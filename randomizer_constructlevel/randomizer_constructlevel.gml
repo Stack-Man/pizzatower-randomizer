@@ -177,17 +177,16 @@ function rd_connect_rooms_with_type(connection, last_room, roomtypes_arr, path_t
 				var match_path =  ds_list_find_value(match_paths, k);
 				
 				//get paths from last_room with start that matches match's exit
-				var last_paths = rd_get_valid_paths(
-					ds_map_find_value(last_room, roomvalues.paths), 
-					ds_map_find_value(match_path, pathvalues.exittype),
-					path_time,
-					rd_get_opposite_dir(ds_map_find_value(match_path, pathvalues.exitdir))
-					);
+				var last_paths = rd_filter_paths_by_start(
+					last_room, 
+					ds_map_find_value(match_path, pathvalues.exittype), 
+					rd_get_opposite_dir(ds_map_find_value(match_path, pathvalues.exitdir)), 
+					path_time);
 					
 				//If there is at least one valid path
 				if ( ds_list_size(last_paths) > 0)
 				{
-					var last_path = ds_list_find_value(last_path, rd_random_seeded(0, ds_list_size(last_path) ));
+					var last_path = ds_list_find_value(last_paths, rd_random_seeded(0, ds_list_size(last_paths) ));
 					
 					connection_last = 
 					{
@@ -374,10 +373,10 @@ function rd_filter_paths(from_room, desired_type, desired_dir, desired_time, des
 		var p_dir = ds_map_find_value(path, dir_type);
 		var p_start = ds_map_find_value(path,letter_type);
 		
-		if ((desired_time == p_time || p_time == pathtime.none) 
-			&& (desired_type == p_type || p_type == transition.none)
+		if ((p_time == desired_time || desired_time == pathtime.none) 
+			&& (p_type == desired_type || desired_type == transition.none)
 			&& (p_start == desired_letter || desired_letter == "")
-			&& (desired_dir == p_dir || p_dir == transitiondir.none)
+			&& (p_dir == desired_dir || desired_dir == transitiondir.none)
 			)
 			{
 				ds_list_add(valid_paths, path);

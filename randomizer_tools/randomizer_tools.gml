@@ -79,12 +79,12 @@ function rd_remove_room(thisroom)
 
 function rd_filter_paths_by_start(from_room, desired_type, desired_dir, desired_time, desired_letter = "")
 {
-	rd_filter_paths(from_room, desired_type, desired_dir, desired_time, desired_letter, pathvalues.starttype, pathvalues.startdir, pathvalues.startletter);
+	return rd_filter_paths(from_room, desired_type, desired_dir, desired_time, desired_letter, pathvalues.starttype, pathvalues.startdir, pathvalues.startletter);
 }
 
 function rd_filter_paths_by_exit(from_room, desired_type, desired_dir, desired_time, desired_letter = "")
 {
-	rd_filter_paths(from_room, desired_type, desired_dir, desired_time, desired_letter, pathvalues.exittype, pathvalues.exitdir, pathvalues.exitletter);
+	return rd_filter_paths(from_room, desired_type, desired_dir, desired_time, desired_letter, pathvalues.exittype, pathvalues.exitdir, pathvalues.exitletter);
 }
 
 //TODO: make seeded
