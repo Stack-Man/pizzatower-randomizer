@@ -71,6 +71,22 @@ function rd_list_contains_exit(list, exitpair)
 	return false;
 }
 
+function rd_remove_room(thisroom)
+{
+	if (ds_map_exists(global.all_rooms,  ds_map_find_value(thisroom, roomvalues.title) ) )
+		ds_map_delete(global.all_rooms,  ds_map_find_value(thisroom, roomvalues.title) );
+}
+
+function rd_filter_paths_by_start(from_room, desired_type, desired_dir, desired_time, desired_letter = "")
+{
+	rd_filter_paths(from_room, desired_type, desired_dir, desired_time, desired_letter, pathvalues.starttype, pathvalues.startdir, pathvalues.startletter);
+}
+
+function rd_filter_paths_by_exit(from_room, desired_type, desired_dir, desired_time, desired_letter = "")
+{
+	rd_filter_paths(from_room, desired_type, desired_dir, desired_time, desired_letter, pathvalues.exittype, pathvalues.exitdir, pathvalues.exitletter);
+}
+
 //TODO: make seeded
 function rd_random_seeded(l, r)
 {

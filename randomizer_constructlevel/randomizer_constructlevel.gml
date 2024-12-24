@@ -1,5 +1,3 @@
-
-#region constructlevel
 function rd_construct_levels()
 {
 	var level_count = array_length(level_names);
@@ -12,105 +10,89 @@ function rd_construct_levels()
 	{
 		show_debug_message( concat("Constructing ", level_names[i]) );
 		
-		//if (level_names[i] != "bloodsauce")
+		var level = ds_map_create()	
+		ds_map_add(levels, level_names[i], level);
+			
+		var entrances = rd_get_rooms_of_type([roomtype.entrance, roomtype.entrancebranching]);
+			
+		for (var i = 0; i < ds_list_size(entrances); i++)
 		{
-			var level = ds_map_create()	
-			ds_map_add(levels, level_names[i], level);
-			
-			var entrances = rd_get_rooms_of_type([roomtype.entrance, roomtype.entrancebranching]);
-			ds_list_shuffle(entrances); //TODO: shuffle seeded
-			
-			for (var i = 0; i < ds_list_size(entrances); i++)
+			var entrance = ds_list_find_value(entrances, i);
+				
+			var johns = rd_get_rooms_of_type([roomtype.john, roomtype.johnbranching]);
+			ds_list_shuffle(johns); //TODO: shuffle seeded
+				
+			for (var j = 0; j < ds_list_size(johns); j++)
 			{
-				var entrance = ds_list_find_value(entrances, i);
-				
-				if ( ds_map_find_value(entrance, roomvalues.title) == "tower_tutorial1N")
-					continue; //skip this shit
-				
-				var johns = rd_get_rooms_of_type([roomtype.john, roomtype.johnbranching]);
-				ds_list_shuffle(johns); //TODO: shuffle seeded
-				
-				for (var j = 0; j < ds_list_size(johns); j++)
+				var john = ds_list_find_value(johns, j);
+					
+				if (entrance != undefined && john != undefined)
 				{
-					var john = ds_list_find_value(johns, j);
-					
-					if (entrance != undefined && john != undefined)
+					ds_map_clear(global.current_rooms); //clear all used rooms from memory. global.all_rooms should be updated if the room was actually used
+					ds_list_clear(global.invalid_exits); //new connnection so renew exits
+				
+					show_debug_message( concat( "entrance: ", ds_map_find_value(entrance, roomvalues.title), " john: ", ds_map_find_value(john, roomvalues.title) ));
+				
+					var connection = rd_connect_rooms_with_type_start(
+					entrance, 
+					john, 
+					[roomtype.twoway, roomtype.ratblockedtwoway, roomtype.potentialoneway, roomtype.oneway, roomtype.branching, roomtype.potentialratblockedtwoway],
+					pathtime.any,
+					"A" //make sure that the entrance door is used as the start path
+					);
+				
+					if (connection != undefined)
 					{
-						ds_map_clear(global.current_rooms); //clear all used rooms from memory. global.all_rooms should be updated if the room was actually used
-						ds_list_clear(global.invalid_exits); //new connnection so renew exits
-				
-						show_debug_message( concat( "entrance: ", ds_map_find_value(entrance, roomvalues.title), " john: ", ds_map_find_value(john, roomvalues.title) ));
-				
-						var connection = rd_connect_rooms_with_type_start(
-						entrance, 
-						john, 
-						[roomtype.twoway, roomtype.ratblockedtwoway, roomtype.potentialoneway, roomtype.oneway, roomtype.branching, roomtype.potentialratblockedtwoway],
-						pathtime.any,
-						"A" //make sure that the entrance door is used as the start path
-						);
-				
-						if (connection != undefined)
-						{
-							rd_remove_room(john);
-							rd_remove_room(entrance);
-							rd_link_connections(connection);
+						rd_remove_room(john);
+						rd_remove_room(entrance);
+						rd_link_connections(connection);
 							
-							show_debug_message( concat("Successfully constructed ", ds_map_find_value(entrance, roomvalues.title), " to ", ds_map_find_value(john, roomvalues.title) ) );
+						show_debug_message( concat("Successfully constructed ", ds_map_find_value(entrance, roomvalues.title), " to ", ds_map_find_value(john, roomvalues.title) ) );
 							
-							break; //found a valid john, skip the rest of the johns
-						}
-						else
-						{
-							show_debug_message( concat("Failed to construct ", ds_map_find_value(entrance, roomvalues.title), " to ", ds_map_find_value(john, roomvalues.title) ) );
-						}
-							
+						break; //found a valid john, skip the rest of the johns
 					}
-					
+					else
+					{
+						show_debug_message( concat("Failed to construct ", ds_map_find_value(entrance, roomvalues.title), " to ", ds_map_find_value(john, roomvalues.title) ) );
+					}
+							
 				}
+					
 			}
 		
-			/*if (entrance != undefined && john != undefined)
-			{
-				ds_map_clear(global.current_rooms); //clear all used rooms from memory. global.all_rooms should be updated if the room was actually used
-				ds_list_clear(global.invalid_exits); //new connnection so renew exits
-				
-				show_debug_message( concat( "entrance: ", ds_map_find_value(entrance, roomvalues.title), " john: ", ds_map_find_value(john, roomvalues.title) ));
-				
-				var connection = rd_connect_rooms_with_type_start(
-				entrance, 
-				john, 
-				[roomtype.twoway, roomtype.ratblockedtwoway, roomtype.oneway, roomtype.branching, roomtype.potentialoneway, roomtype.potentialratblockedtwoway],
-				pathtime.any,
-				"A" //make sure that the entrance door is used as the start path
-				);
-				
-				
-				
-				if (connection != undefined)
-					rd_link_connections(connection);
-				else
-					show_debug_message( concat("Failed to construct ", level_names[i]) );
-			}*/
 		}
 		
-		
 	}
+	
+	//Picking branching logic:
+	//Take the current end room
+	//for every new end room we're trying to connect to some room, purge memory of invalid exits/rooms
+	//also have a chance to pick the john room instead of another branch
+	//if an end branch
+		//for every branch room
+			//try connect two way
+			
+		//if exhausted all branches
+			//step back and undo the last connect one way
+			
+	//if a start branch
+		//for every branch room
+			//try connenct one way
+			//if successfull
+				//try connect backwards one way
+
+		//if exhausted all branches
+			//step back and undo the last connect two way
 	
 	//free the memory afterwards
 	ds_map_destroy(global.all_rooms);
 }
 
+#region connecting
 
 function rd_connect_rooms_with_type_start(first_room, last_room, roomtypes_arr, path_time, start_letter = "")
 {
-	global.recursion_depth = 0;
-	
-	var first_paths = rd_get_valid_paths(
-		ds_map_find_value(first_room, roomvalues.paths),
-		transition.none,
-		path_time,
-		transitiondir.none,
-		start_letter);
+	var first_paths = rd_filter_paths_by_start(first_room, transition.none, transitiondir.none, path_time, start_letter);
 	
 	for (var i = 0; i < ds_list_size(first_paths); i++)
 	{
@@ -153,7 +135,6 @@ function rd_connect_rooms_with_type(connection, last_room, roomtypes_arr, path_t
 		var potential_rooms = rd_get_rooms_of_type(roomtypes_arr);
 
 		//Look for room with a start dir that matches
-		//somehow exclude rooms already in the temp sequence?
 		var potential_matches = rd_get_rooms_with_start_path(
 			potential_rooms, 
 			ds_map_find_value(first_path, pathvalues.exittype),
@@ -162,7 +143,7 @@ function rd_connect_rooms_with_type(connection, last_room, roomtypes_arr, path_t
 			
 		var valid_matches = ds_list_create();
 		
-		//remove all rooms in global.current_rooms from valid_matches and rooms that dont have a new unique exit
+		//remove all rooms in global.current_rooms from valid_matches
 		for (var v = 0; v < ds_list_size(potential_matches); v++)
 		{
 			var potential_match = ds_list_find_value(potential_matches, v);
@@ -180,20 +161,16 @@ function rd_connect_rooms_with_type(connection, last_room, roomtypes_arr, path_t
 			//Add match room to global.current rooms
 			var match_room =  ds_list_find_value(valid_matches, j);
 			
-			//show_debug_message( concat("trying room: ", ds_map_find_value(match_room, roomvalues.title) ));
-			ds_map_add(global.current_rooms, ds_map_find_value(match_room, roomvalues.title), match_room); //remember rooms already in sequence so they aren't reused
+			//remember rooms that have already been attempted in the sequence before
+			ds_map_add(global.current_rooms, ds_map_find_value(match_room, roomvalues.title), match_room); 
 				
 			//Check if there's a path between match and last
 				
 			//Get the paths with start that matches first's exit
-			var match_paths = rd_get_valid_paths(
-				ds_map_find_value(match_room, roomvalues.paths), 
-				ds_map_find_value(first_path, pathvalues.exittype), 
-				path_time,
-				rd_get_opposite_dir(ds_map_find_value(first_path, pathvalues.exitdir)),
-				);
-			
-			
+			var first_exit_type = ds_map_find_value(first_path, pathvalues.exittype);
+			var first_exit_dir = rd_get_opposite_dir(ds_map_find_value(first_path, pathvalues.exitdir));
+			var match_paths = rd_filter_paths_by_start(match_room, first_exit_type, first_exit_dir, path_time);
+
 			//For each match path with a good start, check if there's a last path that matches
 			for (var k = 0; k < ds_list_size(match_paths); k++)
 			{
@@ -210,7 +187,7 @@ function rd_connect_rooms_with_type(connection, last_room, roomtypes_arr, path_t
 				//If there is at least one valid path
 				if ( ds_list_size(last_paths) > 0)
 				{
-					var last_path = rd_get_random_path(last_paths);
+					var last_path = ds_list_find_value(last_path, rd_random_seeded(0, ds_list_size(last_path) ));
 					
 					connection_last = 
 					{
@@ -335,21 +312,6 @@ function rd_link_connections(connection)
 	}
 }
 
-function rd_connect_rooms_directly(room1, room2, transition_type, transition_dir, path_time)
-{
-	//Room to connect from, find a path
-	var room1_path = rd_get_path(ds_map_find_value(room1, roomvalues.paths), transition_type, transition_dir, path_time);		
-	var room1_id = asset_get_index( ds_map_find_value(room1, roomvalues.title) );
-	var room1_path_exit_letter = ds_map_find_value(room1_path, pathvalues.exitletter);
-	
-	//Room to conect to, find a path
-	var room2_path = rd_get_path(ds_map_find_value(room2, roomvalues.paths), transition_type, transition_dir, path_time);		
-	var room2_id = asset_get_index( ds_map_find_value(room2, roomvalues.title) );
-	var room2_path_letter = ds_map_find_value(room2_path, pathvalues.startletter);
-	
-	rd_add_path(room1_id, room1_path_exit_letter, room2_id, room2_path_letter);
-}
-
 function rd_add_path_with_room(from_room, from_path, to_room, to_path)
 {
 	var from_ID = asset_get_index(ds_map_find_value(from_room, roomvalues.title));
@@ -394,35 +356,28 @@ function rd_add_path(current_id, current_letter, destination_id, destination_let
 	
 
 }
+
 #endregion
 
-#region findpaths
-//Find all valid paths in one room where the start connects to the from room
-function rd_get_valid_paths(paths, from_exit_type, path_time, from_exit_dir, start_letter = "")
+function rd_filter_paths(from_room, desired_type, desired_dir, desired_time, desired_letter, type_type, dir_type, letter_type)
 {
-
-	var paths_size = ds_list_size(paths);
+	var paths = ds_map_find_value(from_room, roomvalues.paths);
 	var valid_paths = ds_list_create();
 	
 	//find valid path
-	for (var i = 0; i < paths_size; i++)
+	for (var i = 0; i < ds_list_size(paths); i++)
 	{
 		var path =  ds_list_find_value(paths, i);
 		
-		var time = ds_map_find_value(path, pathvalues.pathtime);
-		var type = ds_map_find_value(path, pathvalues.starttype);
-		var start = ds_map_find_value(path, pathvalues.startletter);
-		var dir = ds_map_find_value(path, pathvalues.startdir);
-
-		var goodtime = (time == path_time || path_time == pathtime.none) ;
-		var goodtype = (type == from_exit_type || from_exit_type == transition.none);
-		var goodstart = (start == start_letter || start_letter == "");
-		var gooddir =  (dir == from_exit_dir || from_exit_dir == transitiondir.none)
+		var p_time = ds_map_find_value(path, pathvalues.pathtime);
+		var p_type = ds_map_find_value(path, type_type);
+		var p_dir = ds_map_find_value(path, dir_type);
+		var p_start = ds_map_find_value(path,letter_type);
 		
-		if ((time == path_time || path_time == pathtime.none) 
-			&& (type == from_exit_type || from_exit_type == transition.none)
-			&& (start == start_letter || start_letter == "")
-			&& (dir == from_exit_dir || from_exit_dir == transitiondir.none)
+		if ((desired_time == p_time || p_time == pathtime.none) 
+			&& (desired_type == p_type || p_type == transition.none)
+			&& (p_start == desired_letter || desired_letter == "")
+			&& (desired_dir == p_dir || p_dir == transitiondir.none)
 			)
 			{
 				ds_list_add(valid_paths, path);
@@ -431,166 +386,6 @@ function rd_get_valid_paths(paths, from_exit_type, path_time, from_exit_dir, sta
 	}
 	
 	return valid_paths;
-}
-
-function rd_get_valid_paths_with_exit(paths, exit_type, path_time, exit_dir, exit_letter = "")
-{
-	var paths_size = ds_list_size(paths);
-	var valid_paths = ds_list_create();
-	
-	//find valid path
-	for (var i = 0; i < paths_size; i++)
-	{
-		var path =  ds_list_find_value(paths, i);
-		
-		var time = ds_map_find_value(path, pathvalues.pathtime);
-		var type = ds_map_find_value(path, pathvalues.exittype);
-		var start = ds_map_find_value(path, pathvalues.exitletter);
-		var dir = ds_map_find_value(path, pathvalues.exitdir);
-		
-		if ((time == path_time || path_time == pathtime.none) 
-			&& (type == exit_type || exit_type == transition.none)
-			&& (start == exit_letter || exit_letter == "")
-			&& (dir == exit_dir || exit_dir == transitiondir.none)
-			)
-			ds_list_add(valid_paths, path);
-	}
-	
-	return valid_paths;
-}
-
-function rd_get_valid_paths_with_start(paths, start_type, path_time, start_dir, start_letter = "")
-{
-	var paths_size = ds_list_size(paths);
-	var valid_paths = ds_list_create();
-	
-	//find valid path
-	for (var i = 0; i < paths_size; i++)
-	{
-		var path =  ds_list_find_value(paths, i);
-		
-		var time = ds_map_find_value(path, pathvalues.pathtime);
-		var type = ds_map_find_value(path, pathvalues.starttype);
-		var start = ds_map_find_value(path, pathvalues.startletter);
-		var dir = ds_map_find_value(path, pathvalues.startdir);
-		
-		if ((time == path_time || path_time == pathtime.none) 
-			&& (type == start_type || start_type == transition.none)
-			&& (start == start_letter || start_letter == "")
-			&& (dir == start_dir || start_dir == transitiondir.none)
-			)
-			ds_list_add(valid_paths, path);
-	}
-	
-	return valid_paths;
-}
-
-
-//Pick random path from list of paths
-function rd_get_random_path(paths)
-{
-	return  ds_list_find_value(paths, rd_random_seeded(0, ds_list_size(paths) ));
-}
-
-//Pick random path from all possible valid paths in all rooms of roomtype
-function rd_get_valid_path_from_rooms(all_rooms, roomtypes_arr, transition_type, path_time, transition_dir, start_letter = "")
-{
-	var all_valid_paths = ds_list_create();
-	
-	//Get all list of all valid paths from all rooms of roomtype
-	for (var i = 0; i < array_length(roomtypes_arr); i++)
-	{
-		var room_type = roomtypes_arr[i];
-		var rooms = ds_map_find_value(all_rooms, room_type);
-		
-		var rooms_arr = [];
-		ds_map_values_to_array(rooms, rooms_arr);
-
-		var total_paths = 0;
-		
-		//for every room in that roomtype
-		for (var j = 0; j < array_length(rooms); j++)
-		{
-			var thisroom = rooms_arr[j];
-			var all_paths = ds_map_find_value(thisroom, roomvalues.paths) 
-			var valid_paths = rd_get_valid_paths(all_paths, transition_type, path_time, transition_dir, start_letter);
-			
-			if ( ds_list_size(valid_paths) > 0)
-			{
-				var valid_path_map = ds_map_create();
-				
-				ds_map_add(valid_path_map, validpathvalues.title, ds_map_find_value(thisroom, roomvalues.title));
-				ds_map_add(valid_path_map, validpathvalues.type, room_type);
-				ds_map_add(valid_path_map, validpathvalues.validpaths, valid_paths);
-			}
-				
-		}
-		
-	}
-	
-	//Now use the list of maps containing validpathvalue keyed values to pick one path from
-	var total_weight = 0;
-	
-	for (var i = 0; i < ds_list_size(all_valid_paths); i++)
-	{
-		total_weight += ds_list_size(ds_map_find_value(ds_list_find_value(all_valid_paths, i), validpathvalues.validpaths));
-	}
-	
-	var room_ID = rd_random_seeded(0, total_weight)
-	
-	var cursor = 0;
-	
-	for (var i = 0; i < ds_list_size(all_valid_paths); i++)
-	{
-		var valid_paths_map = ds_list_find_value(all_valid_paths, i);
-		var valid_paths = ds_map_find_value(valid_paths_map, validpathvalues.validpaths);
-		
-		cursor += ds_list_size(valid_paths);
-		
-		if (cursor >= room_ID)
-		{
-			var real_room_ID = room_ID - (cursor - ds_list_size(valid_paths)); //ID offset by weight of all lists except the current one
-			
-			var vp_arr = []
-			ds_map_values_to_array(valid_paths, vp_arr);
-			
-			//Get the result and remove it from the original map
-			var result = vp_arr[real_room_ID];
-			
-			var title = ds_map_find_value(valid_paths, validpathvalues.title);
-			var type = ds_map_find_value(valid_paths, validpathvalues.type);
-			
-			ds_map_delete( ds_map_find_value(all_rooms, type), title);
-			
-			return result;
-		}
-	}
-	
-	return undefined; //if there are 0 valid transitions
-}
-
-function rd_get_path(paths, exit_type, path_time, exit_dir, start_letter = "")
-{
-	return rd_get_random_path(rd_get_valid_paths(paths, exit_type, path_time, exit_dir, start_letter));
-}
-#endregion
-
-#region findroom
-
-//Get room of type then remove it from all_rooms
-function rd_get_room_of_type(roomtypes_arr)
-{
-	var potential_rooms = rd_get_rooms_of_type(roomtypes_arr);
-	
-	if (potential_rooms == undefined)
-		return undefined;
-	
-	var room_ID = rd_random_seeded(0, ds_list_size(potential_rooms));
-	var result = ds_list_find_value(potential_rooms, room_ID);
-	
-	rd_remove_room(result);
-	
-	return result;
 }
 
 function rd_get_rooms_of_type(roomtypes_arr)
@@ -624,7 +419,7 @@ function rd_get_rooms_with_start_path(potential_rooms, start_type, start_dir, pa
 	for (var i = 0; i < ds_list_size(potential_rooms); i++)
 	{
 		var potential_room =  ds_list_find_value(potential_rooms, i);
-		var paths = rd_get_valid_paths_with_start( ds_map_find_value(potential_room, roomvalues.paths), start_type, path_time, start_dir);
+		var paths = rd_filter_paths_by_start(potential_room, start_type, start_dir, path_time);
 		
 		if ( ds_list_size(paths) > 0 )
 			ds_list_add(result_rooms, potential_room);
@@ -632,11 +427,3 @@ function rd_get_rooms_with_start_path(potential_rooms, start_type, start_dir, pa
 	
 	return result_rooms;
 }
-
-function rd_remove_room(thisroom)
-{
-	if (ds_map_exists(global.all_rooms,  ds_map_find_value(thisroom, roomvalues.title) ) )
-		ds_map_delete(global.all_rooms,  ds_map_find_value(thisroom, roomvalues.title) );
-}
-
-#endregion
