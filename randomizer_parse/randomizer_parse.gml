@@ -39,12 +39,6 @@ function rd_parse_rooms()
 				if (ds_map_exists(thisroom, "doors") )
 				{
 					var parsed_room = rd_parse_doors(thisroom);
-
-					show_debug_message( concat("parsed room: ", ds_map_find_value(thisroom, "title"), " of type ", ds_map_find_value(parsed_room, roomvalues.type) ) );
-					ds_map_add(parsed_room, roomvalues.title, ds_map_find_value(thisroom, "title"));	//add the room's name to its own map
-
-					//var room_type = ds_map_find_value(parsed_room, roomvalues.type);  
-				
 					ds_map_add(parsed_rooms, ds_map_find_value(thisroom, "title"), parsed_room);
 				}
 					
@@ -61,13 +55,11 @@ function rd_parse_rooms()
 
 function rd_parse_doors(thisroom)
 {
-	var parsed_room = ds_map_create(); //Map to hold the created paths and other information about the room
 	var doors  = ds_map_find_value(thisroom, "doors");   //Holds doors in the room
 	
-	var paths = ds_list_create(); //Hold the created paths
-	//ds_map_add(parsed_room, roomvalues.paths, paths);
+	var found_paths = ds_list_create(); //Hold the created paths
 
-	var path_time = pathtime.any; //when the path is accessible
+	var found_path_time = pathtime.any; //when the path is accessible
 	var room_type = roomtype.twoway; //how the room can be traversed
 	
 	var has_pizzatime = false;	//helps determine if the room is branching
@@ -87,7 +79,7 @@ function rd_parse_doors(thisroom)
 			//If it is not the same transition UNLESS there are no other transitions
 			if (ds_map_find_value(start_door, "letter") != ds_map_find_value(exit_door, "letter") || door_count <= 1)
 			{
-				path_time = pathtime.any;
+				found_path_time = pathtime.any;
 				
 				//start or exit is not valid
 				if (ds_map_exists(start_door, "exitonly") 
@@ -103,19 +95,19 @@ function rd_parse_doors(thisroom)
 				if (ds_map_exists(start_door, "pizzatime") || ds_map_exists(exit_door, "pizzatime"))
 				{
 					has_pizzatime = true;
-					path_time = pathtime.pizzatime;
+					found_path_time = pathtime.pizzatime;
 				}
 				
 				if (ds_map_exists(start_door, "notpizzatime") || ds_map_exists(exit_door, "notpizzatime"))
 				{
 					has_notpizzatime = true;
-					path_time = pathtime.notpizzatime;
+					found_path_time = pathtime.notpizzatime;
 				}
 				
 				if ( (ds_map_exists(start_door, "pizzatime") || ds_map_exists(exit_door, "pizzatime"))
 				&& (ds_map_exists(start_door, "notpizzatime") || ds_map_exists(exit_door, "notpizzatime")) )
 				{
-					path_time = pathtime.any;
+					found_path_time = pathtime.any;
 				}
 				
 				//Set the room type as branching
@@ -143,21 +135,19 @@ function rd_parse_doors(thisroom)
 					}
 				}
 				
-				
-			
 				//add the pair of doors
-				var parsed_path = ds_map_create();
+				var parsed_path = {
+					startletter : ds_map_find_value(start_door, "letter"),
+					exitletter : ds_map_find_value(exit_door, "letter"),
+					starttype : rd_convert_transitiontype(ds_map_find_value(start_door, "type")),
+					exittype : rd_convert_transitiontype(ds_map_find_value(exit_door, "type")),
+					startdir :  rd_convert_transitiondir(ds_map_find_value(start_door, "dir")),
+					exitdir : rd_convert_transitiondir(ds_map_find_value(exit_door, "dir"))
+				};
+				
+				parsed_path.pathtime = found_path_time
 			
-				ds_map_add(parsed_path, pathvalues.startletter, ds_map_find_value(start_door, "letter"));
-				ds_map_add(parsed_path, pathvalues.exitletter, ds_map_find_value(exit_door, "letter"));
-				ds_map_add(parsed_path, pathvalues.starttype, rd_convert_transitiontype(ds_map_find_value(start_door, "type")));
-				ds_map_add(parsed_path, pathvalues.exittype, rd_convert_transitiontype(ds_map_find_value(exit_door, "type")));
-				ds_map_add(parsed_path, pathvalues.startdir, rd_convert_transitiondir(ds_map_find_value(start_door, "dir")));
-				ds_map_add(parsed_path, pathvalues.exitdir, rd_convert_transitiondir(ds_map_find_value(exit_door, "dir")));
-				ds_map_add(parsed_path, pathvalues.pathtime, path_time);
-			
-				ds_list_add(paths, parsed_path);
-
+				ds_list_add(found_paths, parsed_path);
 			}
 		}
 	}
@@ -185,8 +175,12 @@ function rd_parse_doors(thisroom)
 
 	//add the type of room thsi is to the finished room object
 	//Add the paths after it has been initialized
-	ds_map_add(parsed_room, roomvalues.paths, paths);
-	ds_map_add(parsed_room, roomvalues.type, room_type);
+	var parsed_room = {
+		title : ds_map_find_value(thisroom, "title"),
+		paths : found_paths,
+	};
+	
+	parsed_room.roomtype = room_type;
 	
 	return parsed_room;
 }

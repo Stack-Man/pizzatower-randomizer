@@ -41,73 +41,27 @@ enum transitiondir
 	none
 }
 
-enum pathvalues
-{
-	startletter,
-	exitletter,
-	starttype,
-	exittype,
-	startdir,
-	exitdir,
-	pathtime
-}
-
-enum roomvalues
-{
-	title,
-	type,
-	paths,
-	special
-}
-
-enum levelvalues
-{
-	entrance, 
-	john, 
-	branches, 
-	initialbranches,
-}
-
-enum validpathvalues
-{
-	title,
-	type,
-	validpaths
-}
-
-enum destinationvalues
-{
-	roomid,
-	letter
-}
-
 
 //Parsed Rooms Map
 //roomtype : Parsed Room Map
 
-//Parsed Room Map
-//roomvalues.title : string
-//roomvalues.paths : Paths List
-//roomvalues.type : roomtype
+//Parsed Room Struct
+//title : string
+//paths : Paths List
+//roomtype : roomtype
 
 //Paths List
-//Path Map
+//Path Struct
 
-//Path Map
-//pathvalues.startletter : string
-//pathvalues.exitletter : string
-//pathvalues.startype : transition
-//pathvalues.endtype : transition
-//pathvalues.startdir : transitiondir
-//pathvalues.enddir : transitiondir
-//pathvalues.pathtime : pathtime
+//Path Struct
+//startletter : string
+//exitletter : string
+//startype : transition
+//endtype : transition
+//startdir : transitiondir
+//enddir : transitiondir
+//pathtime : pathtime
 
-//Levels Map
-//string level name : Level Map
-
-//Level Map
-//levelvalues.entranceroom : Section Map
-//levelvalues.johnroom : Section Map
-//levelvalues.branchingrooms : list of Section Maps
-//levelvalues.returnsections : Array of Section Maps
-//levelvalues.totalbranchingrooms : int
+//Destination Struct
+//roomid : room index
+//letter : string

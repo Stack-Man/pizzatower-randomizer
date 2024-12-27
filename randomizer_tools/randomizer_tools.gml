@@ -55,7 +55,7 @@ function rd_get_opposite_dir(transition_dir)
 
 function rd_check_type(thisroom, type)
 {
-	return ds_map_find_value(thisroom, roomvalues.type) == type;
+	return thisroom.roomtype == type;
 }
 
 function rd_list_contains_exit(list, exitpair)
@@ -73,24 +73,90 @@ function rd_list_contains_exit(list, exitpair)
 
 function rd_remove_room(thisroom)
 {
-	if (ds_map_exists(global.all_rooms,  ds_map_find_value(thisroom, roomvalues.title) ) )
-		ds_map_delete(global.all_rooms,  ds_map_find_value(thisroom, roomvalues.title) );
+	if (ds_map_exists(global.all_rooms,  thisroom.title ) )
+		ds_map_delete(global.all_rooms,  thisroom.title );
+}
+
+function rd_filter_out_rooms(potential_rooms, rooms_to_remove)
+{
+	var valid_rooms = ds_list_create();
+	
+	for (var i = 0; i < ds_list_size(potential_rooms); i++)
+	{
+		var thisroom = ds_list_find_value(potential_rooms, i);
+		
+		if (! ds_map_exists(rooms_to_remove, thisroom.title ) )
+			ds_list_add(valid_rooms, thisroom);
+	}
+	
+	return valid_rooms;
 }
 
 function rd_filter_paths_by_start(from_room, desired_type, desired_dir, desired_time, desired_letter = "")
 {
-	return rd_filter_paths(from_room, desired_type, desired_dir, desired_time, desired_letter, pathvalues.starttype, pathvalues.startdir, pathvalues.startletter);
+	//show_debug_message( concat("Filtering start paths for ", from_room.title));
+	
+	return rd_filter_paths(from_room, desired_type, desired_dir, desired_time, desired_letter, true);
 }
 
 function rd_filter_paths_by_exit(from_room, desired_type, desired_dir, desired_time, desired_letter = "")
 {
-	return rd_filter_paths(from_room, desired_type, desired_dir, desired_time, desired_letter, pathvalues.exittype, pathvalues.exitdir, pathvalues.exitletter);
+	return rd_filter_paths(from_room, desired_type, desired_dir, desired_time, desired_letter, false);
 }
 
-//TODO: make seeded
-function rd_random_seeded(l, r)
+function rd_get_last_path(connection)
 {
-	//Subtract 1 so that it stays within the bounds of the array
-	//Floor it since the value can be a float
-	return floor(random(r - 1 - l) + l)
+	var next = connection;
+	
+	while (next != undefined)
+	{
+		if (next.second == undefined) //last room
+			return next.path;
+		
+		next = next.second;
+	}
+	
+	return undefined;
+}
+
+function rd_print_connection_path(connection)
+{
+	var next = connection;
+	
+	var path = "";
+	
+	while (next != undefined)
+	{
+		path = concat(path, " -> ", next.first.title, " ", next.path.startletter, " to ", next.path.exitletter);
+		
+		next = next.second;
+	}
+	
+	show_debug_message( concat("Path: ", path) );
+}
+
+function rd_add_connection_rooms_to_map(connection, map)
+{
+	var debug_msg = "";
+	
+	var next = connection;
+	
+	while (next != undefined)
+	{
+		ds_map_add(map, next.first.title, next.first);
+		next = next.second;
+		
+		//concat(debug_msg, " ", connection.firs
+	}
+}
+
+function rd_remove_connection_rooms_from_map(connection, map)
+{
+	var next = connection;
+	
+	while (next != undefined)
+	{
+		ds_map_delete(map, next.first.title);
+		next = next.second;
+	}
 }
