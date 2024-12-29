@@ -126,7 +126,7 @@ function rd_parse_doors(thisroom)
 						else
 							room_type = roomtype.oneway;
 					}
-					else if (ds_map_exists(start_door, "exitonly"))
+					else if (ds_map_exists(start_door, "startonly"))
 					{
 						if (ds_map_exists(start_door, "ratblocked"))
 							room_type = roomtype.potentialratblockedtwoway;
@@ -135,6 +135,16 @@ function rd_parse_doors(thisroom)
 					}
 				}
 				
+				var start_door_struct = {
+					startonly : ds_map_exists(start_door, "startonly"),
+					ratblocked : ds_map_exists(start_door, "ratblocked")
+				};
+				
+				var exit_door_struct = {
+					exitonly : ds_map_exists(exit_door, "exitonly"),
+					ratblocked : ds_map_exists(exit_door, "ratblocked")
+				};
+				
 				//add the pair of doors
 				var parsed_path = {
 					startletter : ds_map_find_value(start_door, "letter"),
@@ -142,7 +152,9 @@ function rd_parse_doors(thisroom)
 					starttype : rd_convert_transitiontype(ds_map_find_value(start_door, "type")),
 					exittype : rd_convert_transitiontype(ds_map_find_value(exit_door, "type")),
 					startdir :  rd_convert_transitiondir(ds_map_find_value(start_door, "dir")),
-					exitdir : rd_convert_transitiondir(ds_map_find_value(exit_door, "dir"))
+					exitdir : rd_convert_transitiondir(ds_map_find_value(exit_door, "dir")),
+					startdoor : start_door_struct,
+					exitdoor : exit_door_struct
 				};
 				
 				parsed_path.pathtime = found_path_time

@@ -35,7 +35,9 @@ function scr_room_goto(_room)
 		}
 		else
 		{
-			room_goto(_room);
+			//TODO: account for if transition is hallway and move the player in the opposite direction
+			show_debug_message( concat("Tried to go from ", room_get_name(room), " ", obj_player.targetDoor, " to ", room_get_name(room), " ", obj_player.targetDoor) );
+			room_goto(room);
 		}
 		
 	}

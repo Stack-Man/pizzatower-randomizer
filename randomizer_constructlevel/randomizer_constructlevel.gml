@@ -1,7 +1,8 @@
 function rd_construct_levels()
 {
 	var level_count = array_length(level_names);
-			
+	
+	var levels = ds_list_create();
 	var entrances = rd_get_rooms_of_type([roomtype.entrance, roomtype.entrancebranching]);
 	
 	for (var i = 0; i < level_count; i++)
@@ -23,13 +24,126 @@ function rd_construct_levels()
 		var level = rd_connect_to_branch(incomplete_sequence, "A");
 		
 		if (level != undefined)
-			rd_link_sequences(level);
+			ds_list_add(levels, level);
 		else
 			show_debug_message( concat("Failed to construct: ", first_room.title) );
 	}
 	
+	//add all of the rooms used in the sequences to a map so they aren't reused when adding rooms later
+	//TODO: may be unnecessary? global.sequence_tested_rooms never gets cleared
+	for (var k = 0; k < ds_list_size(levels); k++)
+	{
+		var level = ds_list_find_value(levels, k);
+		rd_add_sequence_rooms_to_map(level, global.sequence_tested_rooms);
+	}
+	
+	for (var k = 0; k < ds_list_size(levels); k++)
+	{
+		var level = ds_list_find_value(levels, k);
+		rd_add_rooms_to_level(level, 10); //automatically adds the new rooms to global.sequence_tested_rooms
+	}
+	
+	for (var j = 0; j < ds_list_size(levels); j++)
+	{
+		var level = ds_list_find_value(levels, j);
+		rd_link_sequences(level);
+	}
+	
 	//free the memory afterwards
 	ds_map_destroy(global.all_rooms);
+}
+
+function rd_add_rooms_to_level(sequence,  desired_amount)
+{
+	var next = sequence;
+	var total_added = 0;
+	var amount_added_this_loop = -1;
+	
+	while (next != undefined && amount_added_this_loop != 0 && total_added < desired_amount)
+	{
+		amount_added_this_loop = 0;
+		
+		var roomtypes_arr = twoway_types;
+		var path_time_arr_to = [pathtime.any];
+		
+		if (next.return_connection != undefined)
+		{
+			roomtypes_arr = oneway_types;
+			path_time_arr_to = [pathtime.any, pathtime.notpizzatime];
+			var path_time_arr_return = [pathtime.any, pathtime.pizzatime];
+			
+			amount_added_this_loop += rd_add_rooms_inbetween(next.return_connection, roomtypes_arr, path_time_arr_return, desired_amount - total_added - amount_added_this_loop);
+		}
+			
+		
+		if (next.to_connection != undefined)
+			amount_added_this_loop += rd_add_rooms_inbetween(next.to_connection, roomtypes_arr, path_time_arr_to, desired_amount - total_added);
+			
+
+		total_added += amount_added_this_loop;
+		next = next.next;
+	}
+	
+	show_debug_message( concat("Rooms Added to ", sequence.to_connection.first.title, ": ", total_added) );
+}
+
+function rd_add_rooms_inbetween(connection, roomtypes_arr, path_time_arr, desired_amount)
+{
+	var next = connection;
+	var last = undefined;
+	var total_added = 0;
+
+	while (next != undefined)
+	{
+		var first_room = next.first;
+		var actual_second = next.second; //Allows us to add new connections inbetween without looping forever, we'll only add to the original connections
+		
+		if (next.second != undefined)
+		{
+			var last_room = next.second.first;
+			
+			var first_room_start_letter = next.path.startletter;
+			var last_room_start_letter = next.second.path.startletter;
+			var last_room_exit_letter = next.second.path.exitletter;
+			
+			//Must start with same first start and last exit so that existing connections remain connected
+			var new_connection = rd_connect_rooms_with_type_start(first_room, last_room, roomtypes_arr, path_time_arr, first_room_start_letter, "", "", last_room_exit_letter);
+			
+			if (new_connection != undefined)
+			{
+				show_debug_message( concat("Added rooms inbetween ", first_room.title, " ", first_room_start_letter, " and ", last_room.title, " ", last_room_exit_letter) );
+				show_debug_message("Original Connection: ");
+				rd_print_connection_path(next);
+				
+				show_debug_message("New Connection: ");
+				rd_print_connection_path(new_connection);
+				
+				total_added += rd_count_connections(new_connection);
+				
+				var temp = next.second;
+				//next.second = new_connection;
+				
+				rd_add_connection_to_end_replace(new_connection, temp);
+				
+				//Add the roonms used to sequence_tested_rooms so they aren't reused
+				rd_add_connection_rooms_to_map(new_connection, global.sequence_tested_rooms);
+				
+				//replace next's valuse with new_connection's values
+				//because we found a new path for first and next's original second is appendded to the end of new connection
+				next.first = new_connection.first;
+				next.second = new_connection.second;
+				next.path = new_connection.path;
+				
+				show_debug_message("Final Connection: ");
+				rd_print_connection_path(next);
+			}
+		}
+		
+		next = actual_second;
+	}
+
+
+	return total_added; //return number of rooms added
 }
 
 #region branch sequencing
@@ -68,11 +182,12 @@ function rd_connect_to_branch(sequence, prev_sequence_last_start_letter = "")
 				{
 					var original_last_path = rd_get_last_path(connection); //All that matters is the start since that matches the connection
 					
-					var possible_last_paths = rd_filter_paths_by_start(
+					var possible_last_paths = rd_filter_paths_by_start_and_roomtype(
 						branch, 
 						original_last_path.starttype, 
 						original_last_path.startdir, 
-						original_last_path.pathtime, 
+						original_last_path.pathtime,
+						twoway_types,
 						original_last_path.startletter
 						);
 					
@@ -163,11 +278,12 @@ function rd_connect_to_branch(sequence, prev_sequence_last_start_letter = "")
 					//show_debug_message( concat("Connection starts with ", sequence.last_room.title, " ", prev_sequence_last_start_letter) );
 					
 					var original_last_path = rd_get_last_path(connection); //All that matters is the start since that matches the connection
-					var possible_last_paths = rd_filter_paths_by_start(
+					var possible_last_paths = rd_filter_paths_by_start_and_roomtype(
 						branch, 
 						original_last_path.starttype, 
 						original_last_path.startdir, 
 						original_last_path.pathtime, 
+						oneway_types,
 						original_last_path.startletter
 						);
 						
@@ -272,15 +388,16 @@ function rd_connect_to_branch(sequence, prev_sequence_last_start_letter = "")
 
 #region connecting
 
-function rd_connect_rooms_with_type_start(first_room, last_room, roomtypes_arr, path_time_arr, start_letter = "", exit_letter = "")
+function rd_connect_rooms_with_type_start(first_room, last_room, roomtypes_arr, path_time_arr, start_letter = "", exit_letter = "", last_start_letter = "", last_exit_letter = "")
 {
-	//show_debug_message( concat("Trying connection from ", first_room.title, " to ", last_room.title));
+	show_debug_message( concat("Trying connection from ", first_room.title, " to ", last_room.title));
+	show_debug_message( concat("Trying connection from ", first_room.title, " to ", last_room.title));
 	
 	//Trying new connection, clear tested from last connection
 	ds_map_clear(global.connection_tested_rooms);
 	ds_list_clear(global.connection_tested_exits);		
 	
-	var first_paths = rd_filter_paths_by_start(first_room, transition.none, transitiondir.none, path_time_arr, start_letter);
+	var first_paths = rd_filter_paths_by_start_and_roomtype(first_room, transition.none, transitiondir.none, path_time_arr, roomtypes_arr, start_letter);
 	var used_exits = ds_list_create();
 	
 	//show_debug_message( concat("Trying connection from ", first_room.title, " to ", last_room.title, " with paths of size ", ds_list_size(first_paths) ));
@@ -308,7 +425,7 @@ function rd_connect_rooms_with_type_start(first_room, last_room, roomtypes_arr, 
 					second: undefined
 				};
 		
-				var connection = rd_connect_rooms_with_type(incomplete_connection, last_room, roomtypes_arr, path_time_arr);
+				var connection = rd_connect_rooms_with_type(incomplete_connection, last_room, roomtypes_arr, path_time_arr, last_start_letter, last_exit_letter);
 		
 				if (connection != undefined) //valid route found
 				{
@@ -335,7 +452,7 @@ function rd_connect_rooms_with_type_start(first_room, last_room, roomtypes_arr, 
 //connection.first, from room
 //connection.path, path in first whose exit matches second.path's start
 //connection.second, a connection tuplet (room a, room b, path)
-function rd_connect_rooms_with_type(connection, last_room, roomtypes_arr, path_time_arr)
+function rd_connect_rooms_with_type(connection, last_room, roomtypes_arr, path_time_arr, last_start_letter = "", last_exit_letter = "")
 {
 	if (connection.second == undefined) //needs a connection still
 	{
@@ -379,7 +496,15 @@ function rd_connect_rooms_with_type(connection, last_room, roomtypes_arr, path_t
 			//Get the paths with start that matches first's exit
 			var first_exit_type = first_path.exittype;
 			var first_exit_dir = rd_get_opposite_dir(first_path.exitdir);
-			var match_paths = rd_filter_paths_by_start(match_room, first_exit_type, first_exit_dir, path_time_arr);
+			
+			
+			//TODO: filter out paths that do not match the desired room types
+			//twoway_types:
+				//filter out paths with  exitonly or startonly
+				//DONT filter out exitonly + ratblocked or startonly + ratblocked since those become twoway after passing through
+			
+			//but do filter out paths that are ratblocked
+			var match_paths = rd_filter_paths_by_start_and_roomtype(match_room, first_exit_type, first_exit_dir, path_time_arr, roomtypes_arr);
 
 			//For each match path with a good start, check if there's a last path that matches
 			for (var k = 0; k < ds_list_size(match_paths); k++)
@@ -387,46 +512,76 @@ function rd_connect_rooms_with_type(connection, last_room, roomtypes_arr, path_t
 				var match_path =  ds_list_find_value(match_paths, k);
 				
 				//get paths from last_room with start that matches match's exit
-				var last_paths = rd_filter_paths_by_start(
+				var last_paths = rd_filter_paths_by_start_and_roomtype(
 					last_room, 
 					match_path.exittype, 
 					rd_get_opposite_dir(match_path.exitdir), 
-					path_time_arr);
+					path_time_arr,
+					roomtypes_arr,
+					last_start_letter);
 					
 				//If there is at least one valid path
 				if ( ds_list_size(last_paths) > 0)
 				{
-					var connection_last = 
-					{
-						first: last_room,
-						path:  ds_list_find_value(last_paths, 0), //Not used for linking BUT the start is used as reference when creating the next sequence
-						second: undefined //Indicates that it is the end of the connection
-					};
+					var last_path =  ds_list_find_value(last_paths, 0)
+					var found = false;
 					
-					var connection_to_last = 
+					if (last_exit_letter != "")
 					{
-						first: match_room,
-						path: match_path,
-						second: connection_last
-					};
+						show_debug_message( concat("Try to find path ending in ", last_exit_letter) );
 						
-					var connection_to_first =
+						for (var r = 0; r < ds_list_size(last_paths); r++)
+						{
+							var potential_last_path = ds_list_find_value(last_paths, r);
+							
+							if (potential_last_path.exitletter == last_exit_letter)
+							{
+								show_debug_message( concat("Found path ending in ", last_exit_letter, ": ", last_path.startletter, " to " , last_path.exitletter) );
+								
+								found = true;
+								last_path = potential_last_path;
+								break;
+							}
+						}
+						
+						//no valid exit found
+					}
+					else
 					{
-						first: first_room,
-						path: first_path,
-						second: connection_to_last
-					};
+						show_debug_message( concat("Not using last exit letter ") );
+						
+						found = true;
+					}
 					
-					//Found a route from first to last
-					return connection_to_first;
+					//only return if last path matches the exit letter or the last path exit was not cared about
+					if (found)
+					{
+						var connection_last = 
+						{
+							first: last_room,
+							path: last_path, //Not used for linking BUT the start is used as reference when creating the next sequence
+							second: undefined //Indicates that it is the end of the connection
+						};
+					
+						var connection_to_last = 
+						{
+							first: match_room,
+							path: match_path,
+							second: connection_last
+						};
+						
+						var connection_to_first =
+						{
+							first: first_room,
+							path: first_path,
+							second: connection_to_last
+						};
+					
+						//Found a route from first to last
+						return connection_to_first;
+					}
 				}
 
-				//This exit didnt work for last, later we will filter rooms that dont have a unique exit type that wasn't tested yet
-				var exitpair = 
-				{
-					exittype : match_path.exittype,
-					exitdir : match_path.exitdir
-				};
 			}
 			
 			//exhausted all match paths
@@ -459,7 +614,7 @@ function rd_connect_rooms_with_type(connection, last_room, roomtypes_arr, path_t
 					ds_list_add(global.connection_tested_exits, exitpair);
 					ds_list_add(used_exit_types, exitpair);
 					
-					var next_connection = rd_connect_rooms_with_type(incomplete_connection, last_room, roomtypes_arr, path_time_arr);
+					var next_connection = rd_connect_rooms_with_type(incomplete_connection, last_room, roomtypes_arr, path_time_arr, last_start_letter, last_exit_letter);
 			
 					//If didn't find a valid connection and alrady used all matches, return undefined
 					if (next_connection == undefined && j >= ds_list_size(valid_matches) )
@@ -514,6 +669,9 @@ function rd_link_sequences(sequence)
 
 function rd_link_connections(connection)
 {
+	show_debug_message( concat("Connecting: ") );
+	rd_print_connection_path(connection);
+	
 	var next = connection;
 	
 	while (next != undefined)

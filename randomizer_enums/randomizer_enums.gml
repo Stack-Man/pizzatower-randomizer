@@ -61,6 +61,16 @@ enum transitiondir
 //startdir : transitiondir
 //enddir : transitiondir
 //pathtime : pathtime
+//exitdoor : exit door struct
+//startdoor : start door struct
+
+//Start Door Struct
+//startonly : start only
+//ratblocked : rat blocked
+
+//Exit Door Struct
+//exitonly : exit only
+//ratblocked : rat blocked
 
 //Destination Struct
 //roomid : room index

@@ -99,6 +99,59 @@ function rd_filter_paths_by_start(from_room, desired_type, desired_dir, desired_
 	return rd_filter_paths(from_room, desired_type, desired_dir, desired_time, desired_letter, true);
 }
 
+function rd_filter_paths_by_start_and_roomtype(from_room, desired_transition_type,  desired_dir, desired_time, desired_roomtypes, desired_letter = "")
+{
+	var unfiltered_paths = rd_filter_paths_by_start(from_room, desired_transition_type, desired_dir, desired_time, desired_letter);
+	
+	if ( ! array_contains(desired_roomtypes, roomtype.oneway) ) //filter out oneway paths from potentialoneway rooms
+	{
+	
+		var filtered_paths = ds_list_create();
+	
+		for (var i = 0; i < ds_list_size(unfiltered_paths); i++)
+		{
+			var path = ds_list_find_value(unfiltered_paths, i);
+			
+			//The path is oneway, unless it is also ratblocked
+			if ( (path.startdoor.startonly && !path.startdoor.ratblocked)
+			||   (path.exitdoor.exitonly   && !path.exitdoor.ratblocked) )
+			{
+				show_debug_message("oneway path in twoway desired");
+			}
+			else
+			{
+				show_debug_message("twoway path in twoway desired");
+				ds_list_add(filtered_paths, path);
+			}
+		}
+
+		var u_msg = "Unfiltered:";
+
+		for (var i = 0; i < ds_list_size(unfiltered_paths); i++)
+		{
+			var path = ds_list_find_value(unfiltered_paths, i);
+			u_msg = concat(u_msg, " ", path.startletter, " to ", path.exitletter);
+		}
+		
+		var f_msg = "Filtered:";
+
+		for (var i = 0; i < ds_list_size(filtered_paths); i++)
+		{
+			var path = ds_list_find_value(filtered_paths, i);
+			f_msg = concat(f_msg, " ", path.startletter, " to ", path.exitletter);
+		}
+		
+		show_debug_message(u_msg);
+		show_debug_message(f_msg);
+
+		ds_list_destroy(unfiltered_paths);
+	
+		return filtered_paths;
+	}
+	
+	return unfiltered_paths;
+}
+
 function rd_filter_paths_by_exit(from_room, desired_type, desired_dir, desired_time, desired_letter = "")
 {
 	return rd_filter_paths(from_room, desired_type, desired_dir, desired_time, desired_letter, false);
@@ -135,18 +188,60 @@ function rd_print_connection_path(connection)
 	show_debug_message( concat("Path: ", path) );
 }
 
-function rd_add_connection_rooms_to_map(connection, map)
+function rd_count_connections(connection)
+{
+	var next = connection;
+	var total = 0;
+	
+	while (next != undefined)
+	{
+		total++;
+		next = next.second;
+	}
+	
+	return total;
+}
+
+function rd_add_connection_to_end_replace(connection, connection_to_add)
+{
+	var next = connection;
+	var last = undefined;
+	
+	while (next != undefined)
+	{
+		last = next;
+		next = next.second;
+	}
+	
+	//last.first = connection_to_add.first; //probably redundant!
+	last.second = connection_to_add.second;
+	//last.path = connection_to_add.path; //don't replace the path because we found a new path to use, the original path is not valid
+}
+
+function rd_add_sequence_rooms_to_map(sequence, map)
 {
 	var debug_msg = "";
 	
+	var next = sequence;
+	
+	while (next != undefined)
+	{
+		//will automatically end if either is undefined
+		rd_add_connection_rooms_to_map(next.to_connection, map);
+		rd_add_connection_rooms_to_map(next.return_connection, map);
+		
+		next = next.next;
+	}
+}
+
+function rd_add_connection_rooms_to_map(connection, map)
+{
 	var next = connection;
 	
 	while (next != undefined)
 	{
 		ds_map_add(map, next.first.title, next.first);
 		next = next.second;
-		
-		//concat(debug_msg, " ", connection.firs
 	}
 }
 
