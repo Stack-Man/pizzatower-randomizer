@@ -1,4 +1,5 @@
-//TODO: special case for branching john rooms, the construction currently assumes there's at least three transitions but in this case there will be two and you only enter/exit the room once
+//TODO: special case for branching john rooms, the construction currently 
+//assumes there's at least three transitions but in this case there will be two and you only enter/exit the room once
 function rd_construct_levels()
 {	
 	var level_count = array_length(level_names);
@@ -291,6 +292,12 @@ function rd_connect_to_branch(sequence, prev_sequence_last_start_letter = "")
 							//The return needs to start from the same exit as the possible path
 							//AND end with the same start as the original to room's path
 							show_debug_message("Doing return_connection");
+							
+							var last_is_john = rd_check_type(branch, roomtype.johnbranching);
+							
+							if (last_is_john) //necessary since the player stays in the john room before using the return connection
+								last_exit_letter = possible_path.startletter;
+							
 							var connection_return = rd_connect_rooms_with_type_start(
 								branch, 
 								sequence.last_room, 
@@ -306,9 +313,6 @@ function rd_connect_to_branch(sequence, prev_sequence_last_start_letter = "")
 								rd_print_connection_path(connection);
 								rd_print_connection_path(connection_return);
 							
-	
-								var last_is_john = rd_check_type(branch, roomtype.johnbranching);
-						
 								rd_add_connection_rooms_to_map(connection_return, global.sequence_tested_rooms);
 								sequence.return_connection = connection_return; 
 					

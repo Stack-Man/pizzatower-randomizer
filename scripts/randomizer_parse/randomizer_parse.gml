@@ -155,7 +155,35 @@ function rd_parse_doors(thisroom)
 					exitdoor : exit_door_struct
 				};
 				
-				parsed_path.pathtime = found_path_time
+				if (ds_map_exists(start_door, "powerup") )
+				{
+					var powerup = ds_map_find_value(start_door, "powerup");
+					
+					var powerup_path_time = pathtime.any;
+					
+					if (ds_map_exists(powerup, "pizzatime"))
+						powerup_path_time = pathtime.pizzatime;
+					else if (ds_map_exists(powerup, "notpizzatime") )
+						powerup_path_time = pathtime.notpizzatime;
+					
+					var start_powerup = {
+						poweruptype : ds_map_find_value(powerup, "type"),
+						poweruptime : powerup_path_time
+					};
+					
+					var room_index = asset_get_index( ds_map_find_value(thisroom, "title") );
+					
+					if (! ds_map_exists(global.powerup_map, room_index) )
+					{
+						ds_map_add(global.powerup_map, room_index, ds_map_create() );
+					}
+					
+					ds_map_add( ds_map_find_value(global.powerup_map, room_index), ds_map_find_value(start_door, "letter"), start_powerup);
+				}
+				
+				
+				
+				parsed_path.pathtime = found_path_time;
 			
 				ds_list_add(found_paths, parsed_path);
 			}

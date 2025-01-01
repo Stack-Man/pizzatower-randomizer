@@ -244,3 +244,35 @@ function rd_get_exit_struct(path)
 			
 	return exitpair;
 }
+
+//TODO: make work with gustavo
+function rd_clear_transformation()
+{
+	with (obj_player)
+	{
+		if (!scr_transformationcheck() && state != states.comingoutdoor && state != states.door)
+		{
+			if state == states.ghost
+				notification_push(notifs.priest_ghost, [ghosttimer, room]);
+			if (state == states.mort || state == states.mortjump || state == states.morthook || state == states.mortattack || state == states.mortjump || state == states.boxxedpep || state == states.boxxedpepjump || state == states.boxxedpepspin || state == states.ghost || state == states.barrelslide || state == states.barrel || state == states.barreljump)
+			{
+				if hsp != 0
+					xscale = sign(hsp);
+				movespeed = abs(hsp);
+			}
+
+			transformationsnd = false;
+			state = states.normal;
+			sprite_index = spr_idle;
+			dir = xscale;
+			ghostdash = false;
+			ghostpepper = 0;
+		}
+	}
+}
+
+//TODO: implement
+function rd_give_transformation(name)
+{
+	
+}
