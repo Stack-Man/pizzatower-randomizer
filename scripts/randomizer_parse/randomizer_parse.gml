@@ -1,3 +1,17 @@
+function rd_init(new_seed = false)
+{
+	//TODO: implement reading the ini file
+	seed = 0;
+	
+	if (seed == 0 || new_seed)
+	{
+		randomize();
+		seed = floor(random_range(-2147483648, 2147483647));
+	}
+	
+	random_set_seed(seed);
+}
+
 function rd_parse_rooms()
 {
 	var jsons = level_names;
@@ -213,6 +227,8 @@ function rd_parse_doors(thisroom)
 
 	//add the type of room thsi is to the finished room object
 	//Add the paths after it has been initialized
+	ds_list_shuffle(found_paths);
+	
 	var parsed_room = {
 		title : ds_map_find_value(thisroom, "title"),
 		paths : found_paths,

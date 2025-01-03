@@ -1,0 +1,57 @@
+{
+    "rooms": [
+        {
+            "title": "tower_tutorial1N",
+            "maxscore": 0,
+            "entrance": true,
+            "doors": [
+                {
+                    "letter": "A",
+                    "type": "leveldoor",
+					"entrance": true
+                },
+                {
+                    "letter": "C",
+                    "type": "door",
+                    "notpizzatime": true
+                },
+                {
+                    "letter": "D",
+                    "type": "broken",
+                    "dir": "up"
+                }
+            ]
+        },
+        {
+            "title": "tower_tutorial2N",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter": "C",
+                    "type": "door"
+                },
+                {
+                    "letter": "E",
+                    "type": "door"
+                }
+            ]
+        },
+        {
+            "title": "tower_tutorial3N",
+            "maxscore": 0,
+			"pillar" : true,
+            "doors": [
+                {
+                    "letter": "E",
+                    "type": "door"
+                },
+                {
+                    "letter": "D",
+                    "type": "box",
+                    "dir": "down",
+                    "pizzatime": true
+                }
+            ]
+        }
+    ]
+}

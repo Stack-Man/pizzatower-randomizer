@@ -1,0 +1,173 @@
+{
+    "rooms": [
+        {
+            "title": "tower_tutorial1",
+            "maxscore": 0,
+            "entrance": true,
+            "doors": [
+                {
+                    "letter": "A",
+                    "type": "leveldoor",
+                    "entrance": true
+                },
+                {
+                    "letter": "C",
+                    "notpizzatime": true,
+					"exitonly" : true,
+                    "type": "door"
+                },
+                {
+                    "letter": "D",
+                    "type": "box",
+                    "dir": "up"
+                }
+            ]
+        },
+        {
+            "title": "tower_tutorial2",
+            "maxscore": 0,
+            "toppin": {
+                "type": "mushroom"
+            },
+            "doors": [
+                {
+                    "letter": "C",
+                    "type": "door"
+                },
+                {
+                    "letter": "B",
+                    "type": "door"
+                }
+            ]
+        },
+        {
+            "title": "tower_tutorial3",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter": "B",
+                    "type": "door"
+                },
+                {
+                    "letter": "C",
+                    "type": "door"
+                }
+            ]
+        },
+        {
+            "title": "tower_tutorial4",
+            "maxscore": 0,
+            "toppin": {
+                "type": "cheese"
+            },
+            "doors": [
+                {
+                    "letter": "C",
+                    "type": "door"
+                },
+                {
+                    "letter": "B",
+                    "type": "door"
+                }
+            ]
+        },
+        {
+            "title": "tower_tutorial5",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter": "B",
+                    "type": "door"
+                },
+                {
+                    "letter": "C",
+                    "type": "door"
+                }
+            ]
+        },
+        {
+            "title": "tower_tutorial6",
+            "maxscore": 0,
+            "toppin": {
+                "type": "tomato"
+            },
+            "doors": [
+                {
+                    "letter": "C",
+                    "type": "door"
+                },
+                {
+                    "letter": "B",
+                    "type": "door"
+                }
+            ]
+        },
+        {
+            "title": "tower_tutorial7",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter": "B",
+                    "type": "door"
+                },
+                {
+                    "letter": "C",
+                    "type": "door"
+                }
+            ]
+        },
+        {
+            "title": "tower_tutorial8",
+            "maxscore": 0,
+            "toppin": {
+                "type": "sausage"
+            },
+            "doors": [
+                {
+                    "letter": "C",
+                    "type": "door",
+					"startonly" : true
+                },
+                {
+                    "letter": "B",
+                    "type": "door"
+                }
+            ]
+        },
+        {
+            "title": "tower_tutorial9",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter": "B",
+                    "type": "door",
+					"startonly": true
+                },
+                {
+                    "letter": "C",
+                    "type": "door"
+                }
+            ]
+        },
+        {
+            "title": "tower_tutorial10",
+            "maxscore": 0,
+            "pillar": true,
+            "toppin": {
+                "type": "pineapple"
+            },
+            "doors": [
+                {
+                    "letter": "C",
+                    "type": "door",
+                    "notpizzatime": true
+                },
+                {
+                    "letter": "D",
+                    "type": "box",
+                    "pizzatime": true
+                }
+            ]
+        }
+    ]
+}

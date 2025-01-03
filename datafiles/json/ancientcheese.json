@@ -1,0 +1,339 @@
+{
+			"rooms": [
+				{
+					"title" : "ruin_1",
+					"maxscore": 0,
+					"entrance": true,
+					"lap2": true,
+					"doors": [
+						{
+							"letter" : "A",
+							"type": "leveldoor",
+							"entrance": true
+						},
+						
+						{
+							"letter" : "B",
+							"type": "horizontal",
+							"dir": "right",
+							"notpizzatime": true
+						},
+
+						{
+							"letter" : "C",
+							"type": "horizontal",
+							"startonly": true,
+							"dir": "right"
+						},
+
+						{
+							"letter" : "D",
+							"type": "door",
+							"locked": true
+						}
+					]
+				},
+				{
+					"title" : "ruin_2",
+					"maxscore": 0,
+					"secret": {
+						"secret": true
+					},
+					"toppin": {
+						"type": "mushroom"
+					},
+					"doors": [
+						{
+							"letter" : "B",
+							"type": "horizontal",
+							"dir": "left"
+						},
+
+						{
+							"letter" : "C",
+							"type": "horizontal",
+							"dir": "right"
+						}
+					]
+				},
+				{
+					"title" : "ruin_3",
+					"maxscore": 0,
+					"loop": true,
+					"doors": [
+						{
+							"letter" : "C",
+							"type": "horizontal",
+							"dir": "left"
+						},
+
+						{
+							"letter" : "A",
+							"type": "horizontal",
+							"dir": "right",
+							"loop": true
+						},
+
+						{
+							"letter" : "B",
+							"type": "horizontal",
+							"dir": "left"
+						}
+					]
+				},
+				{
+					"title" : "ruin_3b",
+					"maxscore": 0,
+					"gerome": true,
+					"doors": [
+						{
+							"letter" : "A",
+							"type": "horizontal",
+							"dir": "left"
+						}
+					]
+				},
+				{
+					"title" : "ruin_4",
+					"maxscore": 0,
+					"key": true,
+					"doors": [
+						{
+							"letter" : "B",
+							"type": "horizontal",
+							"dir": "right"
+						},
+						{
+							"letter" : "C",
+							"type": "horizontal",
+							"dir": "left"
+						}
+					]
+				},
+				{
+					"title" : "ruin_5",
+					"maxscore": 0,
+					"toppin": {
+						"type": "cheese"
+					},
+					"doors": [
+						{
+							"letter" : "D",
+							"type": "door"
+						},
+						{
+							"letter" : "B",
+							"type": "box",
+							"dir": "up"
+						}
+					]
+				},
+				{
+					"title" : "ruin_6",
+					"maxscore": 0,
+					"toppin": {
+						"type": "tomato"
+					},
+					"doors": [
+						{
+							"letter" : "B",
+							"type": "box",
+							"dir": "down"
+						},
+						{
+							"letter": "A",
+							"type": "door",
+							"exitonly": true,
+							"ratblocked" : true
+						}
+					]
+				},
+				{
+					"title" : "ruin_7",
+					"maxscore": 0,
+					"secret": {
+						"secret": true
+					},
+					"doors": [
+						{
+							"letter" : "A",
+							"type": "door"
+						},
+						{
+							"letter" : "B",
+							"exitonly" : true,
+							"ratblocked" : true,
+							"type": "box",
+							"dir" : "up"
+						}
+					]
+				},
+				{
+					"title" : "ruin_8",
+					"maxscore": 0,
+					"loop": true,
+					"doors": [
+						{
+							"letter" : "B",
+							"type": "box",
+							"dir": "down"
+						},
+						{
+							"letter" : "D",
+							"type": "box",
+							"dir": "up",
+							"notpizzatime": true
+						},
+						{
+							"letter" : "F",
+							"type": "door",
+							"gerome": true,
+							"loop": true
+						},
+						{
+							"letter" : "B",
+							"type": "box",
+							"dir": "down"
+						},
+						{
+							"letter" : "C",
+							"type": "vertical",
+							"dir": "down",
+							"startonly": true
+						}
+					]
+				},
+				{
+					"title" : "ruin_treasure",
+					"maxscore": 0,
+					"treasure": true,
+					"doors": [
+						{
+							"letter" : "F",
+							"type": "door"
+						}
+					]
+				},
+				{
+					"title" : "ruin_9",
+					"maxscore": 0,
+					"toppin": {
+						"type": "sausage"
+					},
+					"doors": [
+						{
+							"letter" : "E",
+							"type": "box",
+							"dir": "up"
+						},
+						{
+							"letter" : "B",
+							"type": "box",
+							"dir": "up"
+						}
+					]
+				},
+				{
+					"title" : "ruin_10",
+					"maxscore": 0,
+					"doors": [
+						{
+							"letter" : "D",
+							"type": "box",
+							"dir": "down"
+						},
+						{
+							"letter" : "C",
+							"type": "horizontal",
+							"dir": "right"
+						}
+					]
+				},
+				
+				{
+					"title" : "ruin_11",
+					"maxscore": 0,
+					"secret": {
+						"secret": true
+					},
+                    "pillar": true,
+					"doors": [
+						{
+							"letter" : "B",
+							"type": "box",
+							"dir": "up",
+							"notpizzatime": true
+						},
+						{
+							"letter" : "A",
+							"type": "door"
+						}
+					]
+				},
+				
+				{
+					"title" : "ruin_11",
+					"maxscore": 0,
+					"doors": [
+						{
+							"letter" : "C",
+							"type": "horizontal",
+							"dir": "left"
+						},
+						{
+							"letter" : "E",
+							"type": "box",
+							"dir": "down"
+						}
+					]
+				},
+				
+				{
+					"title" : "ruin_12",
+					"maxscore": 0,
+					"toppin": {
+						"type": "pineapple"
+					},
+					"doors": [
+						{
+							"letter" : "A",
+							"type": "door"
+						},
+						{
+							"letter" : "B",
+							"type" : "box",
+							"exitonly": true,
+							"dir" : "up",
+							"ratblocked" : true
+						}
+					]
+				},
+				{
+					"title" : "ruin_13",
+					"maxscore": 0,
+					"doors": [
+						{
+							"letter" : "B",
+							"type": "box",
+							"dir": "down"
+						},
+						{
+							"letter" : "C",
+							"type": "vertical",
+							"dir": "up"
+						}
+					]
+				},
+				{
+					"title" : "ruin_secret1"
+				},
+				
+				{
+					"title" : "ruin_secret4"
+				},
+				
+				{
+					"title" : "ruin_secret6"
+				}
+			]
+}

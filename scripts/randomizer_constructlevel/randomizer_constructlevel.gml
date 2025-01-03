@@ -45,6 +45,8 @@ function rd_construct_levels()
 	
 	//free the memory afterwards
 	ds_map_destroy(global.all_rooms);
+	
+	return ds_list_size(levels);
 }
 
 function rd_add_rooms_to_level(sequence,  desired_amount)
@@ -792,6 +794,8 @@ function rd_get_rooms_of_type(roomtypes_arr)
 		}
 			
 	}
+	
+	ds_list_shuffle(potential_rooms);
 
 	if (ds_list_size(potential_rooms) == 0)
 		return undefined;

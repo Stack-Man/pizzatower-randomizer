@@ -1,3 +1,33 @@
+function rd_generate_new(new_seed = false)
+{
+	rd_init(new_seed);
+
+	global.sequence_tested_rooms = ds_map_create(); //Doesn't get cleared between sequences
+	global.connection_tested_rooms = ds_map_create(); //Does get cleared whenever calling rd_connect_rooms_with_type_start
+	global.connection_tested_exits = ds_list_create(); //same as above
+
+	global.all_rooms = rd_parse_rooms();
+	global.transition_map = ds_map_create();
+	global.powerup_map = ds_map_create();
+	var created = rd_construct_levels();
+
+	ds_map_destroy(global.all_rooms);
+	ds_map_destroy(global.connection_tested_rooms);
+	ds_map_destroy(global.sequence_tested_rooms);
+	ds_list_destroy(global.connection_tested_exits);
+	
+	if (variable_global_exists("font_map"))
+		create_transformation_tip( concat("Generated ", created, " of ", array_length(level_names), " levels") );
+}
+
+function rd_reset()
+{
+	ds_map_destroy(global.transition_map);
+	ds_map_destroy(global.powerup_map);
+	
+	rd_generate_new(true);
+}
+
 function rd_convert_transitiondir(dir_text)
 {
 	switch(dir_text)

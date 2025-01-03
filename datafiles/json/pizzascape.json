@@ -1,0 +1,254 @@
+{
+			"rooms": [
+				{
+					"title" : "medieval_1",
+					"maxscore": 0,
+					"entrance": true,
+                    "toppin": {
+						"type": "mushroom"
+					},
+                    "lap2": true,
+					"doors": [
+						{
+							"letter" : "A",
+							"type": "leveldoor",
+							"entrance": true
+						},
+						{
+							"letter" : "B",
+							"type": "horizontal",
+							"dir": "right"
+						}
+					]
+				},
+                {
+                    "title" : "medieval_2",
+                    "maxscore" : 0,
+                    "doors": [
+                        {
+                            "letter" : "B",
+                            "type" : "horizontal",
+                            "dir" : "left"
+                        },
+                        {
+                            "letter" : "C",
+                            "type" : "door"
+                        }
+                    ]
+                },
+                {
+                    "title" : "medieval_3",
+                    "maxscore" : 0,
+                    "toppin": {
+						"type": "cheese",
+                        "notpizzatime": true
+					},
+                    "doors": [
+                        {
+                            "letter" : "C",
+                            "type" : "door"
+                        },
+                        {
+                            "letter" : "B",
+                            "type" : "door",
+                            "notpizzatime": true,
+							"ratblocked" : true,
+							"exitonly" : true
+                        }
+                    ],
+                    "oneway":{
+						"pairs":[
+							["C", "B"]
+						]
+					}
+                },
+                {
+                    "title" : "medieval_4",
+                    "maxscore" : 0,
+                    "toppin": {
+						"type": "tomato"
+					},
+                    "secret": {
+						"secret": true
+					},
+                    "doors": [
+                        {
+                            "letter" : "D",
+                            "type" : "door"
+                        },
+                        {
+                            "letter" : "A",
+                            "type" : "door"
+                        }
+                    ]
+                },
+                {
+                    "title" : "medieval_5",
+                    "maxscore" : 0,
+                    "loop" : true,
+                    "doors": [
+                        {
+                            "letter" : "A",
+                            "type" : "door"
+                        },
+                        {
+                            "letter" : "C",
+                            "type" : "door"
+                        },
+                        {
+                            "letter" : "F",
+                            "type" : "door",
+                            "gerome": true,
+                            "loop" : true
+                        }
+                    ]
+                },
+                {
+                    "title" : "medieval_6",
+                    "maxscore" : 0,
+                    "toppin": {
+						"type": "sausage"
+					},
+                    "secret": {
+						"secret": true,
+                        "notpizzatime": true
+					},
+                    "loop" : true,
+                    "doors": [
+                        {
+                            "letter" : "C",
+                            "type" : "door"
+                        },
+                        {
+                            "letter" : "D",
+                            "type" : "horizontal",
+                            "dir" : "left"
+                        },
+                        {
+                            "letter" : "A",
+                            "type" : "horizontal",
+                            "dir" : "right",
+                            "loop" : true,
+                            "notpizzatime": true
+                        }
+                    ]
+                },
+                {
+                    "title" : "medieval_7",
+                    "maxscore" : 0,
+                    "toppin": {
+						"type": "pineapple"
+					},
+                    "doors": [
+                        {
+                            "letter" : "D",
+                            "type" : "horizontal",
+                            "dir" : "right"
+                        },
+                        {
+                            "letter" : "A",
+                            "type" : "door"
+                        }
+                    ]
+                },
+                {
+                    "title" : "medieval_8",
+                    "maxscore" : 0,
+                    "key": true,
+                    "doors": [
+                        {
+                            "letter" : "A",
+                            "type" : "horizontal",
+                            "dir" : "left"
+                        }
+                    ]
+                },
+                {
+                    "title" : "medieval_9",
+                    "maxscore" : 0,
+                    "doors": [
+                        {
+                            "letter" : "A",
+                            "type" : "door"
+                        },
+                        {
+                            "letter" : "B",
+                            "type" : "door",
+                            "locked" : true,
+                            "notpizzatime": true,
+							"ratblocked" : true,
+							"exitonly" : true
+                        }
+                    ],
+                    "oneway":{
+						"pairs":[
+							["A", "B"]
+						]
+					}
+                },
+                {
+                    "title" : "medieval_10",
+                    "maxscore" : 0,
+                    "pillar": true,
+                    "doors": [
+                        {
+                            "letter" : "D",
+                            "type" : "door"
+                        }
+                    ]
+                },
+                {
+                    "title" : "medieval_3b",
+                    "maxscore" : 0,
+                    "secret": {
+						"secret": true,
+                        "pizzatime" : true
+					},
+                    "doors": [
+                        {
+                            "letter" : "B",
+                            "type" : "door"
+                        },
+                        {
+                            "letter" : "D",
+                            "type" : "door"
+                        }
+                    ]
+                },
+                {
+                    "title" : "medieval_9b",
+                    "maxscore" : 0,
+                    "gerome": true,
+                    "doors": [
+                        {
+                            "letter" : "D",
+                            "type" : "door"
+                        },
+                        {
+                            "letter" : "B",
+                            "type" : "door"
+                        }
+                    ]
+                },
+                {
+					"title" : "medieval_treasure",
+					"maxscore": 0,
+					"treasure": true,
+					"doors": [
+						{
+							"letter" : "F",
+							"type": "door"
+						}
+					]
+				},
+                {
+                    "title" : "medieval_secret4"
+                },
+                {
+                    "title" : "medieval_secret5"
+                },
+                {
+                    "title" : "medieval_secret6"
+                }
+			]
+}

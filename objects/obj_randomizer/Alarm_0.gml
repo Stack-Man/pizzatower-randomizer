@@ -1,6 +1,13 @@
 //upon entering the room, remove unused transitions and put obj_solid in place of hallways
 //TODO: first room of a level doesnt create the solids properly but still deletes the hallways
+//TODO: farm_1 B was unused but wasnt blocked off
+//TODO: deleting obj_geromedoor leaves behind an obj_door that crashes the game (in pizzascape?)
 
+with (obj_door)
+{
+	if (!variable_instance_exists(self, "targetRoom"))
+		instance_destroy(self);
+}
 
 if (ds_map_exists(global.transition_map, room))
 {
@@ -20,7 +27,7 @@ if (ds_map_exists(global.transition_map, room))
 			var yscale = image_yscale;
 			
 			//TODO: use different object
-			with (instance_create_depth(x, y, depth, obj_tutorialtargetblock))
+			with (instance_create_depth(x, y, depth, obj_rockblock))
 			{
 				image_xscale = xscale;
 				image_yscale = yscale;

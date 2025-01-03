@@ -9,6 +9,7 @@ if variable_global_exists("smallfont")
 	draw_set_valign(fa_top);
 	
 	//Draw Version
-	var versionstr = "RANDOMIZER V0.1";
-	draw_text(8, 8, versionstr);
+	var versionstr = "RD V0.1";
+	draw_text(8, 0, versionstr);
+	draw_text(8, 24, seed);
 }

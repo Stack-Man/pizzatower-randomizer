@@ -1,0 +1,406 @@
+{
+		"rooms" : 
+		[
+			{
+				"title" : "farm_2",
+				"maxscore": 0,
+				"entrance" : true,
+				"lap2" : true,
+				"doors": [
+					{
+						"letter" : "A",
+						"type": "leveldoor",
+						"entrance": true
+					},
+					
+					{
+						"letter" : "B",
+						"type": "horizontal",
+						"dir": "right",
+						"pizzatime" : true
+					},
+					
+					{
+						"letter" : "C",
+						"type": "box",
+						"dir": "down",
+						"notpizzatime" : true
+					}
+				]
+			},
+			
+			{
+				"title" : "farm_1",
+				"maxscore": 0,
+				"oneway": {
+					"pairs": [
+							[ "D", "C" ],
+							[ "D", "F" ]
+						]
+				},
+				"doors": [
+					{
+						"letter" : "D",
+						"type": "box",
+						"dir": "up",
+						"notpizzatime": true,
+						"startonly": true
+					},
+					
+					{
+						"letter" : "C",
+						"type": "horizontal",
+						"dir": "right"
+					},
+					
+					{
+						"letter" : "B",
+						"type": "horizontal",
+						"dir": "left",
+						"pizzatime": true
+					},
+					
+					{
+						"letter" : "F",
+						"type": "door",
+						"gerome": true
+					}
+				]
+			},
+			
+			{
+				"title" : "farm_3",
+				"maxscore": 0,
+				"doors": [
+					{
+						"letter" : "C",
+						"type": "box",
+						"dir": "up"
+					},
+					
+					{
+						"letter" : "D",
+						"type": "box",
+						"dir": "down"
+					}
+				]
+			},
+			
+			{
+				"title" : "farm_4",
+				"maxscore": 0,
+				"doors": [
+					{
+						"letter" : "A",
+						"type": "horizontal",
+						"dir": "right",
+						"notpizzatime" : true
+					},
+					
+					{
+						"letter" : "D",
+						"type": "door",
+						"pizzatime" : true
+					},
+					
+					{
+						"letter" : "C",
+						"type": "horizontal",
+						"dir": "left"
+					}
+				]
+			},
+			
+			{
+				"title" : "farm_4b",
+				"maxscore": 0,
+				"oneway": {
+					"pairs": [
+							[ "A", "D" ]
+						]
+				},
+				"secret": {
+					"secret": true
+				},
+				"doors": [
+					{
+						"letter" : "A",
+						"type": "horizontal",
+						"dir": "left",
+						"startonly" : true
+					},
+					
+					{
+						"letter" : "D",
+						"type": "door"
+					}
+				]
+			},
+			
+			{
+				"title" : "farm_5",
+				"maxscore": 0,
+				"doors": [
+					{
+						"letter" : "D",
+						"type": "door"
+					},
+					
+					{
+						"letter" : "A",
+						"type": "door"
+					}
+				]
+			},
+			
+			{
+				"title" : "farm_6",
+				"toppin" :
+				{
+					"type" : "cheese"
+				},
+				"gerome" : true,
+				"maxscore": 0,
+				"doors": [
+					{
+						"letter" : "C",
+						"type": "door"
+					},
+					
+					{
+						"letter" : "D",
+						"type": "horizontal",
+						"dir": "right"
+					}
+				]
+			},
+			
+			{
+				"title" : "farm_7",
+				"maxscore": 0,
+				"doors": [
+					{
+						"letter" : "A",
+						"type": "door"
+					},
+					
+					{
+						"letter" : "B",
+						"type": "horizontal",
+						"dir": "right"
+					}
+				]
+			},
+			
+			{
+				"title" : "farm_8",
+				"maxscore": 0,
+				"loop" : true,
+				"oneway": {
+					"pairs": [
+							[ "B", "C" ],
+							[ "B", "E" ]
+						]
+				},
+				"toppin" :
+				{
+					"type" : "mushroom"
+				},
+				"doors": [
+					{
+						"letter" : "C",
+						"type": "door",
+						"exitonly" : true,
+						"ratblocked" : true
+					},
+					
+					{
+						"letter" : "B",
+						"type": "horizontal",
+						"dir": "left"
+					},
+					
+					{
+						"letter" : "E",
+						"type": "vertical",
+						"dir": "down",
+						"loop" : true
+					}
+				]
+			},
+			
+			{
+				"title" : "farm_9",
+				"maxscore": 0,
+				"oneway": {
+					"pairs": [
+							[ "D", "A" ]
+						]
+				},
+				"doors": [
+					{
+						"letter" : "A",
+						"type": "horizontal",
+						"dir": "right",
+						"exitonly": true,
+						"ratblocked": true
+					},
+					
+					{
+						"letter" : "D",
+						"type": "horizontal",
+						"dir": "left"
+					}
+				]
+			},
+			
+			{
+				"title" : "farm_9b",
+				"toppin" :
+				{
+					"type" : "sausage"
+				},
+				"maxscore": 0,
+				"secret": {
+					"secret": true
+				},
+				"doors": [
+					{
+						"letter" : "B",
+						"type": "door",
+						"startonly" : true
+					},
+					
+					{
+						"letter" : "C",
+						"type": "horizontal",
+						"dir": "left"
+					}
+				]
+			},
+			
+			{
+				"title" : "farm_10",
+				"maxscore": 0,
+				"toppin" :
+				{
+					"type" : "tomato"
+				},
+
+				"doors": [
+					{
+						"letter" : "A",
+						"type": "horizontal",
+						"dir": "left"
+					},
+					
+					{
+						"letter" : "C",
+						"type": "horizontal",
+						"dir": "right"
+					}
+				]
+			},
+			
+			{
+				"title" : "farm_11",
+				"maxscore": 0,
+				"pillar" : true,
+				"oneway": {
+					"pairs": [
+							[ "B", "A" ]
+						]
+				},
+				"doors": [
+					{
+						"letter" : "B",
+						"type": "door",
+						"notpizzatime": true
+					},
+					
+					{
+						"letter" : "A",
+						"type": "horizontal",
+						"dir": "right",
+						"pizzatime" : true,
+						"exitonly": true
+					}
+				]
+			},
+			
+			{
+				"title" : "farm_12",
+				"maxscore": 0,
+				"oneway": {
+					"pairs": [
+							[ "A", "B" ]
+						]
+				},
+				"doors": [
+					{
+						"letter" : "A",
+						"type": "horizontal",
+						"dir": "left"
+					},
+					
+					{
+						"letter" : "B",
+						"type": "horizontal",
+						"dir": "right",
+						"exitonly" : true
+					}
+				]
+			},
+			
+			{
+				"title" : "farm_13",
+				"maxscore": 0,
+				"pizzatime" : true,
+				"oneway": {
+					"pairs": [
+							[ "C", "D" ]
+						]
+				},
+				"doors": [
+					{
+						"letter" : "C",
+						"type": "horizontal",
+						"dir": "left",
+						"pizzatime": true
+					},
+					
+					{
+						"letter" : "D",
+						"type": "door",
+						"pizzatime": true,
+						"exitonly": true
+					}
+				]
+			},
+			
+			{
+				"title" : "farm_cube",
+				"maxscore": 0,
+				"doors": [
+					{
+						"letter" : "E",
+						"type": "vertical",
+						"dir": "down"
+					}
+				]
+			},
+			
+			{
+				"title" : "farm_secret1"
+			},
+			
+			{
+				"title" : "farm_secret2"
+			},
+			
+			{
+				"title" : "farm_secret3"
+			}
+			
+		]
+}
