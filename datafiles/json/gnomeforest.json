@@ -1,0 +1,751 @@
+{
+	"rooms" : 
+	[
+		{
+			"title" : "forest_1",
+			"maxscore" : 0,
+			"entrance" : true,
+			"secret" :
+			{
+				"secret" : true,
+				"pizzatime" : true
+			},
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "leveldoor",
+					"entrance" : true
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "right"
+				}
+			]
+		},
+		
+		{
+			"title" : "forest_2",
+			"maxscore" : 0,
+			"loop" : true,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "horizontal",
+					"dir" : "right"
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "left"
+				},
+				
+				{
+					"letter" : "C",
+					"type" : "vertical",
+					"dir" : "up",
+					"loop" : true
+				}
+			]
+		},
+		
+		{
+			"title" : "forest_3",
+			"maxscore" : 0,
+			"toppin" :
+			{
+				"type" : "pineapple",
+				"gnomehouse" : true,
+				"pizzatime" : true
+			},
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "horizontal",
+					"dir" : "left"
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "right"
+				},
+				
+				{
+					"letter" : "F",
+					"type" : "door",
+					"gerome" : true,
+					"loop" : true
+				}
+			]
+		},
+		
+		{
+			"title" : "forest_5",
+			"maxscore" : 0,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "horizontal",
+					"dir" : "left",
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "right",
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "forest_6",
+			"maxscore" : 0,
+			"toppin" :
+			{
+				"type" : "mushroom",
+				"gnomehouse"  : true
+			},
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "vertical",
+					"dir" : "down",
+					"exitonly" : true,
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "left",
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "forest_7",
+			"maxscore" : 0,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "vertical",
+					"dir" : "up",
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "right",
+					"exitonly" : true,
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "forest_8",
+			"maxscore" : 0,
+			"gnomepizza" : true,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "horizontal",
+					"dir" : "right",
+					"exitonly" : true,
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "left",
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "forest_9",
+			"maxscore" : 0,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "horizontal",
+					"dir" : "left"
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "right",
+					"exitonly" : true
+				}
+			]
+		},
+		
+		{
+			"title" : "forest_10",
+			"maxscore" : 0,
+			"toppin" :
+			{
+				"type" : "tomato",
+				"gnomehouse" : true
+			},
+			"doors" :
+			[
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "left",
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				},
+				
+				{
+					"letter" : "D",
+					"type" : "horizontal",
+					"dir" : "left",
+					"exitonly" : true,
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "forest_12",
+			"maxscore" : 0,
+			"secret" :
+			{
+				"secret" : true
+			},
+			"doors" :
+			[
+				{
+					"letter" : "B",
+					"type" : "vertical",
+					"dir" : "down",
+					"exitonly" : true,
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				},
+				
+				{
+					"letter" : "D",
+					"type" : "horizontal",
+					"dir" : "right",
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "forest_14",
+			"maxscore" : 0,
+			"gnomepizza" : true,
+			"doors" :
+			[
+				{
+					"letter" : "B",
+					"type" : "vertical",
+					"dir" : "up",
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				},
+				
+				{
+					"letter" : "C",
+					"type" : "vertical",
+					"dir" : "down",
+					"exitonly" : true,
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "forest_15",
+			"maxscore" : 0,
+			"doors" :
+			[
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "right",
+					"exitonly" : true,
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				},
+				
+				{
+					"letter" : "C",
+					"type" : "vertical",
+					"dir" : "up",
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "forest_16",
+			"maxscore" : 0,
+			"gerome" : true,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "horizontal",
+					"dir" : "right",
+					"exitonly" : true,
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "left",
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "forest_17",
+			"maxscore" : 0,
+			"toppin" :
+			{
+				"type" : "sausage",
+				"gnomehouse" : true
+			},
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "horizontal",
+					"dir" : "left",
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "right",
+					"exitonly" : true,
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "forest_escape1",
+			"maxscore" : 0,
+			"doors" :
+			[
+				{
+					"letter" : "D",
+					"type" : "door",
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				},
+				
+				{
+					"letter" : "E",
+					"type" : "door",
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "forest_escape2",
+			"maxscore" : 0,
+			"doors" :
+			[
+				{
+					"letter" : "D",
+					"type" : "door",
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				},
+				
+				{
+					"letter" : "E",
+					"type" : "door",
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "forest_G1",
+			"maxscore" : 0,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "horizontal",
+					"pizzatimestart" : true,
+					"dir" : "right",
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"notpizzatimestart" : true,
+					"pizzatimeexit" : true,
+					"dir" : "left"
+				},
+				
+				{
+					"letter" : "C",
+					"type" : "door",
+					"loop" : true,
+					"loopexit" : true,
+					"notpizzatime" : true,
+					"startonly" : true,
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				},
+				
+				{
+					"letter" : "D",
+					"type" : "door",
+					"notpizzatime" : true,
+					"loop" : true,
+					"loopstart" : true,
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "forest_G1b",
+			"maxscore" : 0,
+			"doors" :
+			[
+				{
+					"letter" : "C",
+					"type" : "door",
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				},
+				
+				{
+					"letter" : "D",
+					"type" : "door",
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "forest_G2",
+			"maxscore" : 0,
+			"secret" :
+			{
+				"secret" : true
+			},
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "horizontal",
+					"dir" : "left",
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "right",
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "forest_G3",
+			"maxscore" : 0,
+			"gnomepizza" : true,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "horizontal",
+					"dir" : "right",
+					"notpizzatime" : true,
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "left",
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				},
+				
+				{
+					"letter" : "D",
+					"type" : "door",
+					"pizzatime" : true,
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "forest_G4",
+			"maxscore" : 0,
+			"gnomepizza" : true,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "horizontal",
+					"dir" : "right",
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "left",
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "forest_G5",
+			"maxscore" : 0,
+			"toppin" :
+			{
+				"type" : "cheese",
+				"gnomehouse" : true
+			},
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "horizontal",
+					"dir" : "left",
+					"startonly" : true,
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "right",
+					"notpizzatime" : true,
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				},
+				
+				{
+					"letter" : "D",
+					"type" : "door",
+					"pizzatime" : true,
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				},
+				
+				{
+					"letter" : "E",
+					"type" : "door",
+					"pizzatime" : true,
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "forest_john",
+			"maxscore" : 0,
+			"gnomepizza" : true,
+			"pillar" : true,
+			"doors" :
+			[
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "left",
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				},
+				
+				{
+					"letter" : "E",
+					"type" : "door",
+					"exitonly" : true,
+					"pizzatime" : true,
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "forest_lap",
+			"maxscore" : 0,
+			"lap2" : true,
+			"doors" :
+			[
+				{
+					"letter" : "C",
+					"type" : "vertical",
+					"dir" : "down"
+				}
+			]
+		},
+		
+		{
+			"title" : "forest_secret1",
+			"powerup" :
+			{
+				"type" : "gustavo"
+			}
+		},
+		
+		{
+			"title" : "forest_secret2"
+		},
+		
+		{
+			"title" : "forest_secret3",
+			"powerup" :
+			{
+				"type" : "gustavo"
+			}
+		}
+	]
+}

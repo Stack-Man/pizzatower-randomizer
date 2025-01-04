@@ -1,0 +1,308 @@
+{
+	"rooms" :
+	[
+		{
+			"title" : "sewer_1",
+			"maxscore" : 0,
+			"entrance" : true,
+			"lap2" : true,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "leveldoor",
+					"entrance" : true
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "left"
+				}
+			]
+		},
+		
+		{
+			"title" : "sewer_2",
+			"maxscore" : 0,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "vertical",
+					"dir" : "down",
+					"notpizzatime" : true,
+					"exitonly" : true
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "right"
+				},
+				
+				{
+					"letter" : "D",
+					"type" : "box",
+					"dir" : "up",
+					"pizzatime" : true
+				}
+			]
+		},
+		
+		{
+			"title" : "sewer_3",
+			"maxscore" : 0,
+			"toppin" : 
+			{
+				"type" : "mushroom"
+			},
+			"secret" :
+			{
+				"secret" : true
+			},
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "vertical",
+					"dir" : "up"
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "door",
+					"exitonly" : true
+				}
+			]
+		},
+		
+		{
+			"title" : "sewer_4",
+			"maxscore" : 0,
+			"toppin" :
+			{
+				"type" : "cheese"
+			},
+			"doors":
+			[
+				{
+					"letter" : "A",
+					"type" : "horizontal",
+					"dir" : "left",
+					"exitonly" : true
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "door"
+				}
+			]
+		},
+		
+		{
+			"title" : "sewer_5",
+			"maxscore" : 0,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "horizontal",
+					"dir" : "right"
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "door",
+					"exitonly" : true
+				}
+			]
+		},
+		
+		{
+			"title" : "sewer_6",
+			"maxscore" : 0,
+			"gerome" : true,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "door",
+					"exitonly" : true
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "door"
+				}
+			]
+		},
+		
+		{
+			"title" : "sewer_7",
+			"maxscore" : 0,
+			"toppin" :
+			{
+				"type" : "tomato"
+			},
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "door"
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "left",
+					"exitonly" : true
+				}
+			]
+		},
+		
+		{
+			"title" : "sewer_8",
+			"maxscore" : 0,
+			"pillar" : true,
+			"secret" :
+			{
+				"secret" : true
+			},
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "door",
+					"exitonly" : true,
+					"ratblocked" : true
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "right"
+				}
+			]
+		},
+		
+		{
+			"title" : "sewer_9",
+			"maxscore" : 0,
+			"toppin" :
+			{
+				"type" : "sausage"
+			},
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "door"
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "right",
+					"exitonly" : true
+				}
+			]
+		},
+		
+		{
+			"title" : "sewer_10",
+			"maxscore" : 0,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "horizontal",
+					"dir" : "right",
+					"exitonly" : true
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "left"
+				},
+				
+				{
+					"letter" : "F",
+					"type" : "door",
+					"gerome" : true
+				}
+			]
+		},
+		
+		{
+			"title" : "sewer_11",
+			"maxscore" : 0,
+			"toppin" :
+			{
+				"type" : "pineapple"
+			},
+			"secret" :
+			{
+				"secret" : true
+			},
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "horizontal",
+					"dir" : "left"
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "door",
+					"exitonly" : true
+				}
+			]
+		},
+		
+		{
+			"title" : "sewer_12",
+			"maxscore" : 0,
+			"doors" :
+			[
+				{
+					"letter" : "B",
+					"type" : "door"
+				},
+				
+				{
+					"letter" : "D",
+					"type" : "box",
+					"dir" : "down",
+					"exitonly" : true
+				}
+			]
+		},
+		
+		{
+			"title" : "sewer_treasure",
+			"maxscore" : 0,
+			"doors" :
+			[
+				{
+					"letter" : "F",
+					"type" : "door"
+				}
+			]
+		},
+		
+		{
+			"title" : "sewer_secret1"
+		},
+		
+		{
+			"title" : "sewer_secret2"
+		},
+		
+		{
+			"title" : "sewer_secret3"
+		}
+	]
+}

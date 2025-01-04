@@ -1,0 +1,316 @@
+{
+	"rooms" :
+	[
+		{
+			"title" : "minigolf_1",
+			"maxscore" : 0,
+			"entrance" : true,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "leveldoor",
+					"entrance" : true
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "right",
+					"exitonly" : true,
+					"ratblocked" : true
+				},
+				
+				{
+					"letter" : "C",
+					"type" : "horizontal",
+					"dir" : "left",
+					"loop" : true
+				}
+			]
+		},
+		
+		{
+			"title" : "minigolf_2",
+			"maxscore" : 0,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "horizontal",
+					"dir" : "right",
+					"exitonly" : true,
+					"ratblocked" : true
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "left"
+				}
+			]
+		},
+		
+		{
+			"title" : "minigolf_3",
+			"maxscore" : 0,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "horizontal",
+					"dir" : "left"
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "right",
+					"exitonly" : true,
+					"ratblocked" : true
+				}
+			]
+		},
+		
+		{
+			"title" : "minigolf_4",
+			"maxscore" : 0,
+			"loop" : true,
+			"toppin" :
+			{
+				"type" : "mushroom"
+			},
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "door",
+					"notpizzatime" : true,
+					"loop" : true
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "left",
+					"startonly" : true,
+					"ratblocked" : true
+				},
+				
+				{
+					"letter" : "C",
+					"type" : "door",
+					"notpizzatime" : true,
+					"loop" : true
+				},
+				
+				{
+					"letter" : "D",
+					"type" : "door",
+					"notpizzatime" : true,
+					"loop" : true
+				},
+				
+				{
+					"letter" : "E",
+					"type" : "door"
+				},
+				
+				{
+					"letter" : "F",
+					"type" : "door",
+					"gerome" : true,
+					"loop" : true,
+					"pizzatime" : true,
+					"ratblocked" : true,
+				}
+			]
+		},
+		
+		{
+			"title" : "minigolf_5",
+			"maxscore" : 0,
+			"toppin" :
+			{
+				"type" : "cheese"
+			},
+			"secret" :
+			{
+				"secret" : true
+			},
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "door"
+				}
+			]
+		},
+		
+		{
+			"title" : "minigolf_6",
+			"maxscore" : 0,
+			"toppin" :
+			{
+				"type" : "tomato"
+			},
+			"secret" :
+			{
+				"secret" : true
+			},
+			"doors" :
+			[
+				{
+					"letter" : "C",
+					"type" : "door"
+				}
+			]
+		},
+		
+		{
+			"title" : "minigolf_7",
+			"maxscore" : 0,
+			"toppin" :
+			{
+				"type" : "sausage"
+			},
+			"secret" :
+			{
+				"secret" : true
+			},
+			"doors" :
+			[
+				{
+					"letter" : "C",
+					"type" : "door"
+				}
+			]
+		},
+		
+		{
+			"title" : "minigolf_8",
+			"maxscore" : 0,
+			"pillar" : true,
+			"gerome" : true,
+			"toppin" :
+			{
+				"type" : "pineapple"
+			},
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "door",
+					"pizzatime" : true,
+					"exitonly" : true,
+					"loop" : true,
+					"loopstart" : true
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "box",
+					"dir" : "up",
+					"loop" : true,
+					"loopexit" : true,
+					"pizzatime" : true,
+					"pizzatimestart" : true
+				},
+				
+				{
+					"letter" : "E",
+					"type" : "door",
+					"startonly" : true,
+					"notpizzatime" : true,
+					"notpizzatimestart" : true,
+					"pizzatimeexit" : true
+				}
+			]
+		},
+		
+		{
+			"title" : "minigolf_9",
+			"maxscore" : 0,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "door"
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "door",
+					"exitonly" : true
+				}
+			]
+		},
+		
+		{
+			"title" : "minigolf_10",
+			"maxscore" : 0,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "horizontal",
+					"dir" : "right",
+					"exitonly" : true,
+					"ratblocked" : true
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "door"
+				}
+			]
+		},
+		
+		{
+			"title" : "minigolf_11",
+			"maxscore" : 0,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "horizontal",
+					"dir" : "left"
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "box",
+					"dir" : "down",
+					"exitonly" : true,
+					"ratblocked" : true
+				}
+			]
+		},
+		
+		{
+			"title" : "minigolf_lap",
+			"maxscore" : 0,
+			"lap2" : true,
+			"doors" : 
+			[
+				{
+					"letter" : "C",
+					"type" : "horizontal",
+					"dir" : "right"
+				}
+			]
+		},
+		
+		{
+			"title" : "minigolf_secret1"
+		},
+		
+		{
+			"title" : "minigolf_secret2"
+		},
+		
+		{
+			"title" : "minigolf_secret3"
+		}
+	]
+}

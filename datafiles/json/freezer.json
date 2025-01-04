@@ -1,0 +1,618 @@
+{
+	"rooms" :
+	[
+		{
+			"title" : "freezer_1",
+			"maxscore" : 0,
+			"entrance" : true,
+			"loop" : true,
+			"toppin" :
+			{
+				"type" : "mushroom"
+			},
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "leveldoor",
+					"entrance" : true
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "right",
+					"powerup" :
+					{
+						"type" : "satan",
+						"pizzatime" : true
+					}
+				},
+				
+				{
+					"letter" : "F",
+					"type" : "horizontal",
+					"dir" : "left",
+					"loop" : true,
+					"exitonly" : true,
+					"ratblocked" : true,
+					"powerup" :
+					{
+						"type" : "satan",
+						"pizzatime" : true
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "freezer_2",
+			"maxscore" : 0,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "horizontal",
+					"dir" : "right",
+					"powerup" :
+					{
+						"type" : "satan",
+						"pizzatime" : true
+					}
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "left",
+					"powerup" :
+					{
+						"type" : "satan",
+						"pizzatime" : true
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "freezer_3",
+			"maxscore" : 0,
+			"loop" : true,
+			"toppin" :
+			{
+				"type" : "cheese"
+			},
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "horizontal",
+					"dir" : "left",
+					"powerup" :
+					{
+						"type" : "satan",
+						"pizzatime" : true
+					}
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "right",
+					"powerup" :
+					{
+						"type" : "satan",
+						"pizzatime" : true
+					}
+				},
+				
+				{
+					"letter" : "F",
+					"type" : "door",
+					"gerome" : true,
+					"loop" : true,
+					"pizzatimeexit" : true,
+					"powerup" :
+					{
+						"type" : "satan",
+						"pizzatime" : true
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "freezer_4",
+			"maxscore" : 0,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "door",
+					"powerup" :
+					{
+						"type" : "satan",
+						"pizzatime" : true
+					}
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "left",
+					"powerup" :
+					{
+						"type" : "satan",
+						"pizzatime" : true
+					}
+				},
+				
+				{
+					"letter" : "E",
+					"type" : "horizontal",
+					"dir" : "left",
+					"pizzatime" : true,
+					"powerup" :
+					{
+						"type" : "satan",
+						"pizzatime" : true
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "freezer_5",
+			"maxscore" : 0,
+			"secret" :
+			{
+				"secret" : true,
+				"pizzatime" : true
+			},
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "door",
+					"powerup" :
+					{
+						"type" : "satan",
+						"pizzatime" : true
+					}
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "door",
+					"notpizzatime" : true,
+					"powerup" :
+					{
+						"type" : "satan",
+						"pizzatime" : true
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "freezer_6",
+			"maxscore" : 0,
+			"toppin" :
+			{
+				"type" : "tomato"
+			},
+			"secret" :
+			{
+				"secret" : true
+			},
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "box",
+					"dir" : "up",
+					"exitonly" : true
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "door"
+				}
+			]
+		},
+		
+		{
+			"title" : "freezer_7",
+			"maxscore" : 0,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "box",
+					"dir" : "down",
+					"notpizzatime" : true,
+					"powerup" :
+					{
+						"type" : "satan",
+						"pizzatime" : true
+					}
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "right",
+					"powerup" :
+					{
+						"type" : "satan",
+						"pizzatime" : true
+					}
+				},
+				
+				{
+					"letter" : "E",
+					"type" : "horizontal",
+					"dir" : "left",
+					"pizzatime" : true,
+					"ratblocked" : true,
+					"powerup" :
+					{
+						"type" : "satan",
+						"pizzatime" : true
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "freezer_9",
+			"maxscore" : 0,
+			"loop" : true,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "door",
+					"loopstart" : true,
+					"exitonly" : true,
+					"powerup" :
+					{
+						"type" : "satan",
+						"pizzatime" : true
+					}
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "left",
+					"powerup" :
+					{
+						"type" : "satan",
+						"pizzatime" : true
+					}
+				},
+				
+				{
+					"letter" : "C",
+					"type" : "horizontal",
+					"dir" : "right",
+					"loopexit" : true,
+					"startonly" : true,
+					"powerup" :
+					{
+						"type" : "satan",
+						"pizzatime" : true
+					}
+				},
+				
+				{
+					"letter" : "D",
+					"type" : "door",
+					"ratblocked" : true,
+					"powerup" :
+					{
+						"type" : "satan",
+						"pizzatime" : true
+					}
+				}
+			],
+			"groups" :
+			[
+				{
+					"letters" :
+					[
+						"A", "C"
+					]
+				}
+			]
+		},
+		
+		{
+			"title" : "freezer_11",
+			"maxscore" : 0,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "door"
+				},
+				
+				{
+					"letter" : "C",
+					"type" : "horizontal",
+					"dir" : "left",
+					"exitonly" : true,
+					"ratblocked" : true
+				}
+			]
+		},
+		
+		{
+			"title" : "freezer_12",
+			"maxscore" : 0,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "vertical",
+					"dir" : "down",
+					"powerup" :
+					{
+						"type" : "satan",
+						"pizzatime" : true
+					}
+				},
+				
+				{
+					"letter" : "D",
+					"type" : "door",
+					"powerup" :
+					{
+						"type" : "satan",
+						"pizzatime" : true
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "freezer_13",
+			"maxscore" : 0,
+			"gerome" : true,
+			"toppin" :
+			{
+				"type" : "sausage"
+			},
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "vertical",
+					"dir" : "up",
+					"powerup" :
+					{
+						"type" : "satan",
+						"pizzatime" : true
+					}
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "door",
+					"startonly" : true,
+					"powerup" :
+					{
+						"type" : "satan",
+						"pizzatime" : true
+					}
+				},
+				
+				{
+					"letter" : "D",
+					"type" : "box",
+					"dir" : "up",
+					"notpizzatime" : true,
+					"powerup" :
+					{
+						"type" : "satan",
+						"pizzatime" : true
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "freezer_15",
+			"maxscore" : 0,
+			"toppin" :
+			{
+				"type" : "pineapple"
+			},
+			"secret" :
+			{
+				"secret" : true
+			},
+			"doors" :
+			[
+				{
+					"letter" : "B",
+					"type" : "box",
+					"dir" : "up",
+					"exitonly" : true,
+					"ratblocked" : true,
+					"powerup" :
+					{
+						"type" : "satan",
+						"pizzatime" : true
+					}
+				},
+				
+				{
+					"letter" : "D",
+					"type" : "box",
+					"dir" : "down",
+					"powerup" :
+					{
+						"type" : "satan",
+						"pizzatime" : true
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "freezer_16",
+			"maxscore" : 0,
+			"loop" : true,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "horizontal",
+					"dir" : "right",
+					"loop" : true,
+					"powerup" :
+					{
+						"type" : "satan"
+					}
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "box",
+					"dir" : "down",
+					"exitonly" : true,
+					"ratblocked" : true,
+					"powerup" :
+					{
+						"type" : "satan"
+					}
+				},
+				
+				{
+					"letter" : "D",
+					"type" : "box",
+					"dir" : "down",
+					"powerup" :
+					{
+						"type" : "satan"
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "freezer_upgrade",
+			"maxscore" : 0,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "horizontal",
+					"dir" : "left"
+				}
+			]
+		},
+		
+		{
+			"title" : "freezer_17",
+			"maxscore" : 0,
+			"doors" :
+			[
+				{
+					"letter" : "C",
+					"type" : "box",
+					"dir" : "down",
+					"powerup" :
+					{
+						"type" : "satan"
+					}
+				},
+				
+				{
+					"letter" : "D",
+					"type" : "box",
+					"dir" : "up",
+					"startonly" : true,
+					"powerup" :
+					{
+						"type" : "satan"
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "freezer_escape1",
+			"maxscore" : 0,
+			"pillar" : true,
+			"doors" :
+			[
+				{
+					"letter" : "B",
+					"type" : "door",
+					"exitonly" : true,
+					"ratblocked" : true,
+					"powerup" :
+					{
+						"type" : "satan"
+					}
+				},
+				
+				{
+					"letter" : "C",
+					"type" : "box",
+					"dir" : "up",
+					"powerup" :
+					{
+						"type" : "satan"
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "freezer_lap",
+			"maxscore" : 0,
+			"lap2" : true,
+			"doors" :
+			[
+				{
+					"letter" : "F",
+					"type" : "horizontal",
+					"dir" : "right",
+					"powerup" :
+					{
+						"type" : "satan",
+						"pizzatime" : true
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "freezer_treasure",
+			"maxscore" : 0,
+			"doors" :
+			[
+				{
+					"letter" : "F",
+					"type" : "door"
+				}
+			]
+		},
+		
+		{
+			"title" : "freezer_secret1"
+		},
+		
+		{
+			"title" : "freezer_secret2"
+		},
+		
+		{
+			"title" : "freezer_secret3"
+		}
+	]
+}

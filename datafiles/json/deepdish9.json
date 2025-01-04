@@ -1,0 +1,299 @@
+{
+    "rooms":[
+        {
+            "title" : "space_1",
+            "maxscore": 0,
+            "loop": true,
+            "entrance": true,
+            "doors": [
+                {
+                    "letter" : "E",
+                    "type": "horizontal",
+                    "dir": "left",
+                    "loop": true
+                },
+                {
+                    "letter" : "A",
+                    "type": "leveldoor",
+                    "entrance": true
+                },
+                {
+                    "letter" : "B",
+                    "type": "door",
+                    "exitonly": true
+                },
+                {
+                    "letter" : "F",
+                    "type": "door",
+                    "gerome": true,
+                    "loop": true,
+                    "pizzatime": true
+                },
+                {
+                    "letter" : "rocket",
+                    "type": "rocket",
+                    "startonly": true
+                }
+            ]
+        },
+        {
+            "title" : "space_2",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter" : "B",
+                    "type": "door",
+                    "startonly": true
+                },
+                {
+                    "letter" : "A",
+                    "type": "horizontal",
+                    "dir": "right",
+                    "exitonly": true
+                }
+            ]
+        },
+        {
+            "title" : "space_3",
+            "maxscore": 0,
+            "loop": true,
+            "toppin": {
+                "type": "mushroom"
+            },
+            "secret": {
+                "secret": true
+            },
+            "doors": [
+                {
+                    "letter" : "A",
+                    "type": "horizontal",
+                    "dir": "left",
+                    "startonly": true
+                },
+                {
+                    "letter" : "B",
+                    "type": "door",
+                    "loop": true
+                },
+                {
+                    "letter" : "rocket",
+                    "type": "rocket",
+                    "exitonly": true
+                }
+            ]
+        },
+        {
+            "title" : "space_4",
+            "maxscore": 0,
+            "toppin": {
+                "type": "cheese"
+            },
+            "doors": [
+                {
+                    "letter" : "B",
+                    "type": "door"
+                }
+            ]
+        },
+        {
+            "title" : "space_5",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter" : "A",
+                    "type": "door",
+                    "exitonly": true
+                },
+                {
+                    "letter" : "rocket",
+                    "type": "rocket",
+                    "startonly": true
+                }
+            ]
+        },
+        {
+            "title" : "space_6",
+            "maxscore": 0,
+            "toppin": {
+                "type": "tomato"
+            },
+            "doors": [
+                {
+                    "letter" : "A",
+                    "type": "door",
+                    "startonly": true
+                },
+                {
+                    "letter" : "C",
+                    "type": "horizontal",
+                    "dir": "right",
+                    "exitonly": true
+                }
+            ]
+        },
+        {
+            "title" : "space_7",
+            "maxscore": 0,
+            "secret": {
+                "secret": true
+            },
+            "gerome": true,
+            "doors": [
+                {
+                    "letter" : "C",
+                    "type": "horizontal",
+                    "dir": "left",
+                    "rocket": true
+                },
+                {
+                    "letter": "B",
+                    "type": "box",
+                    "dir": "down"
+                }
+            ]
+        },
+        {
+            "title" : "space_8",
+            "maxscore": 0,
+            "toppin": {
+                "type": "sausage"
+            },
+            "doors": [
+                {
+                    "letter" : "B",
+                    "type": "box",
+                    "dir": "up",
+                    "startonly": true
+                },
+                {
+                    "letter" : "rocket",
+                    "type": "rocket",
+                    "exitonly": true
+                }
+            ]
+        },
+        {
+            "title" : "space_9",
+            "maxscore": 0,
+            "toppin": {
+                "type": "pineapple"
+            },
+            "pillar": true,
+            "doors": [
+                {
+                    "letter" : "rocket",
+                    "type": "rocket",
+                    "startonly": true
+                },
+                {
+                    "letter" : "B",
+                    "type": "horizontal",
+                    "dir": "right",
+                    "exitonly": true
+                }
+            ]
+        },
+        {
+            "title" : "space_10",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter" : "B",
+                    "type": "horizontal",
+                    "dir": "left",
+                    "startonly": true
+                },
+                {
+                    "letter" : "A",
+                    "type": "door",
+                    "exitonly": true
+                }
+            ]
+        },
+        {
+            "title" : "space_11",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter" : "A",
+                    "type": "door",
+                    "startonly": true
+                },
+                {
+                    "letter" : "B",
+                    "type": "door",
+                    "exitonly": true
+                }
+            ]
+        },
+        {
+            "title" : "space_11b",
+            "maxscore": 0,
+            "secret": {
+                "secret": true
+            },
+            "doors": [
+                {
+                    "letter" : "B",
+                    "type": "door",
+                    "startonly": true
+                },
+                {
+                    "letter" : "C",
+                    "type": "door",
+                    "exitonly": true
+                }
+            ]
+        },
+        {
+            "title" : "space_12",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter" : "C",
+                    "type": "door",
+                    "startonly": true
+                },
+                {
+                    "letter" : "rocket",
+                    "type": "rocket",
+                    "exitonly": true
+                }
+            ]
+        },
+        {
+            "title" : "space_lap",
+            "maxscore": 0,
+            "lap2": true,
+            "doors": [
+                {
+                    "letter" : "E",
+                    "type": "horizontal",
+                    "dir": "right"
+                }
+            ]
+        },
+        {
+            "title": "space_treasure",
+            "maxscore": 0,
+            "treasure": true,
+            "doors": [
+                {
+                    "letter" : "F",
+                    "type": "door"
+                }
+            ]
+        },
+        {
+            "title" : "space_secret1"
+        },
+        
+        {
+            "title" : "space_secret2"
+        },
+        
+        {
+            "title" : "space_secret3"
+        }
+    ]
+}

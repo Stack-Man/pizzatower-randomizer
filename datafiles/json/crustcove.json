@@ -1,0 +1,355 @@
+{
+	"rooms" :
+	[
+		{
+			"title" : "plage_entrance",
+			"maxscore" : 0,
+			"entrance" : true,
+			"loop" : true,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "leveldoor",
+					"entrance" : true
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "vertical",
+					"dir" : "up"
+				},
+				
+				{
+					"letter" : "C",
+					"type" : "box",
+					"dir" : "down",
+					"loop" : true
+				}
+			]
+		},
+		
+		{
+			"title" : "plage_beach1",
+			"maxscore" : 0,
+			"loop" : true,
+			"toppin" :
+			{
+				"type" : "mushroom"
+			},
+			"doors" :
+			[
+				{
+					"letter" : "B",
+					"type" : "vertical",
+					"dir" : "down"
+				},
+				
+				{
+					"letter" : "C",
+					"type" : "horizontal",
+					"dir" : "right",
+					"notpizzatime" : true
+				},
+				
+				{
+					"letter" : "D",
+					"type" : "vertical",
+					"dir" : "up",
+					"startonly" : true
+				},
+				
+				{
+					"letter" : "F",
+					"type" : "door",
+					"gerome" : true,
+					"loop" : true
+				}
+			]
+		},
+		
+		{
+			"title" : "plage_shipmain",
+			"maxscore" : 0,
+			"gerome" : true,
+			"loop": true,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "door",
+					"loopstart" : true,
+					"notpizzatime" : true
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "door",
+					"locked" : true
+				},
+				
+				{
+					"letter" : "C",
+					"type" : "horizontal",
+					"dir" : "left",
+					"notpizzatime" : true
+				},
+				
+				{
+					"letter" : "D",
+					"type" : "door",
+					"loopexit" : true,
+					"notpizzatime" : true,
+					"startonly" : true,
+					"ratblocked" : true
+				},
+				
+				{
+					"letter" : "E",
+					"type" : "door",
+					"pizzatime" : true
+				}
+			],
+			"groups" :
+			[
+				{
+					"letters" :
+					[
+						"C",
+						"A",
+						"D"
+					]
+				}
+			]
+		},
+		
+		{
+			"title" : "plage_ship1",
+			"maxscore" : 0,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "door"
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "vertical",
+					"dir" : "down",
+					"exitonly" : true,
+					"ratblocked" : true
+				}
+			]
+		},
+		
+		{
+			"title" : "plage_ship2",
+			"maxscore" : 0,
+			"toppin" :
+			{
+				"type" : "cheese"
+			},
+			"secret" :
+			{
+				"secret" : true
+			},
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "horizontal",
+					"dir" : "right",
+					"exitonly" : true
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "vertical",
+					"dir" : "up",
+					"powerup" :
+					{
+						"type" : "barrel"
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "plage_ship3",
+			"maxscore" : 0,
+			"key" : true,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "horizontal",
+					"dir" : "left",
+					"powerup" :
+					{
+						"type" : "barrel"
+					}
+				},
+				
+				{
+					"letter" : "D",
+					"type" : "door",
+					"exitonly" : true
+				}
+			]
+		},
+		
+		{
+			"title" : "plage_beach2",
+			"maxscore" : 0,
+			"toppin" :
+			{
+				"type" : "tomato"
+			},
+			"secret" :
+			{
+				"secret" : true,
+				"notpizzatime" : true
+			},
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "vertical",
+					"dir" : "down",
+					"notpizzatime" : true,
+					"exitonly" : true
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "door"
+				},
+				
+				{
+					"letter" : "D",
+					"type" : "vertical",
+					"dir" : "down",
+					"startonly" : true
+				}
+			]
+		},
+		
+		{
+			"title" : "plage_cavern1",
+			"maxscore" : 0,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "vertical",
+					"dir" : "up"
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "door",
+					"exitonly" : true
+				}
+			]
+		},
+		
+		{
+			"title" : "plage_cavern2",
+			"maxscore" : 0,
+			"pillar" : true,
+			"toppin" :
+			{
+				"type" : "sausage"
+			},
+			"secret" :
+			{
+				"secret" : true
+			},
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "horizontal",
+					"dir" : "left",
+					"exitonly" : true
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "door"
+				}
+			]
+		},
+		
+		{
+			"title" : "plage_cavern3",
+			"maxscore" : 0,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "horizontal",
+					"dir" : "right"
+				},
+				
+				{
+					"letter" : "D",
+					"type" : "vertical",
+					"dir" : "up",
+					"exitonly" : true
+				}
+			]
+		},
+		
+		{
+			"title" : "plage_shiptop",
+			"maxscore" : 0,
+			"toppin" :
+			{
+				"type" : "pineapple"
+			},
+			"doors" :
+			[
+				{
+					"letter" : "D",
+					"type" : "vertical",
+					"dir" : "down",
+					"exitonly" : true,
+					"ratblocked" : true
+				},
+				
+				{
+					"letter" : "E",
+					"type" : "door"
+				}
+			]
+		},
+		
+		{
+			"title" : "plage_lap",
+			"maxscore" : 0,
+			"lap2" : true,
+			"doors" :
+			[
+				{
+					"letter" : "C",
+					"type" : "box",
+					"dir" : "up"
+				}
+			]
+		},
+		
+		{
+			"title" : "beach_secret1"
+		},
+		
+		{
+			"title" : "beach_secret2"
+		},
+		
+		{
+			"title" : "beach_secret3"
+		}
+	]
+}

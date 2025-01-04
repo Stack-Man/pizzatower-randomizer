@@ -1,0 +1,216 @@
+{
+  "rooms": [
+    {
+      "title": "industrial_1",
+      "maxscore": 0,
+      "loop": true,
+      "doors": [
+        {
+          "letter": "A",
+          "type": "leveldoor",
+          "entrance": true
+        },
+        {
+          "letter": "B",
+          "type": "vertical",
+          "dir": "up"
+        },
+        {
+          "letter": "D",
+          "type": "vertical",
+          "dir": "up",
+          "pizzatime": true
+        },
+        {
+          "letter": "E",
+          "type": "door",
+          "pizzatime": true
+        },
+        {
+          "letter": "F",
+          "type": "box",
+          "dir": "down",
+          "loop": true
+        }
+      ]
+    },
+    {
+      "title": "industrial_2",
+      "maxscore": 0,
+      "toppin": {
+        "type": "mushroom"
+      },
+      "secret": {
+        "secret": true
+      },
+      "doors": [
+        {
+          "letter": "B",
+          "type": "vertical",
+          "dir": "down",
+          "startonly": true
+        },
+        {
+          "letter": "A",
+          "type": "vertical",
+          "dir": "up",
+          "exitonly": true
+        },
+        {
+          "letter": "E",
+          "type": "door",
+          "pizzatime": true
+        },
+        {
+          "letter": "F",
+          "type": "door",
+          "gerome": true,
+          "pizzatime": true
+        }
+      ]
+    },
+    {
+      "title": "industrial_2",
+      "maxscore": 0,
+      "doors": [
+        {
+          "letter": "D",
+          "type": "vertical",
+          "dir": "down",
+          "exitonly": true
+          
+        },
+        {
+          "letter": "C",
+          "type": "vertical",
+          "dir": "up",
+          "startonly": true
+        }
+      ]
+    },
+    {
+      "title": "industrial_3",
+      "maxscore": 0,
+      "toppin": {
+        "type": "cheese"
+      },
+      "doors": [
+        {
+          "letter": "A",
+          "type": "vertical",
+          "dir": "down",
+          "startonly": true
+        },
+        {
+          "letter": "B",
+          "type": "door",
+          "exitonly": true
+        }
+      ]
+    },
+    {
+      "title": "industrial_3",
+      "maxscore": 0,
+      "secret": {
+        "secret": true
+      },
+      "doors": [
+        {
+          "letter": "D",
+          "type": "vertical",
+          "dir": "up",
+          "startonly": true
+        },
+        {
+          "letter": "C",
+          "type": "vertical",
+          "dir": "down",
+          "exitonly": true
+        }
+      ]
+    },
+    {
+      "title": "industrial_4",
+      "maxscore": 0,
+      "secret": {
+        "secret": true
+      },
+      "toppin": {
+        "toppin": "tomato"
+      },
+      "doors": [
+        {
+          "letter": "A",
+          "type": "vertical",
+          "dir": "up",
+          "exitonly": true
+        },
+        {
+          "letter": "B",
+          "type": "door",
+          "startonly": true
+        }
+      ]
+    },
+    {
+      "title": "industrial_4",
+      "maxscore": 0,
+      "doors": [
+        {
+          "letter": "D",
+          "type": "vertical",
+          "dir": "down",
+          "exitonly": true
+        },
+        {
+          "letter": "C",
+          "type": "vertical",
+          "dir": "up",
+          "startonly": true
+        }
+      ]
+    },
+    {
+      "title": "industrial_5",
+      "maxscore": 0,
+      "toppin": {
+        "toppin": "sausage"
+      },
+      "doors": [
+        {
+          "letter": "A",
+          "type": "vertical",
+          "dir": "down",
+          "startonly": true
+        },
+        {
+          "letter": "C",
+          "type": "vertical",
+          "dir": "down",
+          "exitonly": true
+        }
+      ]
+    },
+    {
+      "title": "industrial_lap",
+      "maxscore": 0,
+      "lap2": true,
+      "doors": [
+        {
+          "letter": "F",
+          "type": "pizzabox",
+          "dir": "up"
+        }
+      ]
+    },
+    {
+      "title": "industrial_secret1"
+    },
+    {
+      "title": "industrial_secret2"
+    },
+    {
+      "title": "industrial_secret3"
+    }
+  ]
+}

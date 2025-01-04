@@ -1,0 +1,292 @@
+{
+    "rooms":[
+        {
+            "title": "graveyard_1",
+            "maxscore": 0,
+            "entrance": true,
+            "loop": false,
+            "lap2": true,
+            "doors": [
+                {
+                    "letter": "A",
+                    "type": "leveldoor",
+                    "entrance": true
+                },
+                {
+                    "letter" : "B",
+                    "type": "horizontal",
+                    "dir": "left"
+                },
+                {
+                    "letter": "E",
+                    "type": "door",
+                    "pizzatime" : true
+                }
+            ]
+        },
+        {
+            "title" : "graveyard_2",
+            "maxscore": 0,
+            "toppin": {
+                "type": "mushroom"
+            },
+            "doors": [
+                {
+                    "letter" : "B",
+                    "type": "horizontal",
+					"notpizzatime" : true,
+                    "dir": "right"
+                },
+                {
+                    "letter" : "A",
+                    "type": "horizontal",
+                    "dir": "left"
+                },
+                {
+                    "letter" : "C",
+                    "type": "door",
+                    "pizzatime": true
+                }
+            ]
+        },
+        {
+            "title" : "graveyard_3",
+            "maxscore": 0,
+            "secret": {
+                "secret": true
+            },
+            "doors": [
+                {
+                    "letter" : "A",
+                    "type": "horizontal",
+                    "dir": "right"
+                },
+                {
+                    "letter" : "B",
+                    "type": "horizontal",
+                    "dir": "left"
+                },
+                {
+                    "letter" : "A",
+                    "type": "box",
+                    "dir": "down",
+                    "pizzatime" : true
+                }
+            ]
+        },
+        {
+            "title" : "graveyard_4",
+            "maxscore": 0,
+            "secret": {
+                "secret": true,
+                "pizzatime": true
+            },
+            "toppin": {
+                "type": "cheese"
+            },
+            "doors": [
+                {
+                    "letter" : "B",
+                    "type": "horizontal",
+                    "dir": "right",
+                    "startonly": true
+                },
+                {
+                    "letter" : "C",
+                    "type": "vertical",
+                    "dir": "down",
+                    "exitonly": true
+                }
+            ]
+        },
+        {
+            "title" : "graveyard_5",
+            "maxscore": 0,
+            "toppin": {
+                "type": "tomato"
+            },
+            "gerome": true,
+            "doors": [
+                {
+                    "letter" : "C",
+                    "type": "vertical",
+                    "dir": "up"
+                },
+                {
+                    "letter" : "B",
+                    "type": "door"
+                }
+            ]
+        },
+        {
+            "title" : "graveyard_5b",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter" : "B",
+                    "type": "door",
+                    "startonly": true
+                },
+                {
+                    "letter" : "A",
+                    "type": "door",
+                    "exitonly": true
+                }
+            ]
+        },
+        {
+            "title" : "graveyard_5c",
+            "maxscore": 0,
+            "toppin": {
+                "type": "sausage"
+            },
+            "secret": {
+                "secret": true
+            },
+            "loop" : true,
+            "doors": [
+                {
+                    "letter" : "A",
+                    "type": "door",
+                    "startonly": true,
+					"notpizzatime": true
+                },
+                {
+                    "letter" : "B",
+                    "type": "door"
+                },
+                {
+                    "letter" : "D",
+                    "type": "box",
+                    "dir": "up",
+                    "pizzatime": true
+                }
+            ]
+        },
+        {
+            "title" : "graveyard_6",
+            "maxscore": 0,
+            "loop": true,
+            "pillar": true,
+            "doors": [
+                {
+                    "letter" : "B",
+                    "type": "door"
+                },
+                {
+                    "letter" : "F",
+                    "type": "door",
+                    "gerome": true,
+                    "loop": true
+                }
+            ]
+        },
+        {
+            "title" : "graveyard_7",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter" : "C",
+                    "type": "door"
+                },
+                {
+                    "letter" : "A",
+                    "type": "horizontal",
+                    "dir": "right"
+                }
+            ]
+        },
+        {
+            "title" : "graveyard_8",
+            "maxscore": 0,
+            "toppin": {
+                "type": "pineapple"
+            },
+            "doors": [
+                {
+                    "letter" : "A",
+                    "type": "horizontal",
+                    "dir": "left"
+                },
+                {
+                    "letter" : "B",
+                    "type": "horizontal",
+                    "dir": "right"
+                }
+            ]
+        },
+        {
+            "title" : "graveyard_9",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter" : "B",
+                    "type": "horizontal",
+                    "dir": "left",
+                    "startonly": true
+                },
+                {
+                    "letter" : "C",
+                    "type": "horizontal",
+                    "dir": "right",
+                    "exitonly": true
+                }
+            ]
+        },
+        {
+            "title" : "graveyard_9b",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter" : "C",
+                    "type": "horizontal",
+                    "dir": "left",
+                    "startonly": true
+                },
+                {
+                    "letter" : "D",
+                    "type": "horizontal",
+                    "dir": "right",
+                    "exitonly": true
+                }
+            ]
+        },
+        {
+            "title" : "graveyard_10",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter" : "D",
+                    "type": "horizontal",
+                    "dir": "left"
+                },
+                {
+                    "letter" : "E",
+                    "type": "door"
+                }
+            ]
+        },
+        {
+            "title": "graveyard_treasure",
+            "maxscore": 0,
+            "treasure": true,
+            "doors": [
+                {
+                    "letter" : "F",
+                    "type": "door"
+                }
+            ]
+        },
+        {
+            "title" : "graveyard_secret1"
+        },
+        
+        {
+            "title" : "graveyard_secret2"
+        },
+        
+        {
+            "title" : "graveyard_secret3"
+        }
+    ]
+}
