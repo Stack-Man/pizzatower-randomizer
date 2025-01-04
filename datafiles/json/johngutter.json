@@ -183,7 +183,8 @@
 						{
 							"letter" : "D",
                             "type": "box",
-                            "dir": "up"
+                            "dir": "up",
+							"pizzatimestart" : true,
 						}
                     ]
 				},

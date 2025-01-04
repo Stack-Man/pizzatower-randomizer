@@ -1,14 +1,15 @@
-function rd_generate_new(new_seed = false)
+function rd_generate_new(use_new_seed = false)
 {
-	rd_init(new_seed);
+	rd_init(use_new_seed);
 
 	global.sequence_tested_rooms = ds_map_create(); //Doesn't get cleared between sequences
 	global.connection_tested_rooms = ds_map_create(); //Does get cleared whenever calling rd_connect_rooms_with_type_start
 	global.connection_tested_exits = ds_list_create(); //same as above
 
-	global.all_rooms = rd_parse_rooms();
 	global.transition_map = ds_map_create();
 	global.powerup_map = ds_map_create();
+	global.all_rooms = rd_parse_rooms();
+	
 	var created = rd_construct_levels();
 
 	ds_map_destroy(global.all_rooms);
@@ -278,8 +279,11 @@ function rd_get_exit_struct(path)
 //TODO: make work with gustavo
 function rd_clear_transformation()
 {
+	global.noisejetpack = false;
+	
 	with (obj_player)
 	{
+		//TODO: will this prevent clearing transformations upon exiting a door? This function gets called 2 frames after entering the room so maybe not
 		if (!scr_transformationcheck() && state != states.comingoutdoor && state != states.door)
 		{
 			if state == states.ghost
@@ -304,5 +308,29 @@ function rd_clear_transformation()
 //TODO: implement
 function rd_give_transformation(name)
 {
+	with (obj_player)
+	{
+		switch (name)
+		{
+			case "barrel":
+				rd_barrel();
+			case "satan":
+				rd_satan();
+			default:
+				break;
+		}
+	}
 	
+}
+
+function rd_barrel()
+{
+	movespeed = hsp;
+	state = states.barrel;
+	image_index = 0;
+}
+
+function rd_satan()
+{
+	global.noisejetpack = true;
 }

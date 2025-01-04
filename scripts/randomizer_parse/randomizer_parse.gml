@@ -1,9 +1,9 @@
-function rd_init(new_seed = false)
+function rd_init(use_new_seed = false)
 {
 	//TODO: implement reading the ini file
 	seed = 0;
 	
-	if (seed == 0 || new_seed)
+	if (seed == 0 || use_new_seed)
 	{
 		randomize();
 		seed = floor(random_range(-2147483648, 2147483647));
@@ -22,6 +22,7 @@ function rd_parse_rooms()
 	{
 		var level = undefined;
 		var directory = working_directory + "/json/" + jsons[j] + ".json"
+		show_debug_message( concat("Parsing Level: ", directory ) );
 		
 		if (file_exists(directory))
 		{
@@ -48,8 +49,11 @@ function rd_parse_rooms()
 				//var thisroom = rooms[i];
 				var thisroom = ds_list_find_value(rooms, i);
 				
-				if (ds_map_exists(thisroom, "doors") )
+				if (ds_map_exists(thisroom, "doors"))
 				{
+					if (array_contains(ignore_rooms, ds_map_find_value(thisroom, "title")) )
+						break;
+					
 					var parsed_room = rd_parse_doors(thisroom);
 					ds_map_add(parsed_rooms, ds_map_find_value(thisroom, "title"), parsed_room);
 				}
@@ -67,6 +71,7 @@ function rd_parse_rooms()
 
 function rd_parse_doors(thisroom)
 {
+	show_debug_message( concat("Parsing: ", ds_map_find_value(thisroom, "title") ) );
 	var doors  = ds_map_find_value(thisroom, "doors");   //Holds doors in the room
 	
 	var found_paths = ds_list_create(); //Hold the created paths
@@ -157,6 +162,11 @@ function rd_parse_doors(thisroom)
 					ratblocked : ds_map_exists(exit_door, "ratblocked")
 				};
 				
+				var has_loop = false;
+				
+				if (ds_map_exists(start_door, "loop") || ds_map_exists(exit_door, "loop") )
+					has_loop = true;
+				
 				//add the pair of doors
 				var parsed_path = {
 					startletter : ds_map_find_value(start_door, "letter"),
@@ -166,7 +176,8 @@ function rd_parse_doors(thisroom)
 					startdir :  rd_convert_transitiondir(ds_map_find_value(start_door, "dir")),
 					exitdir : rd_convert_transitiondir(ds_map_find_value(exit_door, "dir")),
 					startdoor : start_door_struct,
-					exitdoor : exit_door_struct
+					exitdoor : exit_door_struct,
+					hasloop : has_loop
 				};
 				
 				if (ds_map_exists(start_door, "powerup") )
@@ -199,7 +210,8 @@ function rd_parse_doors(thisroom)
 				
 				parsed_path.pathtime = found_path_time;
 			
-				ds_list_add(found_paths, parsed_path);
+				if (!has_loop || (has_loop && global.use_loops))
+					ds_list_add(found_paths, parsed_path);
 			}
 		}
 	}

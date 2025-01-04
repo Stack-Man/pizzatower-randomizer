@@ -12,7 +12,7 @@ if (ds_map_exists(global.powerup_map, room) )
 		|| (global.panic && powerup.poweruptime == pathtime.pizzatime)
 		|| (!global.panic && powerup.poweruptime == pathtime.notpizzatime) )
 		{
-			rd_give_transformation(powerup.poweruptype); //TODO: not implemented
+			rd_give_transformation(powerup.poweruptype);
 		}
 	}
 }

@@ -274,7 +274,9 @@
 					{
 						"letter" : "C",
 						"type": "horizontal",
-						"dir": "left"
+						"dir": "left",
+						"exitonly" : true,
+						"ratblocked" : true
 					}
 				]
 			},
