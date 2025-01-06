@@ -1,0 +1,248 @@
+{
+    "rooms":[
+        {
+            "title": "chateau_1",
+            "maxscore": 0,
+            "entrance": true,
+            "lap2": true,
+            "secret": {
+                "secret": true,
+                "pizzatime": true
+            },
+            "doors": [
+                {
+                    "letter" : "A",
+                    "type": "leveldoor",
+                    "entrance": true
+                },
+                {
+                    "letter" : "B",
+                    "type": "horizontal",
+                    "dir": "right"
+                }
+            ]
+        },
+        {
+            "title": "chateau_2",
+            "maxscore": 0,
+            "loop": true,
+            "doors": [
+                {
+                    "letter" : "B",
+                    "type": "horizontal",
+                    "dir": "left"
+                },
+                {
+                    "letter" : "C",
+                    "type": "door",
+                    "notpizzatime": true
+                },
+                {
+                    "letter" : "D",
+                    "type": "door",
+                    "pizzatime": true
+                },
+                {
+                    "letter" : "F",
+                    "type": "horizontal",
+                    "dir": "right",
+                    "loop": true,
+                    "ratblocked" : true,
+                    "exitonly": true
+                }
+            ]
+        },
+        {
+            "title": "chateau_2b",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter" : "F",
+                    "type": "horizontal",
+                    "dir": "left"
+                },
+                {
+                    "letter" : "C",
+                    "type": "door",
+                    "gerome": true,
+                    "loop": true
+                }
+            ]
+        },
+        {
+            "title": "chateau_3",
+            "maxscore": 0,
+            "toppin": {
+                "type": "mushroom"
+            },
+            "doors": [
+                {
+                    "letter" : "C",
+                    "type": "door"
+                },
+                {
+                    "letter" : "B",
+                    "type": "horizontal",
+                    "dir": "right",
+                    "exitonly": true,
+                    "ratblocked": true
+                }
+            ]
+        },
+        {
+            "title": "chateau_4",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter" : "B",
+                    "type": "horizontal",
+                    "dir": "left"
+                },
+                {
+                    "letter" : "A",
+                    "type": "door",
+                    "exitonly": true,
+                    "ratblocked": true
+                }
+            ]
+        },
+        {
+            "title": "chateau_5",
+            "maxscore": 0,
+            "toppin": {
+                "type": "cheese"
+            },
+            "secret": {
+                "secret": true,
+                "pizzatime": true
+            },
+            "gerome": true,
+            "doors": [
+                {
+                    "letter" : "A",
+                    "type": "door",
+                    "notpizzatime": true
+                },
+                {
+                    "letter" : "C",
+                    "type": "door",
+                    "exitonly": true,
+                    "ratblocked": true
+                },
+                {
+                    "letter" : "D",
+                    "type": "door",
+                    "pizzatime": true
+                }
+            ]
+        },
+        {
+            "title": "chateau_6",
+            "maxscore": 0,
+            "toppin": {
+                "type": "tomato"
+            },
+            "doors": [
+                {
+                    "letter" : "D",
+                    "type": "horizontal",
+                    "dir": "left",
+                    "pizzatime": true
+                },
+                {
+                    "letter" : "C",
+                    "type": "door"
+                },
+                {
+                    "letter" : "A",
+                    "type": "horizontal",
+                    "dir": "left",
+                    "notpizzatime": true,
+                    "ratblocked": true,
+                    "exitonly": true
+                }
+            ]
+        },
+        {
+            "title": "chateau_7",
+            "maxscore": 0,
+            "toppin": {
+                "type": "pineapple",
+                "pizzatime": true
+            },
+            "doors": [
+                {
+                    "letter" : "A",
+                    "type": "horizontal",
+                    "dir": "right",
+                    "notpizzatime": true
+                },
+                {
+                    "letter" : "D",
+                    "type": "horizontal",
+                    "dir": "right",
+                    "pizzatime": true
+                },
+                {
+                    "letter" : "B",
+                    "type": "horizontal",
+                    "dir": "left"
+                }
+            ]
+        },
+        {
+            "title": "chateau_8",
+            "maxscore": 0,
+            "secret": {
+                "secret": true
+            },
+            "toppin": {
+                "type": "sausage"
+            },
+            "doors": [
+                {
+                    "letter" : "B",
+                    "type": "horizontal",
+                    "dir": "right"
+                },
+                {
+                    "letter" : "A",
+                    "type": "door"
+                }
+            ]
+        },
+        {
+            "title": "chateau_9",
+            "maxscore": 0,
+            "pillar": true,
+            "doors": [
+                {
+                    "letter" : "A",
+                    "type": "door"
+                }
+            ]
+        },
+        {
+            "title": "chateau_treasure",
+            "maxscore": 0,
+            "treasure": true,
+            "doors": [
+                {
+                    "letter" : "C",
+                    "type": "door"
+                }
+            ]
+        },
+        {
+            "title" : "chateau_secret1"
+        },
+        
+        {
+            "title" : "chateau_secret2"
+        },
+        
+        {
+            "title" : "chateau_secret3"
+        }
+    ]
+}

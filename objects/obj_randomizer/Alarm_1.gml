@@ -16,3 +16,9 @@ if (ds_map_exists(global.powerup_map, room) )
 		}
 	}
 }
+
+with (obj_pause)
+{
+	if (variable_instance_exists(self, "roomtorestart") )
+		show_debug_message( concat("Pause's Room to restart: ", roomtorestart) );
+}

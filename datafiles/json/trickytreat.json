@@ -1,0 +1,208 @@
+{
+    "rooms":[
+        {
+            "title": "trickytreat_1",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter" : "D",
+                    "type": "door"
+                },
+                {
+                    "letter" : "E",
+                    "type": "box",
+                    "dir": "down",
+                    "startonly": true
+                },
+                {
+                    "letter" : "B",
+                    "type": "vertical",
+                    "dir": "down"
+                }
+            ]
+        },
+        {
+            "title": "trickytreat_2",
+            "maxscore": 0,
+            "loop": true,
+            "doors": [
+                {
+                    "letter" : "B",
+                    "type": "vertical",
+                    "dir": "up"
+                },
+                {
+                    "letter" : "A",
+                    "type": "horizontal",
+                    "dir": "right"
+                },
+                {
+                    "letter" : "C",
+                    "type": "door",
+                    "loop": true
+                }
+            ]
+        },
+        {
+            "title": "trickytreat_3",
+            "maxscore": 0,
+            "loop": true,
+            "doors": [
+                {
+                    "letter" : "A",
+                    "type": "horizontal",
+                    "dir": "left"
+                },
+                {
+                    "letter" : "B",
+                    "type": "horizontal",
+                    "dir": "right",
+                    "exitonly": true,
+                    "ratblocked": true
+                },
+                {
+                    "letter" : "C",
+                    "type": "horizontal",
+                    "dir": "left",
+                    "loop": true,
+                    "exitonly": true,
+                    "ratblocked": true
+                }
+            ],
+            "groups" :
+			[
+				{
+					"letters" :
+					[
+						"B",
+						"C"
+					]
+				}
+			]
+        },
+        {
+            "title": "trickytreat_4",
+            "maxscore": 0,
+            "loop": true,
+            "doors": [
+                {
+                    "letter" : "B",
+                    "type": "horizontal",
+                    "dir": "left"
+                },
+                {
+                    "letter" : "C",
+                    "type": "horizontal",
+                    "dir": "right",
+                    "loop": true
+                },
+                {
+                    "letter" : "A",
+                    "type": "horizontal",
+                    "dir": "right",
+                    "exitonly": true
+                }
+            ]
+        },
+        {
+            "title": "trickytreat_5",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter" : "A",
+                    "type": "horizontal",
+                    "dir": "left",
+                    "startonly": true
+                },
+                {
+                    "letter" : "B",
+                    "type": "vertical",
+                    "dir": "up",
+                    "exitonly": true
+                }
+            ]
+        },
+        {
+            "title": "trickytreat_6",
+            "maxscore": 0,
+            "loop": true,
+            "doors": [
+                {
+                    "letter" : "B",
+                    "type": "vertical",
+                    "dir": "down",
+                    "startonly": true
+                },
+                {
+                    "letter" : "A",
+                    "type": "door"
+                },
+                {
+                    "letter" : "C",
+                    "type": "vertical",
+                    "dir": "up"
+                }
+            ]
+        },
+        {
+            "title": "trickytreat_7",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter" : "C",
+                    "type": "vertical",
+                    "dir": "down",
+                    "startonly": true
+                },
+                {
+                    "letter" : "E",
+                    "type": "box",
+                    "dir": "up",
+                    "exitonly": true
+                }
+            ]
+        },
+        {
+            "title": "trickytreat_3b",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter" : "C",
+                    "type": "horizontal",
+                    "dir": "right"
+                }
+            ]
+        },
+        {
+            "title": "trickytreat_4b",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter" : "C",
+                    "type": "horizontal",
+                    "dir": "left"
+                }
+            ]
+        },
+        {
+            "title": "trickytreat_2b",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter" : "C",
+                    "type": "door"
+                }
+            ]
+        },
+        {
+            "title": "trickytreat_6b",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter" : "A",
+                    "type": "door"
+                }
+            ]
+        }
+    ]
+}

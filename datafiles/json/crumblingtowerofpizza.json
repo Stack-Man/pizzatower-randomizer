@@ -1,0 +1,358 @@
+{
+  "rooms": [
+    {
+      "title": "tower_finalhallway",
+      "maxscore": 0,
+      "entrance": true,
+      "doors": [
+        {
+          "letter": "A",
+          "type": "leveldoor",
+          "entrance": true,
+          "startonly": true
+        },
+        {
+          "letter": "B",
+          "type": "horizontal",
+          "dir": "right",
+          "exitonly": true
+        }
+      ]
+    },
+    {
+      "title": "tower_5",
+      "maxscore": 0,
+      "pizzatime": true,
+      "doors": [
+        {
+          "letter": "B",
+          "type": "horizontal",
+          "dir": "left"
+        },
+        {
+          "letter": "C",
+          "type": "horizontal",
+          "dir": "left"
+        }
+      ]
+    },
+    {
+      "title": "tower_escape1",
+      "maxscore": 0,
+      "doors": [
+        {
+          "letter": "D",
+          "type": "horizontal",
+          "dir": "left",
+          "ratblocked": true,
+          "exitonly": true
+        },
+        {
+          "letter": "C",
+          "type": "horizontal",
+          "dir": "right",
+          "startonly": true
+        }
+      ]
+    },
+    {
+      "title": "tower_escape2",
+      "maxscore": 0,
+      "doors": [
+        {
+          "letter": "C",
+          "type": "horizontal",
+          "dir": "right",
+          "ratblocked": true,
+          "exitonly": true
+        },
+        {
+          "letter": "D",
+          "type": "horizontal",
+          "dir": "left",
+          "powerup": {
+            "type": "shotgun"
+          },
+          "startonly": true
+        }
+      ]
+    },
+    {
+      "title": "tower_escape3",
+      "maxscore": 0,
+      "doors": [
+        {
+          "letter": "C",
+          "type": "horizontal",
+          "dir": "left"
+        },
+        {
+          "letter": "D",
+          "type": "horizontal",
+          "dir": "right"
+        }
+      ]
+    },
+    {
+      "title": "tower_4",
+      "maxscore": 0,
+      "pizzatime": true,
+      "doors": [
+        {
+          "letter": "D",
+          "type": "horizontal",
+          "dir": "left"
+        },
+        {
+          "letter": "C",
+          "type": "horizontal",
+          "dir": "right"
+        }
+      ]
+    },
+    {
+      "title": "tower_escape4",
+      "maxscore": 0,
+      "doors": [
+        {
+          "letter": "C",
+          "type": "horizontal",
+          "dir": "left"
+        },
+        {
+          "letter": "B",
+          "type": "horizontal",
+          "dir": "right"
+        }
+      ]
+    },
+    {
+      "title": "tower_escape5",
+      "maxscore": 0,
+      "doors": [
+        {
+          "letter": "C",
+          "type": "horizontal",
+          "dir": "left",
+          "ratblocked": true,
+          "exitonly": true
+        },
+        {
+          "letter": "B",
+          "type": "horizontal",
+          "dir": "left",
+          "startonly": true
+        }
+      ]
+    },
+    {
+      "title": "tower_escape6",
+      "maxscore": 0,
+      "doors": [
+        {
+          "letter": "C",
+          "type": "horizontal",
+          "dir": "right",
+          "startonly": true
+        },
+        {
+          "letter": "D",
+          "type": "horizontal",
+          "dir": "left",
+          "exitonly": true
+        }
+      ]
+    },
+    {
+      "title": "tower_3",
+      "maxscore": 0,
+      "pizzatime": true,
+      "doors": [
+        {
+          "letter": "D",
+          "type": "horizontal",
+          "dir": "right",
+          "startonly": true
+        },
+        {
+          "letter": "E",
+          "type": "horizontal",
+          "dir": "left",
+          "exitonly": true
+        }
+      ]
+    },
+    {
+      "title": "tower_escape7",
+      "maxscore": 0,
+      "doors": [
+        {
+          "letter": "E",
+          "type": "horizontal",
+          "dir": "right",
+          "startonly": true
+        },
+        {
+          "letter": "B",
+          "type": "horizontal",
+          "dir": "left",
+          "exitonly": true
+        }
+      ]
+    },
+    {
+      "title": "tower_escape8",
+      "maxscore": 0,
+      "doors": [
+        {
+          "letter": "B",
+          "type": "horizontal",
+          "dir": "right",
+          "startonly": true
+        },
+        {
+          "letter": "E",
+          "type": "horizontal",
+          "dir": "right",
+          "ratblocked": true,
+          "exitonly": true
+        }
+      ]
+    },
+    {
+      "title": "tower_escape9",
+      "maxscore": 0,
+      "doors": [
+        {
+          "letter": "E",
+          "type": "horizontal",
+          "dir": "left",
+          "startonly": true
+        },
+        {
+          "letter": "D",
+          "type": "horizontal",
+          "dir": "right",
+          "ratblocked": true,
+          "exitonly": true
+        }
+      ]
+    },
+    {
+      "title": "tower_2",
+      "maxscore": 0,
+      "pizzatime": true,
+      "doors": [
+        {
+          "letter": "D",
+          "type": "horizontal",
+          "dir": "left"
+        },
+        {
+          "letter": "A",
+          "type": "horizontal",
+          "dir": "right"
+        }
+      ]
+    },
+    {
+      "title": "tower_escape10",
+      "maxscore": 0,
+      "doors": [
+        {
+          "letter": "A",
+          "type": "horizontal",
+          "dir": "left"
+        },
+        {
+          "letter": "B",
+          "type": "horizontal",
+          "dir": "right"
+        }
+      ]
+    },
+    {
+      "title": "tower_escape11",
+      "maxscore": 0,
+      "doors": [
+        {
+          "letter": "B",
+          "type": "horizontal",
+          "dir": "left"
+        },
+        {
+          "letter": "A",
+          "type": "horizontal",
+          "dir": "left"
+        }
+      ]
+    },
+    {
+      "title": "tower_escape12",
+      "maxscore": 0,
+      "doors": [
+        {
+          "letter": "A",
+          "type": "horizontal",
+          "dir": "right"
+        },
+        {
+          "letter": "B",
+          "type": "horizontal",
+          "dir": "left"
+        }
+      ]
+    },
+    {
+      "title": "tower_1",
+      "maxscore": 0,
+      "pizzatime": true,
+      "doors": [
+        {
+          "letter": "C",
+          "type": "horizontal",
+          "dir": "left"
+        },
+        {
+          "letter": "B",
+          "type": "horizontal",
+          "dir": "right"
+        }
+      ]
+    },
+    {
+      "title": "tower_johngutterhall",
+      "maxscore": 0,
+      "doors": [
+        {
+          "letter": "C",
+          "type": "horizontal",
+          "dir": "right"
+        },
+        {
+          "letter": "B",
+          "type": "horizontal",
+          "dir": "left"
+        }
+      ]
+    },
+    {
+      "title": "tower_entrancehall",
+      "maxscore": 0,
+      "pizzatime": true,
+      "doors": [
+        {
+          "letter": "A",
+          "type": "leveldoor",
+          "exitonly": true
+        },
+        {
+          "letter": "B",
+          "type": "horizontal",
+          "dir": "right",
+          "startonly": true
+        }
+      ]
+    }
+  ]
+}

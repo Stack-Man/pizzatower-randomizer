@@ -160,7 +160,8 @@
 					"letter" : "A",
 					"type" : "horizontal",
 					"dir" : "right",
-					"exitonly" : true
+					"exitonly" : true,
+					"ratblocked": true
 				},
 				
 				{
@@ -315,8 +316,7 @@
 					"letter" : "D",
 					"type" : "vertical",
 					"dir" : "down",
-					"exitonly" : true,
-					"ratblocked" : true
+					"exitonly" : true
 				},
 				
 				{

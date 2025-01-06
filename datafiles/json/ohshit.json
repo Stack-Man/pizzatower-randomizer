@@ -175,13 +175,14 @@
 					"letter" : "A",
 					"type" : "door",
 					"exitonly" : true,
-					"ratblocked" : true
+					"pizzatime" : true
 				},
 				
 				{
 					"letter" : "B",
 					"type" : "horizontal",
-					"dir" : "right"
+					"dir" : "right",
+					"notpizzatime" : true
 				}
 			]
 		},

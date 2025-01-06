@@ -2,17 +2,16 @@
 //assumes there's at least three transitions but in this case there will be two and you only enter/exit the room once
 function rd_construct_levels()
 {	
-	var level_count = array_length(level_names);
-	
 	var levels = ds_list_create();
 	var entrances = rd_get_rooms_of_type([roomtype.entrance, roomtype.entrancebranching]);
 	
-	for (var i = 0; i < level_count; i++)
+	for (var i = 0; i < ds_list_size(entrances); i++)
 	{
 		var first_room = ds_list_find_value(entrances, i);
-		var first_room_is_end_branch = rd_check_type(first_room, roomtype.entrance);
 		
 		show_debug_message( concat("Constructing: ", first_room.title) );
+		
+		var first_room_is_end_branch = rd_check_type(first_room, roomtype.entrance);
 		
 		var incomplete_sequence = 
 		{
@@ -26,7 +25,10 @@ function rd_construct_levels()
 		var level = rd_connect_to_branch(incomplete_sequence, "A");
 		
 		if (level != undefined)
+		{
+			show_debug_message( concat("Success to construct: ", first_room.title) );
 			ds_list_add(levels, level);
+		}	
 		else
 			show_debug_message( concat("Failed to construct: ", first_room.title) );
 	}
@@ -300,13 +302,18 @@ function rd_connect_to_branch(sequence, prev_sequence_last_start_letter = "")
 							if (last_is_john) //necessary since the player stays in the john room before using the return connection
 								last_exit_letter = possible_path.startletter;
 							
+							//TODO: make sure branch exit is not last_start_letter and sequence.last_room start is not actual_exit_letter
+							
+							var dont_use_last_start_letter = concat("not ", possible_path.startletter);
+							var dont_use_actual_exit_letter = concat("not ", connection.path.exitletter);
+							
 							var connection_return = rd_connect_rooms_with_type_start(
 								branch, 
 								sequence.last_room, 
 								oneway_types, 
 								[pathtime.any, pathtime.pizzatime], 
-								last_exit_letter, "",	//Only care about the first start and the last end, so the first end and the last start are left empty
-								"", actual_start_letter);
+								last_exit_letter, dont_use_last_start_letter,	//Only care about the first start and the last end, so the first end and the last start are left empty
+								dont_use_actual_exit_letter, actual_start_letter);
 					
 							if (connection_return != undefined)
 							{
@@ -380,6 +387,11 @@ function rd_connect_rooms_with_type_start(first_room, last_room, roomtypes_arr, 
 {
 	show_debug_message( concat("Trying connection from ", first_room.title, " ", start_letter, " to ", exit_letter, " with ", last_room.title, " ", last_start_letter, " to ", last_exit_letter));
 	
+	//may contain "not " followed by a letter if we are to not use that letter
+	var dont_use_exit_letter = string_pos(exit_letter, "not") != 0;
+	if (dont_use_exit_letter)
+		exit_letter = string_char_at(exit_letter, string_length(exit_letter));
+	
 	//Trying new connection, clear tested from last connection
 	ds_map_clear(global.connection_tested_rooms);
 	ds_list_clear(global.connection_tested_exits);		
@@ -393,7 +405,7 @@ function rd_connect_rooms_with_type_start(first_room, last_room, roomtypes_arr, 
 	{
 		var first_path = ds_list_find_value(first_paths, i);
 		
-		if ( first_path.exitletter == exit_letter || exit_letter == "")
+		if ((dont_use_exit_letter && first_path.exitletter != exit_letter) || first_path.exitletter == exit_letter || exit_letter == "")
 		{
 			var exitpair = rd_get_exit_struct(first_path);
 			
@@ -419,6 +431,7 @@ function rd_connect_rooms_with_type_start(first_room, last_room, roomtypes_arr, 
 					else
 					{
 						ds_list_destroy(used_exits);
+						ds_list_destroy(connections);
 						return connection;
 					}
 					
@@ -445,7 +458,7 @@ function rd_connect_rooms_with_type_start(first_room, last_room, roomtypes_arr, 
 //connection.path, path in first whose exit matches second.path's start
 //connection.second, a connection tuplet (room a, room b, path)
 function rd_connect_rooms_with_type(connection, last_room, roomtypes_arr, path_time_arr, last_start_letter = "", last_exit_letter = "")
-{
+{	
 	if (connection.second == undefined) //needs a connection still
 	{
 		var first_room = connection.first;
@@ -498,6 +511,7 @@ function rd_connect_rooms_with_type(connection, last_room, roomtypes_arr, path_t
 				var match_path =  ds_list_find_value(match_paths, k);
 				
 				//get paths from last_room with start that matches match's exit
+				//TODO: acoount for not last start letter
 				var last_paths = rd_filter_paths_by_start_and_roomtype(
 					last_room, 
 					match_path.exittype, 
@@ -713,11 +727,17 @@ function rd_add_path(current_id, current_letter, destination_id, destination_let
 #endregion
 
 //desired_time can be a single value or an array of values
-//TODO: add global variable whether doors that were originally a LOOP are allowed
+//desired letter may contain the string "not" followed by the letter to not use at the end of the string
 function rd_filter_paths(from_room, desired_type, desired_dir, desired_time, desired_letter, start)
 {
 	var paths = from_room.paths;
 	var valid_paths = ds_list_create();
+	
+	var dont_use_desired_letter = string_pos(desired_letter, "not") != 0;
+	
+	if (dont_use_desired_letter)
+		desired_letter = string_char_at(desired_letter, string_length(desired_letter));
+	
 	
 	//find valid path
 	for (var i = 0; i < ds_list_size(paths); i++)
@@ -763,7 +783,7 @@ function rd_filter_paths(from_room, desired_type, desired_dir, desired_time, des
 		
 		if (	time_matches
 			&& (p_type == desired_type || desired_type == transition.none)
-			&& (p_letter == desired_letter || desired_letter == "")
+			&& ((dont_use_desired_letter && p_letter != desired_letter) || p_letter == desired_letter || desired_letter == "")
 			&& (p_dir == desired_dir || desired_dir == transitiondir.none)
 			)
 			{

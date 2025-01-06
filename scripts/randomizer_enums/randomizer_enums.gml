@@ -41,6 +41,15 @@ enum transitiondir
 	none
 }
 
+enum poweruptype
+{
+	none,
+	gustavo,
+	shotgun,
+	barrel,
+	satan
+}
+
 
 //Parsed Rooms Map
 //roomtype : Parsed Room Map

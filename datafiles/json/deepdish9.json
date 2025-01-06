@@ -20,7 +20,8 @@
                 {
                     "letter" : "B",
                     "type": "door",
-                    "exitonly": true
+                    "exitonly": true,
+                    "notpizzatime": true
                 },
                 {
                     "letter" : "F",

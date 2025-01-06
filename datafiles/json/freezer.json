@@ -482,8 +482,7 @@
 					"letter" : "B",
 					"type" : "box",
 					"dir" : "down",
-					"exitonly" : true,
-					"ratblocked" : true,
+					"startonly" : true,
 					"powerup" :
 					{
 						"type" : "satan"
@@ -494,10 +493,8 @@
 					"letter" : "D",
 					"type" : "box",
 					"dir" : "down",
-					"powerup" :
-					{
-						"type" : "satan"
-					}
+					"exitonly" : true,
+					"ratblocked" : true
 				}
 			]
 		},
@@ -554,16 +551,15 @@
 					"type" : "door",
 					"exitonly" : true,
 					"ratblocked" : true,
-					"powerup" :
-					{
-						"type" : "satan"
-					}
+					"pizzatime" : true
+
 				},
 				
 				{
 					"letter" : "C",
 					"type" : "box",
 					"dir" : "up",
+					"notpizzatime" : true,
 					"powerup" :
 					{
 						"type" : "satan"

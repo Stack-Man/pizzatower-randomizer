@@ -1,0 +1,418 @@
+{
+    "rooms":[
+        {
+            "title" : "street_intro",
+            "maxscore": 0,
+            "entrance": true,
+            "doors": [
+                {
+                    "letter" : "A",
+                    "type": "leveldoor",
+                    "entrance": true
+                },
+                {
+                    "letter" : "D",
+                    "type": "door"
+                }
+            ]
+        },
+        {
+            "title" : "street_1",
+            "maxscore": 0,
+            "loop": true,
+            "lap2": true,
+            "doors": [
+                {
+                    "letter" : "D",
+                    "type": "door"
+                },
+                {
+                    "letter" : "C",
+                    "type": "horizontal",
+                    "dir": "left"
+                },
+                {
+                    "letter" : "taxi",
+                    "type": "taxi",
+                    "exitonly": true,
+                    "loopstart": true,
+                    "notpizzatime": true,
+                    "loop": true
+                },
+                {
+                    "letter" : "taxi",
+                    "type": "taxi",
+                    "startonly": true,
+                    "loopexit": true,
+                    "notpizzatime": true,
+                    "loop": true
+                }
+            ]
+        },
+        {
+            "title" : "street_2",
+            "maxscore": 0,
+            "loop": true,
+            "doors": [
+                {
+                    "letter" : "C",
+                    "type": "horizontal",
+                    "dir": "right"
+                },
+                {
+                    "letter" : "B",
+                    "type": "horizontal",
+                    "dir": "left"
+                },
+                {
+                    "letter" : "taxi",
+                    "type": "taxi",
+                    "exitonly": true,
+                    "loopstart": true,
+                    "notpizzatime": true,
+                    "loop": true
+                },
+                {
+                    "letter" : "taxi",
+                    "type": "taxi",
+                    "startonly": true,
+                    "loopexit": true,
+                    "notpizzatime": true,
+                    "loop": true
+                }
+            ]
+        },
+        {
+            "title" : "street_3",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter" : "B",
+                    "type": "horizontal",
+                    "dir": "right"
+                },
+                {
+                    "letter" : "taxi",
+                    "type": "taxi",
+                    "exitonly": true,
+                    "notpizzatime": true
+                },
+                {
+                    "letter" : "taxi",
+                    "type": "taxi",
+                    "startonly": true,
+                    "pizzatime": true
+                }
+            ]
+        },
+        {
+            "title" : "street_4",
+            "maxscore": 0,
+            "loop": true,
+            "doors": [
+                {
+                    "letter" : "B",
+                    "type": "door",
+                    "powerup": {
+                        "type": "gustavo"
+                    }
+                },
+                {
+                    "letter" : "A",
+                    "type": "horizontal",
+                    "dir": "right",
+                    "powerup": {
+                        "type": "gustavo"
+                    }
+                },
+                {
+                    "letter" : "taxi",
+                    "type": "taxi",
+                    "exitonly": true,
+                    "loopstart": true,
+                    "notpizzatime": true,
+                    "loop": true,
+                    "powerup": {
+                        "type": "gustavo"
+                    }
+                },
+                {
+                    "letter" : "taxi",
+                    "type": "taxi",
+                    "startonly": true,
+                    "loopexit": true,
+                    "notpizzatime": true,
+                    "loop": true,
+                    "powerup": {
+                        "type": "gustavo"
+                    }
+                }
+            ]
+        },
+        {
+            "title" : "street_5",
+            "maxscore": 0,
+            "loop": true,
+            "doors": [
+                {
+                    "letter" : "A",
+                    "type": "horizontal",
+                    "dir": "left",
+                    "pizzatimeexit": true,
+                    "pizzatimestart" : true,
+                    "notpizzatimestart" : true,
+                    "powerup": {
+                        "type": "gustavo"
+                    }
+                },
+                {
+                    "letter" : "B",
+                    "type": "door",
+                    "pizzatimestart": true,
+                    "powerup": {
+                        "type": "gustavo"
+                    }
+                },
+                {
+                    "letter" : "taxi",
+                    "type": "taxi",
+                    "exitonly": true,
+                    "loopstart": true,
+                    "notpizzatime": true,
+                    "loop": true,
+                    "powerup": {
+                        "type": "gustavo"
+                    }
+                },
+                {
+                    "letter" : "taxi",
+                    "type": "taxi",
+                    "startonly": true,
+                    "loopexit": true,
+                    "notpizzatime": true,
+                    "loop": true,
+                    "powerup": {
+                        "type": "gustavo"
+                    }
+                }
+            ]
+        },
+        {
+            "title" : "street_house1",
+            "maxscore": 0,
+            "toppin": {
+                "type": "mushroom"
+            },
+            "doors": [
+                {
+                    "letter" : "taxi",
+                    "type": "taxi",
+                    "startonly": true,
+                    "notpizzatime": true
+                },
+                {
+                    "letter" : "taxi",
+                    "type": "taxi",
+                    "exitonly": true,
+                    "notpizzatime": true
+                }
+            ]
+        },
+        {
+            "title" : "street_house2",
+            "maxscore": 0,
+            "toppin": {
+                "type": "cheese"
+            },
+            "secret": {
+                "secret": true
+            },
+            "doors": [
+                {
+                    "letter" : "taxi",
+                    "type": "taxi",
+                    "startonly": true,
+                    "notpizzatime": true
+                },
+                {
+                    "letter" : "taxi",
+                    "type": "taxi",
+                    "exitonly": true,
+                    "notpizzatime": true
+                }
+            ]
+        },
+        {
+            "title" : "street_house3",
+            "maxscore": 0,
+            "toppin": {
+                "type": "tomato"
+            },
+            "loop": true,
+            "doors": [
+                {
+                    "letter" : "taxi",
+                    "type": "taxi",
+                    "startonly": true,
+                    "notpizzatime": true
+                },
+                {
+                    "letter" : "taxi",
+                    "type": "taxi",
+                    "exitonly": true,
+                    "notpizzatime": true
+                },
+                {
+                    "letter" : "E",
+                    "type": "door",
+                    "loop": true
+                }
+            ]
+        },
+        {
+            "title" : "street_house4",
+            "maxscore": 0,
+            "toppin": {
+                "type": "sausage"
+            },
+            "secret": {
+                "secret": true
+            },
+            "doors": [
+                {
+                    "letter" : "taxi",
+                    "type": "taxi",
+                    "startonly": true,
+                    "powerup": {
+                        "type": "gustavo"
+                    },
+                    "notpizzatime": true
+                },
+                {
+                    "letter" : "taxi",
+                    "type": "taxi",
+                    "exitonly": true,
+                    "powerup": {
+                        "type": "gustavo"
+                    },
+                    "notpizzatime": true
+                }
+            ]
+        },
+        {
+            "title" : "street_house5",
+            "maxscore": 0,
+            "toppin": {
+                "type": "pineapple"
+            },
+            "secret": {
+                "secret": true
+            },
+            "gerome": true,
+            "doors": [
+                {
+                    "letter" : "taxi",
+                    "type": "taxi",
+                    "startonly": true,
+                    "powerup": {
+                        "type": "gustavo"
+                    },
+                    "notpizzatime": true
+                },
+                {
+                    "letter" : "taxi",
+                    "type": "taxi",
+                    "exitonly": true,
+                    "powerup": {
+                        "type": "gustavo"
+                    },
+                    "notpizzatime": true
+                }
+            ]
+        },
+        {
+            "title" : "street_jail",
+            "maxscore": 0,
+            "loop": true,
+            "doors": [
+                {
+                    "letter" : "F",
+                    "type": "door",
+                    "gerome": true,
+                    "loop": true
+                },
+                {
+                    "letter" : "B",
+                    "type": "door",
+                    "powerup": {
+                        "type": "gustavo"
+                    }
+                },
+                {
+                    "letter" : "taxi",
+                    "type": "taxi",
+                    "startonly": true,
+                    "notpizzatime": true
+                },
+                {
+                    "letter" : "taxi",
+                    "type": "taxi",
+                    "exitonly": true,
+                    "pizzatime": true
+                }
+            ]
+        },
+        {
+            "title" : "street_john",
+            "maxscore": 0,
+            "pillar": true,
+            "doors": [
+                {
+                    "letter" : "B",
+                    "type": "door",
+                    "powerup": {
+                        "type": "gustavo"
+                    }
+                }
+            ]
+        },
+        {
+            "title": "street_treasure",
+            "maxscore": 0,
+            "treasure": true,
+            "doors": [
+                {
+                    "letter" : "F",
+                    "type": "door"
+                }
+            ]
+        },
+        {
+            "title": "street_bacon",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter" : "E",
+                    "type": "door"
+                }
+            ]
+        },
+        {
+            "title" : "street_secret1"
+        },
+        
+        {
+            "title" : "street_secret2",
+            "powerup": {
+                "type": "gustavo"
+            }
+        },
+        
+        {
+            "title" : "street_secret3",
+            "powerup": {
+                "type": "gustavo"
+            }
+        }
+    ]
+}

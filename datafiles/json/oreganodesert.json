@@ -3,6 +3,7 @@
     {
       "title": "badland_1",
       "maxscore": 0,
+	  "entrance" : true,
       "doors": [
         {
           "letter": "A",
@@ -45,7 +46,14 @@
         {
           "letter": "B",
           "type": "horizontal",
-          "dir": "right"
+          "dir": "right",
+		  "notpizzatime" : true
+        },
+		{
+          "letter": "C",
+          "type": "horizontal",
+          "dir": "left",
+		  "pizzatime" : true
         },
         {
           "letter": "E",
@@ -293,17 +301,21 @@
         {
           "letter": "D",
           "type": "horizontal",
-          "dir": "right"
+          "dir": "left",
+		  "notpizzatime" : true
         },
         {
           "letter": "B",
           "type": "vertical",
-          "dir": "down"
+          "dir": "down",
+		  "pizzatime" : true,
+		  "exitonly" : true
         },
         {
           "letter": "E",
           "type": "door",
-          "loop": true
+          "loop": true,
+		  "notpizzatime" : true
         }
       ]
     },

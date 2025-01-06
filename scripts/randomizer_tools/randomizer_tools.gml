@@ -276,11 +276,15 @@ function rd_get_exit_struct(path)
 	return exitpair;
 }
 
-//TODO: make work with gustavo
 function rd_clear_transformation()
 {
-	global.noisejetpack = false;
+
+	if (current_powerup == poweruptype.satan)
+	{
+		global.noisejetpack = false;
+	}
 	
+	//Clear any powerups leftover (mort barrel rocket?)
 	with (obj_player)
 	{
 		//TODO: will this prevent clearing transformations upon exiting a door? This function gets called 2 frames after entering the room so maybe not
@@ -303,11 +307,41 @@ function rd_clear_transformation()
 			ghostpepper = 0;
 		}
 	}
+	
+	if (current_powerup == poweruptype.shotgun)
+	{
+		with (obj_player)
+		{
+			if shotgunAnim
+			{
+				shotgunAnim = false;
+				fmod_event_one_shot_3d("event:/sfx/misc/detransfo", x, y);
+				with instance_create(x, y, obj_sausageman_dead)
+				{
+					sprite_index = spr_shotgunback;
+					if !obj_player1.ispeppino
+						sprite_index = spr_minigunfall;
+				}
+				if state == states.shotgunshoot
+					state = states.normal;
+			}
+	
+		}
+	}
+	
+	if (current_powerup == poweruptype.gustavo)
+	{
+		scr_switchpeppino();
+	}
+	
+	current_powerup = poweruptype.none;
 }
 
-//TODO: implement
+//TODO: implement rocket
 function rd_give_transformation(name)
 {
+	show_debug_message( concat("Giving Powerup: ", name) );
+	
 	with (obj_player)
 	{
 		switch (name)
@@ -316,15 +350,34 @@ function rd_give_transformation(name)
 				rd_barrel();
 			case "satan":
 				rd_satan();
+			case "shotgun":
+				rd_shotgun();
+			case "gustavo":
+				rd_gustavo();
 			default:
 				break;
 		}
+	}
+	
+	switch (name)
+	{
+		case "barrel":
+			current_powerup = poweruptype.barrel;
+		case "satan":
+			current_powerup = poweruptype.satan;
+		case "shotgun":
+			current_powerup = poweruptype.shotgun;
+		case "gustavo":
+			current_powerup = poweruptype.gustavo;
+		default:
+			break;
 	}
 	
 }
 
 function rd_barrel()
 {
+	show_debug_message("barrel on");
 	movespeed = hsp;
 	state = states.barrel;
 	image_index = 0;
@@ -332,5 +385,19 @@ function rd_barrel()
 
 function rd_satan()
 {
+	show_debug_message("satan on");
 	global.noisejetpack = true;
+}
+
+function rd_shotgun()
+{
+	show_debug_message("shotgun on");
+	shotgunAnim = true;
+	state = states.shotgun;
+}
+
+function rd_gustavo()
+{
+	show_debug_message("gustavo on");
+	scr_switchgustavo();
 }

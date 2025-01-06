@@ -1,0 +1,433 @@
+{
+	"rooms" :
+	[
+		{
+			"title" : "war_1",
+			"maxscore" : 0,
+			"entrance" : true,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "leveldoor",
+					"entrance" : true
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "right",
+					"exitonly" : true,
+					"ratblocked" : true
+				}
+			]
+		},
+		
+		{
+			"title" : "war_2",
+			"maxscore" : 0,
+			"wartimer" : true,
+			"toppin" :
+			{
+				"type" : "mushroom"
+			},
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "horizontal",
+					"dir" : "right",
+					"exitonly" : true,
+					"powerup" :
+					{
+						"type" : "shotgun"
+					}
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "left",
+					"powerup" :
+					{
+						"type" : "shotgun"
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "war_3",
+			"maxscore" : 0,
+			"wartimer" : true,
+			"gerome" : true,
+			"toppin" :
+			{
+				"type" : "cheese"
+			},
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "horizontal",
+					"dir" : "left",
+					"powerup" :
+					{
+						"type" : "shotgun"
+					}
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "vertical",
+					"dir" : "down",
+					"exitonly" : true,
+					"ratblocked" : true,
+					"powerup" :
+					{
+						"type" : "shotgun"
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "war_6",
+			"maxscore" : 0,
+			"wartimer" : true,
+			"toppin" :
+			{
+				"type" : "tomato"
+			},
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "horizontal",
+					"dir" : "right",
+					"exitonly" : true,
+					"ratblocked" : true,
+					"powerup" :
+					{
+						"type" : "shotgun"
+					}
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "vertical",
+					"dir" : "up",
+					"powerup" :
+					{
+						"type" : "shotgun"
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "war_7",
+			"maxscore" : 0,
+			"wartimer" : true,
+			"secret" :
+			{
+				"secret" : true
+			},
+			"doors" : 
+			[
+				{
+					"letter" : "A",
+					"type" : "horizontal",
+					"dir" : "left",
+					"powerup" :
+					{
+						"type" : "shotgun"
+					}
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "vertical",
+					"dir" : "down",
+					"powerup" :
+					{
+						"type" : "shotgun"
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "war_8",
+			"maxscore" : 0,
+			"wartimer" : true,
+			"toppin" :
+			{
+				"type" : "sausage"
+			},
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "vertical",
+					"dir" : "down",
+					"exitonly" : true,
+					"powerup" :
+					{
+						"type" : "shotgun"
+					}
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "vertical",
+					"dir" : "up",
+					"powerup" :
+					{
+						"type" : "shotgun"
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "war_9",
+			"maxscore" : 0,
+			"wartimer" : true,
+			"secret" : 
+			{
+				"secret": true
+			},
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "vertical",
+					"dir" : "up",
+					"powerup" :
+					{
+						"type" : "shotgun"
+					}
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "vertical",
+					"dir" : "down",
+					"exitonly" : true,
+					"powerup" :
+					{
+						"type" : "shotgun"
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "war_10",
+			"maxscore" : 0,
+			"wartimer" : true,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "door",
+					"exitonly" : true,
+					"ratblocked" : true,
+					"powerup" :
+					{
+						"type" : "shotgun"
+					}
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "vertical",
+					"dir" : "up",
+					"powerup" :
+					{
+						"type" : "shotgun"
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "war_11",
+			"maxscore" : 0,
+			"wartimer" : true,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "door",
+					"powerup" :
+					{
+						"type" : "shotgun"
+					}
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "right",
+					"powerup" :
+					{
+						"type" : "shotgun"
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "war_12",
+			"maxscore" : 0,
+			"wartimer" : true,
+			"secret" :
+			{
+				"secret" : true
+			},
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "horizontal",
+					"dir" : "right",
+					"exitonly" : true,
+					"ratblocked" : true,
+					"powerup" :
+					{
+						"type" : "shotgun"
+					}
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"dir" : "left",
+					"powerup" :
+					{
+						"type" : "shotgun"
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "war_12b",
+			"maxscore" : 0,
+			"wartimer" : true,
+			"loop" : true,
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "horizontal",
+					"dir" : "left",
+					"powerup" :
+					{
+						"type" : "shotgun"
+					}
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "vertical",
+					"dir" : "up",
+					"exitonly" : true,
+					"powerup" :
+					{
+						"type" : "shotgun"
+					}
+				},
+				
+				{
+					"letter" : "F",
+					"type" : "door",
+					"gerome" : true,
+					"loop" : true,
+					"powerup" :
+					{
+						"type" : "shotgun"
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "war_13",
+			"maxscore" : 0,
+			"wartimer" : true,
+			"lap2" : true,
+			"toppin" :
+			{
+				"type" : "pineapple"
+			},
+			"doors" :
+			[
+				{
+					"letter" : "A",
+					"type" : "leveldoor",
+					"exit" : true,
+					"exitonly" : true,
+					"powerup" :
+					{
+						"type" : "shotgun"
+					}
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "vertical",
+					"dir" : "down",
+					"powerup" :
+					{
+						"type" : "shotgun"
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "war_lap",
+			"maxscore" : 0,
+			"wartimer" : true,
+			"doors" :
+			[
+				{
+					"letter" : "C",
+					"type" : "door"
+				}
+			]
+		},
+		
+		{
+			"title" : "war_treasure",
+			"maxscore" : 0,
+			"wartimer" : true,
+			"doors" :
+			[
+				{
+					"letter" : "F",
+					"type" : "door",
+					"powerup" :
+					{
+						"type" : "shotgun"
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "war_secret1"
+		},
+		
+		{
+			"title" : "war_secret2"
+		},
+		
+		{
+			"title" : "war_secret3"
+		}
+	]
+}

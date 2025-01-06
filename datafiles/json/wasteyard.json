@@ -34,8 +34,8 @@
                 {
                     "letter" : "B",
                     "type": "horizontal",
-					"notpizzatime" : true,
-                    "dir": "right"
+                    "dir": "right",
+                    "notpizzatime": true
                 },
                 {
                     "letter" : "A",
@@ -89,13 +89,15 @@
                     "letter" : "B",
                     "type": "horizontal",
                     "dir": "right",
-                    "startonly": true
+                    "startonly": true,
+                    "notpizzatime": true
                 },
                 {
                     "letter" : "C",
                     "type": "vertical",
                     "dir": "down",
-                    "exitonly": true
+                    "exitonly": true,
+                    "notpizzatime": true
                 }
             ]
         },
@@ -143,13 +145,11 @@
             "secret": {
                 "secret": true
             },
-            "loop" : true,
             "doors": [
                 {
                     "letter" : "A",
                     "type": "door",
-                    "startonly": true,
-					"notpizzatime": true
+                    "dir": "startonly"
                 },
                 {
                     "letter" : "B",

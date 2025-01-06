@@ -4,6 +4,7 @@
       "title": "industrial_1",
       "maxscore": 0,
       "loop": true,
+	  "entrance" : true,
       "doors": [
         {
           "letter": "A",

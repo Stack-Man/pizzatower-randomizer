@@ -1,0 +1,416 @@
+{
+    "rooms":[
+        {
+            "title": "kidsparty_1",
+            "maxscore": 0,
+            "entrance": true,
+            "doors": [
+                {
+                    "letter" : "A",
+                    "type": "leveldoor",
+                    "entrance": true
+                },
+                {
+                    "letter" : "B",
+                    "type": "horizontal",
+                    "dir": "right"
+                }
+            ]
+        },
+        {
+            "title": "kidsparty_floor1_1",
+            "lap2": true,
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter" : "B",
+                    "type": "horizontal",
+                    "dir": "left"
+                },
+                {
+                    "letter" : "A",
+                    "type": "horizontal",
+                    "dir": "right"
+                }
+            ]
+        },
+        {
+            "title": "kidsparty_floor1_2",
+            "maxscore": 0,
+            "toppin": {
+                "type": "mushroom"
+            },
+            "loop": true,
+            "doors": [
+                {
+                    "letter" : "A",
+                    "type": "horizontal",
+                    "dir": "left"
+                },
+                {
+                    "letter" : "E",
+                    "type": "horizontal",
+                    "dir": "right"
+                },
+                {
+                    "letter" : "D",
+                    "type": "vertical",
+                    "dir": "down",
+                    "loopstart": true,
+                    "exitonly": true
+                },
+                {
+                    "letter" : "C",
+                    "type": "vertical",
+                    "dir": "down",
+                    "loopexit": true,
+                    "startonly": true
+                }
+            ]
+        },
+        {
+            "title": "kidsparty_floor1_3",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter" : "E",
+                    "type": "horizontal",
+                    "dir": "left"
+                },
+                {
+                    "letter" : "D",
+                    "type": "vertical",
+                    "dir": "up",
+                    "pizzatime": true
+                },
+                {
+                    "letter" : "B",
+                    "type": "door",
+                    "notpizzatime": true,
+                    "exitonly": true
+                }
+            ]
+        },
+        {
+            "title": "kidsparty_basementsecret",
+            "secret": {
+                "secret": true
+            },
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter" : "D",
+                    "type": "vertical",
+                    "dir": "up"
+                },
+                {
+                    "letter" : "C",
+                    "type": "vertical",
+                    "dir": "up",
+                    "exitonly": true,
+                    "ratblocked": true
+                }
+            ]
+        },
+        {
+            "title": "kidsparty_floor2_1",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter" : "B",
+                    "type": "door",
+                    "startonly": true
+                },
+                {
+                    "letter" : "A",
+                    "type": "horizontal",
+                    "dir": "left",
+                    "exitonly": true
+                }
+            ]
+        },
+        {
+            "title": "kidsparty_floor2_2",
+            "maxscore": 0,
+            "toppin": {
+                "type": "cheese"
+            },
+            "doors": [
+                {
+                    "letter" : "A",
+                    "type": "horizontal",
+                    "dir": "right",
+                    "startonly": true
+                },
+                {
+                    "letter" : "B",
+                    "type": "horizontal",
+                    "dir": "left",
+                    "exitonly": true
+                }
+            ]
+        },
+        {
+            "title": "kidsparty_floor2_3",
+            "maxscore": 0,
+            "loop": true,
+            "secret": {
+                "secret": true
+            },
+            "doors": [
+                {
+                    "letter" : "A",
+                    "type": "door"
+                },
+                {
+                    "letter" : "C",
+                    "type": "vertical",
+                    "dir": "down",
+                    "pizzatime": true
+                },
+                {
+                    "letter" : "B",
+                    "type": "horizontal",
+                    "dir": "right",
+                    "notpizzatime": true
+                },
+                {
+                    "letter" : "F",
+                    "type": "door",
+                    "gerome": true,
+                    "loop": true,
+                    "powerup" :
+					{
+						"type": "shotgun"
+					}
+                }
+            ]
+        },
+        {
+            "title": "kidsparty_floor3_1",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter" : "A",
+                    "type": "door"
+                },
+                {
+                    "letter" : "C",
+                    "type": "vertical",
+                    "dir": "up",
+                    "pizzatime": true
+                },
+                {
+                    "letter" : "B",
+                    "type": "horizontal",
+                    "dir": "right",
+                    "notpizzatime": true
+                }
+            ]
+        },
+        {
+            "title": "kidsparty_floor3_2",
+            "maxscore": 0,
+            "toppin": {
+                "type": "tomato"
+            },
+            "doors": [
+                {
+                    "letter" : "B",
+                    "type": "horizontal",
+                    "dir": "left"
+                },
+                {
+                    "letter" : "A",
+                    "type": "horizontal",
+                    "dir": "right"
+                }
+            ]
+        },
+        {
+            "title": "kidsparty_floor3_3",
+            "maxscore": 0,
+            "secret": {
+                "secret": true
+            },
+            "doors": [
+                {
+                    "letter" : "A",
+                    "type": "horizontal",
+                    "dir": "left"
+                },
+                {
+                    "letter" : "B",
+                    "type": "horizontal",
+                    "dir": "left"
+                }
+            ]
+        },
+        {
+            "title": "kidsparty_floor4_1",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter" : "B",
+                    "type": "horizontal",
+                    "dir": "right"
+                },
+                {
+                    "letter" : "A",
+                    "type": "horizontal",
+                    "dir": "left",
+                    "exitonly": true,
+                    "ratblocked": true
+                }
+            ]
+        },
+        {
+            "title": "kidsparty_floor4_2",
+            "maxscore": 0,
+            "toppin": {
+                "type": "sausage"
+            },
+            "doors": [
+                {
+                    "letter" : "A",
+                    "type": "horizontal",
+                    "dir": "right",
+                    "startonly": true
+                },
+                {
+                    "letter" : "B",
+                    "type": "horizontal",
+                    "dir": "left",
+                    "exitonly": true
+                }
+            ]
+        },
+        {
+            "title": "kidsparty_floor4_3",
+            "maxscore": 0,
+            "gerome": true,
+            "doors": [
+                {
+                    "letter" : "B",
+                    "type": "horizontal",
+                    "dir": "right",
+                    "notpizzatime": true
+                },
+                {
+                    "letter" : "D",
+                    "type": "vertical",
+                    "dir": "down",
+                    "pizzatime": true
+                },
+                {
+                    "letter" : "C",
+                    "type": "vertical",
+                    "dir": "up",
+                    "pizzatime": true,
+                    "powerup" :
+					{
+						"type": "shotgun"
+					}
+                },
+                {
+                    "letter" : "A",
+                    "type": "vertical",
+                    "dir": "up",
+                    "notpizzatime": true,
+                    "exitonly": true
+                }
+            ]
+        },
+        {
+            "title": "kidsparty_john",
+            "maxscore": 0,
+			            "pillar": true,
+            "doors": [
+                {
+                    "letter" : "A",
+                    "type": "vertical",
+                    "dir": "down",
+                    "startonly": true,
+					"notpizzatime" : true
+					
+                },
+                {
+                    "letter" : "C",
+                    "type": "vertical",
+                    "dir": "down",
+                    "exitonly": true,
+					"pizzatime" : true
+                }
+            ]
+        },
+        {
+            "title": "kidsparty_escape1",
+            "maxscore": 0,
+            "toppin": {
+                "type": "pineapple"
+            },
+            "doors": [
+                {
+                    "letter" : "D",
+                    "type": "vertical",
+                    "dir": "up",
+                    "powerup" :
+					{
+						"type": "shotgun"
+					}
+                },
+                {
+                    "letter" : "C",
+                    "type": "vertical",
+                    "dir": "down",
+                    "exitonly": true,
+                    "ratblocked": true
+                }
+            ]
+        },
+        {
+            "title": "kidsparty_escape2",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter" : "C",
+                    "type": "vertical",
+                    "dir": "up",
+                    "powerup" :
+					{
+						"type": "shotgun"
+					}
+                },
+                {
+                    "letter" : "D",
+                    "type": "vertical",
+                    "dir": "down",
+                    "powerup" :
+					{
+						"type": "shotgun"
+					}
+                }
+            ]
+        },
+        {
+            "title": "kidsparty_treasure",
+            "maxscore": 0,
+            "treasure": true,
+            "doors": [
+                {
+                    "letter" : "F",
+                    "type": "door"
+                }
+            ]
+        },
+        {
+            "title" : "kidsparty_secret1"
+        },
+        {
+            "title" : "kidsparty_secret2"
+        },
+        {
+            "title" : "kidsparty_secret3"
+        }
+    ]
+}
