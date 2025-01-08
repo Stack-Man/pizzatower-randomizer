@@ -54,8 +54,6 @@ function rd_convert_transitiontype(type_text)
 			return transition.vertical;
 		case "horizontal":
 			return transition.horizontal;
-		case "hallway":
-			return transition.hallway;
 		case "door":
 			return transition.door;
 		case "box":
@@ -133,6 +131,11 @@ function rd_filter_paths_by_start(from_room, desired_type, desired_dir, desired_
 function rd_filter_paths_by_start_and_roomtype(from_room, desired_transition_type,  desired_dir, desired_time, desired_roomtypes, desired_letter = "")
 {
 	var unfiltered_paths = rd_filter_paths_by_start(from_room, desired_transition_type, desired_dir, desired_time, desired_letter);
+	
+	if (from_room.title == "graveyard_6")
+	{
+		show_debug_message( concat("unfilteres size for graveyard 6 ", ds_list_size(unfiltered_paths) ) );
+	}
 	
 	if ( ! array_contains(desired_roomtypes, roomtype.oneway) ) //filter out oneway paths from potentialoneway rooms
 	{
@@ -276,6 +279,32 @@ function rd_get_exit_struct(path)
 	return exitpair;
 }
 
+function rd_get_sequence_struct(new_to_connection, new_return_connection, new_next, new_last_room, new_is_end_branch)
+{
+	var new_sequence = 
+		{
+			to_connection : new_to_connection,
+			return_connection : new_return_connection,
+			next : new_next,
+			last_room : new_last_room,
+			last_room_is_end_branch : new_is_end_branch
+		};
+		
+	return new_sequence;
+}
+
+function rd_get_connection_struct(new_first, new_path, new_second)
+{
+	var new_connection =
+	{
+		first: new_first,
+		path: new_path,
+		second: new_second
+	};
+	
+	return new_connection;
+}
+
 function rd_clear_transformation()
 {
 
@@ -315,13 +344,13 @@ function rd_clear_transformation()
 			if shotgunAnim
 			{
 				shotgunAnim = false;
-				fmod_event_one_shot_3d("event:/sfx/misc/detransfo", x, y);
+				/*fmod_event_one_shot_3d("event:/sfx/misc/detransfo", x, y);
 				with instance_create(x, y, obj_sausageman_dead)
 				{
 					sprite_index = spr_shotgunback;
 					if !obj_player1.ispeppino
 						sprite_index = spr_minigunfall;
-				}
+				}*/
 				if state == states.shotgunshoot
 					state = states.normal;
 			}
@@ -338,6 +367,7 @@ function rd_clear_transformation()
 }
 
 //TODO: implement rocket
+//implement ghostking and "ghostking ball"
 function rd_give_transformation(name)
 {
 	show_debug_message( concat("Giving Powerup: ", name) );
@@ -348,12 +378,16 @@ function rd_give_transformation(name)
 		{
 			case "barrel":
 				rd_barrel();
+				break;
 			case "satan":
 				rd_satan();
+				break;
 			case "shotgun":
 				rd_shotgun();
+				break;
 			case "gustavo":
 				rd_gustavo();
+				break;
 			default:
 				break;
 		}
@@ -363,12 +397,16 @@ function rd_give_transformation(name)
 	{
 		case "barrel":
 			current_powerup = poweruptype.barrel;
+			break;
 		case "satan":
 			current_powerup = poweruptype.satan;
+			break;
 		case "shotgun":
 			current_powerup = poweruptype.shotgun;
+			break;
 		case "gustavo":
 			current_powerup = poweruptype.gustavo;
+			break;
 		default:
 			break;
 	}
@@ -389,11 +427,12 @@ function rd_satan()
 	global.noisejetpack = true;
 }
 
+//TODO: this state puts peppino in the old shotgun state at first, does not remove properly, and ends his running
 function rd_shotgun()
 {
 	show_debug_message("shotgun on");
 	shotgunAnim = true;
-	state = states.shotgun;
+	//state = states.shotgun;
 }
 
 function rd_gustavo()

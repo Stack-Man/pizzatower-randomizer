@@ -352,13 +352,7 @@
                     "letter" : "taxi",
                     "type": "taxi",
                     "startonly": true,
-                    "notpizzatime": true
-                },
-                {
-                    "letter" : "taxi",
-                    "type": "taxi",
-                    "exitonly": true,
-                    "pizzatime": true
+					"ratblocked" : true
                 }
             ]
         },

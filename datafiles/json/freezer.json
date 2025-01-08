@@ -254,7 +254,6 @@
 					"type" : "horizontal",
 					"dir" : "left",
 					"pizzatime" : true,
-					"ratblocked" : true,
 					"powerup" :
 					{
 						"type" : "satan",

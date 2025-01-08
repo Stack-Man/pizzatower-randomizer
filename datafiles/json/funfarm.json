@@ -63,7 +63,8 @@
 					{
 						"letter" : "F",
 						"type": "door",
-						"gerome": true
+						"gerome": true,
+						"loop" : true
 					}
 				]
 			},

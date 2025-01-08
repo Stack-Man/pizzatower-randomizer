@@ -149,7 +149,8 @@
                 {
                     "letter" : "A",
                     "type": "door",
-                    "dir": "startonly"
+                    "dir": "startonly",
+					"notpizzatime" : true
                 },
                 {
                     "letter" : "B",

@@ -2,6 +2,9 @@ depth = -6000;
 
 current_powerup = poweruptype.none;
 
+global.recursion_depth = 0;
+global.test_string = "";
+
 global.use_loops = false;
 
 ignore_rooms = ["forest_G1", "plage_shipmain", "minigolf_8"];
@@ -9,7 +12,7 @@ separated_rooms = ["ruin_11"];
 
 //TODO: add trickytreat and handling since it doesnt have an entrance or john
 level_names = [ 
-"tutorial", "tutorial_noise",
+//"tutorial", "tutorial_noise",
 "johngutter", "pizzascape", "bloodsauce", "ancientcheese", 
 "wasteyard", "funfarm", "oreganodesert",  
 "gnomeforest", "golf", "crustcove", "deepdish9",

@@ -1,7 +1,7 @@
 function rd_init(use_new_seed = false)
 {
 	//TODO: implement reading the ini file
-	seed = 0;
+	seed = 1366994938;
 	
 	if (seed == 0 || use_new_seed)
 	{
@@ -84,6 +84,16 @@ function rd_parse_doors(thisroom)
 
 	var door_count = ds_list_size(doors);
 	
+	var non_loops = 0;
+	
+	for (var d = 0; d < door_count; d++)
+	{
+		var door = ds_list_find_value(doors, d)
+		
+		if (! ds_map_find_value(door, "loop") )
+			non_loops++;
+	}
+	
 	//For every pair of transitions
 	for (var i = 0; i < door_count; i++)
 	{
@@ -94,7 +104,7 @@ function rd_parse_doors(thisroom)
 			var exit_door = ds_list_find_value(doors, j);
 			
 			//If it is not the same transition UNLESS there are no other transitions
-			if (ds_map_find_value(start_door, "letter") != ds_map_find_value(exit_door, "letter") || door_count <= 1)
+			if (ds_map_find_value(start_door, "letter") != ds_map_find_value(exit_door, "letter") || door_count <= 1 || (!global.use_loops && non_loops <= 1) )
 			{
 				found_path_time = pathtime.any;
 				

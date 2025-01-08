@@ -23,7 +23,6 @@ enum pathtime
 
 enum transition
 {
-	hallway,
 	vertical,
 	horizontal,
 	door,
