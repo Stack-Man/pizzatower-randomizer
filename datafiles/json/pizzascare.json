@@ -18,7 +18,11 @@
                 {
                     "letter" : "B",
                     "type": "horizontal",
-                    "dir": "right"
+                    "dir": "right",
+                    "powerup": {
+                        "type" : "ghostking",
+                        "pizzatime" : true
+				    }
                 }
             ]
         },
@@ -30,7 +34,11 @@
                 {
                     "letter" : "B",
                     "type": "horizontal",
-                    "dir": "left"
+                    "dir": "left",
+                    "powerup": {
+                        "type" : "ghostking",
+                        "pizzatime" : true
+				    }
                 },
                 {
                     "letter" : "C",
@@ -40,7 +48,11 @@
                 {
                     "letter" : "D",
                     "type": "door",
-                    "pizzatime": true
+                    "pizzatime": true,
+                    "powerup": {
+                        "type" : "ghostking",
+                        "pizzatime" : true
+				    }
                 },
                 {
                     "letter" : "F",
@@ -48,7 +60,11 @@
                     "dir": "right",
                     "loop": true,
                     "ratblocked" : true,
-                    "exitonly": true
+                    "exitonly": true,
+                    "powerup": {
+                        "type" : "ghostking",
+                        "pizzatime" : true
+				    }
                 }
             ]
         },
@@ -59,13 +75,19 @@
                 {
                     "letter" : "F",
                     "type": "horizontal",
-                    "dir": "left"
+                    "dir": "left",
+                    "powerup": {
+                        "type" : "ghostking ball"
+				    }
                 },
                 {
                     "letter" : "C",
                     "type": "door",
                     "gerome": true,
-                    "loop": true
+                    "loop": true,
+                    "powerup": {
+                        "type" : "ghostking"
+				    }
                 }
             ]
         },
@@ -96,13 +118,19 @@
                 {
                     "letter" : "B",
                     "type": "horizontal",
-                    "dir": "left"
+                    "dir": "left",
+                    "powerup": {
+                        "type" : "ghostking"
+				    }
                 },
                 {
                     "letter" : "A",
                     "type": "door",
                     "exitonly": true,
-                    "ratblocked": true
+                    "ratblocked": true,
+                    "powerup": {
+                        "type" : "ghostking"
+				    }
                 }
             ]
         },
@@ -121,18 +149,27 @@
                 {
                     "letter" : "A",
                     "type": "door",
-                    "notpizzatime": true
+                    "notpizzatime": true,
+                    "powerup": {
+                        "type" : "ghostking"
+				    }
                 },
                 {
                     "letter" : "C",
                     "type": "door",
                     "exitonly": true,
-                    "ratblocked": true
+                    "ratblocked": true,
+                    "powerup": {
+                        "type" : "ghostking"
+				    }
                 },
                 {
                     "letter" : "D",
                     "type": "door",
-                    "pizzatime": true
+                    "pizzatime": true,
+                    "powerup": {
+                        "type" : "ghostking"
+				    }
                 }
             ]
         },
@@ -147,11 +184,17 @@
                     "letter" : "D",
                     "type": "horizontal",
                     "dir": "left",
-                    "pizzatime": true
+                    "pizzatime": true,
+                    "powerup": {
+                        "type" : "ghostking"
+				    }
                 },
                 {
                     "letter" : "C",
-                    "type": "door"
+                    "type": "door",
+                    "powerup": {
+                        "type" : "ghostking"
+				    }
                 },
                 {
                     "letter" : "A",
@@ -159,7 +202,10 @@
                     "dir": "left",
                     "notpizzatime": true,
                     "ratblocked": true,
-                    "exitonly": true
+                    "exitonly": true,
+                    "powerup": {
+                        "type" : "ghostking"
+				    }
                 }
             ]
         },
@@ -175,18 +221,27 @@
                     "letter" : "A",
                     "type": "horizontal",
                     "dir": "right",
-                    "notpizzatime": true
+                    "notpizzatime": true,
+                    "powerup": {
+                        "type" : "ghostking"
+				    }
                 },
                 {
                     "letter" : "D",
                     "type": "horizontal",
                     "dir": "right",
-                    "pizzatime": true
+                    "pizzatime": true,
+                    "powerup": {
+                        "type" : "ghostking"
+				    }
                 },
                 {
                     "letter" : "B",
                     "type": "horizontal",
-                    "dir": "left"
+                    "dir": "left",
+                    "powerup": {
+                        "type" : "ghostking"
+				    }
                 }
             ]
         },
@@ -203,11 +258,17 @@
                 {
                     "letter" : "B",
                     "type": "horizontal",
-                    "dir": "right"
+                    "dir": "right",
+                    "powerup": {
+                        "type" : "ghostking"
+				    }
                 },
                 {
                     "letter" : "A",
-                    "type": "door"
+                    "type": "door",
+                    "powerup": {
+                        "type" : "ghostking"
+				    }
                 }
             ]
         },
@@ -218,7 +279,10 @@
             "doors": [
                 {
                     "letter" : "A",
-                    "type": "door"
+                    "type": "door",
+                    "powerup": {
+                        "type" : "ghostking"
+				    }
                 }
             ]
         },
