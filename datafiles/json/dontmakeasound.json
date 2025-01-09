@@ -325,7 +325,7 @@
         {
             "title": "kidsparty_john",
             "maxscore": 0,
-			            "pillar": true,
+			"pillar": true,
             "doors": [
                 {
                     "letter" : "A",

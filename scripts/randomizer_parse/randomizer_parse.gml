@@ -53,8 +53,8 @@ function rd_parse_rooms()
 				
 				if (ds_map_exists(thisroom, "doors"))
 				{
-					if (array_contains(ignore_rooms, ds_map_find_value(thisroom, "title")) )
-						break;
+					if (array_contains(ignore_rooms, ds_map_find_value(thisroom, "title")) ) //skip this room
+						continue;
 					
 					var parsed_room = rd_parse_doors(thisroom);
 					ds_map_add(parsed_rooms, ds_map_find_value(thisroom, "title"), parsed_room);

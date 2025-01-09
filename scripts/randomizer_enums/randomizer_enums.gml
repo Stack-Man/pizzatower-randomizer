@@ -28,6 +28,8 @@ enum transition
 	door,
 	box,
 	secret,
+	rocket,
+	taxi,
 	none
 }
 

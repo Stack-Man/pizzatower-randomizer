@@ -191,11 +191,6 @@
 							"loop": true
 						},
 						{
-							"letter" : "B",
-							"type": "box",
-							"dir": "down"
-						},
-						{
 							"letter" : "C",
 							"type": "vertical",
 							"dir": "down",

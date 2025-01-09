@@ -60,6 +60,10 @@ function rd_convert_transitiontype(type_text)
 			return transition.box;
 		case "secret":
 			return transition.secret;
+		case "rocket":
+			return transition.rocket;
+		case "taxi":
+			return transition.taxi;
 		default:
 			return transitiondir.none;
 	}
@@ -337,25 +341,18 @@ function rd_clear_transformation()
 		}
 	}
 	
-	if (current_powerup == poweruptype.shotgun)
+	//Clear natural and given shotgun
+	//TODO: clear war flashing red background
+	with (obj_player)
 	{
-		with (obj_player)
+		if shotgunAnim
 		{
-			if shotgunAnim
-			{
-				shotgunAnim = false;
-				/*fmod_event_one_shot_3d("event:/sfx/misc/detransfo", x, y);
-				with instance_create(x, y, obj_sausageman_dead)
-				{
-					sprite_index = spr_shotgunback;
-					if !obj_player1.ispeppino
-						sprite_index = spr_minigunfall;
-				}*/
-				if state == states.shotgunshoot
-					state = states.normal;
-			}
-	
+			shotgunAnim = false;
+
+			if state == states.shotgunshoot
+				state = states.normal;
 		}
+	
 	}
 	
 	if (current_powerup == poweruptype.gustavo)

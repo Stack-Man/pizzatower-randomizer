@@ -7,8 +7,8 @@ global.test_string = "";
 
 global.use_loops = false;
 
-ignore_rooms = ["forest_G1", "plage_shipmain", "minigolf_8"];
-separated_rooms = ["ruin_11"];
+ignore_rooms = ["forest_G1", "plage_shipmain", "minigolf_8", "minigolf_4"];
+separated_rooms = ["ruin_11", "badlands_5", "industrial_2", "industrial_3", "industrial_4"]; //TODO: implement
 
 //TODO: add trickytreat and handling since it doesnt have an entrance or john
 level_names = [ 
