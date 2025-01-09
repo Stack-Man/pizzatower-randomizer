@@ -185,6 +185,8 @@
                             "type": "box",
                             "dir": "up",
 							"pizzatimestart" : true,
+							"exitonly" : true,
+							"ratblocked" : true
 						}
                     ]
 				},

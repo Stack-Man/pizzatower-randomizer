@@ -164,20 +164,24 @@ function rd_connect_to_branch2(sequence, prev_sequence_last_start_letter)
 		buffer = concat(buffer, "    ");
 	}
 	
-	show_debug_message( concat(buffer, "Sequence from ", sequence.last_room.title, " ", prev_sequence_last_start_letter ));
+	show_debug_message( concat(buffer, "Sequence from ", sequence.last_room.title, " ", prev_sequence_last_start_letter, " needs return? : ", ! sequence.last_room_is_end_branch));
 	
 	var needs_return = ! sequence.last_room_is_end_branch;
-	var johntype = needs_return ? roomtype.johnbranching : roomtype.john;
+	var johntype = needs_return ? roomtype.johnbranching : roomtype.john; //TODO: testing with just branching
+	//var johntype = roomtype.branching;
 	var roomtypes = needs_return ? oneway_types : twoway_types;
-	var to_pathtimes = needs_return ? [pathtime.any, pathtime.notpizzatime] : pathtime.any;
+	var to_pathtimes = needs_return ? [pathtime.any, pathtime.notpizzatime] : [pathtime.any, pathtime.notpizzatime]; 
+	//TODO: not needs_return needs notpizzatime too so it can leave the start branch it enters, how can we be sure that either starts on the correct side of the notpizzatime path?
+	//TODO: pathtime for specifically the last room in the sequence (the branch itself)
 	
 	var unfiltered_branches =  rd_get_rooms_of_type([roomtype.branching, johntype]);
 	var branches = rd_filter_out_rooms(unfiltered_branches, global.sequence_tested_rooms);
 	ds_list_destroy(unfiltered_branches);
 	
-	show_debug_message( concat(buffer, "Branch Candidates: ", ds_list_size(branches) ));
+	//show_debug_message( concat(buffer, "Branch Candidates: ", ds_list_size(branches) ));
 	for (var b = 0; b < ds_list_size(branches); b++)
 	{
+		show_debug_message(concat(buffer, "branch ", b  + 1, " of ", ds_list_size(branches) ));
 		var branch = ds_list_find_value(branches, b);
 		
 		//Find all connections
@@ -186,12 +190,21 @@ function rd_connect_to_branch2(sequence, prev_sequence_last_start_letter)
 			branch,
 			roomtypes,
 			to_pathtimes,
-			prev_sequence_last_start_letter);
+			prev_sequence_last_start_letter, "",
+			"", "",
+			true, true,
+			true, true,
+			!needs_return, needs_return); 
+			//if it does not need a return, then it is the end branch, meaning it should enter the next branch from a branch door
+			//if it does need a return, then it is a start branch, so it should exit the next branch from a branch door
+			
 		
-		show_debug_message( concat(buffer, "Connection Candidates for branch ", b, ": ", ds_list_size(connections) ));
+		//show_debug_message( concat(buffer, "Connection Candidates for branch ", b, ": ", ds_list_size(connections) ));
 		
 		for (var c = 0; c < ds_list_size(connections); c++)
 		{
+			show_debug_message(concat(buffer, "connection ", c + 1, " of ", ds_list_size(connections) ));
+			
 			var connection = ds_list_find_value(connections, c);
 			rd_add_connection_rooms_to_map(connection, global.sequence_tested_rooms);
 			sequence.to_connection = connection;
@@ -207,78 +220,14 @@ function rd_connect_to_branch2(sequence, prev_sequence_last_start_letter)
 				original_last_path.startletter //Start needs to match the previous room's transition
 				);
 			
-			show_debug_message( concat(buffer, "Last Path Candidates for connection ", c, ": ", ds_list_size(last_paths) ));
-			
 			for (var l = 0; l < ds_list_size(last_paths); l++)
 			{
+				show_debug_message(concat(buffer, "last path ", l  + 1, " of ", ds_list_size(last_paths) ));
+				
 				var last_path = ds_list_find_value(last_paths, l);
 				var last_is_john = rd_check_type(branch, johntype);
 				
-				if (needs_return)
-				{
-					//If john there is no third door, the player immediately uses the return connection
-					var last_exit_letter = last_is_john ? last_path.startletter : last_path.exitletter; 
-					var actual_start_letter = connection.path.startletter;
-					
-					//Ensure the to connection's entrance to last is not used
-					//And the to connection's exit from first is not used
-					/*var dont_use_last_start_letter = concat("not ", last_path.startletter);
-					var dont_use_actual_exit_letter = concat("not ", connection.path.exitletter);
-					
-					var return_connections = rd_connect_rooms_with_type_start(
-								branch, 
-								sequence.last_room, 
-								roomtypes, 
-								pathtimes, 
-								last_exit_letter, dont_use_last_start_letter,
-								dont_use_actual_exit_letter, actual_start_letter,
-								true);*/
-					
-					var temp = global.test_string;
-					
-					show_debug_message( concat("Trying return from ", branch.title, " to ", sequence.last_room.title));
-					
-					var return_connections = rd_find_connections_start(
-						branch,
-						sequence.last_room,
-						roomtypes,
-						[pathtime.any, pathtime.pizzatime],
-						last_exit_letter, last_path.startletter,
-						connection.path.exitletter, actual_start_letter,
-						true, false,
-						false, true);
-					
-					global.test_string = temp;
-					
-					show_debug_message( concat(buffer, "Return Connection Candidates for last path ", l, ": ", ds_list_size(return_connections) ));
-					
-					for (var r = 0; r < ds_list_size(return_connections); r++)
-					{
-						var return_connection = ds_list_find_value(return_connections, r);
-						rd_add_connection_rooms_to_map(return_connection, global.sequence_tested_rooms);
-						sequence.return_connection = return_connection;
-						
-						//The next sequence starts from the same exit as is used for the end of the to connection and start of the return connection
-						var new_sequence = rd_continue_sequence(
-							sequence,
-							last_is_john,
-							branch,
-							false,
-							last_exit_letter)
-						
-						if (new_sequence != undefined)
-						{
-							global.recursion_depth--;
-							return new_sequence;
-						}
-							
-						
-						rd_remove_connection_rooms_from_map(return_connection, global.sequence_tested_rooms);
-						sequence.return_connection = undefined;
-					}
-					
-				}
-				else
+				if (!needs_return)
 				{
 					var new_sequence = rd_continue_sequence(
 						sequence, 
@@ -294,6 +243,50 @@ function rd_connect_to_branch2(sequence, prev_sequence_last_start_letter)
 					}
 				}
 				
+				//If john there is no third door, the player immediately uses the return connection
+				var last_exit_letter = last_is_john ? last_path.startletter : last_path.exitletter; 
+				var actual_start_letter = connection.path.startletter;
+				
+				var return_connections = rd_find_connections_start(
+					branch,
+					sequence.last_room,
+					roomtypes,
+					[pathtime.any, pathtime.pizzatime],
+					last_exit_letter, last_path.startletter,
+					connection.path.exitletter, actual_start_letter,
+					true, false,
+					false, true,
+					false, false);
+					//needs_return, !needs_return);
+
+				for (var r = 0; r < ds_list_size(return_connections); r++)
+				{
+					show_debug_message(concat(buffer, "return ", r, " of ", ds_list_size(return_connections) ));
+					
+					var return_connection = ds_list_find_value(return_connections, r);
+					rd_add_connection_rooms_to_map(return_connection, global.sequence_tested_rooms);
+					sequence.return_connection = return_connection;
+						
+					//The next sequence starts from the same exit as is used for the end of the to connection and start of the return connection
+					var new_sequence = rd_continue_sequence(
+						sequence,
+						last_is_john,
+						branch,
+						false,
+						last_path.startletter);//TODO: test
+						//last_exit_letter);
+						
+					if (new_sequence != undefined)
+					{
+						global.recursion_depth--;
+						return new_sequence;
+					}
+							
+						
+					rd_remove_connection_rooms_from_map(return_connection, global.sequence_tested_rooms);
+					sequence.return_connection = undefined;
+				}
+					
 				//Failed to continue sequence, try next path
 			}
 			
@@ -318,7 +311,7 @@ function rd_continue_sequence(sequence, last_is_john, last_room, last_room_is_en
 		undefined,
 		undefined,
 		last_room,
-		last_room_is_end_branch);
+		!last_room_is_end_branch); //inverse the end branch
 						
 		//The next sequence starts from the same exit as is used for the end of the to connection and start of the return connection
 		var next_sequence = rd_connect_to_branch2(incomplete_sequence, prev_sequence_last_start_letter);
@@ -341,21 +334,18 @@ function rd_continue_sequence(sequence, last_is_john, last_room, last_room_is_en
 
 function rd_find_connections_start(first_room, last_room, roomtypes, pathtimes, 
 start_letter = "", exit_letter = "", last_start_letter = "", last_exit_letter = "", 
-use_start = true, use_exit = true, use_last_start = true, use_last_exit = true)
+use_start = true, use_exit = true, use_last_start = true, use_last_exit = true,
+use_branch_start = false, use_branch_exit = false)
 {
+	if (first_room.title == "chateau_2" && last_room.title == "farm_2")
+	{
+		show_debug_message(concat("Testing chateau_2 return to farm_2"));
+	}
+	
 	ds_list_clear(global.connection_tested_exits);
 	ds_map_clear(global.connection_tested_rooms);
-	global.test_string = first_room.title;
 	
-	if (first_room.title == "graveyard_5c")
-	{
-		for (var v = 0; v < ds_list_size(first_room.paths); v++)
-		{
-			var test_path = ds_list_find_value(first_room.paths, v);
-			
-			show_debug_message( concat("graveyard_5c path: ", test_path.startletter, " to ", test_path.exitletter));
-		}
-	}
+	global.test_string = first_room.title;
 	
 	var first_paths =  rd_filter_paths_by_start_and_roomtype( //TODO: delete list
 			first_room, 
@@ -364,15 +354,6 @@ use_start = true, use_exit = true, use_last_start = true, use_last_exit = true)
 			);
 			
 	var connections = ds_list_create();
-	
-	global.recursion_depth++;
-	var buffer = "";
-	
-	for (var i = 0; i < global.recursion_depth; i++)
-	{
-		buffer = concat(buffer, "    ");
-	}
-	show_debug_message( concat(buffer, "First Path Candidates: ", ds_list_size(first_paths) ) );
 	
 	//Try to connect all paths directly to last room
 	//All possible connections are returned;
@@ -391,7 +372,11 @@ use_start = true, use_exit = true, use_last_start = true, use_last_exit = true)
 			
 			global.test_string = concat(global.test_string, " ", first_path.exitletter, " -> ", last_room.title);
 			
-			var direct_connection = rd_connect_directly(first_room, first_path, last_room, roomtypes, pathtimes, last_start_letter, last_exit_letter, use_last_start, use_last_exit);
+			var direct_connection = rd_connect_directly(
+				first_room, first_path, last_room, roomtypes, pathtimes, 
+				last_start_letter, last_exit_letter, 
+				use_last_start, use_last_exit, 
+				use_branch_start, use_branch_exit);
 			
 			global.test_string = temp;
 			
@@ -402,10 +387,7 @@ use_start = true, use_exit = true, use_last_start = true, use_last_exit = true)
 	}
 	
 	if ( ds_list_size(connections) > 0) //If we directly connected, there's no need to test any proper connections
-	{
-		global.recursion_depth--;
 		return connections;
-	}
 	
 	//Try to create connections to last room with all first paths 
 	for (var f = 0; f < ds_list_size(first_paths); f++)
@@ -423,7 +405,6 @@ use_start = true, use_exit = true, use_last_start = true, use_last_exit = true)
 		
 		if (correct_start && correct_exit)
 		{
-			show_debug_message( concat(buffer, "Using First Path: ", f ) );
 			//Don't repeat exits that have been tested in the connection before
 			var exitpair = rd_get_exit_struct(first_path);
 			
@@ -446,7 +427,8 @@ use_start = true, use_exit = true, use_last_start = true, use_last_exit = true)
 				roomtypes,
 				pathtimes,
 				last_start_letter, last_exit_letter,
-				use_last_start, use_last_exit);
+				use_last_start, use_last_exit,
+				use_branch_start, use_branch_exit);
 				
 			if (new_connection != undefined)
 				ds_list_add(connections, new_connection);
@@ -456,15 +438,19 @@ use_start = true, use_exit = true, use_last_start = true, use_last_exit = true)
 		//Try next first path
 	}
 	
-	global.recursion_depth--;
 	return connections;
 }
 
 function rd_find_connections(connection, last_room, roomtypes, pathtimes, 
 last_start_letter = "", last_exit_letter = "", 
-use_last_start = true, use_last_exit = true)
+use_last_start = true, use_last_exit = true,
+use_branch_start = false, use_branch_exit = false)
 {
-	global.recursion_depth++;
+	if (connection.first.title == "chateau_2" && last_room.title == "farm_2")
+	{
+		show_debug_message(concat("Testing chateau_2 return to farm_2 with path ", connection.path));
+	}
+	
 	var buffer = "";
 	
 	for (var i = 0; i < global.recursion_depth; i++)
@@ -509,7 +495,7 @@ use_last_start = true, use_last_exit = true)
 				
 	var stored_match_paths = ds_list_create(); //TODO: delete list, sub lists are handled
 	
-	show_debug_message( concat(buffer, "Match Candidates: ", ds_list_size(match_rooms) ) );	
+	//show_debug_message( concat(buffer, "Match Candidates: ", ds_list_size(match_rooms) ) );	
 	//Try to find a match room that connects to last
 	for (var mr = 0; mr < ds_list_size(match_rooms); mr++)
 	{
@@ -519,6 +505,11 @@ use_last_start = true, use_last_exit = true)
 
 		global.test_string = concat(global.test_string, " -> ", match_room.title, " -> ", last_room.title);
 
+		if (first_room.title == "chateau_2" && last_room.title == "farm_2" && match_room.title == "freezer_11")
+		{
+			show_debug_message(concat("Testing chateau_2 return to farm_2 with freezer_11 inbetween"));
+		}
+
 		//Get path that matches first exit and the correct roomtype
 		var match_paths = rd_filter_paths_by_start_and_roomtype(
 			match_room,  
@@ -527,6 +518,11 @@ use_last_start = true, use_last_exit = true)
 			pathtimes, 
 			roomtypes
 			);
+		
+		if (first_room.title == "chateau_2" && last_room.title == "farm_2" && match_room.title == "freezer_11")
+		{
+			show_debug_message(concat("freezer_11 paths size: ", ds_list_size(match_paths) ));
+		}
 					
 		ds_list_add(stored_match_paths, match_paths);
 		ds_list_mark_as_list(stored_match_paths, mr); //auto delete sublists
@@ -537,13 +533,27 @@ use_last_start = true, use_last_exit = true)
 			var exitpair = rd_get_exit_struct(match_path);
 			
 			if (rd_list_contains_exit(global.connection_tested_exits, exitpair)) //Skip path exits that have already been tested
+			{
+				if (first_room.title == "chateau_2" && last_room.title == "farm_2" && match_room.title == "freezer_11")
+				{
+					show_debug_message(concat("not testing freezer_11 path: ", match_path));
+				}
+				
 				continue;
+			}
+			
+			if (first_room.title == "chateau_2" && last_room.title == "farm_2" && match_room.title == "freezer_11")
+			{
+				show_debug_message(concat("testing freezer_11 path: ", match_path ));
+			}
 			
 			ds_list_add(global.connection_tested_exits, exitpair);
 			
-			var new_connection = rd_connect_directly(match_room, match_path, last_room, roomtypes, pathtimes, last_start_letter, last_exit_letter, use_last_start, use_last_exit);
-			
-			
+			var new_connection = rd_connect_directly(
+				match_room, match_path, last_room, roomtypes, pathtimes, 
+				last_start_letter, last_exit_letter, 
+				use_last_start, use_last_exit, 
+				use_branch_start, use_branch_exit);
 			
 			if (new_connection != undefined)
 			{
@@ -566,15 +576,6 @@ use_last_start = true, use_last_exit = true)
 	}
 	
 	//Try to find a match room that connects to last with a new room inbetween
-	//PRIORITY TODO: it only ever recursively does one room after the initial,
-	//For example, dungeon_1 has 37 matches
-	//If none of them connect directly to entrance_5,
-	//It tries to add dungeon_2 to dungeon_1 then continue recursively
-	//but never tries any of the other 36 matches, even if they have unique exits, though maybe its because some conclusion from dungeon 2 decided taht none of those
-	//matches would be valid connections, since possible their exits were tested further down the line
-	var total_used = 0;
-	var total_str = "";
-	
 	for (var mr = 0; mr < ds_list_size(match_rooms); mr++) 
 	{
 		var used = false;
@@ -615,7 +616,8 @@ use_last_start = true, use_last_exit = true)
 				roomtypes, 
 				pathtimes, 
 				last_start_letter, last_exit_letter, 
-				use_last_start, use_last_exit);
+				use_last_start, use_last_exit,
+				use_branch_start, use_branch_exit);
 
 			//valid found, return it //TODO: why are we checking if next connection.second is also not undefined?
 			//May be because next_connection.second should be a connection to last and not undefined
@@ -623,61 +625,33 @@ use_last_start = true, use_last_exit = true)
 			if (next_connection != undefined && next_connection.second != undefined) //a valid connection was found
 			{
 				connection.second = next_connection;
-				global.recursion_depth--;
 				return connection;
 			}
 				
 		}
 
-		if (used)
-				total_used++;
-			
-		if (used)
-			total_str = concat(total_str, " ", match_room.title);
-				
 		//Try next match room
 		global.test_string = temp;
 	}
 	
-			
-	show_debug_message( concat(buffer, "Total: ", ds_list_size(match_rooms), " Used: ", total_used, " Names: ", total_str) );
-	
 	//Exhausted all match rooms
-	global.recursion_depth--;
 	return undefined;
 }
 
-function rd_connect_directly(first_room, first_path, last_room, roomtypes, pathtimes, last_start_letter, last_exit_letter, use_last_start, use_last_exit)
+function rd_connect_directly(first_room, first_path, last_room, roomtypes, pathtimes, 
+last_start_letter, last_exit_letter, use_last_start, use_last_exit, 
+use_branch_start = false, use_branch_exit = false)
 {
+	if (first_room.title == "freezer_11" && last_room.title == "farm_2")
+	{
+		show_debug_message(concat("Trying to directly connect freezer_11 to farm_2"));
+	}
+	
 	var buffer = "";
 	
 	for (var i = 0; i < global.recursion_depth; i++)
 	{
 		buffer = concat(buffer, "    ");
-	}
-	
-	if (first_room.title == "medieval_6")
-	{
-		switch (first_path.exittype)
-		{
-			case transition.door:
-				show_debug_message("door");
-				break;
-			case transition.box:
-				show_debug_message("box");
-				break;
-			case transition.horizontal:
-				show_debug_message("horizontal");
-				break;
-			case transition.vertical:
-				show_debug_message("vertical");
-				break;
-			default:
-				show_debug_message("none");
-				break;
-		}
-		
-		show_debug_message( concat("Letter: ", first_path.exitletter) );
 	}
 	
 	var potential_last_paths = rd_filter_paths_by_start_and_roomtype( //TODO: delete list
@@ -686,6 +660,23 @@ function rd_connect_directly(first_room, first_path, last_room, roomtypes, patht
 		rd_get_opposite_dir(first_path.exitdir), 
 		pathtimes,
 		roomtypes);
+		
+	if (first_room.title == "freezer_11" && last_room.title == "farm_2")
+	{
+		show_debug_message( concat(first_room.title, " path: ", first_path) );
+		
+		var last_paths = last_room.paths;
+		
+		for (var lp = 0; lp < ds_list_size(last_paths); lp++)
+		{
+			show_debug_message( concat(last_room.title, " path: ", ds_list_find_value(last_paths, lp) ));
+		}
+		
+		for (var lp = 0; lp < ds_list_size(potential_last_paths); lp++)
+		{
+			show_debug_message( concat(last_room.title, " potential path: ", ds_list_find_value(potential_last_paths, lp) ));
+		}
+	}
 	
 	var last_paths = ds_list_create();
 			
@@ -696,7 +687,14 @@ function rd_connect_directly(first_room, first_path, last_room, roomtypes, patht
 		var correct_start = last_start_letter = "" || (use_last_start && potential_last_path.startletter == last_start_letter) || (!use_last_start && potential_last_path.startletter != last_start_letter);
 		var correct_exit = last_exit_letter = "" || (use_last_exit && potential_last_path.exitletter == last_exit_letter) || (!use_last_exit && potential_last_path.exitletter != last_exit_letter);
 	
-		if (correct_start && correct_exit)
+		var correct_branch = ( !use_branch_start || (use_branch_start && potential_last_path.startdoor.branch) ) && ( !use_branch_exit || (use_branch_exit && potential_last_path.exitdoor.branch) )
+	
+		if (first_room.title == "freezer_11" && last_room.title == "farm_2")
+		{
+			show_debug_message( concat(last_room.title, "path ", plp, " is valid? start: ", correct_start, " exit: ", correct_exit, " branch: ", correct_branch) );
+		}
+	
+		if (correct_start && correct_exit && correct_branch)
 			ds_list_add(last_paths, potential_last_path);
 	}
 	
@@ -865,8 +863,14 @@ function rd_filter_paths(from_room, desired_type, desired_dir, desired_time, des
 		{
 			for (var j = 0; j < array_length(desired_time); j++)
 			{
+				if (from_room.title == "test")
+				{
+					show_debug_message( concat("Time wanted: ", desired_time[j]) );
+				}
+				
 				if (p_time == desired_time[j])
 				{
+					
 					time_matches = true;
 					break;
 				}
@@ -875,6 +879,11 @@ function rd_filter_paths(from_room, desired_type, desired_dir, desired_time, des
 		else
 		{
 			time_matches = (p_time == desired_time || desired_time == pathtime.none);
+			
+			if (from_room.title == "test")
+			{
+				show_debug_message( concat("Time wanted 1: ", desired_time) );
+			}
 		}
 		
 						
@@ -886,6 +895,27 @@ function rd_filter_paths(from_room, desired_type, desired_dir, desired_time, des
 			{
 				ds_list_add(valid_paths, path);
 			}
+		
+		
+		if (from_room.title == "test")
+		{
+			show_debug_message( concat("test filtering: ", path) );
+			
+			if (!time_matches)
+				show_debug_message("above time does not match");
+			
+			if (! (p_type == desired_type || desired_type == transition.none))
+				show_debug_message("above type does not match");
+			
+			if (! (p_type == desired_type || desired_type == transition.none))
+				show_debug_message("above type does not match");
+			
+			if (! ((dont_use_desired_letter && p_letter != desired_letter) || p_letter == desired_letter || desired_letter == ""))
+				show_debug_message("above letter does not match");
+			
+			if (! (p_dir == desired_dir || desired_dir == transitiondir.none) )
+				show_debug_message("above dir does not match");
+		}
 	
 	}
 	

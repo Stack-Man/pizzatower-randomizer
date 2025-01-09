@@ -334,15 +334,26 @@
 			[
 				{
 					"letter" : "A",
-					"type" : "door"
+					"type" : "door",
+					"powerup" :
+					{
+						"type" : "satan",
+						"pizzatime" : true
+					}
 				},
+				
 				
 				{
 					"letter" : "C",
 					"type" : "horizontal",
 					"dir" : "left",
 					"exitonly" : true,
-					"ratblocked" : true
+					"ratblocked" : true,
+					"powerup" :
+					{
+						"type" : "satan",
+						"pizzatime" : true
+					}
 				}
 			]
 		},

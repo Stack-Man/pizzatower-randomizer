@@ -266,7 +266,8 @@
 						},
 						{
 							"letter" : "A",
-							"type": "door"
+							"type": "door",
+							"pizzatime" : true
 						}
 					]
 				},

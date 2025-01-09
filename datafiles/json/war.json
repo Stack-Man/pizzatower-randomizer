@@ -359,23 +359,13 @@
 			"maxscore" : 0,
 			"wartimer" : true,
 			"lap2" : true,
+			"exit" : true,
 			"toppin" :
 			{
 				"type" : "pineapple"
 			},
 			"doors" :
 			[
-				{
-					"letter" : "A",
-					"type" : "leveldoor",
-					"exit" : true,
-					"exitonly" : true,
-					"powerup" :
-					{
-						"type" : "shotgun"
-					}
-				},
-				
 				{
 					"letter" : "B",
 					"type" : "vertical",

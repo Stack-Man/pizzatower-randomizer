@@ -3,7 +3,7 @@ function rd_generate_new(use_new_seed = false)
 	rd_init(use_new_seed);
 
 	global.sequence_tested_rooms = ds_map_create(); //Doesn't get cleared between sequences
-	global.connection_tested_rooms = ds_map_create(); //Does get cleared whenever calling rd_connect_rooms_with_type_start
+	global.connection_tested_rooms = ds_map_create(); //Does get cleared whenever calling rd_find_connections_start
 	global.connection_tested_exits = ds_list_create(); //same as above
 
 	global.transition_map = ds_map_create();
@@ -132,9 +132,9 @@ function rd_filter_paths_by_start_and_roomtype(from_room, desired_transition_typ
 {
 	var unfiltered_paths = rd_filter_paths_by_start(from_room, desired_transition_type, desired_dir, desired_time, desired_letter);
 	
-	if (from_room.title == "graveyard_6")
+	if (from_room.title == "test")
 	{
-		show_debug_message( concat("unfilteres size for graveyard 6 ", ds_list_size(unfiltered_paths) ) );
+		show_debug_message( concat("unfilteres size for test ", ds_list_size(unfiltered_paths) ) );
 	}
 	
 	if ( ! array_contains(desired_roomtypes, roomtype.oneway) ) //filter out oneway paths from potentialoneway rooms

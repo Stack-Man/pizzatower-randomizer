@@ -27,11 +27,15 @@ if (ds_map_exists(global.transition_map, room))
 		{
 			var xscale = image_xscale;
 			var yscale = image_yscale;
+			var orginal_depth = depth;
+			var orginal_layer = layer;
 			
 			with (instance_create_depth(x, y, depth, obj_closedboxofpizza))
 			{
 				image_xscale = xscale;
 				image_yscale = yscale;
+				depth = orginal_depth;
+				layer = orginal_layer;
 			}
 			
 			instance_destroy(self);

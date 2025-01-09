@@ -1,13 +1,15 @@
 function rd_init(use_new_seed = false)
 {
 	//TODO: implement reading the ini file
-	seed = 1366994938;
+	seed = 422622450;
 	
 	if (seed == 0 || use_new_seed)
 	{
 		randomize();
 		seed = floor(random_range(-2147483648, 2147483647));
 	}
+	
+	show_debug_message( concat("Seed: ", seed) );
 	
 	random_set_seed(seed);
 }
@@ -131,6 +133,7 @@ function rd_parse_doors(thisroom)
 					found_path_time = pathtime.notpizzatime;
 				}
 				
+				//TODO: what is this supposed to indicate
 				if ( (ds_map_exists(start_door, "pizzatime") || ds_map_exists(exit_door, "pizzatime"))
 				&& (ds_map_exists(start_door, "notpizzatime") || ds_map_exists(exit_door, "notpizzatime")) )
 				{
@@ -164,12 +167,14 @@ function rd_parse_doors(thisroom)
 				
 				var start_door_struct = {
 					startonly : ds_map_exists(start_door, "startonly"),
-					ratblocked : ds_map_exists(start_door, "ratblocked")
+					ratblocked : ds_map_exists(start_door, "ratblocked"),
+					branch : !ds_map_exists(start_door, "pizzatime") && !ds_map_exists(start_door, "notpizzatime")
 				};
 				
 				var exit_door_struct = {
 					exitonly : ds_map_exists(exit_door, "exitonly"),
-					ratblocked : ds_map_exists(exit_door, "ratblocked")
+					ratblocked : ds_map_exists(exit_door, "ratblocked"),
+					branch : !ds_map_exists(exit_door, "pizzatime") && !ds_map_exists(exit_door, "notpizzatime")
 				};
 				
 				var has_loop = false;

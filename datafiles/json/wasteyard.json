@@ -15,7 +15,8 @@
                 {
                     "letter" : "B",
                     "type": "horizontal",
-                    "dir": "left"
+                    "dir": "left",
+					"notpizzatime" : true
                 },
                 {
                     "letter": "E",
