@@ -687,6 +687,7 @@
 		{
 			"title" : "forest_john",
 			"maxscore" : 0,
+			"maxscore" : 0,
 			"gnomepizza" : true,
 			"pillar" : true,
 			"doors" :
@@ -695,6 +696,7 @@
 					"letter" : "B",
 					"type" : "horizontal",
 					"dir" : "left",
+					"notpizzatime": true,
 					"powerup" :
 					{
 						"type" : "gustavo"

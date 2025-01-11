@@ -132,13 +132,15 @@ function rd_filter_paths_by_start(from_room, desired_type, desired_dir, desired_
 	return rd_filter_paths(from_room, desired_type, desired_dir, desired_time, desired_letter, true);
 }
 
-function rd_filter_paths_by_start_and_roomtype(from_room, desired_transition_type,  desired_dir, desired_time, desired_roomtypes, desired_letter = "")
+function rd_filter_paths_by_start_and_roomtype(
+	from_room, desired_transition_type,  desired_dir, desired_time, desired_roomtypes, desired_letter = "", use_branch_start = false, use_branch_exit = false)
 {
 	var unfiltered_paths = rd_filter_paths_by_start(from_room, desired_transition_type, desired_dir, desired_time, desired_letter);
 	
-	if (from_room.title == "test")
+	if (from_room.title == global.test_name)
 	{
-		show_debug_message( concat("unfilteres size for test ", ds_list_size(unfiltered_paths) ) );
+		show_debug_message( concat("unfiltered paths size for ", global.test_name, ": ", ds_list_size(unfiltered_paths) ) );
+		show_debug_message( concat("Using branch start? exit? ", use_branch_start, " and  ", use_branch_exit) );
 	}
 	
 	if ( ! array_contains(desired_roomtypes, roomtype.oneway) ) //filter out oneway paths from potentialoneway rooms
@@ -151,14 +153,28 @@ function rd_filter_paths_by_start_and_roomtype(from_room, desired_transition_typ
 			var path = ds_list_find_value(unfiltered_paths, i);
 			
 			//The path is oneway, unless it is also ratblocked
-			if ( (path.startdoor.startonly && !path.startdoor.ratblocked)
-			||   (path.exitdoor.exitonly   && !path.exitdoor.ratblocked) )
+			//unless startdoor is branch and we use start branch
+			//unless exitdoor is branch and we use exit branch
+			var good_branch = (path.startdoor.branch && use_branch_start) || (path.exitdoor.branch && use_branch_exit);
+			
+			//It doesnt matter which is startonly/exitonly if either of them is a branch and we are using it
+			var bad_start = (path.startdoor.startonly && !path.startdoor.ratblocked );
+			var bad_exit = (path.exitdoor.exitonly && !path.exitdoor.ratblocked);
+			
+			if ( (bad_start || bad_exit) && !good_branch )
 			{
-				//do nothing
+				if (from_room.title == global.test_name)
+				{
+					show_debug_message( concat("bad oneway path for ", global.test_name, path ) );
+				}
 			}
 			else
 			{
 				ds_list_add(filtered_paths, path);
+				if (from_room.title == global.test_name)
+				{
+					show_debug_message( concat("good oneway path for ", global.test_name, path ) );
+				}
 			}
 		}
 
@@ -362,6 +378,19 @@ function rd_clear_transformation()
 	
 	current_powerup = poweruptype.none;
 }
+
+function rd_buffer()
+{
+	var buffer = "";
+	
+	for (var i = 0; i < global.recursion_depth; i++)
+	{
+		buffer = concat(buffer, "    ");
+	}
+	
+	return buffer;
+}
+
 
 //TODO: implement rocket
 //implement ghostking and "ghostking ball"
