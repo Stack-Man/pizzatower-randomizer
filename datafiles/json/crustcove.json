@@ -73,6 +73,7 @@
 			"maxscore" : 0,
 			"gerome" : true,
 			"loop": true,
+			"keyloop" : true,
 			"doors" :
 			[
 				{
@@ -85,7 +86,8 @@
 				{
 					"letter" : "B",
 					"type" : "door",
-					"locked" : true
+					"locked" : true,
+					"branch" : true
 				},
 				
 				{
@@ -224,7 +226,8 @@
 				
 				{
 					"letter" : "B",
-					"type" : "door"
+					"type" : "door",
+					"branch" : true
 				},
 				
 				{

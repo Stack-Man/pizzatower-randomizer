@@ -5,6 +5,7 @@
 					"maxscore": 0,
 					"entrance": true,
 					"lap2": true,
+					"keyloop" : true,
 					"doors": [
 						{
 							"letter" : "A",
@@ -16,7 +17,8 @@
 							"letter" : "B",
 							"type": "horizontal",
 							"dir": "right",
-							"notpizzatime": true
+							"notpizzatime": true,
+							"loopstart" : true
 						},
 
 						{
@@ -176,7 +178,8 @@
 						{
 							"letter" : "B",
 							"type": "box",
-							"dir": "down"
+							"dir": "down",
+							"branch" : true
 						},
 						{
 							"letter" : "D",
