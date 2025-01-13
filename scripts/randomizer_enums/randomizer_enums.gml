@@ -52,7 +52,8 @@ enum poweruptype
 	gustavo,
 	shotgun,
 	barrel,
-	satan
+	satan,
+	ghostking
 }
 
 

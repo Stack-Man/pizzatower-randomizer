@@ -66,7 +66,8 @@
           "letter": "F",
           "type": "door",
           "gerome": true,
-          "pizzatime": true
+          "pizzatime": true,
+		  "loop" : true
         }
       ]
     },

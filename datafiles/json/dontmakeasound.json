@@ -56,6 +56,7 @@
                     "letter" : "D",
                     "type": "vertical",
                     "dir": "down",
+					"loop" : true,
                     "loopstart": true,
                     "exitonly": true
                 },
@@ -63,6 +64,7 @@
                     "letter" : "C",
                     "type": "vertical",
                     "dir": "down",
+					"loop" : true,
                     "loopexit": true,
                     "startonly": true
                 }
@@ -82,7 +84,12 @@
                     "letter" : "D",
                     "type": "vertical",
                     "dir": "up",
-                    "pizzatime": true
+                    "pizzatime": true,
+					"powerup" :
+					{
+						"type": "shotgun"
+					}
+					
                 },
                 {
                     "letter" : "B",

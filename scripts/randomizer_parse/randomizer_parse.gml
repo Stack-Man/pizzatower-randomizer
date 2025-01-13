@@ -132,9 +132,17 @@ function rd_check_all_paths_for_special_branch(paths, has_pillar, has_entrance, 
 	{
 		var path = ds_list_find_value(paths, p);
 		
+		//TODO: may be redundant with the below check
 		if (path.pathtime == pathtime.pizzatime)
 			has_pizzatime = true;
 		else if (path.pathtime == pathtime.notpizzatime)
+			has_notpizzatime = true;
+		
+		//Accounts for john branching paths as well which are marked as pathtime.any
+		if (path.startdoor.pizzatime || path.exitdoor.pizzatime)
+			has_pizzatime = true;
+		
+		if (path.startdoor.notpizzatime || path.exitdoor.notpizzatime)
 			has_notpizzatime = true;
 		
 		if (has_pizzatime && has_notpizzatime)
@@ -299,6 +307,12 @@ function rd_parse_doors(thisroom)
 	
 	//Check for john, entrance, branch variant, or branchmid
 	found_room_type = rd_check_all_paths_for_special_branch(found_paths, has_pillar, has_entrance, found_room_type);
+	
+	if (found_room_type == roomtype.john || found_room_type == roomtype.entrance)
+		show_debug_message( concat(room_title, " is john or entrance ") );
+	
+	if (found_room_type == roomtype.johnbranching || found_room_type == roomtype.entrancebranching)
+		show_debug_message( concat(room_title, " is john branching or entrance branching") );
 
 	if (ds_list_size(filtered_doors) <= 1 && found_room_type != roomtype.entrance && found_room_type != roomtype.john)
 		found_room_type = roomtype.loop;

@@ -351,6 +351,21 @@ function rd_get_connection_struct(new_first, new_path, new_second)
 function rd_clear_transformation()
 {
 
+	//TODO: may accidentally delete existing ghostking if you go into a room with a natural ghostking from a fake ghostking
+	//Try to only delete the first instance
+	if (instance_exists(obj_trapghost) && current_powerup == poweruptype.ghostking )
+	{
+		var already_destroyed = false;
+		
+		with (obj_trapghost)
+		{
+			if (!already_destroyed)
+				instance_destroy(self);
+			
+			already_destroyed = true;
+		}
+	}
+
 	if (current_powerup == poweruptype.satan)
 	{
 		global.noisejetpack = false;
@@ -437,6 +452,12 @@ function rd_give_transformation(name)
 			case "gustavo":
 				rd_gustavo();
 				break;
+			case "ghostking":
+				rd_ghostking();
+				break;
+			case "rocket":
+				rd_rocket();
+				break;
 			default:
 				break;
 		}
@@ -456,10 +477,35 @@ function rd_give_transformation(name)
 		case "gustavo":
 			current_powerup = poweruptype.gustavo;
 			break;
+		case "ghostking":
+			current_powerup = poweruptype.ghostking;
 		default:
 			break;
 	}
 	
+}
+
+function rd_rocket()
+{
+	with (obj_player)
+	{
+		state = states.rocket;
+		sprite_index = spr_rocketstart;
+		image_index = 0;
+		if movespeed < 8
+			movespeed = 8;
+	}
+}
+
+function rd_ghostking()
+{
+	if (!instance_exists(obj_trapghost) )
+	{
+		with(obj_player)
+		{
+			instance_create_depth(x, y, depth, obj_trapghost);
+		}
+	}
 }
 
 function rd_barrel()

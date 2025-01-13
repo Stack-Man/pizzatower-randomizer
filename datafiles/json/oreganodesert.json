@@ -315,8 +315,7 @@
         {
           "letter": "E",
           "type": "door",
-          "loop": true,
-		  "notpizzatime" : true
+          "loop": true
         }
       ]
     },

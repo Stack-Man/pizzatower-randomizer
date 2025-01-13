@@ -252,6 +252,8 @@ function rd_connect_to_branch2(sequence, prev_sequence_last_path_start_letter)
 				var last_exit_letter = last_is_john ? last_path.startdoor.letter : last_path.exitdoor.letter; 
 				var actual_start_letter = connection.path.startdoor.letter;
 				
+				show_debug_message( concat(rd_buffer(), "depth: ", global.recursion_depth, " trying return from ", branch.title, " to ", sequence.last_room.title) );
+				
 				var return_connections = rd_find_connections_start(
 					branch,
 					sequence.last_room,
