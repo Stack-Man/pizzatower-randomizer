@@ -38,7 +38,8 @@
 				{
 					"letter" : "B",
 					"type" : "horizontal",
-					"dir" : "right"
+					"dir" : "right",
+					"branch" : true
 				},
 				
 				{

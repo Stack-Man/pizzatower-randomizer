@@ -191,7 +191,8 @@
 							"letter" : "F",
 							"type": "door",
 							"gerome": true,
-							"loop": true
+							"loop": true,
+							"branch" : true
 						},
 						{
 							"letter" : "C",

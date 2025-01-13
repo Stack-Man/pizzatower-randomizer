@@ -116,7 +116,8 @@
 						{
 							"letter" : "D",
                             "type": "box",
-                            "dir": "down"
+                            "dir": "down",
+							"branch" : true
 						},
 						
 						{
@@ -150,7 +151,8 @@
 						{
 							"letter" : "B",
                             "type": "horizontal",
-                            "dir": "left"
+                            "dir": "left",
+							"branch" : true
 						},
 						
 						{

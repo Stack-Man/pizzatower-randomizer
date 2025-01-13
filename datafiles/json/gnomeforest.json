@@ -584,6 +584,7 @@
 					"letter" : "B",
 					"type" : "horizontal",
 					"dir" : "left",
+					"branch" : true,
 					"powerup" :
 					{
 						"type" : "gustavo"
@@ -645,6 +646,7 @@
 					"type" : "horizontal",
 					"dir" : "left",
 					"startonly" : true,
+					"branchstart" : true,
 					"powerup" :
 					{
 						"type" : "gustavo"
@@ -666,6 +668,7 @@
 					"letter" : "D",
 					"type" : "door",
 					"pizzatime" : true,
+					"branchexit" : true,
 					"powerup" :
 					{
 						"type" : "gustavo"
@@ -676,6 +679,7 @@
 					"letter" : "E",
 					"type" : "door",
 					"pizzatime" : true,
+					"branchexit" : true,
 					"powerup" :
 					{
 						"type" : "gustavo"
@@ -686,7 +690,6 @@
 		
 		{
 			"title" : "forest_john",
-			"maxscore" : 0,
 			"maxscore" : 0,
 			"gnomepizza" : true,
 			"pillar" : true,

@@ -223,7 +223,8 @@
 					"startonly" : true,
 					"notpizzatime" : true,
 					"notpizzatimestart" : true,
-					"pizzatimeexit" : true
+					"pizzatimeexit" : true,
+					"branch" : true
 				}
 			]
 		},

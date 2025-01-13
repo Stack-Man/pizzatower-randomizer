@@ -35,6 +35,7 @@
                     "letter" : "B",
                     "type": "horizontal",
                     "dir": "left",
+					"branch" : true,
                     "powerup": {
                         "type" : "ghostking",
                         "pizzatime" : true
@@ -159,6 +160,7 @@
                     "type": "door",
                     "exitonly": true,
                     "ratblocked": true,
+					"branch" : true,
                     "powerup": {
                         "type" : "ghostking"
 				    }
@@ -192,6 +194,7 @@
                 {
                     "letter" : "C",
                     "type": "door",
+					"branch" : true,
                     "powerup": {
                         "type" : "ghostking"
 				    }
@@ -239,6 +242,7 @@
                     "letter" : "B",
                     "type": "horizontal",
                     "dir": "left",
+					"branch" : true,
                     "powerup": {
                         "type" : "ghostking"
 				    }

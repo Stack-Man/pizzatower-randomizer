@@ -242,6 +242,7 @@
 					"letter" : "B",
 					"type" : "horizontal",
 					"dir" : "right",
+					"branch" : true,
 					"powerup" :
 					{
 						"type" : "satan",
@@ -400,6 +401,7 @@
 					"letter" : "A",
 					"type" : "vertical",
 					"dir" : "up",
+					"branch" : true,
 					"powerup" :
 					{
 						"type" : "satan",

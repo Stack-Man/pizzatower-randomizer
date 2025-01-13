@@ -214,7 +214,7 @@ function rd_print_connection_path(connection)
 	
 	while (next != undefined)
 	{
-		path = concat(path, " -> ", next.first.title, " ", next.path.startletter, " to ", next.path.exitletter);
+		path = concat(path, " -> ", next.first.title, " ", next.path.startdoor.letter, " to ", next.path.exitdoor.letter);
 		
 		next = next.second;
 	}
@@ -288,12 +288,35 @@ function rd_remove_connection_rooms_from_map(connection, map)
 	}
 }
 
+function rd_get_door_struct(door)
+{
+	var door_struct =
+	{
+		startonly : ds_map_exists(door, "startonly"),
+		exitonly : ds_map_exists(door, "exitonly"),
+		branch : ds_map_exists(door, "branch"),
+		branchstart : ds_map_exists(door, "branchstart"),
+		branchexit : ds_map_exists(door, "branchexit"),
+		ratblocked : ds_map_exists(door, "ratblocked"),
+			
+		pizzatime : ds_map_exists(door, "pizzatime"),
+		notpizzatime : ds_map_exists(door, "notpizzatime"),
+		
+		letter : ds_map_find_value(door, "letter"),
+		type : rd_convert_transitiontype(ds_map_find_value(door, "type")),
+		dir : rd_convert_transitiondir(ds_map_find_value(door, "dir"))
+		
+	};
+	
+	return door_struct;
+}
+
 function rd_get_exit_struct(path)
 {
 	var exitpair = 
 	{
-		exittype : path.exittype,
-		exitdir : path.exitdir
+		exittype : path.exitdoor.type,
+		exitdir : path.exitdoor.dir
 	};
 			
 	return exitpair;
@@ -385,7 +408,7 @@ function rd_buffer()
 	
 	for (var i = 0; i < global.recursion_depth; i++)
 	{
-		buffer = concat(buffer, "    ");
+		buffer = concat(buffer, " ");
 	}
 	
 	return buffer;

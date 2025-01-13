@@ -17,7 +17,6 @@ function rd_init(use_new_seed = false)
 function rd_parse_rooms()
 {
 	var jsons = level_names;
-	
 	var parsed_rooms = ds_map_create();
 
 	for (var j = 0; j < array_length(jsons); j++)
@@ -71,197 +70,247 @@ function rd_parse_rooms()
     return parsed_rooms;
 }
 
+//TODO: change to check all paths at once
+function rd_check_path_for_roomtype(path, current_type)
+{
+	if (path == undefined)
+		return current_type; //path check failed
+		
+	if (ds_map_exists(path.exitdoor, "exitonly"))
+	{
+		if (ds_map_exists(path.exitdoor, "ratblocked"))
+			return roomtype.ratblockedtwoway;
+		else
+			return roomtype.oneway;
+	}
+	else if (ds_map_exists(path.startdoor, "startonly"))
+	{
+		if (ds_map_exists(path.startdoor, "ratblocked"))
+			return roomtype.potentialratblockedtwoway;
+		else
+			return roomtype.potentialoneway;
+	}
+	
+	return current_type;
+}
+
+function rd_check_paths_for_branchtype(path_ab, path_ba, current_type)
+{
+	if ((path_ab != undefined && !path_ab.startdoor.branch && !path_ab.exitdoor.branch)
+	||  (path_ba != undefined && !path_ba.startdoor.branch && !path_ba.exitdoor.branch))
+		return current_type; //branch check failed
+	
+	//path == undefined means the other is a oneway
+	//to branch path (ba) being oneway is a valid alternative to being notpizzatime/pizzatime exclusive
+	
+	var branch_NPT = (path_ab != undefined) && path_ab.startdoor.branch && path_ab.pathtime == pathtime.notpizzatime;
+	var NPT_branch = (path_ba != undefined) && (path_ba.pathtime == pathtime.notpizzatime || path_ba.oneway) && path_ba.exitdoor.branch;
+	
+	var branch_PT = (path_ab != undefined) && path_ab.startdoor.branch && path_ab.pathtime == pathtime.pizzatime;
+	var PT_branch = (path_ba != undefined) && (path_ba.pathtime == pathtime.pizzatime || path_ba.oneway) && path_ba.exitdoor.branch;
+	
+	if ( (branch_NPT && ! NPT_branch) || (branch_PT && ! PT_branch) )
+		return roomtype.branchstart;
+	
+	if ( (NPT_branch && ! branch_NPT) || (PT_branch && ! branch_PT) )
+		return roomtype.branchend;
+	
+	if ( (branch_NPT && NPT_branch) || (branch_PT && PT_branch) )
+		return roomtype.branchany;
+	
+	return current_type; //branch check failed
+}
+
+function rd_check_all_paths_for_special_branch(paths, has_pillar, has_entrance, current_type)
+{
+	var has_pizzatime = false;
+	var has_notpizzatime = false;
+	
+	var has_branchstart = false;
+	
+	for (var p = 0; p < ds_list_size(paths); p++)
+	{
+		var path = ds_list_find_value(paths, p);
+		
+		if (path.pathtime == pathtime.pizzatime)
+			has_pizzatime = true;
+		else if (path.pathtime == pathtime.notpizzatime)
+			has_notpizzatime = true;
+		
+		if (has_pizzatime && has_notpizzatime)
+		{
+			if (has_pillar)
+				return roomtype.johnbranching;
+				
+			if (has_entrance)
+				return roomtype.entrancebranching;
+		}
+		
+		if (path.startdoor.branchstart)
+			return roomtype.branchmid;
+	}
+	
+	if (has_pillar)
+		return roomtype.john;
+	
+	if (has_entrance)
+		return roomtype.entrance;
+	
+	return current_type; //check failed
+}
+
+function rd_parse_path(start_door, exit_door, has_pillar)
+{
+	if (start_door.exitonly || exit_door.startonly)
+		return undefined;
+	
+	if (!has_pillar && ((start_door.pizzatime && exit_door.notpizzatime) || (start_door.notpizzatime && exit_door.pizzatime)) )
+		return undefined;
+		
+	var found_pathtime = pathtime.any;
+	
+	if (!has_pillar)
+	{
+		if (start_door.pizzatime || exit_door.pizzatime)
+			found_pathtime = pathtime.pizzatime;
+		
+		if (start_door.notpizzatime || exit_door.notpizzatime)
+			found_pathtime = pathtime.notpizzatime;
+	}
+	
+	var found_oneway = (start_door.startonly && !start_door.ratblocked) || (exit_door.exitonly && !exit_door.ratblocked);
+	var found_loop = ds_map_exists(start_door, "loop") || ds_map_exists(exit_door, "loop");
+	
+	var parsed_path = 
+	{
+		startdoor : start_door,
+		exitdoor : exit_door,
+		oneway : found_oneway,
+		loop : found_loop,
+		pathtime : found_pathtime
+	};
+	
+	return parsed_path;
+	
+}
+
+function rd_parse_powerup(door, room_index)
+{
+	if (ds_map_exists(door, "powerup") )
+	{
+		var powerup = ds_map_find_value(door, "powerup");	
+		var powerup_path_time = pathtime.any;
+					
+		if (ds_map_exists(powerup, "pizzatime"))
+			powerup_path_time = pathtime.pizzatime;
+		else if (ds_map_exists(powerup, "notpizzatime") )
+			powerup_path_time = pathtime.notpizzatime;
+					
+		var start_powerup = {
+			poweruptype : ds_map_find_value(powerup, "type"),
+			poweruptime : powerup_path_time
+		};
+							
+		if (! ds_map_exists(global.powerup_map, room_index) )
+			ds_map_add(global.powerup_map, room_index, ds_map_create() );
+					
+		ds_map_add( ds_map_find_value(global.powerup_map, room_index), ds_map_find_value(door, "letter"), start_powerup);
+	}
+}
+
 function rd_parse_doors(thisroom)
 {
 	show_debug_message( concat("Parsing: ", ds_map_find_value(thisroom, "title") ) );
-	var doors  = ds_map_find_value(thisroom, "doors");   //Holds doors in the room
+	
+	var doors  = ds_map_find_value(thisroom, "doors"); //Holds doors in the room, don't prematurely delete, it will get delted with parsed_level later
+	var filtered_doors;
+
+	if (global.use_loops)
+	{
+		filtered_doors = doors;
+	}
+	else
+	{
+		filtered_doors = ds_list_create();
+		
+		//Filter out loops if we don't use them
+		for (var d = 0; d < ds_list_size(doors); d++)
+		{
+			var door = ds_list_find_value(doors, d);
+		
+			if (ds_map_exists(door, "loop") )
+				continue;
+		
+			ds_list_add(filtered_doors, door);
+		}
+	}
 	
 	var found_paths = ds_list_create(); //Hold the created paths
 
-	var found_path_time = pathtime.any; //when the path is accessible
-	var room_type = roomtype.twoway; //how the room can be traversed
+	var found_room_type = roomtype.twoway; //how the room can be traversed
 	
-	var has_pizzatime = false;	//helps determine if the room is branching
-	var has_notpizzatime = false; //helps determine if the room is branching
-
-	var door_count = ds_list_size(doors);
+	var has_pillar = ds_map_find_value(thisroom, "pillar");
+	var has_entrance = ds_map_find_value(thisroom, "entrance");
+	var room_title = ds_map_find_value(thisroom, "title");
+	var room_index = asset_get_index(room_title);
 	
-	var non_loops = 0;
-	
-	for (var d = 0; d < door_count; d++)
+	//For every letter
+	for (var a = 0; a < ds_list_size(filtered_doors); a++)
 	{
-		var door = ds_list_find_value(doors, d)
+		var door_a = ds_list_find_value(filtered_doors, a);
+		var door_a_struct = rd_get_door_struct(door_a);
 		
-		if (! ds_map_find_value(door, "loop") )
-			non_loops++;
-	}
-	
-	//For every pair of transitions
-	for (var i = 0; i < door_count; i++)
-	{
-		var start_door = ds_list_find_value(doors, i);
+		rd_parse_powerup(door_a, room_index);
 		
-		for (var j = 0; j < door_count; j++)
+		var c = (ds_list_size(filtered_doors) <= 1) ? a : a + 1; //Handle one door rooms
+		
+		//For every letter after that
+		for (var b = c; b < ds_list_size(filtered_doors); b++)
 		{
-			var exit_door = ds_list_find_value(doors, j);
+			var door_b = ds_list_find_value(filtered_doors, b);
+			var door_b_struct = rd_get_door_struct(door_b);
 			
-			//If it is not the same transition UNLESS there are no other transitions
-			if (ds_map_find_value(start_door, "letter") != ds_map_find_value(exit_door, "letter") || door_count <= 1 || (!global.use_loops && non_loops <= 1) )
+			//do A start B end
+			var path_ab = rd_parse_path(door_a_struct, door_b_struct, has_pillar);
+			
+			//do B start A end
+			var path_ba = rd_parse_path(door_b_struct, door_a_struct, has_pillar);
+			
+			//may have yet to check a branch path, or a branchany that may be more restrictive due to PT/NPT branch path
+			if (found_room_type != roomtype.branchstart && found_room_type != roomtype.branchend)
+				found_room_type = rd_check_paths_for_branchtype(path_ab, path_ba, found_room_type);
+			
+			if (found_room_type != roomtype.branchstart && found_room_type != roomtype.branchend && found_room_type != roomtype.branchany &&
+				found_room_type != roomtype.oneway && found_room_type != roomtype.potentialoneway)
 			{
-				found_path_time = pathtime.any;
-				
-				//start or exit is not valid
-				if (ds_map_exists(start_door, "exitonly") 
-				||  ds_map_exists(exit_door, "startonly"))
-					continue;
-				
-				//Start and exit aren't accessible at the same time (unless its a pillar room)
-				if (!ds_map_exists(thisroom, "pillar")
-				&& ( (ds_map_exists(start_door, "pizzatime") && ds_map_exists(exit_door, "notpizzatime"))
-				|| (ds_map_exists(start_door, "notpizzatime") && ds_map_exists(exit_door, "pizzatime")) ) )
-					continue;
-				
-				if (ds_map_exists(start_door, "pizzatime") || ds_map_exists(exit_door, "pizzatime"))
-				{
-					has_pizzatime = true;
-					found_path_time = pathtime.pizzatime;
-				}
-				
-				if (ds_map_exists(start_door, "notpizzatime") || ds_map_exists(exit_door, "notpizzatime"))
-				{
-					has_notpizzatime = true;
-					found_path_time = pathtime.notpizzatime;
-				}
-				
-				//TODO: what is this supposed to indicate
-				if ( (ds_map_exists(start_door, "pizzatime") || ds_map_exists(exit_door, "pizzatime"))
-				&& (ds_map_exists(start_door, "notpizzatime") || ds_map_exists(exit_door, "notpizzatime")) )
-				{
-					found_path_time = pathtime.any;
-				}
-				
-				//Set the room type as branching
-				if (has_pizzatime && has_notpizzatime)
-				{
-					room_type = roomtype.branching;
-					
-				}
-				
-				if (room_type == roomtype.twoway)
-				{
-					if (ds_map_exists(exit_door, "exitonly"))
-					{
-						if (ds_map_exists(exit_door, "ratblocked"))
-							room_type = roomtype.ratblockedtwoway;
-						else
-							room_type = roomtype.oneway;
-					}
-					else if (ds_map_exists(start_door, "startonly"))
-					{
-						if (ds_map_exists(start_door, "ratblocked"))
-							room_type = roomtype.potentialratblockedtwoway;
-						else
-							room_type = roomtype.potentialoneway;
-					}
-				}
-				
-				var start_door_struct = {
-					startonly : ds_map_exists(start_door, "startonly"),
-					ratblocked : ds_map_exists(start_door, "ratblocked"),
-					branch : !ds_map_exists(start_door, "pizzatime") && !ds_map_exists(start_door, "notpizzatime")
-				};
-				
-				var exit_door_struct = {
-					exitonly : ds_map_exists(exit_door, "exitonly"),
-					ratblocked : ds_map_exists(exit_door, "ratblocked"),
-					branch : !ds_map_exists(exit_door, "pizzatime") && !ds_map_exists(exit_door, "notpizzatime")
-				};
-				
-				var has_loop = false;
-				
-				if (ds_map_exists(start_door, "loop") || ds_map_exists(exit_door, "loop") )
-					has_loop = true;
-				
-				//add the pair of doors
-				var parsed_path = {
-					startletter : ds_map_find_value(start_door, "letter"),
-					exitletter : ds_map_find_value(exit_door, "letter"),
-					starttype : rd_convert_transitiontype(ds_map_find_value(start_door, "type")),
-					exittype : rd_convert_transitiontype(ds_map_find_value(exit_door, "type")),
-					startdir :  rd_convert_transitiondir(ds_map_find_value(start_door, "dir")),
-					exitdir : rd_convert_transitiondir(ds_map_find_value(exit_door, "dir")),
-					startdoor : start_door_struct,
-					exitdoor : exit_door_struct,
-					hasloop : has_loop
-				};
-				
-				if (ds_map_exists(start_door, "powerup") )
-				{
-					var powerup = ds_map_find_value(start_door, "powerup");
-					
-					var powerup_path_time = pathtime.any;
-					
-					if (ds_map_exists(powerup, "pizzatime"))
-						powerup_path_time = pathtime.pizzatime;
-					else if (ds_map_exists(powerup, "notpizzatime") )
-						powerup_path_time = pathtime.notpizzatime;
-					
-					var start_powerup = {
-						poweruptype : ds_map_find_value(powerup, "type"),
-						poweruptime : powerup_path_time
-					};
-					
-					var room_index = asset_get_index( ds_map_find_value(thisroom, "title") );
-					
-					if (! ds_map_exists(global.powerup_map, room_index) )
-					{
-						ds_map_add(global.powerup_map, room_index, ds_map_create() );
-					}
-					
-					ds_map_add( ds_map_find_value(global.powerup_map, room_index), ds_map_find_value(start_door, "letter"), start_powerup);
-				}
-				
-				
-				
-				parsed_path.pathtime = found_path_time;
-			
-				if (!has_loop || (has_loop && global.use_loops))
-					ds_list_add(found_paths, parsed_path);
+				found_room_type = rd_check_path_for_roomtype(path_ab, found_room_type);
+				found_room_type = rd_check_path_for_roomtype(path_ba, found_room_type);
 			}
+			
+			if (path_ab != undefined)
+				ds_list_add(found_paths, path_ab);
+			
+			if (path_ba != undefined)
+				ds_list_add(found_paths, path_ba);
 		}
 	}
-
-	//Determine if it is also an entrance or pillar room
-	if (ds_map_exists(thisroom, "entrance"))
-	{
-		if (room_type == roomtype.branching)
-			room_type = roomtype.entrancebranching;
-		else
-			room_type = roomtype.entrance;
-	}	
-	else if (ds_map_exists(thisroom, "pillar"))
-	{
-		if (room_type == roomtype.branching)
-			room_type = roomtype.johnbranching;
-		else
-			room_type = roomtype.john;
-
-	}
 	
-	//determine if it should be looping
-	if (door_count <= 1 && room_type != roomtype.entrance && room_type != roomtype.john)
-		room_type = roomtype.loop;
+	//Check for john, entrance, branch variant, or branchmid
+	found_room_type = rd_check_all_paths_for_special_branch(found_paths, has_pillar, has_entrance, found_room_type);
 
-	//add the type of room thsi is to the finished room object
-	//Add the paths after it has been initialized
+	if (ds_list_size(filtered_doors) <= 1 && found_room_type != roomtype.entrance && found_room_type != roomtype.john)
+		found_room_type = roomtype.loop;
+
+	ds_list_destroy(filtered_doors);
+
+	//seeded shuffling of paths
 	ds_list_shuffle(found_paths);
 	
 	var parsed_room = {
-		title : ds_map_find_value(thisroom, "title"),
+		title : room_title,
 		paths : found_paths,
+		roomtype : found_room_type
 	};
-	
-	parsed_room.roomtype = room_type;
 	
 	return parsed_room;
 }

@@ -10,7 +10,8 @@
                 {
                     "letter": "A",
                     "type": "leveldoor",
-                    "entrance": true
+                    "entrance": true,
+					"branch" : true
                 },
                 {
                     "letter" : "B",
@@ -41,7 +42,8 @@
                 {
                     "letter" : "A",
                     "type": "horizontal",
-                    "dir": "left"
+                    "dir": "left",
+					"branch" : true
                 },
                 {
                     "letter" : "C",
@@ -155,7 +157,8 @@
                 },
                 {
                     "letter" : "B",
-                    "type": "door"
+                    "type": "door",
+					"branch" : true
                 },
                 {
                     "letter" : "D",

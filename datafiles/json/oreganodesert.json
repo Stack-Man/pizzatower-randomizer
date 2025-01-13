@@ -41,7 +41,8 @@
         {
           "letter": "A",
           "type": "horizontal",
-          "dir": "left"
+          "dir": "left",
+		  "branch" : true
         },
         {
           "letter": "B",

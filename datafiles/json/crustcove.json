@@ -42,7 +42,8 @@
 				{
 					"letter" : "B",
 					"type" : "vertical",
-					"dir" : "down"
+					"dir" : "down",
+					"branch" : true
 				},
 				
 				{
@@ -63,7 +64,8 @@
 					"letter" : "F",
 					"type" : "door",
 					"gerome" : true,
-					"loop" : true
+					"loop" : true,
+					"branch" : true
 				}
 			]
 		},
@@ -87,7 +89,7 @@
 					"letter" : "B",
 					"type" : "door",
 					"locked" : true,
-					"branch" : true
+					"branch" : true,
 				},
 				
 				{

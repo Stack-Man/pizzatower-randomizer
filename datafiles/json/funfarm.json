@@ -10,7 +10,8 @@
 					{
 						"letter" : "A",
 						"type": "leveldoor",
-						"entrance": true
+						"entrance": true,
+						"branch" : true
 					},
 					
 					{
@@ -50,7 +51,8 @@
 					{
 						"letter" : "C",
 						"type": "horizontal",
-						"dir": "right"
+						"dir": "right",
+						"branch" : true
 					},
 					
 					{
@@ -64,7 +66,8 @@
 						"letter" : "F",
 						"type": "door",
 						"gerome": true,
-						"loop" : true
+						"loop" : true,
+						"branch" : true
 					}
 				]
 			},
@@ -107,7 +110,8 @@
 					{
 						"letter" : "C",
 						"type": "horizontal",
-						"dir": "left"
+						"dir": "left",
+						"branch" : true
 					}
 				]
 			},

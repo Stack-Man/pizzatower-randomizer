@@ -9,6 +9,7 @@ global.recursion_depth = 0;
 global.test_string = "";
 
 global.use_loops = false;
+max_branches = 3;
 
 ignore_rooms = ["forest_G1", "plage_shipmain", "minigolf_8", "minigolf_4", "space_9", "forest_G5", "farm_1", "kidsparty_floor4_3"];
 separated_rooms = ["ruin_11", "badlands_5", "industrial_2", "industrial_3", "industrial_4"]; //TODO: implement

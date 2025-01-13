@@ -10,7 +10,11 @@ enum roomtype
 	johnbranching,
 	ratblockedtwoway,
 	potentialratblockedtwoway,
-	loop
+	loop,
+	branchstart, //must initially enter with branch door
+	branchend, //must initially exit with branch door
+	branchany, //can either enter or exit with branch door
+	branchmid //must be inbetween two branches, enter branchstart during notpizzatime and exit branchexit during pizzatime
 }
 
 enum pathtime
@@ -64,23 +68,34 @@ enum poweruptype
 //Path Struct
 
 //Path Struct
-//startletter : string
-//exitletter : string
-//startype : transition
-//endtype : transition
-//startdir : transitiondir
-//enddir : transitiondir
 //pathtime : pathtime
 //exitdoor : exit door struct
 //startdoor : start door struct
+//oneway
 
 //Start Door Struct
 //startonly : start only
 //ratblocked : rat blocked
+//branch
+//exitdoor
+//branchstart
+//branchexit
+//letter : string
+//dir : transitiondir enum
+//type : transition enum
+//loop
 
 //Exit Door Struct
 //exitonly : exit only
 //ratblocked : rat blocked
+//branch
+//exitdoor
+//branchstart
+//branchexit
+//letter : string
+//dir : transitiondir enum
+//type : transition enum
+//loop
 
 //Destination Struct
 //roomid : room index
