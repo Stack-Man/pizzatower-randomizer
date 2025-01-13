@@ -1,38 +1,38 @@
 {
-    "rooms":[
+    "rooms": [
         {
-            "title" : "street_intro",
+            "title": "street_intro",
             "maxscore": 0,
             "entrance": true,
             "doors": [
                 {
-                    "letter" : "A",
+                    "letter": "A",
                     "type": "leveldoor",
                     "entrance": true
                 },
                 {
-                    "letter" : "D",
+                    "letter": "D",
                     "type": "door"
                 }
             ]
         },
         {
-            "title" : "street_1",
+            "title": "street_1",
             "maxscore": 0,
             "loop": true,
             "lap2": true,
             "doors": [
                 {
-                    "letter" : "D",
+                    "letter": "D",
                     "type": "door"
                 },
                 {
-                    "letter" : "C",
+                    "letter": "C",
                     "type": "horizontal",
                     "dir": "left"
                 },
                 {
-                    "letter" : "taxi",
+                    "letter": "taxi",
                     "type": "taxi",
                     "exitonly": true,
                     "loopstart": true,
@@ -40,7 +40,7 @@
                     "loop": true
                 },
                 {
-                    "letter" : "taxi",
+                    "letter": "taxi",
                     "type": "taxi",
                     "startonly": true,
                     "loopexit": true,
@@ -50,22 +50,22 @@
             ]
         },
         {
-            "title" : "street_2",
+            "title": "street_2",
             "maxscore": 0,
             "loop": true,
             "doors": [
                 {
-                    "letter" : "C",
+                    "letter": "C",
                     "type": "horizontal",
                     "dir": "right"
                 },
                 {
-                    "letter" : "B",
+                    "letter": "B",
                     "type": "horizontal",
                     "dir": "left"
                 },
                 {
-                    "letter" : "taxi",
+                    "letter": "taxi",
                     "type": "taxi",
                     "exitonly": true,
                     "loopstart": true,
@@ -73,7 +73,7 @@
                     "loop": true
                 },
                 {
-                    "letter" : "taxi",
+                    "letter": "taxi",
                     "type": "taxi",
                     "startonly": true,
                     "loopexit": true,
@@ -83,22 +83,22 @@
             ]
         },
         {
-            "title" : "street_3",
+            "title": "street_3",
             "maxscore": 0,
             "doors": [
                 {
-                    "letter" : "B",
+                    "letter": "B",
                     "type": "horizontal",
                     "dir": "right"
                 },
                 {
-                    "letter" : "taxi",
+                    "letter": "taxi",
                     "type": "taxi",
                     "exitonly": true,
                     "notpizzatime": true
                 },
                 {
-                    "letter" : "taxi",
+                    "letter": "taxi",
                     "type": "taxi",
                     "startonly": true,
                     "pizzatime": true
@@ -106,27 +106,29 @@
             ]
         },
         {
-            "title" : "street_4",
+            "title": "street_4",
             "maxscore": 0,
             "loop": true,
             "doors": [
                 {
-                    "letter" : "B",
+                    "letter": "B",
                     "type": "door",
                     "powerup": {
                         "type": "gustavo"
                     }
                 },
                 {
-                    "letter" : "A",
+                    "letter": "A",
                     "type": "horizontal",
                     "dir": "right",
+                    "exitonly": true,
+                    "ratblocked": true,
                     "powerup": {
                         "type": "gustavo"
                     }
                 },
                 {
-                    "letter" : "taxi",
+                    "letter": "taxi",
                     "type": "taxi",
                     "exitonly": true,
                     "loopstart": true,
@@ -137,7 +139,7 @@
                     }
                 },
                 {
-                    "letter" : "taxi",
+                    "letter": "taxi",
                     "type": "taxi",
                     "startonly": true,
                     "loopexit": true,
@@ -150,23 +152,23 @@
             ]
         },
         {
-            "title" : "street_5",
+            "title": "street_5",
             "maxscore": 0,
             "loop": true,
             "doors": [
                 {
-                    "letter" : "A",
+                    "letter": "A",
                     "type": "horizontal",
                     "dir": "left",
                     "pizzatimeexit": true,
-                    "pizzatimestart" : true,
-                    "notpizzatimestart" : true,
+                    "pizzatimestart": true,
+                    "notpizzatimestart": true,
                     "powerup": {
                         "type": "gustavo"
                     }
                 },
                 {
-                    "letter" : "B",
+                    "letter": "B",
                     "type": "door",
                     "pizzatimestart": true,
                     "powerup": {
@@ -174,7 +176,7 @@
                     }
                 },
                 {
-                    "letter" : "taxi",
+                    "letter": "taxi",
                     "type": "taxi",
                     "exitonly": true,
                     "loopstart": true,
@@ -185,7 +187,7 @@
                     }
                 },
                 {
-                    "letter" : "taxi",
+                    "letter": "taxi",
                     "type": "taxi",
                     "startonly": true,
                     "loopexit": true,
@@ -198,20 +200,20 @@
             ]
         },
         {
-            "title" : "street_house1",
+            "title": "street_house1",
             "maxscore": 0,
             "toppin": {
                 "type": "mushroom"
             },
             "doors": [
                 {
-                    "letter" : "taxi",
+                    "letter": "taxi",
                     "type": "taxi",
                     "startonly": true,
                     "notpizzatime": true
                 },
                 {
-                    "letter" : "taxi",
+                    "letter": "taxi",
                     "type": "taxi",
                     "exitonly": true,
                     "notpizzatime": true
@@ -219,7 +221,7 @@
             ]
         },
         {
-            "title" : "street_house2",
+            "title": "street_house2",
             "maxscore": 0,
             "toppin": {
                 "type": "cheese"
@@ -229,13 +231,13 @@
             },
             "doors": [
                 {
-                    "letter" : "taxi",
+                    "letter": "taxi",
                     "type": "taxi",
                     "startonly": true,
                     "notpizzatime": true
                 },
                 {
-                    "letter" : "taxi",
+                    "letter": "taxi",
                     "type": "taxi",
                     "exitonly": true,
                     "notpizzatime": true
@@ -243,7 +245,7 @@
             ]
         },
         {
-            "title" : "street_house3",
+            "title": "street_house3",
             "maxscore": 0,
             "toppin": {
                 "type": "tomato"
@@ -251,26 +253,26 @@
             "loop": true,
             "doors": [
                 {
-                    "letter" : "taxi",
+                    "letter": "taxi",
                     "type": "taxi",
                     "startonly": true,
                     "notpizzatime": true
                 },
                 {
-                    "letter" : "taxi",
+                    "letter": "taxi",
                     "type": "taxi",
                     "exitonly": true,
                     "notpizzatime": true
                 },
                 {
-                    "letter" : "E",
+                    "letter": "E",
                     "type": "door",
                     "loop": true
                 }
             ]
         },
         {
-            "title" : "street_house4",
+            "title": "street_house4",
             "maxscore": 0,
             "toppin": {
                 "type": "sausage"
@@ -280,7 +282,7 @@
             },
             "doors": [
                 {
-                    "letter" : "taxi",
+                    "letter": "taxi",
                     "type": "taxi",
                     "startonly": true,
                     "powerup": {
@@ -289,7 +291,7 @@
                     "notpizzatime": true
                 },
                 {
-                    "letter" : "taxi",
+                    "letter": "taxi",
                     "type": "taxi",
                     "exitonly": true,
                     "powerup": {
@@ -300,7 +302,7 @@
             ]
         },
         {
-            "title" : "street_house5",
+            "title": "street_house5",
             "maxscore": 0,
             "toppin": {
                 "type": "pineapple"
@@ -311,7 +313,7 @@
             "gerome": true,
             "doors": [
                 {
-                    "letter" : "taxi",
+                    "letter": "taxi",
                     "type": "taxi",
                     "startonly": true,
                     "powerup": {
@@ -320,7 +322,7 @@
                     "notpizzatime": true
                 },
                 {
-                    "letter" : "taxi",
+                    "letter": "taxi",
                     "type": "taxi",
                     "exitonly": true,
                     "powerup": {
@@ -331,38 +333,38 @@
             ]
         },
         {
-            "title" : "street_jail",
+            "title": "street_jail",
             "maxscore": 0,
             "loop": true,
             "doors": [
                 {
-                    "letter" : "F",
+                    "letter": "F",
                     "type": "door",
                     "gerome": true,
                     "loop": true
                 },
                 {
-                    "letter" : "B",
+                    "letter": "B",
                     "type": "door",
                     "powerup": {
                         "type": "gustavo"
                     }
                 },
                 {
-                    "letter" : "taxi",
+                    "letter": "taxi",
                     "type": "taxi",
                     "startonly": true,
-					"ratblocked" : true
+                    "ratblocked": true
                 }
             ]
         },
         {
-            "title" : "street_john",
+            "title": "street_john",
             "maxscore": 0,
             "pillar": true,
             "doors": [
                 {
-                    "letter" : "B",
+                    "letter": "B",
                     "type": "door",
                     "powerup": {
                         "type": "gustavo"
@@ -376,7 +378,7 @@
             "treasure": true,
             "doors": [
                 {
-                    "letter" : "F",
+                    "letter": "F",
                     "type": "door"
                 }
             ]
@@ -386,24 +388,22 @@
             "maxscore": 0,
             "doors": [
                 {
-                    "letter" : "E",
+                    "letter": "E",
                     "type": "door"
                 }
             ]
         },
         {
-            "title" : "street_secret1"
+            "title": "street_secret1"
         },
-        
         {
-            "title" : "street_secret2",
+            "title": "street_secret2",
             "powerup": {
                 "type": "gustavo"
             }
         },
-        
         {
-            "title" : "street_secret3",
+            "title": "street_secret3",
             "powerup": {
                 "type": "gustavo"
             }

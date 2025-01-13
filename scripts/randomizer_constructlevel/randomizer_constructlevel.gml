@@ -1,7 +1,10 @@
 function rd_construct_levels()
 {	
 	var levels = ds_list_create();
-	var entrances = rd_get_rooms_of_type([roomtype.entrance, roomtype.entrancebranching]);
+	var unsorted_entrances = rd_get_rooms_of_type([roomtype.entrance, roomtype.entrancebranching]);
+	var entrances = rd_prioritize_rooms_of_type(unsorted_entrances, [roomtype.entrance, roomtype.entrancebranching])
+	
+	ds_list_destroy(unsorted_entrances);
 	
 	var war_exit_created = false;
 	
@@ -35,7 +38,8 @@ function rd_construct_levels()
 		
 		if (level != undefined)
 		{
-			show_debug_message( concat("Success to construct: ", first_room.title) );
+			show_debug_message( concat("Success to construct: ", first_room.title ) );
+			ds_list_add(global.created_levels, asset_get_index(first_room.title));
 			ds_list_add(levels, level);
 		}	
 		else
@@ -50,6 +54,7 @@ function rd_construct_levels()
 				
 				if (war_exit_level != undefined)
 				{
+					ds_list_add(global.created_levels, asset_get_index(first_room.title));
 					ds_list_add(levels, war_exit_level);
 					war_exit_created = true;
 					
@@ -140,7 +145,14 @@ function rd_add_rooms_inbetween(connection, roomtypes_arr, path_time_arr, desire
 			var last_room_exit_letter = next.second.path.exitdoor.letter;
 			
 			//Must start with same first start and last exit so that existing connections remain connected
-			var new_connections = rd_find_connections_start(first_room, last_room, roomtypes_arr, path_time_arr, first_room_start_letter, "", "", last_room_exit_letter);
+			var new_connections = rd_find_connections_start(
+			first_room, last_room, roomtypes_arr, path_time_arr, 
+			first_room_start_letter, "", 
+			"", last_room_exit_letter,
+			true, true,
+			true, true,
+			false, false,
+			false);
 			
 			if (ds_list_size(new_connections) > 0)
 			{
@@ -230,7 +242,7 @@ function rd_connect_to_branch2(sequence, prev_sequence_last_path_start_letter)
 	
 	show_debug_message( concat(rd_buffer(), "Sequence from ", sequence.last_room.title, " ", prev_sequence_last_path_start_letter, " needs return? : ", ! sequence.last_room_is_end_branch));
 	
-	var needs_return = ! sequence.last_room_is_end_branch; //Still need this variable in case last room is branchany //TODO: move variable to function arguments? might be used when linking
+	var needs_return = ! sequence.last_room_is_end_branch; //Still need this variable in case last room is branchany
 
 	var roomtypes = needs_return ? oneway_types : twoway_types;
 	var to_pathtimes = needs_return ? [pathtime.any, pathtime.notpizzatime] : [pathtime.any, pathtime.notpizzatime]; 
@@ -238,20 +250,13 @@ function rd_connect_to_branch2(sequence, prev_sequence_last_path_start_letter)
 	var johntype = needs_return ? roomtype.johnbranching : roomtype.john;
 	var branchtype = needs_return ?  roomtype.branchend : roomtype.branchstart;
 	
-	//TODO: working on implementing max recursion depth to prevent endlessly long levels
-	//If the recursion depth is greater than the max allowed, only try to connect to a johntype in order to end the sequence earlier if possible
-	//TODO: change to instead prefer connecting to johntypes first instead of restricting them to only johntypes
-	//could get johns and branches separately, then combine with johns at thefront if preferring them
-	//though that would mean it will continue endlessly until it finds a john instead of trying all shorter possible sqeuences first
-	//we would have to try each sequence in turn and stop if its over, only returning once all sequencs of that length are exhausted
-	
-	//TODO: running out of the correct johntype, need to allow it one more branch if thats the case
 	var all_branchtypes = global.recursion_depth >= max_branches ? [johntype] : [roomtype.branchany, branchtype, johntype];
 	
-	//TODO: kidsparty_floor3_1 A failed to connect to graveyard_6 door
+	var unfiltered_branches = rd_get_rooms_of_type(all_branchtypes); //TODO: allow branchmid if needs_return, and if branchmid is used, ask for anoth4r branchend with branchmid
+	var unsorted_branches = rd_filter_out_rooms(unfiltered_branches, global.sequence_tested_rooms);
+	var branches = rd_prioritize_rooms_of_type(unsorted_branches, [branchtype, roomtype.branchany, johntype]); //prefer start/end over any, to increase chances of successful construction
 	
-	var unfiltered_branches = rd_get_rooms_of_type(all_branchtypes); //TODO: allow branchmid if needs_return, and if branchmid is used, ask for another branchend with branchmid
-	var branches = rd_filter_out_rooms(unfiltered_branches, global.sequence_tested_rooms);
+	ds_list_destroy(unsorted_branches);
 	ds_list_destroy(unfiltered_branches);
 	
 	var use_branch_start = !needs_return
@@ -407,7 +412,7 @@ function rd_continue_sequence(sequence, last_is_john, last_room, last_room_is_en
 function rd_find_connections_start(first_room, last_room, roomtypes, pathtimes, 
 start_letter = "", exit_letter = "", last_start_letter = "", last_exit_letter = "", 
 use_start = true, use_exit = true, use_last_start = true, use_last_exit = true,
-use_branch_start = false, use_branch_exit = false)
+use_branch_start = false, use_branch_exit = false, try_connect_start = true)
 {	
 	//show_debug_message( concat(rd_buffer(), "Clearing exit types") );
 	ds_list_clear(global.connection_tested_exits);
@@ -415,7 +420,7 @@ use_branch_start = false, use_branch_exit = false)
 	
 	global.test_string = concat("depth: ", global.recursion_depth, " start ", first_room.title);
 	
-	var first_paths =  rd_filter_paths_by_start_and_roomtype( //TODO: delete list
+	var first_paths =  rd_filter_paths_by_start_and_roomtype(
 			first_room, 
 			transition.none, transitiondir.none, 
 			pathtimes, roomtypes
@@ -425,30 +430,34 @@ use_branch_start = false, use_branch_exit = false)
 	
 	//Try to connect all paths directly to last room
 	//All possible connections are returned;
-	for (var f = 0; f < ds_list_size(first_paths); f++)
+	
+	if (try_connect_start) //false if we are adding rooms inbetween
 	{
-		var first_path = ds_list_find_value(first_paths, f);
-		
-		var correct_start = start_letter == "" || (use_start && start_letter == first_path.startdoor.letter) || (!use_start && start_letter != first_path.startdoor.letter);
-		var correct_exit = exit_letter == "" || (use_exit && exit_letter == first_path.exitdoor.letter) || (!use_exit && exit_letter != first_path.exitdoor.letter);
-		
-		if (correct_start && correct_exit)
+		for (var f = 0; f < ds_list_size(first_paths); f++)
 		{
-			var temp = global.test_string;
+			var first_path = ds_list_find_value(first_paths, f);
+		
+			var correct_start = start_letter == "" || (use_start && start_letter == first_path.startdoor.letter) || (!use_start && start_letter != first_path.startdoor.letter);
+			var correct_exit = exit_letter == "" || (use_exit && exit_letter == first_path.exitdoor.letter) || (!use_exit && exit_letter != first_path.exitdoor.letter);
+		
+			if (correct_start && correct_exit)
+			{
+				var temp = global.test_string;
 			
-			global.test_string = concat(global.test_string, " ", first_path.exitdoor.letter, " -> ", last_room.title);
+				global.test_string = concat(global.test_string, " ", first_path.exitdoor.letter, " -> ", last_room.title);
 			
-			var direct_connection = rd_connect_directly(
-				first_room, first_path, last_room, roomtypes, pathtimes, 
-				last_start_letter, last_exit_letter, 
-				use_last_start, use_last_exit, 
-				use_branch_start, use_branch_exit);
+				var direct_connection = rd_connect_directly(
+					first_room, first_path, last_room, roomtypes, pathtimes, 
+					last_start_letter, last_exit_letter, 
+					use_last_start, use_last_exit, 
+					use_branch_start, use_branch_exit);
 			
-			global.test_string = temp;
+				global.test_string = temp;
 			
-			if (direct_connection != undefined)
-				ds_list_add(connections, direct_connection);
+				if (direct_connection != undefined)
+					ds_list_add(connections, direct_connection);
 				
+			}
 		}
 	}
 	
@@ -489,7 +498,7 @@ use_branch_start = false, use_branch_exit = false)
 			//Only one connection from the list will be used, so we can try to reuse rooms
 			ds_map_clear(global.connection_tested_rooms);
 				
-			var new_connection = rd_find_connections( //TODO: might need to find all possible connections to increase the success rate between sequences
+			var new_connection = rd_find_connections(
 				incomplete_connection,
 				last_room,
 				roomtypes,
@@ -505,6 +514,8 @@ use_branch_start = false, use_branch_exit = false)
 		global.test_string = temp;
 		//Try next first path
 	}
+	
+	ds_list_destroy(first_paths);
 	
 	return connections;
 }

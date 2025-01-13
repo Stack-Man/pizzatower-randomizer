@@ -270,6 +270,52 @@
 			"loop" : true,
 			"doors" :
 			[
+			
+				{
+					"letter" : "C",
+					"type" : "horizontal",
+					"dir" : "right",
+					"loopexit" : true,
+					"startonly" : true,
+					"notpizzatime" : true,
+					"powerup" :
+					{
+						"type" : "satan",
+						"pizzatime" : true
+					}
+				},
+				
+				{
+					"letter" : "D",
+					"type" : "door",
+					"branch": true,
+					"powerup" :
+					{
+						"type" : "satan",
+						"pizzatime" : true
+					}
+				},
+				
+				{
+					"letter" : "B",
+					"type" : "horizontal",
+					"pizzatime" : true,
+					"dir" : "left",
+					"powerup" :
+					{
+						"type" : "satan",
+						"pizzatime" : true
+					}
+				}
+			]
+		},
+		
+		{
+			"title" : "freezer_9",
+			"maxscore" : 0,
+			"loop" : true,
+			"doors" :
+			[
 				{
 					"letter" : "A",
 					"type" : "door",
@@ -291,41 +337,9 @@
 						"type" : "satan",
 						"pizzatime" : true
 					}
-				},
-				
-				{
-					"letter" : "C",
-					"type" : "horizontal",
-					"dir" : "right",
-					"loopexit" : true,
-					"startonly" : true,
-					"powerup" :
-					{
-						"type" : "satan",
-						"pizzatime" : true
-					}
-				},
-				
-				{
-					"letter" : "D",
-					"type" : "door",
-					"ratblocked" : true,
-					"powerup" :
-					{
-						"type" : "satan",
-						"pizzatime" : true
-					}
 				}
-			],
-			"groups" :
-			[
-				{
-					"letters" :
-					[
-						"A", "C"
-					]
-				}
-			]
+			]	
+				
 		},
 		
 		{

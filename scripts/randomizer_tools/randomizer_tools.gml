@@ -18,7 +18,7 @@ function rd_generate_new(use_new_seed = false)
 	ds_list_destroy(global.connection_tested_exits);
 	
 	if (variable_global_exists("font_map"))
-		create_transformation_tip( concat("Generated ", created, " of ", array_length(level_names), " levels") );
+		create_transformation_tip( concat("Generated ", created, " of ", "21", " levels") );
 }
 
 function rd_reset()
@@ -123,6 +123,47 @@ function rd_filter_out_rooms(potential_rooms, rooms_to_remove)
 	}
 	
 	return valid_rooms;
+}
+
+function rd_prioritize_rooms_of_type(potential_rooms, roomorder)
+{
+	var result_rooms = ds_list_create();
+	
+	for (var r = 0; r < array_length(roomorder); r++)
+	{
+		var current_roomtype = roomorder[r];
+		
+		for (var p = 0; p < ds_list_size(potential_rooms); p++)
+		{
+			var thisroom = ds_list_find_value(potential_rooms, p);
+			
+			if (thisroom.roomtype == current_roomtype)
+				ds_list_add(result_rooms, thisroom);
+			
+		}
+	}
+	
+	for (var p = 0; p < ds_list_size(potential_rooms); p++)
+	{
+		var thisroom = ds_list_find_value(potential_rooms, p);
+			
+		if ( !array_contains(roomorder, thisroom.roomtype) )
+			ds_list_add(result_rooms, thisroom);
+			
+	}
+	
+	show_debug_message("Prioritized rooms: ");
+	
+	for (var p = 0; p < ds_list_size(result_rooms); p++)
+	{
+		var thisroom = ds_list_find_value(result_rooms, p);
+			
+		show_debug_message(concat("Room of type ", thisroom.roomtype, ": ", thisroom.title));
+			
+	}
+	
+	return result_rooms;
+	
 }
 
 function rd_filter_paths_by_start(from_room, desired_type, desired_dir, desired_time, desired_letter = "")
@@ -436,9 +477,7 @@ function rd_buffer()
 	return buffer;
 }
 
-
-//TODO: implement rocket
-//implement ghostking and "ghostking ball"
+//TODO: implement "ghostking ball" for that gerome door loop room in chateau
 function rd_give_transformation(name)
 {
 	show_debug_message( concat("Giving Powerup: ", name) );
@@ -529,12 +568,10 @@ function rd_satan()
 	global.noisejetpack = true;
 }
 
-//TODO: this state puts peppino in the old shotgun state at first, does not remove properly, and ends his running
 function rd_shotgun()
 {
 	show_debug_message("shotgun on");
 	shotgunAnim = true;
-	//state = states.shotgun;
 }
 
 function rd_gustavo()

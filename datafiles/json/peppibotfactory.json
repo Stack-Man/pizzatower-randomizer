@@ -60,7 +60,8 @@
         {
           "letter": "E",
           "type": "door",
-          "pizzatime": true
+          "pizzatime": true,
+		  "exitonly" : true
         },
         {
           "letter": "F",

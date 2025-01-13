@@ -80,7 +80,8 @@
 				{
 					"letter" : "D",
 					"type" : "horizontal",
-					"dir" : "right"
+					"dir" : "right",
+					"notpizzatime" : true
 				}
 			]
 		},

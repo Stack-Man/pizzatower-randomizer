@@ -58,38 +58,41 @@ if (ds_map_exists(global.transition_map, room))
 	{
 		if (!ds_map_exists(room_transitions, targetDoor))
 		{
-			//var xscale = image_xscale;
-			//var yscale = image_yscale;
+			var xscale = image_xscale;
+			var yscale = image_yscale;
+			var orginal_depth = depth;
+			var orginal_layer = layer;
 			
-			/*with (instance_create_depth(x, y, depth, obj_solid))
+			with (instance_create_depth(x, y, depth, obj_hallway_blocked))
 			{
-				image_xscale = xscale * 100;
-				image_yscale = yscale * 100;
-				visible = true;
-			}*/
+				image_xscale = xscale;
+				image_yscale = yscale;
+				depth = orginal_depth;
+				layer = orginal_layer;
+			}
 			
-			enable = false;
-			solid = true;
-			
-			//instance_destroy(self);
-		}
+			instance_destroy(self);
+		}	
 	}
 
-	//TODO: proper blockage
 	with (obj_verticalhallway)
 	{
 		if (!ds_map_exists(room_transitions, targetDoor))
 		{
 			var xscale = image_xscale;
 			var yscale = image_yscale;
+			var orginal_depth = depth;
+			var orginal_layer = layer;
 			
-			with (instance_create_depth(x, y, depth, obj_solid))
+			with (instance_create_depth(x, y, depth, obj_verticalhallway_blocked))
 			{
 				image_xscale = xscale;
 				image_yscale = yscale;
+				depth = orginal_depth;
+				layer = orginal_layer;
 			}
 			
 			instance_destroy(self);
-		}
+		}	
 	}
 }

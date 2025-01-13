@@ -1,7 +1,7 @@
 function rd_init(use_new_seed = false)
 {
 	//TODO: implement reading the ini file
-	seed = 422622450;
+	seed = 0;
 	
 	if (seed == 0 || use_new_seed)
 	{
