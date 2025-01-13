@@ -57,7 +57,8 @@
 					"letter" : "D",
 					"type" : "vertical",
 					"dir" : "up",
-					"startonly" : true
+					"startonly" : true,
+					"pizzatime" : true
 				},
 				
 				{

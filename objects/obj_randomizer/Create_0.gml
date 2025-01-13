@@ -2,8 +2,8 @@ depth = -6000;
 
 current_powerup = poweruptype.none;
 
-global.first_test_name = "farm_7";
-global.test_name = "badland_9";
+global.first_test_name = "test";
+global.test_name = "test";
 
 global.recursion_depth = 0;
 global.test_string = "";
@@ -12,7 +12,7 @@ global.use_loops = false;
 max_branches = 3;
 
 ignore_rooms = [
-"forest_G1", "plage_shipmain", "minigolf_8", "war_13", 
+"forest_G1", "plage_shipmain", 
 "tower_finalhallway", "tower_1", "tower_johngutterhall", "tower_2", "tower_3", "tower_4", "tower_5",
 "tower_tutorial1N"];
 separated_rooms = ["ruin_11", "badlands_5", "industrial_2", "industrial_3", "industrial_4"]; //TODO: implement

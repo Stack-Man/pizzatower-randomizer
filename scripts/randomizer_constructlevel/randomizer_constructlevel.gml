@@ -3,10 +3,25 @@ function rd_construct_levels()
 	var levels = ds_list_create();
 	var entrances = rd_get_rooms_of_type([roomtype.entrance, roomtype.entrancebranching]);
 	
+	var war_exit_created = false;
+	
 	for (var i = 0; i < ds_list_size(entrances); i++)
 	{
 		var first_room = ds_list_find_value(entrances, i);		
 		show_debug_message( concat("Constructing: ", first_room.title) );
+		
+		var branch_start = ds_list_size( rd_filter_out_rooms(rd_get_rooms_of_type([roomtype.branchstart]), global.sequence_tested_rooms) );
+		var branch_any = ds_list_size( rd_filter_out_rooms(rd_get_rooms_of_type([roomtype.branchany]), global.sequence_tested_rooms) );
+		var branch_end = ds_list_size( rd_filter_out_rooms(rd_get_rooms_of_type([roomtype.branchend]), global.sequence_tested_rooms) );
+		var branch_mid = ds_list_size( rd_filter_out_rooms(rd_get_rooms_of_type([roomtype.branchmid]), global.sequence_tested_rooms) );
+		var john = ds_list_size( rd_filter_out_rooms(rd_get_rooms_of_type([roomtype.john]), global.sequence_tested_rooms) );
+		var john_branch = ds_list_size( rd_filter_out_rooms(rd_get_rooms_of_type([roomtype.johnbranching]), global.sequence_tested_rooms) );
+		
+		show_debug_message( concat( "Remaining rooms: ",
+		"branch anys left: ", branch_any,
+		"branch starts left: ", branch_start, "branch ends left: ", branch_end, 
+		"branch mid left: ", branch_mid, "john left: ", john,
+		"branch johns left: ", john_branch) );
 
 		var incomplete_sequence = rd_get_sequence_struct(
 			undefined, 
@@ -24,7 +39,31 @@ function rd_construct_levels()
 			ds_list_add(levels, level);
 		}	
 		else
+		{
 			show_debug_message( concat("Failed to construct: ", first_room.title) );
+			
+			if (!war_exit_created)
+			{
+				show_debug_message( concat("Constructing: ", first_room.title, " with war exit") );
+					
+				var war_exit_level = rd_connect_to_war_exit(first_room, "A");
+				
+				if (war_exit_level != undefined)
+				{
+					ds_list_add(levels, war_exit_level);
+					war_exit_created = true;
+					
+					show_debug_message( concat("Success to construct: ", first_room.title, " with war exit") );
+				}
+				else
+				{
+					show_debug_message( concat("Failed to construct: ", first_room.title, " with war exit") );
+				}
+			}
+			
+			
+		}
+			
 	}
 	
 	show_debug_message( concat("Created ", ds_list_size(levels), " levels") );
@@ -142,6 +181,36 @@ function rd_add_rooms_inbetween(connection, roomtypes_arr, path_time_arr, desire
 
 #region branch sequencing
 
+function rd_connect_to_war_exit(first_room)
+{
+	var war_exit_room = ds_list_find_value( rd_get_rooms_of_type([roomtype.warexit]), 0);
+	
+	var connections = rd_find_connections_start(
+			first_room,
+			war_exit_room,
+			oneway_types,
+			[pathtime.any, pathtime.notpizzatime],
+			"A", "",
+			"", "",
+			true, true,
+			true, true,
+			false, false); 
+	
+	if ( ds_list_size(connections) > 0)
+	{
+		var new_sequence = rd_get_sequence_struct(
+			ds_list_find_value(connections, 0),
+			undefined,
+			undefined,
+			first_room,
+			true);
+		
+		return new_sequence;
+	}
+	
+	return undefined;
+}
+
 //sequence struct
 //sequence.to_connection = a complete connection struct from a room to last room
 //sequence.return_connection = a connection struct IF the last room was an end branch
@@ -190,7 +259,7 @@ function rd_connect_to_branch2(sequence, prev_sequence_last_path_start_letter)
 	
 	for (var b = 0; b < ds_list_size(branches); b++)
 	{
-		//show_debug_message(concat(rd_buffer(), "branch ", b  + 1, " of ", ds_list_size(branches) ));
+		show_debug_message(concat(rd_buffer(), "branch ", b  + 1, " of ", ds_list_size(branches) ));
 		var branch = ds_list_find_value(branches, b);
 		
 		//Find all connections
@@ -763,16 +832,39 @@ function rd_link_connections(connection)
 //Take two rooms and a path and add them to the transition map by ID
 function rd_add_path_with_room(from_room, from_path, to_room, to_path)
 {
-	var from_ID = asset_get_index(from_room.title);
-	var to_ID = asset_get_index(to_room.title);
+	//Fix duplicated rooms to use the actual ID
+	var from_extra = string_pos("_SECOND", from_room.title);
+	
+	if (from_extra == 0)
+		from_extra = string_pos("_THIRD_", from_room.title);
+		
+	
+	var to_extra = string_pos("_SECOND", to_room.title);
+	
+	if (to_extra == 0)
+		to_extra = string_pos("_THIRD_", to_room.title);
+	
+	var real_from_title = from_extra != 0 ? string_delete(from_room.title, from_extra, 7) : from_room.title;
+	var real_to_title = to_extra != 0 ? string_delete(to_room.title, to_extra, 7) : to_room.title;
+	
+	var from_ID = asset_get_index(real_from_title);
+	var to_ID = asset_get_index(real_to_title);
+	
+	if (from_ID == -1 || to_ID == -1)
+	{
+		show_debug_message( concat("invalid room ID for ", from_room.title, " or ", to_room.title) );
+	}
+		
 	
 	var from_letter = from_path.exitdoor.letter;
 	var to_letter = to_path.startdoor.letter;
 		
 	show_debug_message(concat("connected ", from_room.title, " ", from_letter, " to ", to_room.title, " ", to_letter));
 	
+
 	rd_add_path(from_ID, from_letter, to_ID, to_letter);
 	
+	//TODO: unnecessary? we're already filtering out all_rooms during construction then deleting it later
 	rd_remove_room(from_room);
 	rd_remove_room(to_room);
 }

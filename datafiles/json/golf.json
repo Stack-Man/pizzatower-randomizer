@@ -203,7 +203,6 @@
 					"type" : "door",
 					"pizzatime" : true,
 					"exitonly" : true,
-					"loop" : true,
 					"loopstart" : true
 				},
 				

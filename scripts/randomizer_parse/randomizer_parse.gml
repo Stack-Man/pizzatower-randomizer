@@ -44,7 +44,6 @@ function rd_parse_rooms()
 		{
 			var rooms = ds_map_find_value(level, "rooms")
 			
-			//for (var i = 0; i < array_length(rooms); i++)
 			for (var i = 0; i < ds_list_size(rooms); i++)
 			{
 				//var thisroom = rooms[i];
@@ -56,6 +55,20 @@ function rd_parse_rooms()
 						continue;
 					
 					var parsed_room = rd_parse_doors(thisroom);
+					var room_title = ds_map_find_value(thisroom, "title");
+					
+					if (ds_map_exists(parsed_rooms, room_title) )
+					{
+						var temp = room_title;
+						
+						room_title = concat(room_title, "_SECOND");
+						
+						if (ds_map_exists(parsed_rooms, room_title) )
+						{
+							room_title = concat(temp, "_THIRD_"); //making it seven characters long like _SECOND
+						}
+					}
+					
 					ds_map_add(parsed_rooms, ds_map_find_value(thisroom, "title"), parsed_room);
 				}
 					
@@ -267,7 +280,7 @@ function rd_parse_doors(thisroom)
 	{
 		var door_a = ds_list_find_value(filtered_doors, a);
 		var door_a_struct = rd_get_door_struct(door_a);
-		
+
 		rd_parse_powerup(door_a, room_index);
 		
 		var c = (ds_list_size(filtered_doors) <= 1) ? a : a + 1; //Handle one door rooms
@@ -316,6 +329,9 @@ function rd_parse_doors(thisroom)
 
 	if (ds_list_size(filtered_doors) <= 1 && found_room_type != roomtype.entrance && found_room_type != roomtype.john)
 		found_room_type = roomtype.loop;
+
+	if (room_title == "war_13")
+		found_room_type = roomtype.warexit;
 
 	ds_list_destroy(filtered_doors);
 

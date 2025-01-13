@@ -274,7 +274,8 @@
 					"letter" : "B",
 					"type" : "horizontal",
 					"dir" : "left",
-					"exitonly" : true
+					"exitonly" : true,
+					"pizzatime" : true
 				},
 				
 				{

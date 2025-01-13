@@ -34,7 +34,8 @@
                 {
                     "letter" : "ROCKET",
                     "type": "rocket",
-                    "startonly": true
+                    "startonly": true,
+					"pizzatime" : true
                 }
             ]
         },

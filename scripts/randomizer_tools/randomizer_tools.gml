@@ -350,6 +350,13 @@ function rd_get_connection_struct(new_first, new_path, new_second)
 
 function rd_clear_transformation()
 {
+	if (instance_exists(obj_wartimer))
+	{
+		with(obj_wartimer)
+		{
+			instance_destroy(self);
+		}
+	}
 
 	//TODO: may accidentally delete existing ghostking if you go into a room with a natural ghostking from a fake ghostking
 	//Try to only delete the first instance

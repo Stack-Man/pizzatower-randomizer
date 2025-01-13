@@ -33,12 +33,6 @@
 			{
 				"title" : "farm_1",
 				"maxscore": 0,
-				"oneway": {
-					"pairs": [
-							[ "D", "C" ],
-							[ "D", "F" ]
-						]
-				},
 				"doors": [
 					{
 						"letter" : "D",
@@ -52,7 +46,9 @@
 						"letter" : "C",
 						"type": "horizontal",
 						"dir": "right",
-						"branch" : true
+						"branch" : true,
+						"exitonly" : true,
+						"ratblocked" : true
 					},
 					
 					{
