@@ -173,7 +173,7 @@ function rd_filter_paths_by_start_and_roomtype(
 				ds_list_add(filtered_paths, path);
 				if (from_room.title == global.test_name)
 				{
-					show_debug_message( concat("good oneway path for ", global.test_name, path ) );
+					show_debug_message( concat("good not oneway path for ", global.test_name, path ) );
 				}
 			}
 		}

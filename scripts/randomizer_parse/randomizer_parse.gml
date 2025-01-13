@@ -287,6 +287,8 @@ function rd_parse_doors(thisroom)
 				found_room_type = rd_check_path_for_roomtype(path_ba, found_room_type);
 			}
 			
+			//TODO: loop rooms add two identical paths
+			
 			if (path_ab != undefined)
 				ds_list_add(found_paths, path_ab);
 			

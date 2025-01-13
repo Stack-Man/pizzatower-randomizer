@@ -179,6 +179,8 @@ function rd_connect_to_branch2(sequence, prev_sequence_last_path_start_letter)
 	//TODO: running out of the correct johntype, need to allow it one more branch if thats the case
 	var all_branchtypes = global.recursion_depth >= max_branches ? [johntype] : [roomtype.branchany, branchtype, johntype];
 	
+	//TODO: kidsparty_floor3_1 A failed to connect to graveyard_6 door
+	
 	var unfiltered_branches = rd_get_rooms_of_type(all_branchtypes); //TODO: allow branchmid if needs_return, and if branchmid is used, ask for another branchend with branchmid
 	var branches = rd_filter_out_rooms(unfiltered_branches, global.sequence_tested_rooms);
 	ds_list_destroy(unfiltered_branches);
@@ -263,7 +265,7 @@ function rd_connect_to_branch2(sequence, prev_sequence_last_path_start_letter)
 
 				for (var r = 0; r < ds_list_size(return_connections); r++)
 				{
-					show_debug_message(concat(rd_buffer(), "return ", r, " of ", ds_list_size(return_connections) ));
+					//show_debug_message(concat(rd_buffer(), "return ", r, " of ", ds_list_size(return_connections) ));
 					
 					var return_connection = ds_list_find_value(return_connections, r);
 					rd_add_connection_rooms_to_map(return_connection, global.sequence_tested_rooms);
@@ -656,7 +658,16 @@ use_branch_start = false, use_branch_exit = false)
 		var correct_start = last_start_letter = "" || (use_last_start && potential_last_path.startdoor.letter == last_start_letter) || (!use_last_start && potential_last_path.startdoor.letter != last_start_letter);
 		var correct_exit = last_exit_letter = "" || (use_last_exit && potential_last_path.exitdoor.letter == last_exit_letter) || (!use_last_exit && potential_last_path.exitdoor.letter != last_exit_letter);
 	
-		var correct_branch = ( !use_branch_start || (use_branch_start && potential_last_path.startdoor.branch) ) && ( !use_branch_exit || (use_branch_exit && potential_last_path.exitdoor.branch) )
+		//its okay if its not marked branch if we're connecting to a john room which wont have a door marked branch
+		var correct_branch_start = ( !use_branch_start || (use_branch_start && potential_last_path.startdoor.branch) );
+		var correct_branch_exit = ( !use_branch_exit || (use_branch_exit && potential_last_path.exitdoor.branch) )
+		var correct_branch = (correct_branch_start && correct_branch_exit) || last_room.roomtype == roomtype.john || last_room.roomtype == roomtype.johnbranching;
+	
+		if (first_room.title == global.first_test_name && last_room.title == global.test_name)
+		{
+			show_debug_message( concat("Testing direct for path ", potential_last_path) );
+			show_debug_message( concat("start? exit? branch? ", correct_start, ", ", correct_exit, ", ", correct_branch) );
+		}
 	
 		if (correct_start && correct_exit && correct_branch)
 		{

@@ -2,8 +2,8 @@ depth = -6000;
 
 current_powerup = poweruptype.none;
 
-global.first_test_name = "test";
-global.test_name = "test";
+global.first_test_name = "kidsparty_floor3_1";
+global.test_name = "graveyard_6";
 
 global.recursion_depth = 0;
 global.test_string = "";
