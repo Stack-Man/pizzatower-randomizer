@@ -17,7 +17,8 @@
                 },
                 {
                     "letter": "D",
-                    "type": "broken",
+                    "type": "box",
+					"pizzatime" : true,
                     "dir": "up"
                 }
             ]
@@ -43,13 +44,15 @@
             "doors": [
                 {
                     "letter": "E",
-                    "type": "door"
+                    "type": "door",
+					"notpizzatime" : true
                 },
                 {
                     "letter": "D",
                     "type": "box",
                     "dir": "down",
-                    "pizzatime": true
+                    "pizzatime": true,
+					"exitonly" : true
                 }
             ]
         }

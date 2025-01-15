@@ -261,7 +261,8 @@
 							"letter" : "B",
 							"type": "box",
 							"dir": "up",
-							"notpizzatime": true
+							"notpizzatime": true,
+							"startonly" : true
 						},
 						{
 							"letter" : "A",
@@ -272,7 +273,7 @@
 				},
 				
 				{
-					"title" : "ruin_11",
+					"title" : "ruin_11_2",
 					"maxscore": 0,
 					"doors": [
 						{

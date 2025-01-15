@@ -15,7 +15,9 @@ enum roomtype
 	branchend, //must initially exit with branch door
 	branchany, //can either enter or exit with branch door
 	branchmid, //must be inbetween two branches, enter branchstart during notpizzatime and exit branchexit during pizzatime
-	warexit
+	warexit,
+	ctopexit,
+	ctopentrance
 }
 
 enum pathtime

@@ -112,8 +112,12 @@
                     "letter" : "A",
                     "type": "horizontal",
                     "dir": "left",
-                    "startonly": true
+                    "startonly": true,
+					"powerup": {
+                        "type" : "ghostking"
+				    }
                 },
+				
                 {
                     "letter" : "B",
                     "type": "vertical",

@@ -78,7 +78,8 @@
                     "type": "horizontal",
                     "dir": "left",
                     "powerup": {
-                        "type" : "ghostking ball"
+                        "type" : "ghostking ball",
+						"pizzatime" : true
 				    }
                 },
                 {
@@ -87,7 +88,8 @@
                     "gerome": true,
                     "loop": true,
                     "powerup": {
-                        "type" : "ghostking"
+                        "type" : "ghostking",
+						"pizzatime" : true
 				    }
                 }
             ]
@@ -101,7 +103,10 @@
             "doors": [
                 {
                     "letter" : "C",
-                    "type": "door"
+                    "type": "door",
+                    "powerup": {
+                        "type" : "ghostking"
+				    }
                 },
                 {
                     "letter" : "B",
@@ -306,7 +311,16 @@
         },
         
         {
-            "title" : "chateau_secret2"
+            "title" : "chateau_secret2",
+			"doors" : [
+				{
+					"letter" : "secret",
+					"type": "secret",
+                    "powerup": {
+                        "type" : "ghostking"
+				    }
+				}
+			]
         },
         
         {

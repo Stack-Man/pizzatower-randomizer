@@ -1,4 +1,4 @@
-if global.panic || ds_list_find_index(global.created_levels, targetRoom) == -1
+if global.panic || (ds_list_find_index(global.created_levels, targetRoom) == -1 && !array_contains(global.boss_levels, targetRoom) )
 {
 	instance_destroy();
 	instance_create(x, y + 144, obj_rubble);

@@ -113,7 +113,7 @@
       ]
     },
     {
-      "title": "badland_5",
+      "title": "badland_5_2",
       "maxscore": 0,
       "doors": [
         {
@@ -127,7 +127,7 @@
       ]
     },
     {
-      "title": "badland_5",
+      "title": "badland_5_3",
       "maxscore": 0,
       "doors": [
         {
@@ -213,6 +213,7 @@
         {
           "letter": "A",
           "type": "vertical",
+		  "dir" : down,
           "exitonly": true
         }
       ]

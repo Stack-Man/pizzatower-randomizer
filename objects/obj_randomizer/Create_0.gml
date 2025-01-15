@@ -2,6 +2,7 @@ depth = -6000;
 
 current_powerup = poweruptype.none;
 
+
 global.first_test_name = "test";
 global.test_name = "test";
 
@@ -14,26 +15,23 @@ global.use_loops = false;
 max_branches = 2;
 
 ignore_rooms = [
-"forest_G1", "plage_shipmain", "tower_finalhallway",
-"tower_entrancehall", "tower_1", "tower_johngutterhall", "tower_2", "tower_3", "tower_4", "tower_5", "ruin_11",
+"forest_G1", "plage_shipmain", 
+"tower_1", "tower_johngutterhall", "tower_2", "tower_3", "tower_4", "tower_5", "ruin_11",
 "tower_tutorial1N"];
-separated_rooms = ["ruin_11", "badlands_5", "industrial_2", "industrial_3", "industrial_4", "freezer_9"];
+
+global.boss_levels = [boss_pepperman, boss_vigilante, boss_noise, boss_fakepep, boss_pizzaface];
 
 //TODO:
+//gustavo/peppino door skips door exit naimation
+//gustavo to peppino causes velocity in the wrong direction
 
-//dont delete boss doors
-//rooms added failing still
+//control how many rooms are being added to levls
 
-//space_9 always failing, rocket doors and taxi doosr may not work properly
+//restart is broken
 
-//ghost king is sometimes persisting, may have to do with natural spawns
+//space_9 always failing, rocket doors and taxi doors may not work properly, now farm_2 failed, so its something else, a lack of johns?
+
 //create direct room handling for crumbling tower
-
-//ruin 11 treated like a loop john instead of a branching, entered from door
-
-//separated rooms code not working properly?
-
-//delete unmade levels
 
 //floor progression since toppins are a no go (always give $50 for every level? require beating all or X levels?)
 //fix gustavo door/transition messuips, save door state and duirection then set them after doing the switch?

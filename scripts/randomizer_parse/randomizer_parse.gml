@@ -46,7 +46,6 @@ function rd_parse_rooms()
 			
 			for (var i = 0; i < ds_list_size(rooms); i++)
 			{
-				//var thisroom = rooms[i];
 				var thisroom = ds_list_find_value(rooms, i);
 				
 				if (ds_map_exists(thisroom, "doors"))
@@ -56,18 +55,6 @@ function rd_parse_rooms()
 					
 					var parsed_room = rd_parse_doors(thisroom);
 					var room_title = ds_map_find_value(thisroom, "title");
-					
-					if (ds_map_exists(parsed_rooms, room_title) )
-					{
-						var temp = room_title;
-						
-						room_title = concat(room_title, "_SECOND");
-						
-						if (ds_map_exists(parsed_rooms, room_title) )
-						{
-							room_title = concat(temp, "_THIRD_"); //making it seven characters long like _SECOND
-						}
-					}
 					
 					ds_map_add(parsed_rooms, ds_map_find_value(thisroom, "title"), parsed_room);
 				}
@@ -332,6 +319,12 @@ function rd_parse_doors(thisroom)
 
 	if (room_title == "war_13")
 		found_room_type = roomtype.warexit;
+	
+	if (room_title == "tower_entrancehall")
+		found_room_type = roomtype.ctopexit;
+	
+	if (room_title == "tower_finalhallway")
+		found_room_type = roomtype.ctopentrance;
 
 	ds_list_destroy(filtered_doors);
 

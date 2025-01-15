@@ -5,13 +5,20 @@ function rd_generate_new(use_new_seed = false)
 	global.sequence_tested_rooms = ds_map_create(); //Doesn't get cleared between sequences
 	global.connection_tested_rooms = ds_map_create(); //Does get cleared whenever calling rd_find_connections_start
 	global.connection_tested_exits = ds_list_create(); //same as above
+	global.sequence_used_rooms = ds_map_create();
 
 	global.transition_map = ds_map_create();
 	global.powerup_map = ds_map_create();
 	global.all_rooms = rd_parse_rooms();
 	
+	var johns = ds_list_size(rd_get_rooms_of_type([roomtype.john, roomtype.johnbranching]));
+	var entrances = ds_list_size( rd_get_rooms_of_type( [roomtype.entrance, roomtype.entrancebranching] ) );
+	
+	show_debug_message( concat("Johns: ", johns, " entrances: ", entrances) );
+	
 	var created = rd_construct_levels();
 
+	ds_map_destroy(global.sequence_used_rooms);
 	ds_map_destroy(global.all_rooms);
 	ds_map_destroy(global.connection_tested_rooms);
 	ds_map_destroy(global.sequence_tested_rooms);
@@ -152,7 +159,7 @@ function rd_prioritize_rooms_of_type(potential_rooms, roomorder)
 			
 	}
 	
-	show_debug_message("Prioritized rooms: ");
+	/*show_debug_message("Prioritized rooms: ");
 	
 	for (var p = 0; p < ds_list_size(result_rooms); p++)
 	{
@@ -160,7 +167,7 @@ function rd_prioritize_rooms_of_type(potential_rooms, roomorder)
 			
 		show_debug_message(concat("Room of type ", thisroom.roomtype, ": ", thisroom.title));
 			
-	}
+	}*/
 	
 	return result_rooms;
 	
@@ -401,16 +408,11 @@ function rd_clear_transformation()
 
 	//TODO: may accidentally delete existing ghostking if you go into a room with a natural ghostking from a fake ghostking
 	//Try to only delete the first instance
-	if (instance_exists(obj_trapghost) && current_powerup == poweruptype.ghostking )
+	if (instance_exists(obj_trapghost))
 	{
-		var already_destroyed = false;
-		
 		with (obj_trapghost)
 		{
-			if (!already_destroyed)
-				instance_destroy(self);
-			
-			already_destroyed = true;
+			instance_destroy(self);
 		}
 	}
 
@@ -459,7 +461,26 @@ function rd_clear_transformation()
 	
 	if (current_powerup == poweruptype.gustavo)
 	{
+		var temp_state;
+		
+		with (obj_player)
+		{
+			temp_state = state;
+		}
+			
+		var original_xscale = image_xscale;
+		
 		scr_switchpeppino();
+		
+		if (temp_state == states.comingoutdoor)
+		{
+			with (obj_player)
+			{
+				state = temp_state;	
+			}
+		}
+		
+		image_xscale = original_xscale;
 	}
 	
 	current_powerup = poweruptype.none;
@@ -556,7 +577,6 @@ function rd_ghostking()
 
 function rd_barrel()
 {
-	show_debug_message("barrel on");
 	movespeed = hsp;
 	state = states.barrel;
 	image_index = 0;
@@ -564,18 +584,15 @@ function rd_barrel()
 
 function rd_satan()
 {
-	show_debug_message("satan on");
 	global.noisejetpack = true;
 }
 
 function rd_shotgun()
 {
-	show_debug_message("shotgun on");
 	shotgunAnim = true;
 }
 
 function rd_gustavo()
 {
-	show_debug_message("gustavo on");
 	scr_switchgustavo();
 }

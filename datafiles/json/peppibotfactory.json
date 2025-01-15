@@ -73,7 +73,7 @@
       ]
     },
     {
-      "title": "industrial_2",
+      "title": "industrial_2_2",
       "maxscore": 0,
       "doors": [
         {
@@ -112,7 +112,7 @@
       ]
     },
     {
-      "title": "industrial_3",
+      "title": "industrial_3_2",
       "maxscore": 0,
       "secret": {
         "secret": true
@@ -156,7 +156,7 @@
       ]
     },
     {
-      "title": "industrial_4",
+      "title": "industrial_4_2",
       "maxscore": 0,
       "doors": [
         {
@@ -176,6 +176,7 @@
     {
       "title": "industrial_5",
       "maxscore": 0,
+	  "pillar" : true,
       "toppin": {
         "toppin": "sausage"
       },
@@ -184,13 +185,15 @@
           "letter": "A",
           "type": "vertical",
           "dir": "down",
-          "startonly": true
+          "startonly": true,
+		  "notpizzatime" : true
         },
         {
           "letter": "C",
           "type": "vertical",
           "dir": "down",
-          "exitonly": true
+          "exitonly": true,
+		  "pizzatime" : true
         }
       ]
     },
