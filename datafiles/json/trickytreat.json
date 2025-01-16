@@ -139,7 +139,10 @@
                 },
                 {
                     "letter" : "A",
-                    "type": "door"
+                    "type": "door",
+					"loop" : true,
+					"exitonly" : true,
+					"ratblocked" : true
                 },
                 {
                     "letter" : "C",

@@ -14,7 +14,8 @@
         {
           "letter": "B",
           "type": "vertical",
-          "dir": "up"
+          "dir": "up",
+		  "notpizzatime" : true
         },
         {
           "letter": "D",

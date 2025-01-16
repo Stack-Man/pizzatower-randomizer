@@ -27,6 +27,20 @@
 		},
 		
 		{
+			"title" : "forest_treasure",
+			"maxscore" : 0,
+			"loop" : true,
+			"doors" :
+			[
+				{
+					"letter" : "F",
+					"type" : "door",
+					"loop" : true
+				}
+			]
+		},
+		
+		{
 			"title" : "forest_2",
 			"maxscore" : 0,
 			"loop" : true,
@@ -518,7 +532,8 @@
 					"powerup" :
 					{
 						"type" : "gustavo"
-					}
+					},
+					"exitonly" : true
 				},
 				
 				{
@@ -616,7 +631,8 @@
 					"powerup" :
 					{
 						"type" : "gustavo"
-					}
+					},
+					"exitonly" : true
 				},
 				
 				{

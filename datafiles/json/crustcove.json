@@ -30,6 +30,20 @@
 		},
 		
 		{
+			"title" : "plage_treasure",
+			"maxscore" : 0,
+			"loop" : true,
+			"doors" :
+			[
+				{
+					"letter" : "F",
+					"type" : "door",
+					"loop" : true
+				}
+			]
+		},
+		
+		{
 			"title" : "plage_beach1",
 			"maxscore" : 0,
 			"loop" : true,

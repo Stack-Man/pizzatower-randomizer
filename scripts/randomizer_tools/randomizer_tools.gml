@@ -270,6 +270,22 @@ function rd_print_connection_path(connection)
 	show_debug_message( concat("Path: ", path) );
 }
 
+function rd_count_rooms(sequence)
+{
+	var next = sequence;
+	var total = 0;
+	
+	while (next != undefined)
+	{
+		total += rd_count_connections(next.to_connection);
+		total += rd_count_connections(next.return_connection);
+		
+		next = next.next;
+	}
+	
+	return total;
+}
+
 function rd_count_connections(connection)
 {
 	var next = connection;

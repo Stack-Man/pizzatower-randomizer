@@ -70,7 +70,7 @@
                     "dir": "left"
                 },
                 {
-                    "letter" : "A",
+                    "letter" : "D",
                     "type": "box",
                     "dir": "down",
                     "pizzatime" : true

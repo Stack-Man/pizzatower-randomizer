@@ -99,7 +99,9 @@
                 },
                 {
                     "letter": "B",
-                    "type": "door"
+                    "type": "door",
+					"exitonly" : true,
+					"ratblocked" : true
                 }
             ]
         },

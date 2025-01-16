@@ -241,7 +241,8 @@
                     "pizzatime": true,
                     "powerup": {
                         "type" : "ghostking"
-				    }
+				    },
+					"exitonly" : true
                 },
                 {
                     "letter" : "B",

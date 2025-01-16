@@ -30,6 +30,20 @@
 			]
 		},
 		
+				{
+			"title" : "minigolf_treasure",
+			"maxscore" : 0,
+			"loop" : true,
+			"doors" :
+			[
+				{
+					"letter" : "F",
+					"type" : "door",
+					"loop" : true
+				}
+			]
+		},
+		
 		{
 			"title" : "minigolf_2",
 			"maxscore" : 0,
@@ -92,9 +106,7 @@
 				{
 					"letter" : "B",
 					"type" : "horizontal",
-					"dir" : "left",
-					"startonly" : true,
-					"ratblocked" : true
+					"dir" : "left"
 				},
 				
 				{
@@ -241,8 +253,7 @@
 				{
 					"letter" : "B",
 					"type" : "door",
-					"exitonly" : true,
-					"ratblocked" : true
+					"exitonly" : true
 				}
 			]
 		},

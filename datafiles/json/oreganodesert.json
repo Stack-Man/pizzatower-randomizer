@@ -1,398 +1,398 @@
 {
-  "rooms": [
-    {
-      "title": "badland_1",
-      "maxscore": 0,
-	  "entrance" : true,
-      "doors": [
+    "rooms": [
         {
-          "letter": "A",
-          "type": "leveldoor",
-          "entrance": true
+            "title": "badland_1",
+            "maxscore": 0,
+            "entrance": true,
+            "doors": [
+                {
+                    "letter": "A",
+                    "type": "leveldoor",
+                    "entrance": true
+                },
+                {
+                    "letter": "B",
+                    "type": "horizontal",
+                    "dir": "right"
+                }
+            ]
         },
         {
-          "letter": "B",
-          "type": "horizontal",
-          "dir": "right"
+            "title": "badland_2",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter": "A",
+                    "type": "horizontal",
+                    "dir": "right"
+                },
+                {
+                    "letter": "B",
+                    "type": "horizontal",
+                    "dir": "left"
+                }
+            ]
+        },
+        {
+            "title": "badland_3",
+            "maxscore": 0,
+            "loop": true,
+            "doors": [
+                {
+                    "letter": "A",
+                    "type": "horizontal",
+                    "dir": "left",
+                    "branch": true
+                },
+                {
+                    "letter": "B",
+                    "type": "horizontal",
+                    "dir": "right",
+                    "notpizzatime": true
+                },
+                {
+                    "letter": "C",
+                    "type": "horizontal",
+                    "dir": "left",
+                    "pizzatime": true
+                },
+                {
+                    "letter": "E",
+                    "type": "door",
+                    "loop": true
+                }
+            ]
+        },
+        {
+            "title": "badland_mart1",
+            "maxscore": 0,
+            "toppin": {
+                "type": "mushroom"
+            },
+            "doors": [
+                {
+                    "letter": "E",
+                    "type": "door"
+                }
+            ]
+        },
+        {
+            "title": "badland_4",
+            "maxscore": 0,
+            "secret": {
+                "secret": true
+            },
+            "doors": [
+                {
+                    "letter": "A",
+                    "type": "horizontal",
+                    "dir": "right",
+                    "exitonly": true,
+                    "ratblocked": true
+                },
+                {
+                    "letter": "B",
+                    "type": "horizontal",
+                    "dir": "left"
+                }
+            ]
+        },
+        {
+            "title": "badland_5",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter": "A",
+                    "type": "horizontal",
+                    "dir": "left"
+                },
+                {
+                    "letter": "B",
+                    "type": "door"
+                }
+            ]
+        },
+        {
+            "title": "badland_5_2",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter": "C",
+                    "type": "door"
+                },
+                {
+                    "letter": "D",
+                    "type": "door"
+                }
+            ]
+        },
+        {
+            "title": "badland_5_3",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter": "E",
+                    "type": "door"
+                },
+                {
+                    "letter": "F",
+                    "type": "horizontal",
+                    "dir": "right"
+                }
+            ]
+        },
+        {
+            "title": "badland_5a",
+            "maxscore": 0,
+            "loop": true,
+            "doors": [
+                {
+                    "letter": "B",
+                    "type": "door",
+                    "loop": true
+                },
+                {
+                    "letter": "C",
+                    "type": "door",
+                    "loop": true,
+                    "exitonly": true,
+                    "ratblocked": true
+                },
+                {
+                    "letter": "E",
+                    "type": "door",
+                    "loop": true
+                }
+            ]
+        },
+        {
+            "title": "badland_mart2",
+            "maxscore": 0,
+            "toppin": {
+                "type": "cheese"
+            },
+            "doors": [
+                {
+                    "letter": "E",
+                    "type": "door"
+                }
+            ]
+        },
+        {
+            "title": "badland_5b",
+            "maxscore": 0,
+            "loop": true,
+            "gerome": true,
+            "doors": [
+                {
+                    "letter": "D",
+                    "type": "door",
+                    "loop": true
+                },
+                {
+                    "letter": "E",
+                    "type": "door",
+                    "loop": true,
+                    "exitonly": true,
+                    "ratblocked": true
+                }
+            ]
+        },
+        {
+            "title": "badland_6",
+            "maxscore": 0,
+            "secret": {
+                "secret": true
+            },
+            "doors": [
+                {
+                    "letter": "C",
+                    "type": "horizontal",
+                    "dir": "left"
+                },
+                {
+                    "letter": "A",
+                    "type": "vertical",
+                    "dir": "down",
+                    "exitonly": true
+                }
+            ]
+        },
+        {
+            "title": "badland_7",
+            "maxscore": 0,
+            "secret": {
+                "secret": true,
+                "notpizzatime": true
+            },
+            "loop": true,
+            "doors": [
+                {
+                    "letter": "C",
+                    "type": "horizontal",
+                    "dir": "right",
+                    "exitonly": true
+                },
+                {
+                    "letter": "A",
+                    "type": "vertical",
+                    "dir": "up",
+                    "startonly": true
+                },
+                {
+                    "letter": "E",
+                    "type": "door",
+                    "loop": true
+                }
+            ]
+        },
+        {
+            "title": "badland_mart3",
+            "maxscore": 0,
+            "toppin": {
+                "type": "pineapple"
+            },
+            "secret": {
+                "secret": true
+            },
+            "doors": [
+                {
+                    "letter": "E",
+                    "type": "door"
+                }
+            ]
+        },
+        {
+            "title": "badland_8",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter": "F",
+                    "type": "horizontal",
+                    "dir": "left"
+                },
+                {
+                    "letter": "A",
+                    "type": "door",
+                    "ratblocked": true,
+                    "exitonly": true
+                }
+            ]
+        },
+        {
+            "title": "badland_8b",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter": "D",
+                    "type": "horizontal",
+                    "dir": "right"
+                },
+                {
+                    "letter": "A",
+                    "type": "door"
+                }
+            ]
+        },
+        {
+            "title": "badland_9",
+            "maxscore": 0,
+            "pillar": true,
+            "loop": true,
+            "doors": [
+                {
+                    "letter": "D",
+                    "type": "horizontal",
+                    "dir": "left",
+                    "notpizzatime": true
+                },
+                {
+                    "letter": "B",
+                    "type": "vertical",
+                    "dir": "down",
+                    "pizzatime": true,
+                    "exitonly": true
+                },
+                {
+                    "letter": "E",
+                    "type": "door",
+                    "loop": true
+                }
+            ]
+        },
+        {
+            "title": "badland_mart4",
+            "maxscore": 0,
+            "toppin": {
+                "type": "tomato"
+            },
+            "doors": [
+                {
+                    "letter": "E",
+                    "type": "door"
+                }
+            ]
+        },
+        {
+            "title": "badland_10",
+            "maxscore": 0,
+            "doors": [
+                {
+                    "letter": "B",
+                    "type": "vertical",
+                    "dir": "up",
+                    "startonly": true
+                },
+                {
+                    "letter": "C",
+                    "type": "horizontal",
+                    "dir": "right"
+                },
+                {
+                    "letter": "E",
+                    "type": "door",
+                    "loop": true
+                },
+                {
+                    "letter": "F",
+                    "type": "door",
+                    "loop": true,
+                    "gerome": true
+                }
+            ]
+        },
+        {
+            "title": "entrance_treasure",
+            "maxscore": 0,
+            "treasure": true,
+            "doors": [
+                {
+                    "letter": "F",
+                    "type": "door"
+                }
+            ]
+        },
+        {
+            "title": "badland_mart5",
+            "maxscore": 0,
+            "toppin": {
+                "type": "sausage"
+            },
+            "doors": [
+                {
+                    "letter": "E",
+                    "type": "door"
+                }
+            ]
+        },
+        {
+            "title": "badland_secret1"
+        },
+        {
+            "title": "badland_secret2"
+        },
+        {
+            "title": "badland_secret3"
         }
-      ]
-    },
-    {
-      "title": "badland_2",
-      "maxscore": 0,
-      "doors": [
-        {
-          "letter": "A",
-          "type": "horizontal",
-          "dir": "right"
-        },
-        {
-          "letter": "B",
-          "type": "horizontal",
-          "dir": "left"
-        }
-      ]
-    },
-    {
-      "title": "badland_3",
-      "maxscore": 0,
-      "loop": true,
-      "doors": [
-        {
-          "letter": "A",
-          "type": "horizontal",
-          "dir": "left",
-		  "branch" : true
-        },
-        {
-          "letter": "B",
-          "type": "horizontal",
-          "dir": "right",
-		  "notpizzatime" : true
-        },
-		{
-          "letter": "C",
-          "type": "horizontal",
-          "dir": "left",
-		  "pizzatime" : true
-        },
-        {
-          "letter": "E",
-          "type": "door",
-          "loop": true
-        }
-      ]
-    },
-    {
-      "title": "badland_mart1",
-      "maxscore": 0,
-      "toppin": {
-        "type": "mushroom"
-      },
-      "doors": [
-        {
-          "letter": "E",
-          "type": "door"
-        }
-      ]
-    },
-    {
-      "title": "badland_4",
-      "maxscore": 0,
-      "secret": {
-        "secret": true
-      },
-      "doors": [
-        {
-          "letter": "A",
-          "type": "horizontal",
-          "dir": "right",
-          "exitonly": true,
-          "ratblocked": true
-        },
-        {
-          "letter": "B",
-          "type": "horizontal",
-          "dir": "left"
-        }
-      ]
-    },
-    {
-      "title": "badland_5",
-      "maxscore": 0,
-      "doors": [
-        {
-          "letter": "A",
-          "type": "horizontal",
-          "dir": "left"
-        },
-        {
-          "letter": "B",
-          "type": "door"
-        }
-      ]
-    },
-    {
-      "title": "badland_5_2",
-      "maxscore": 0,
-      "doors": [
-        {
-          "letter": "C",
-          "type": "door"
-        },
-        {
-          "letter": "D",
-          "type": "door"
-        }
-      ]
-    },
-    {
-      "title": "badland_5_3",
-      "maxscore": 0,
-      "doors": [
-        {
-          "letter": "E",
-          "type": "door"
-        },
-        {
-          "letter": "F",
-          "type": "horizontal",
-          "dir": "right"
-        }
-      ]
-    },
-    {
-      "title": "badland_5a",
-      "maxscore": 0,
-      "loop": true,
-      "doors": [
-        {
-          "letter": "B",
-          "type": "door",
-          "loop": true
-        },
-        {
-          "letter": "C",
-          "type": "door",
-          "loop": true,
-          "exitonly": true,
-          "ratblocked": true
-        },
-        {
-          "letter": "E",
-          "type": "door",
-          "loop": true
-        }
-      ]
-    },
-    {
-      "title": "badland_mart2",
-      "maxscore": 0,
-      "toppin": {
-        "type": "cheese"
-      },
-      "doors": [
-        {
-          "letter": "E",
-          "type": "door"
-        }
-      ]
-    },
-    {
-      "title": "badland_5b",
-      "maxscore": 0,
-      "loop": true,
-      "gerome": true,
-      "doors": [
-        {
-          "letter": "D",
-          "type": "door",
-          "loop": true
-        },
-        {
-          "letter": "E",
-          "type": "door",
-          "loop": true,
-          "exitonly": true,
-          "ratblocked": true
-        }
-      ]
-    },
-    {
-      "title": "badland_6",
-      "maxscore": 0,
-      "secret": {
-        "secret": true
-      },
-      "doors": [
-        {
-          "letter": "C",
-          "type": "horizontal",
-          "dir": "left"
-        },
-        {
-          "letter": "A",
-          "type": "vertical",
-		  "dir" : down,
-          "exitonly": true
-        }
-      ]
-    },
-    {
-      "title": "badland_7",
-      "maxscore": 0,
-      "secret": {
-        "secret": true,
-        "notpizzatime": true
-      },
-      "loop": true,
-      "doors": [
-        {
-          "letter": "C",
-          "type": "horizontal",
-          "dir": "right",
-          "exitonly": true
-        },
-        {
-          "letter": "A",
-          "type": "vertical",
-          "dir": "up",
-          "startonly": true
-        },
-        {
-          "letter": "E",
-          "type": "door",
-          "loop": true
-        }
-      ]
-    },
-    {
-      "title": "badland_mart3",
-      "maxscore": 0,
-      "toppin": {
-        "type": "pineapple"
-      },
-      "secret": {
-        "secret": true
-      },
-      "doors": [
-        {
-          "letter": "E",
-          "type": "door"
-        }
-      ]
-    },
-    {
-      "title": "badland_8",
-      "maxscore": 0,
-      "doors": [
-        {
-          "letter": "F",
-          "type": "horizontal",
-          "dir": "left"
-        },
-        {
-          "letter": "A",
-          "type": "door",
-          "ratblocked": true,
-          "exitonly": true
-        }
-      ]
-    },
-    {
-      "title": "badland_8b",
-      "maxscore": 0,
-      "doors": [
-        {
-          "letter": "D",
-          "type": "horizontal",
-          "dir": "right"
-        },
-        {
-          "letter": "A",
-          "type": "door"
-        }
-      ]
-    },
-    {
-      "title": "badland_9",
-      "maxscore": 0,
-      "pillar": true,
-      "loop": true,
-      "doors": [
-        {
-          "letter": "D",
-          "type": "horizontal",
-          "dir": "left",
-		  "notpizzatime" : true
-        },
-        {
-          "letter": "B",
-          "type": "vertical",
-          "dir": "down",
-		  "pizzatime" : true,
-		  "exitonly" : true
-        },
-        {
-          "letter": "E",
-          "type": "door",
-          "loop": true
-        }
-      ]
-    },
-    {
-      "title": "badland_mart4",
-      "maxscore": 0,
-      "toppin": {
-        "type": "tomato"
-      },
-      "doors": [
-        {
-          "letter": "E",
-          "type": "door"
-        }
-      ]
-    },
-    {
-      "title": "badland_10",
-      "maxscore": 0,
-      "doors": [
-        {
-          "letter": "B",
-          "type": "vertical",
-          "dir": "up",
-          "startonly": true
-        },
-        {
-          "letter": "C",
-          "type": "horizontal",
-          "dir": "right"
-        },
-        {
-          "letter": "E",
-          "type": "door",
-          "loop": true
-        },
-        {
-          "letter": "F",
-          "type": "door",
-          "loop": true,
-          "gerome": true
-        }
-      ]
-    },
-    {
-      "title": "entrance_treasure",
-      "maxscore": 0,
-      "treasure": true,
-      "doors": [
-        {
-          "letter": "F",
-          "type": "door"
-        }
-      ]
-    },
-    {
-      "title": "badland_mart5",
-      "maxscore": 0,
-      "toppin": {
-        "type": "sausage"
-      },
-      "doors": [
-        {
-          "letter": "E",
-          "type": "door"
-        }
-      ]
-    },
-    {
-      "title": "badland_secret1"
-    },
-    {
-      "title": "badland_secret2"
-    },
-    {
-      "title": "badland_secret3"
-    }
-  ]
+    ]
 }

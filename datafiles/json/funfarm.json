@@ -269,15 +269,14 @@
 					{
 						"letter" : "B",
 						"type": "door",
-						"startonly" : true
+						"exitonly" : true
 					},
 					
 					{
 						"letter" : "C",
 						"type": "horizontal",
 						"dir": "left",
-						"exitonly" : true,
-						"ratblocked" : true
+						"startonly" : true
 					}
 				]
 			},

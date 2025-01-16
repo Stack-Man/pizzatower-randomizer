@@ -294,7 +294,6 @@
 					"type" : "horizontal",
 					"dir" : "right",
 					"exitonly" : true,
-					"ratblocked" : true,
 					"powerup" :
 					{
 						"type" : "shotgun"
