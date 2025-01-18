@@ -158,14 +158,15 @@
 					"letter" : "A",
 					"type" : "horizontal",
 					"dir" : "right",
-					"pizzatime" : true
+					"pizzatime" : true,
+					"startonly" : true
 				},
 				
 				{
 					"letter" : "B",
 					"type" : "horizontal",
 					"dir" : "left",
-					"pizzatimeexit" : true
+					"branch" : true
 				},
 				
 				{

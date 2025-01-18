@@ -224,14 +224,22 @@
 				{
 					"letter" : "A",
 					"type" : "horizontal",
-					"dir" : "left"
+					"dir" : "left",
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
 				},
 				
 				{
 					"letter" : "B",
 					"type" : "horizontal",
 					"dir" : "right",
-					"exitonly" : true
+					"exitonly" : true,
+					"powerup" :
+					{
+						"type" : "gustavo"
+					}
 				}
 			]
 		},

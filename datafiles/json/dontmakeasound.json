@@ -115,8 +115,7 @@
                     "letter" : "C",
                     "type": "vertical",
                     "dir": "up",
-                    "exitonly": true,
-                    "ratblocked": true
+                    "exitonly": true
                 }
             ]
         },

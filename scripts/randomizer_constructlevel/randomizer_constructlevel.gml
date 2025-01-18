@@ -172,7 +172,7 @@ function rd_add_rooms_to_level(sequence, initial_rooms, max_rooms)
 		}
 		
 		if (next.to_connection != undefined)
-			amount_added_this_loop += rd_add_rooms_inbetween(next.to_connection, roomtypes_arr, path_time_arr_to, initial_rooms + total_added + amount_added_this_loop, max_rooms);
+			amount_added_this_loop += rd_add_rooms_inbetween(next.to_connection, roomtypes_arr, path_time_arr_to, initial_rooms + total_added + amount_added_this_loop, max_rooms, true);
 
 		total_added += amount_added_this_loop;
 		next = next.next;
@@ -184,7 +184,7 @@ function rd_add_rooms_to_level(sequence, initial_rooms, max_rooms)
 	return total_added;
 }
 
-function rd_add_rooms_inbetween(connection, roomtypes_arr, path_time_arr, current_rooms, max_rooms)
+function rd_add_rooms_inbetween(connection, roomtypes_arr, path_time_arr, current_rooms, max_rooms, is_to_connection = false)
 {
 	var next = connection;
 	var last = undefined;
@@ -210,7 +210,7 @@ function rd_add_rooms_inbetween(connection, roomtypes_arr, path_time_arr, curren
 			true, true,
 			true, true,
 			false, false,
-			true);
+			true, is_to_connection);
 			
 			if (ds_list_size(new_connections) > 0)
 			{
@@ -355,7 +355,7 @@ function rd_connect_to_branch2(sequence, prev_sequence_last_path_start_letter)
 	var needs_return = ! sequence.last_room_is_end_branch; //Still need this variable in case last room is branchany
 
 	var roomtypes = needs_return ? oneway_types : twoway_types;
-	var to_pathtimes = needs_return ? [pathtime.any, pathtime.notpizzatime] : [pathtime.any]; //no return = must be traversible both ways (.any)
+	var to_pathtimes = needs_return ? [pathtime.any, pathtime.notpizzatime] : [pathtime.any]; //no return = must be traversible both ways
 	
 	var johntype = needs_return ? roomtype.johnbranching : roomtype.john;
 	var branchtype = needs_return ?  roomtype.branchend : roomtype.branchstart;
@@ -387,7 +387,10 @@ function rd_connect_to_branch2(sequence, prev_sequence_last_path_start_letter)
 			"", "",
 			true, true,
 			true, true,
-			use_branch_start, use_branch_exit); 
+			use_branch_start, use_branch_exit,
+			false,
+			!needs_return); //if no return, must be pathtime.any EXCEPT the final path in the branch room itself which can be pathtime.notpizzatime
+			
 			//if it does not need a return, then it is the end branch, meaning it should enter the next branch from a branch door
 			//if it does need a return, then it is a start branch, so it should exit the next branch from a branch door
 			
@@ -522,7 +525,7 @@ function rd_continue_sequence(sequence, last_is_john, last_room, last_room_is_en
 function rd_find_connections_start(first_room, last_room, roomtypes, pathtimes, 
 start_letter = "", exit_letter = "", last_start_letter = "", last_exit_letter = "", 
 use_start = true, use_exit = true, use_last_start = true, use_last_exit = true,
-use_branch_start = false, use_branch_exit = false, adding_inbetween = false)
+use_branch_start = false, use_branch_exit = false, adding_inbetween = false, allow_to_branch_notpizzatime = false)
 {	
 	//show_debug_message( concat(rd_buffer(), "Clearing exit types") );
 	ds_list_clear(global.connection_tested_exits);
@@ -555,6 +558,10 @@ use_branch_start = false, use_branch_exit = false, adding_inbetween = false)
 				var temp = global.test_string;
 			
 				global.test_string = concat(global.test_string, " ", first_path.exitdoor.letter, " -> ", last_room.title);
+			
+				//allow to connection connecting to a branchstart to use a notpizzatime route in the branch room itself
+				if (allow_to_branch_notpizzatime && rd_check_type(last_room, roomtype.branchstart) )
+					pathtimes = [pathtime.any, pathtime.notpizzatime];
 			
 				var direct_connection = rd_connect_directly(
 					first_room, first_path, last_room, roomtypes, pathtimes, 
@@ -615,7 +622,7 @@ use_branch_start = false, use_branch_exit = false, adding_inbetween = false)
 				last_start_letter, last_exit_letter,
 				use_last_start, use_last_exit,
 				use_branch_start, use_branch_exit,
-				adding_inbetween);
+				adding_inbetween, allow_to_branch_notpizzatime);
 				
 			if (new_connection != undefined)
 				ds_list_add(connections, new_connection);
@@ -634,7 +641,7 @@ function rd_find_connections(connection, last_room, roomtypes, pathtimes,
 last_start_letter = "", last_exit_letter = "", 
 use_last_start = true, use_last_exit = true,
 use_branch_start = false, use_branch_exit = false,
-adding_inbetween = false)
+adding_inbetween = false, allow_to_branch_notpizzatime = false)
 {
 	//Already complete
 	if (connection.second != undefined)
@@ -715,6 +722,9 @@ adding_inbetween = false)
 			
 			ds_list_add(temp_used_exits, exitpair);
 			
+			if (allow_to_branch_notpizzatime && rd_check_type(last_room, roomtype.branchstart) )
+				pathtimes = [pathtime.any, pathtime.notpizzatime];
+			
 			var new_connection = rd_connect_directly(
 				match_room, match_path, last_room, roomtypes, pathtimes, 
 				last_start_letter, last_exit_letter, 
@@ -788,7 +798,7 @@ adding_inbetween = false)
 				last_start_letter, last_exit_letter, 
 				use_last_start, use_last_exit,
 				use_branch_start, use_branch_exit,
-				adding_inbetween);
+				adding_inbetween, allow_to_branch_notpizzatime);
 
 			if (next_connection != undefined && next_connection.second != undefined) //a valid connection was found
 			{

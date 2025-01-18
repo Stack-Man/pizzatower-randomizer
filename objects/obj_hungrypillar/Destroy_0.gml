@@ -241,8 +241,9 @@ if (ds_list_find_index(global.saveroom, id) == -1 && global.snickchallenge == fa
 			break;
 	}
 	
-	global.minutes = 5;
-	global.seconds = 30;
+	
+	//global.minutes = 5;
+	//global.seconds = 30;
 	
 	ds_list_add(global.saveroom, id);
 }

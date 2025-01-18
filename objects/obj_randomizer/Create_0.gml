@@ -7,8 +7,8 @@ loadedini = false;
 current_powerup = poweruptype.none;
 global.print_connection_debug = true;
 
-global.first_test_name = "test";
-global.test_name = "test";
+global.first_test_name = "badland_5_3";
+global.test_name = "kidsparty_floor1_3";
 
 global.recursion_depth = 0;
 global.test_string = "";

@@ -2,18 +2,36 @@ function rd_init(use_new_seed = false)
 {
 	seed = 0;
 	
+	//debug
+	seed = -1759570163;
+	random_set_seed(seed);
+	return true;
+	
 	if (!use_new_seed)
 	{
 		rd_create_or_read_ini();
 	
-		if (seed != 0)
+		var directory = concat("randomizer/main.json");
+
+		var should_load_json = false;
+		
+		if (file_exists(directory))
 		{
-			show_debug_message(concat("Loading seed ", seed) );
+			should_load_json = true;
+		}
+		else if (seed != 0)
+		{
+			should_load_json = true;
+			directory = concat("randomizer/", seed, ".json");
+		}
+
+		if (should_load_json)
+		{
+			show_debug_message(concat("Loading seed ", directory) );
 			
-			var directory = concat("randomizer/", seed, ".json");
 			var final_map = undefined;
 			
-			if (file_exists(directory) )
+			if (file_exists(directory))
 			{
 				var json = "";
 				var file = file_text_open_read(directory);
@@ -219,25 +237,44 @@ function rd_check_path_for_roomtype(path, current_type)
 	return current_type;
 }
 
-function rd_check_paths_for_branchtype(path_ab, path_ba, current_type)
-{
+//Doesnt get called if the branch type is already branchstart or branchend
+//maybe change because that means it never checks both pt and npt to ensure the other is valid
+function rd_check_paths_for_branchtype(path_ab, path_ba, current_type, show_debug = false)
+{	
 	if ((path_ab != undefined && !path_ab.startdoor.branch && !path_ab.exitdoor.branch)
 	||  (path_ba != undefined && !path_ba.startdoor.branch && !path_ba.exitdoor.branch))
+	{
+		if (show_debug)
+		{
+			show_debug_message(concat("At least one path of chateau_7 or farm_4 is not branch: ", path_ab, path_ba) );
+		}
+		
 		return current_type; //branch check failed
+		
+	}
 	
 	//path == undefined means the other is a oneway
 	//to branch path (ba) being oneway is a valid alternative to being notpizzatime/pizzatime exclusive
 	
-	var branch_NPT = (path_ab != undefined) && path_ab.startdoor.branch && path_ab.pathtime == pathtime.notpizzatime;
-	var NPT_branch = (path_ba != undefined) && (path_ba.pathtime == pathtime.notpizzatime || path_ba.oneway) && path_ba.exitdoor.branch;
+	//Check both in case branch is a or b
+	var branch_NPT = rd_branch_NPT(path_ab) || rd_branch_NPT(path_ba);
+	var NPT_branch = rd_NPT_branch(path_ab) || rd_NPT_branch(path_ba);
 	
-	var branch_PT = (path_ab != undefined) && path_ab.startdoor.branch && path_ab.pathtime == pathtime.pizzatime;
-	var PT_branch = (path_ba != undefined) && (path_ba.pathtime == pathtime.pizzatime || path_ba.oneway) && path_ba.exitdoor.branch;
+	var branch_PT = rd_branch_PT(path_ab) || rd_branch_PT(path_ba);
+	var PT_branch = rd_PT_branch(path_ab) || rd_PT_branch(path_ba);
 	
-	if ( (branch_NPT && ! NPT_branch) || (branch_PT && ! PT_branch) )
+	if (show_debug)
+	{
+		show_debug_message(concat("path_ab: ", path_ab));
+		show_debug_message(concat(" path_ba: ", path_ba));
+		show_debug_message(concat("branch_NPT: ", branch_NPT, " NPT_branch: ", NPT_branch," branch_PT: ", branch_PT, " PT_branch: ", PT_branch) );
+	}
+	
+	
+	if ( (branch_NPT && ! NPT_branch) || (!branch_PT && PT_branch) )
 		return roomtype.branchstart;
 	
-	if ( (NPT_branch && ! branch_NPT) || (PT_branch && ! branch_PT) )
+	if ( (NPT_branch && ! branch_NPT) || (!PT_branch && branch_PT) )
 		return roomtype.branchend;
 	
 	if ( (branch_NPT && NPT_branch) || (branch_PT && PT_branch) )
@@ -245,6 +282,39 @@ function rd_check_paths_for_branchtype(path_ab, path_ba, current_type)
 	
 	return current_type; //branch check failed
 }
+
+function rd_branch_NPT(path)
+{
+	return (path != undefined) && path.startdoor.branch && path.pathtime == pathtime.notpizzatime;
+}
+
+function rd_NPT_branch(path)
+{
+	show_debug_message(concat("check NPT branch for: ", path) );
+	show_debug_message(concat("defined?: ", path != undefined ) );
+	
+	if (path != undefined)
+	{
+		show_debug_message(concat("notpizzatime?: ", path.pathtime == pathtime.notpizzatime ) );
+		show_debug_message(concat("oneway?: ", path.oneway ) );
+		show_debug_message(concat("exit branch?: ", path.exitdoor.branch ) );
+		
+		show_debug_message(concat("NPT branch valid?: ", ((path != undefined) && (path.pathtime == pathtime.notpizzatime || path.oneway) && path.exitdoor.branch) ) );
+	}
+	
+	return (path != undefined) && (path.pathtime == pathtime.notpizzatime || path.oneway) && path.pathtime != pathtime.pizzatime && path.exitdoor.branch;
+}
+
+function rd_branch_PT(path)
+{
+	return (path != undefined) && path.startdoor.branch && path.pathtime == pathtime.pizzatime;
+}
+
+function rd_PT_branch(path)
+{
+	return (path != undefined) && (path.pathtime == pathtime.pizzatime || path.oneway) && path.pathtime != pathtime.notpizzatime  && path.exitdoor.branch;
+}
+
 
 function rd_check_all_paths_for_special_branch(paths, has_pillar, has_entrance, current_type)
 {
@@ -415,7 +485,7 @@ function rd_parse_doors(thisroom)
 			
 			//may have yet to check a branch path, or a branchany that may be more restrictive due to PT/NPT branch path
 			if (found_room_type != roomtype.branchstart && found_room_type != roomtype.branchend)
-				found_room_type = rd_check_paths_for_branchtype(path_ab, path_ba, found_room_type);
+				found_room_type = rd_check_paths_for_branchtype(path_ab, path_ba, found_room_type, room_title == "graveyard_5c");
 			
 			if (found_room_type != roomtype.branchstart && found_room_type != roomtype.branchend && found_room_type != roomtype.branchany &&
 				found_room_type != roomtype.oneway && found_room_type != roomtype.potentialoneway)
@@ -424,12 +494,10 @@ function rd_parse_doors(thisroom)
 				found_room_type = rd_check_path_for_roomtype(path_ba, found_room_type);
 			}
 			
-			//TODO: loop rooms add two identical paths
-			
 			if (path_ab != undefined)
 				ds_list_add(found_paths, path_ab);
 			
-			if (path_ba != undefined)
+			if (path_ba != undefined && door_a_struct.letter != door_b_struct.letter) //add only one in case of loop paths
 				ds_list_add(found_paths, path_ba);
 		}
 	}
@@ -465,6 +533,8 @@ function rd_parse_doors(thisroom)
 		paths : found_paths,
 		roomtype : found_room_type
 	};
+	
+	show_debug_message( concat("Parsed: ", ds_map_find_value(thisroom, "title"), " type: ", found_room_type ) );
 	
 	return parsed_room;
 }
