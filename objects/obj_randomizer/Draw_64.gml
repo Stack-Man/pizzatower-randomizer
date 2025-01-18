@@ -9,7 +9,33 @@ if variable_global_exists("smallfont")
 	draw_set_valign(fa_top);
 	
 	//Draw Version
-	var versionstr = "RD V0.1";
+	var versionstr = concat("RD V", version);
 	draw_text(8, 0, versionstr);
-	draw_text(8, 24, seed);
+	
+	var seedstr = seed;
+	
+	if (seed < 0)
+		seedstr = concat("M", seedstr);
+	
+	if (!loadedjson)
+	{
+		seedstr = concat("NEW ", seedstr);
+		
+		if (!loadedini)
+			seedstr = concat("NO INI ", seedstr);
+	}	
+	else
+	{
+		seedstr = concat("LOADED ", seedstr);
+		
+		if (!validversion)
+			seedstr = concat("MISMATCHED VERSION ", seedstr);
+	}
+		
+	
+
+	
+	draw_text(8, 24, seedstr);
+	
+
 }

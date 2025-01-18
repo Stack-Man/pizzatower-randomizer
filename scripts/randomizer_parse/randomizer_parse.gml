@@ -1,7 +1,83 @@
 function rd_init(use_new_seed = false)
 {
-	//TODO: implement reading the ini file
 	seed = 0;
+	
+	if (!use_new_seed)
+	{
+		rd_create_or_read_ini();
+	
+		if (seed != 0)
+		{
+			show_debug_message(concat("Loading seed ", seed) );
+			
+			var directory = concat("randomizer/", seed, ".json");
+			var final_map = undefined;
+			
+			if (file_exists(directory) )
+			{
+				var json = "";
+				var file = file_text_open_read(directory);
+			
+				while(!file_text_eof(file))
+				{
+					json += file_text_readln(file);
+				}
+			
+				file_text_close(file);
+			
+				final_map = json_decode(json);
+			}
+			
+			if (final_map != undefined)
+			{
+				global.transition_map = ds_map_create();
+				global.powerup_map = ds_map_create();
+				
+				//replace the stringified room index keys with numbers again
+				var temp_transition_map = ds_map_find_value(final_map, "transitions");	
+				var trans_keys_arr = []
+				ds_map_keys_to_array(temp_transition_map, trans_keys_arr);
+				
+				for (var k = 0; k < array_length(trans_keys_arr); k++)
+				{
+					var letters_map = ds_map_find_value(temp_transition_map, trans_keys_arr[k]);
+					var room_id = real(trans_keys_arr[k]);
+					
+					ds_map_add_map(global.transition_map, room_id, letters_map);
+				}
+				
+				//replace the stringified room index keys with numbers again
+				var temp_powerup_map = ds_map_find_value(final_map, "powerups");
+				var powerup_keys_arr = []
+				ds_map_keys_to_array(temp_powerup_map, powerup_keys_arr);
+				
+				for (var p = 0; p < array_length(powerup_keys_arr); p++)
+				{
+					var letters_map = ds_map_find_value(temp_powerup_map, powerup_keys_arr[p]);
+					var room_id = real(powerup_keys_arr[p]);
+					
+					ds_map_add_map(global.powerup_map, room_id, letters_map);
+				}
+				
+				if (ds_map_exists(global.transition_map, minigolf_1))
+					show_debug_message("minigolf_1 exists")
+				else
+					show_debug_message("minigolf_1 does not exists")
+				
+				seed = ds_map_find_value(final_map, "seed");
+				
+				var found_version = ds_map_find_value(final_map, "version");
+				validversion = found_version == version;
+				
+				loadedjson = true;	
+				
+				return false; //don't generate levels
+			}
+
+		}
+	
+		loadedjson = false;
+	}
 	
 	if (seed == 0 || use_new_seed)
 	{
@@ -12,6 +88,55 @@ function rd_init(use_new_seed = false)
 	show_debug_message( concat("Seed: ", seed) );
 	
 	random_set_seed(seed);
+	
+	return true;
+}
+
+function rd_create_or_read_ini()
+{
+	var directory = concat("randomizer/randomizer.ini");
+	
+	//ini_close();
+	ini_open(directory);
+	
+	if (file_exists(directory))
+	{
+		seed = ini_read_real("settings", "seed", 0);
+		loadedini = true;
+	}
+	else
+	{
+		ini_write_real("settings", "seed", 0);
+		loadedini = false;
+	}
+	
+	ini_close();
+	//ini_open("saveData.ini");
+}
+
+function rd_save_seed()
+{
+	var final_map = ds_map_create();
+	
+	ds_map_add(final_map, "version", version);
+	ds_map_add(final_map, "seed", seed);
+	ds_map_add_map(final_map, "transitions", global.transition_map);
+	ds_map_add_map(final_map, "powerups", global.powerup_map);
+
+	
+	var directory = concat("randomizer/", seed, ".json");
+	var json = json_encode(final_map);
+	
+	show_debug_message( concat("Saving seed ", seed, " to ", directory) );
+	rd_save_to_json(json, directory);
+}
+
+function rd_save_to_json(_string, _filename)
+{
+	var _buffer = buffer_create(string_byte_length(_string) + 1, buffer_fixed, 1);
+	buffer_write(_buffer, buffer_string, _string);
+	buffer_save(_buffer, _filename);
+	buffer_delete(_buffer);
 }
 
 function rd_parse_rooms()
@@ -22,7 +147,7 @@ function rd_parse_rooms()
 	for (var j = 0; j < array_length(jsons); j++)
 	{
 		var level = undefined;
-		var directory = working_directory + "/json/" + jsons[j] + ".json"
+		var directory = concat(working_directory, "/json/", jsons[j], ".json");
 		show_debug_message( concat("Parsing Level: ", directory ) );
 		
 		if (file_exists(directory))
@@ -214,15 +339,19 @@ function rd_parse_powerup(door, room_index)
 		else if (ds_map_exists(powerup, "notpizzatime") )
 			powerup_path_time = pathtime.notpizzatime;
 					
-		var start_powerup = {
+		/*var start_powerup = {
 			poweruptype : ds_map_find_value(powerup, "type"),
 			poweruptime : powerup_path_time
-		};
+		};*/
+		
+		var start_powerup = ds_map_create();
+		ds_map_add(start_powerup, "poweruptype", ds_map_find_value(powerup, "type"));
+		ds_map_add(start_powerup, "poweruptime", powerup_path_time);
 							
 		if (! ds_map_exists(global.powerup_map, room_index) )
-			ds_map_add(global.powerup_map, room_index, ds_map_create() );
+			ds_map_add_map(global.powerup_map, room_index, ds_map_create() );
 					
-		ds_map_add( ds_map_find_value(global.powerup_map, room_index), ds_map_find_value(door, "letter"), start_powerup);
+		ds_map_add_map( ds_map_find_value(global.powerup_map, room_index), ds_map_find_value(door, "letter"), start_powerup);
 	}
 }
 

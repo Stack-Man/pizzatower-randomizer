@@ -1,31 +1,37 @@
 function rd_generate_new(use_new_seed = false)
 {
-	rd_init(use_new_seed);
+	var generate = rd_init(use_new_seed);
 
-	global.sequence_tested_rooms = ds_map_create(); //Doesn't get cleared between sequences
-	global.connection_tested_rooms = ds_map_create(); //Does get cleared whenever calling rd_find_connections_start
-	global.connection_tested_exits = ds_list_create(); //same as above
-	global.sequence_used_rooms = ds_map_create();
+	if (generate)
+	{
+		global.sequence_tested_rooms = ds_map_create(); //Doesn't get cleared between sequences
+		global.connection_tested_rooms = ds_map_create(); //Does get cleared whenever calling rd_find_connections_start
+		global.connection_tested_exits = ds_list_create(); //same as above
+		global.sequence_used_rooms = ds_map_create();
 
-	global.transition_map = ds_map_create();
-	global.powerup_map = ds_map_create();
-	global.all_rooms = rd_parse_rooms();
+		global.transition_map = ds_map_create();
+		global.powerup_map = ds_map_create();
+		global.all_rooms = rd_parse_rooms();
 	
-	var johns = ds_list_size(rd_get_rooms_of_type([roomtype.john, roomtype.johnbranching]));
-	var entrances = ds_list_size( rd_get_rooms_of_type( [roomtype.entrance, roomtype.entrancebranching] ) );
+		var johns = ds_list_size(rd_get_rooms_of_type([roomtype.john, roomtype.johnbranching]));
+		var entrances = ds_list_size( rd_get_rooms_of_type( [roomtype.entrance, roomtype.entrancebranching] ) );
 	
-	show_debug_message( concat("Johns: ", johns, " entrances: ", entrances) );
+		show_debug_message( concat("Johns: ", johns, " entrances: ", entrances) );
 	
-	var created = rd_construct_levels();
+		var created = rd_construct_levels();
 
-	ds_map_destroy(global.sequence_used_rooms);
-	ds_map_destroy(global.all_rooms);
-	ds_map_destroy(global.connection_tested_rooms);
-	ds_map_destroy(global.sequence_tested_rooms);
-	ds_list_destroy(global.connection_tested_exits);
+		ds_map_destroy(global.sequence_used_rooms);
+		ds_map_destroy(global.all_rooms);
+		ds_map_destroy(global.connection_tested_rooms);
+		ds_map_destroy(global.sequence_tested_rooms);
+		ds_list_destroy(global.connection_tested_exits);
 	
-	if (variable_global_exists("font_map"))
-		create_transformation_tip( concat("Generated ", created, " of ", "21", " levels") );
+		if (variable_global_exists("font_map"))
+			create_transformation_tip( concat("Generated ", created, " of ", "21", " levels") );
+		
+		rd_save_seed();
+	}
+
 }
 
 function rd_reset()

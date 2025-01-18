@@ -2,7 +2,9 @@ function rd_construct_levels()
 {	
 	var levels = ds_list_create();
 	var unsorted_entrances = rd_get_rooms_of_type([roomtype.entrance, roomtype.entrancebranching]);
-	var entrances = rd_prioritize_rooms_of_type(unsorted_entrances, [roomtype.entrance, roomtype.entrancebranching]);
+	var temp_entrances = rd_prioritize_rooms_of_type(unsorted_entrances, [roomtype.entrance, roomtype.entrancebranching]);
+	var entrances = ds_list_create();
+	ds_list_add(entrances, ds_list_find_value(temp_entrances, 0));
 	
 	ds_list_destroy(unsorted_entrances);
 	
@@ -26,7 +28,6 @@ function rd_construct_levels()
 		if (level != undefined)
 		{
 			show_debug_message( concat("Success to construct: ", first_room.title ) );
-			ds_list_add(global.created_levels, asset_get_index(first_room.title));
 			ds_list_add(levels, level);
 		}	
 		else
@@ -41,7 +42,6 @@ function rd_construct_levels()
 				
 				if (war_exit_level != undefined)
 				{
-					ds_list_add(global.created_levels, asset_get_index(first_room.title));
 					ds_list_add(levels, war_exit_level);
 					
 					rd_add_sequence_rooms_to_map(war_exit_level, global.sequence_tested_rooms);
@@ -65,7 +65,6 @@ function rd_construct_levels()
 	
 	if (ctop != undefined)
 	{
-		ds_list_add(global.created_levels, asset_get_index("tower_finalhallway"));
 		rd_add_sequence_rooms_to_map(ctop, global.sequence_tested_rooms);
 		ds_list_add(levels, ctop);
 	}
@@ -81,7 +80,7 @@ function rd_construct_levels()
 	
 	global.print_connection_debug = false;
 	rd_pad_levels(levels, max_rooms);
-	rd_add_rest_of_rooms(levels);
+	//rd_add_rest_of_rooms(levels);
 	
 	for (var j = 0; j < ds_list_size(levels); j++)
 	{
@@ -981,7 +980,7 @@ function rd_add_path_with_room(from_room, from_path, to_room, to_path)
 //Take two IDs and two Letters and add it to the transition map forwards and backwards
 function rd_add_path(current_id, current_letter, destination_id, destination_letter )
 {
-	var destination =
+	/*var destination =
 	{
 		roomid : destination_id,
 		letter : destination_letter
@@ -991,19 +990,29 @@ function rd_add_path(current_id, current_letter, destination_id, destination_let
 	{
 		roomid : current_id,
 		letter : current_letter
-	};
+	};*/
+	
+	var destination = ds_map_create();
+	ds_map_add(destination, "roomid", destination_id);
+	ds_map_add(destination, "letter", destination_letter);
+	
+	var reverse = ds_map_create();
+	ds_map_add(reverse, "roomid", current_id);
+	ds_map_add(reverse, "letter", current_letter);
 	
 	//Add current to destination
 	if (!ds_map_exists(global.transition_map, current_id))
-		ds_map_add(global.transition_map, current_id, ds_map_create())
+		ds_map_add_map(global.transition_map, current_id, ds_map_create())
 	
-	ds_map_add( ds_map_find_value(global.transition_map, current_id), current_letter, destination);
+	//ds_map_add( ds_map_find_value(global.transition_map, current_id), current_letter, destination);
+	ds_map_add_map( ds_map_find_value(global.transition_map, current_id), current_letter, destination);
 	
 	//Add destination to current (backwards)
 	if (!ds_map_exists(global.transition_map, destination_id))
-		ds_map_add(global.transition_map, destination_id, ds_map_create())
+		ds_map_add_map(global.transition_map, destination_id, ds_map_create())
 	
-	ds_map_add( ds_map_find_value(global.transition_map, destination_id), destination_letter, reverse);
+	//ds_map_add( ds_map_find_value(global.transition_map, destination_id), destination_letter, reverse);
+	ds_map_add_map( ds_map_find_value(global.transition_map, destination_id), destination_letter, reverse);
 }
 
 #endregion

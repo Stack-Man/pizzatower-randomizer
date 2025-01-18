@@ -47,6 +47,24 @@ if (ds_map_exists(global.transition_map, room))
 		if (!ds_map_exists(room_transitions, targetDoor))
 			instance_destroy(self);
 	}
+	
+	with (obj_taxi)
+	{
+		if (!ds_map_exists(room_transitions, "taxi"))
+			instance_destroy(self);
+	}
+	
+	with (obj_rocket)
+	{
+		if (!ds_map_exists(room_transitions, "rocket"))
+			instance_destroy(self);
+	}
+	
+	with (obj_secretportal)
+	{
+		if (!ds_map_exists(room_transitions, "secret"))
+			instance_destroy(self);
+	}
 
 	with (obj_keydoor)
 	{

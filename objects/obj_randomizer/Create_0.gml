@@ -1,12 +1,14 @@
 depth = -6000;
+version = "0.1";
+validversion = true;
+loadedjson = false;
+loadedini = false;
 
 current_powerup = poweruptype.none;
 global.print_connection_debug = true;
 
 global.first_test_name = "test";
 global.test_name = "test";
-
-global.created_levels = ds_list_create();
 
 global.recursion_depth = 0;
 global.test_string = "";
@@ -29,8 +31,6 @@ global.boss_levels = [boss_pepperman, boss_vigilante, boss_noise, boss_fakepep, 
 //gustavo/peppino door skips door exit naimation
 //gustavo to peppino causes velocity in the wrong direction
 //modify scr_switchpep/gus to not reset state
-
-//control how many rooms are being added to levls
 
 //taxi does not work, problem wiht door being set
 
