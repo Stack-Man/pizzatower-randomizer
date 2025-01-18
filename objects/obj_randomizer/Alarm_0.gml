@@ -54,7 +54,7 @@ if (ds_map_exists(global.transition_map, room))
 			instance_destroy(self);
 	}
 	
-	with (obj_rocket)
+	with (obj_spaceshuttle)
 	{
 		if (!ds_map_exists(room_transitions, "rocket"))
 			instance_destroy(self);

@@ -2,13 +2,19 @@ function rd_construct_levels()
 {	
 	var levels = ds_list_create();
 	var unsorted_entrances = rd_get_rooms_of_type([roomtype.entrance, roomtype.entrancebranching]);
-	var temp_entrances = rd_prioritize_rooms_of_type(unsorted_entrances, [roomtype.entrance, roomtype.entrancebranching]);
-	var entrances = ds_list_create();
-	ds_list_add(entrances, ds_list_find_value(temp_entrances, 0));
+	var entrances = rd_prioritize_rooms_of_type(unsorted_entrances, [roomtype.entrance, roomtype.entrancebranching]);
 	
 	ds_list_destroy(unsorted_entrances);
 	
 	var war_exit_created = false;
+	
+	var test_branches = rd_get_rooms_of_type([roomtype.branchstart, roomtype.branchend, roomtype.branchmid]);
+	for (var tb = 0; tb < ds_list_size(test_branches); tb++)
+	{
+		var test_branch = ds_list_find_value(test_branches, tb);
+		show_debug_message( concat("branch: ", test_branch.title, " type: ", test_branch.roomtype) );
+	}
+	
 	
 	for (var i = 0; i < ds_list_size(entrances); i++)
 	{
@@ -80,7 +86,7 @@ function rd_construct_levels()
 	
 	global.print_connection_debug = false;
 	rd_pad_levels(levels, max_rooms);
-	//rd_add_rest_of_rooms(levels);
+	rd_add_rest_of_rooms(levels);
 	
 	for (var j = 0; j < ds_list_size(levels); j++)
 	{

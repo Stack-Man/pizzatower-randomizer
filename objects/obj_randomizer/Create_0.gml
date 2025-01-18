@@ -26,6 +26,9 @@ ignore_rooms = [
 global.boss_levels = [boss_pepperman, boss_vigilante, boss_noise, boss_fakepep, boss_pizzaface];
 
 //TODO:
+//TODO: some rooms are not being treated as branches
+//scr_room_goto is interupting reset level and forcing you to the previous room instead
+
 //chateau 7 not being used as a branch? farm_4 also
 
 //gustavo/peppino door skips door exit naimation
