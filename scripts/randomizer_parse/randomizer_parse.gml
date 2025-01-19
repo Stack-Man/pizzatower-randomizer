@@ -175,6 +175,10 @@ function rd_parse_rooms()
 			
 			level = json_decode(json);
 		}
+		else
+		{
+			global.missing_json++;
+		}
 		
 		if (level != undefined)
 		{

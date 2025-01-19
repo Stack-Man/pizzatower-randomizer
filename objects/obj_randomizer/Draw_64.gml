@@ -31,8 +31,16 @@ if variable_global_exists("smallfont")
 		if (!validversion)
 			seedstr = concat("MISMATCHED VERSION ", seedstr);
 	}
+	
+	if (global.missing_json <= 0)
+		draw_text(8, 24, seedstr);
+	else
+	{
+		draw_set_font(-1);
+		draw_text(8, 24, concat("MISSING ", global.missing_json," JSON FILES IN ", working_directory, "json") );
+		draw_set_font(global.smallfont);
+	}
 		
-	draw_text(8, 24, seedstr);
 	
 	/*with (obj_player1)
 	{

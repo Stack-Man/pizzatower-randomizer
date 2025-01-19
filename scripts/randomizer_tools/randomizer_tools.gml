@@ -12,24 +12,27 @@ function rd_generate_new(use_new_seed = false)
 		global.transition_map = ds_map_create();
 		global.powerup_map = ds_map_create();
 		global.all_rooms = rd_parse_rooms();
-	
-		var johns = ds_list_size(rd_get_rooms_of_type([roomtype.john, roomtype.johnbranching]));
-		var entrances = ds_list_size( rd_get_rooms_of_type( [roomtype.entrance, roomtype.entrancebranching] ) );
-	
-		show_debug_message( concat("Johns: ", johns, " entrances: ", entrances) );
-	
-		var created = rd_construct_levels();
-
-		ds_map_destroy(global.sequence_used_rooms);
-		ds_map_destroy(global.all_rooms);
-		ds_map_destroy(global.connection_tested_rooms);
-		ds_map_destroy(global.sequence_tested_rooms);
-		ds_list_destroy(global.connection_tested_exits);
-	
-		if (variable_global_exists("font_map"))
-			create_transformation_tip( concat("Generated ", created, " of ", "21", " levels") );
 		
-		rd_save_seed();
+		if (!global.missing_json)
+		{
+			var johns = ds_list_size(rd_get_rooms_of_type([roomtype.john, roomtype.johnbranching]));
+			var entrances = ds_list_size( rd_get_rooms_of_type( [roomtype.entrance, roomtype.entrancebranching] ) );
+	
+			show_debug_message( concat("Johns: ", johns, " entrances: ", entrances) );
+	
+			var created = rd_construct_levels();
+
+			ds_map_destroy(global.sequence_used_rooms);
+			ds_map_destroy(global.all_rooms);
+			ds_map_destroy(global.connection_tested_rooms);
+			ds_map_destroy(global.sequence_tested_rooms);
+			ds_list_destroy(global.connection_tested_exits);
+	
+			if (variable_global_exists("font_map"))
+				create_transformation_tip( concat("Generated ", created, " of ", "21", " levels") );
+		
+			rd_save_seed();
+		}
 	}
 
 }
