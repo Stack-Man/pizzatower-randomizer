@@ -1,5 +1,4 @@
 {
-	"version" : "0.1",
 	"rooms" :
 	[
 		{
@@ -82,6 +81,7 @@
 					"letter" : "D",
 					"type" : "horizontal",
 					"dir" : "right",
+					"exitonly" : true,
 					"notpizzatime" : true
 				}
 			]
@@ -159,15 +159,14 @@
 					"letter" : "A",
 					"type" : "horizontal",
 					"dir" : "right",
-					"pizzatime" : true,
-					"startonly" : true
+					"pizzatime" : true
 				},
 				
 				{
 					"letter" : "B",
 					"type" : "horizontal",
 					"dir" : "left",
-					"branch" : true
+					"pizzatimeexit" : true
 				},
 				
 				{
@@ -277,8 +276,7 @@
 					"letter" : "B",
 					"type" : "horizontal",
 					"dir" : "left",
-					"exitonly" : true,
-					"pizzatime" : true
+					"exitonly" : true
 				},
 				
 				{
