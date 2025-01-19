@@ -14,6 +14,13 @@ function scr_room_goto(_room)
 	
 	var current_room = room;
 
+	var tpf = 12
+
+	if (global.panic && global.fill < 30 * 12)
+	{
+		global.fill = 30 * 12; //extend time for long levels
+	}
+
 	if (ds_map_exists(global.transition_map, current_room) && !(current_room == tower_entrancehall && !global.panic)
 	&& !(_room == global.leveltorestart && obj_player.targetDoor == "A") //allow normal goto if destination is the start of the level with target A
 	&& !(_room == boss_pizzaface && obj_player.targetDoor == "B") //or B if pizzaface
@@ -38,6 +45,18 @@ function scr_room_goto(_room)
 			
 			with (obj_randomizer) //trigger the enter room logic
 			{
+				var player_hsp = 0;
+				var player_movespeed = 0;
+				
+				with (obj_player1)
+				{
+					player_hsp = hsp;
+					player_movespeed = movespeed;
+				}
+				
+				saved_hsp = player_hsp;
+				saved_movespeed = player_movespeed;
+				
 				alarm[0] = 2; //Longer delay so that objects have a chance to set their targetDoor in their step eventa
 				alarm[1] = 2; //clear and add new powerups
 			}

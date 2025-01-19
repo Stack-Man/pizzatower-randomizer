@@ -1,3 +1,6 @@
+// @description remove unused transitions
+
+
 //upon entering the room, remove unused transitions and put obj_solid in place of hallways
 
 //TODO: deleting obj_geromedoor leaves behind an obj_door that crashes the game (in pizzascape?)
@@ -54,11 +57,11 @@ if (ds_map_exists(global.transition_map, room))
 			instance_destroy(self);
 	}
 	
-	with (obj_spaceshuttle)
+	/*with (obj_spaceshuttle)
 	{
 		if (!ds_map_exists(room_transitions, "rocket"))
 			instance_destroy(self);
-	}
+	}*/
 	
 	with (obj_secretportal)
 	{

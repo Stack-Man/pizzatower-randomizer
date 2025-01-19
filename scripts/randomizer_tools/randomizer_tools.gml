@@ -428,8 +428,6 @@ function rd_clear_transformation()
 		}
 	}
 
-	//TODO: may accidentally delete existing ghostking if you go into a room with a natural ghostking from a fake ghostking
-	//Try to only delete the first instance
 	if (instance_exists(obj_trapghost))
 	{
 		with (obj_trapghost)
@@ -483,28 +481,9 @@ function rd_clear_transformation()
 	
 	if (current_powerup == poweruptype.gustavo)
 	{
-		var temp_state;
-		
-		with (obj_player)
-		{
-			temp_state = state;
-		}
-			
-		var original_xscale = image_xscale;
-		
-		scr_switchpeppino();
-		
-		if (temp_state == states.comingoutdoor)
-		{
-			with (obj_player)
-			{
-				state = temp_state;	
-			}
-		}
-		
-		image_xscale = original_xscale;
+		rd_peppino();
 	}
-	
+
 	current_powerup = poweruptype.none;
 }
 
@@ -614,7 +593,118 @@ function rd_shotgun()
 	shotgunAnim = true;
 }
 
+function rd_peppino()
+{
+	with obj_player1
+	{
+		if isgustavo
+		{
+			isgustavo = false;
+			brick = false;
+
+			sprite_index = spr_player_idle;
+			
+			var in_mach_speed = gustavodash == 51;
+			gustavodash = 0;
+			
+			switch (state)
+			{
+				case states.comingoutdoor:
+					state = states.comingoutdoor;
+					break;
+				case 191: //rat idle
+					if (in_mach_speed)
+					{
+						state = 121;
+						sprite_index = spr_player_mach4;
+					}
+					else
+						state = 104;
+					break;
+				case 192: //rat jump
+					if (in_mach_speed)
+					{
+						state = 121;
+						sprite_index = spr_player_mach4;
+					}
+					else
+						state = 92;
+					break;
+				case 259: //gustavo spin
+					state = 42;
+					break;
+				//case 204: //skid
+					//state = 105;
+					//break;
+				case 197: //stomp
+					state = 108;
+					break;
+				default:
+					state = states.normal;
+					break;
+			}
+			
+			if (movespeed < 0) //flip to positive if it was negative (its can be negative as gus)
+				movespeed = movespeed * -1;
+		}
+		
+	}
+	
+	with obj_swapmodefollow
+	{
+		isgustavo = false;
+		get_character_spr();
+	}
+}
+
 function rd_gustavo()
 {
-	scr_switchgustavo();
+	with obj_player1
+	{
+		if ispeppino
+		{
+			//gustavodash = 0;
+			isgustavo = true;
+			
+			sprite_index = spr_player_ratmountidle;
+
+			brick = true;
+			
+			switch (state)
+			{	
+				case 5: //grabslide
+					state = states.ratmount;
+					//gustavodash = 51;
+					sprite_index = spr_player_ratmountmach3;
+					
+					break;
+				
+				case 121: //run
+					state = states.ratmount;
+					//gustavodash = 51;
+					sprite_index = spr_player_ratmountmach3;
+					
+					break;
+				case 108: //groundpound
+					state = 197;
+					break;
+				case states.comingoutdoor:
+					state = states.comingoutdoor;
+					break;
+				default:
+					state = states.ratmount;
+					break;
+			}
+			
+			if (hsp < 0) //make negative for gus, since its only positive as peppino
+				movespeed = hsp;
+			
+			ratmount_movespeed = abs(movespeed);
+		}
+	}
+	with obj_swapmodefollow
+	{
+		isgustavo = true;
+		get_character_spr();
+	}
 }

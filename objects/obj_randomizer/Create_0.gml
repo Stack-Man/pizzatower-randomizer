@@ -5,10 +5,10 @@ loadedjson = false;
 loadedini = false;
 
 current_powerup = poweruptype.none;
-global.print_connection_debug = true;
+global.print_connection_debug = false;
 
-global.first_test_name = "badland_5_3";
-global.test_name = "kidsparty_floor1_3";
+global.first_test_name = "test";
+global.test_name = "test";
 
 global.recursion_depth = 0;
 global.test_string = "";
@@ -26,10 +26,8 @@ ignore_rooms = [
 global.boss_levels = [boss_pepperman, boss_vigilante, boss_noise, boss_fakepep, boss_pizzaface];
 
 //TODO:
-//TODO: some rooms are not being treated as branches
-//scr_room_goto is interupting reset level and forcing you to the previous room instead
 
-//chateau 7 not being used as a branch? farm_4 also
+//remove hungry pilalr destroy from git
 
 //gustavo/peppino door skips door exit naimation
 //gustavo to peppino causes velocity in the wrong direction
@@ -37,10 +35,8 @@ global.boss_levels = [boss_pepperman, boss_vigilante, boss_noise, boss_fakepep, 
 
 //taxi does not work, problem wiht door being set
 
-//restart is broken
 //ctop only ever gets 3 rooms
-
-//space_9 always failing, rocket doors and taxi doors may not work properly, now farm_2 failed, so its something else, a lack of johns?
+//give ctop priority with construction and its own loop for adding levels
 
 //floor progression since toppins are a no go (always give $50 for every level? require beating all or X levels?)
 //fix gustavo door/transition messuips, save door state and duirection then set them after doing the switch?
@@ -66,4 +62,7 @@ level_names = [
 twoway_types = [roomtype.twoway, roomtype.potentialoneway, roomtype.ratblockedtwoway, roomtype.potentialratblockedtwoway];
 oneway_types = [roomtype.oneway, roomtype.potentialoneway, roomtype.twoway, roomtype.ratblockedtwoway, roomtype.potentialratblockedtwoway];
 
-rd_generate_new();
+saved_hsp = 0;
+saved_movespeed = 0;
+
+alarm[3] = 30;

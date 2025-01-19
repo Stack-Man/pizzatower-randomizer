@@ -32,10 +32,41 @@ if variable_global_exists("smallfont")
 			seedstr = concat("MISMATCHED VERSION ", seedstr);
 	}
 		
-	
-
-	
 	draw_text(8, 24, seedstr);
+	
+	/*with (obj_player1)
+	{
+		draw_text(8, 48, state);
+		
+		if (variable_instance_exists(self, "ratmount_movespeed"))
+		{
+			var spdstr = ratmount_movespeed;
+			
+			if (ratmount_movespeed < 0)
+				spdstr = concat("M", spdstr);
+			
+			draw_text(8, 48 + 24, concat("RSP: ", spdstr));
+			
+			var hspstr = hsp;
+			var vspstr = vsp;
+			
+			if (hsp < 0)
+				hspstr = concat("M", hspstr);
+			
+			if (vsp < 0)
+				vspstr = concat("M", vspstr);
+				
+			draw_text(8, 48 + 48 , concat("HSP: ", hspstr) );
+			draw_text(8, 48 + 48 + 24, concat("VSP: ", vspstr) );
+			
+			
+			var mspstr = movespeed;
+			if (movespeed < 0)
+				mspstr = concat("M", mspstr);
+			
+			draw_text(8, 48 + 48 + 24 + 24, concat("MSP: ", mspstr) );
+		}
+	}*/
 	
 
 }

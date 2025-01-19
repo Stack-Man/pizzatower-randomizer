@@ -2,11 +2,6 @@ function rd_init(use_new_seed = false)
 {
 	seed = 0;
 	
-	//debug
-	seed = -1759570163;
-	random_set_seed(seed);
-	return true;
-	
 	if (!use_new_seed)
 	{
 		rd_create_or_read_ini();
@@ -114,7 +109,6 @@ function rd_create_or_read_ini()
 {
 	var directory = concat("randomizer/randomizer.ini");
 	
-	//ini_close();
 	ini_open(directory);
 	
 	if (file_exists(directory))
@@ -129,7 +123,6 @@ function rd_create_or_read_ini()
 	}
 	
 	ini_close();
-	//ini_open("saveData.ini");
 }
 
 function rd_save_seed()

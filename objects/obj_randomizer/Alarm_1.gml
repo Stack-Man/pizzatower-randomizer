@@ -1,3 +1,6 @@
+// @description clear and give transformation
+
+
 rd_clear_transformation();
 			
 if (ds_map_exists(global.powerup_map, room) )

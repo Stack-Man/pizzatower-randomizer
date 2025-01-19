@@ -8,13 +8,13 @@ function rd_construct_levels()
 	
 	var war_exit_created = false;
 	
-	var test_branches = rd_get_rooms_of_type([roomtype.branchstart, roomtype.branchend, roomtype.branchmid]);
-	for (var tb = 0; tb < ds_list_size(test_branches); tb++)
-	{
-		var test_branch = ds_list_find_value(test_branches, tb);
-		show_debug_message( concat("branch: ", test_branch.title, " type: ", test_branch.roomtype) );
-	}
+	var ctop = rd_connect_ctop();
 	
+	if (ctop != undefined)
+	{
+		rd_add_sequence_rooms_to_map(ctop, global.sequence_tested_rooms);
+		ds_list_add(levels, ctop);
+	}
 	
 	for (var i = 0; i < ds_list_size(entrances); i++)
 	{
@@ -67,15 +67,7 @@ function rd_construct_levels()
 			
 	}
 	
-	var ctop = rd_connect_ctop();
-	
-	if (ctop != undefined)
-	{
-		rd_add_sequence_rooms_to_map(ctop, global.sequence_tested_rooms);
-		ds_list_add(levels, ctop);
-	}
-		
-	
+
 	show_debug_message( concat("Created ", ds_list_size(levels), " levels") );
 	
 	for (var k = 0; k < ds_list_size(levels); k++)
@@ -85,6 +77,7 @@ function rd_construct_levels()
 	}
 	
 	global.print_connection_debug = false;
+	rd_pad_level(ctop, max_rooms);
 	rd_pad_levels(levels, max_rooms);
 	rd_add_rest_of_rooms(levels);
 	
@@ -98,6 +91,22 @@ function rd_construct_levels()
 	ds_map_destroy(global.all_rooms);
 	
 	return ds_list_size(levels);
+}
+
+function rd_pad_level(level, rooms_to_reach)
+{
+	var existing_rooms = -1;
+	var amount_added_this_loop = 1;
+	var total_added = 0;
+	
+	while (amount_added_this_loop > 0 && total_added < rooms_to_reach)
+	{
+		existing_rooms = rd_count_rooms(level);
+		amount_added_this_loop = rd_add_rooms_to_level(level, existing_rooms, rooms_to_reach);
+		total_added += amount_added_this_loop;
+	}
+	
+	
 }
 
 function rd_pad_levels(levels, rooms_to_reach)
