@@ -45,12 +45,22 @@
                 {
                     "letter" : "A",
                     "type": "horizontal",
-                    "dir": "left"
+                    "dir": "left",
+					"powerup" :
+					{
+						"type": "shotgun",
+						"time": "pizzatime"
+					}
                 },
                 {
                     "letter" : "E",
                     "type": "horizontal",
-                    "dir": "right"
+                    "dir": "right",
+					"powerup" :
+					{
+						"type": "shotgun",
+						"time": "pizzatime"
+					}
                 },
                 {
                     "letter" : "D",
@@ -58,7 +68,12 @@
                     "dir": "down",
 					"loop" : true,
                     "loopstart": true,
-                    "exitonly": true
+                    "exitonly": true,
+					"powerup" :
+					{
+						"type": "shotgun",
+						"time": "pizzatime"
+					}
                 },
                 {
                     "letter" : "C",
@@ -66,7 +81,12 @@
                     "dir": "down",
 					"loop" : true,
                     "loopexit": true,
-                    "startonly": true
+                    "startonly": true,
+					"powerup" :
+					{
+						"type": "shotgun",
+						"time": "pizzatime"
+					}
                 }
             ]
         },

@@ -2,7 +2,8 @@ if (is_bossroom() || instance_exists(obj_achievementviewer) || room == tower_sou
 	exit;
 if !global.option_hud
 	exit;
-draw_set_font(global.moneyfont);
+//draw_set_font(global.moneyfont);
+draw_set_font(global.creditsfont);
 draw_set_halign(fa_center);
 draw_set_valign(fa_top);
 draw_set_color(c_white);
@@ -11,4 +12,4 @@ draw_set_color(c_white);
 	//draw_text_color(x, y + add_y, concat("$", global.pigtotal_add), c_lime, c_lime, c_lime, c_lime, 1);
 draw_sprite(spr_pigtotal, -1, x, y);
 //draw_text(x, y, concat("$", string(global.pigtotal - global.pigreduction - global.pigtotal_add)));
-draw_text(x, y, concat(global.levels_beat, "/", global.total_levels)));
+draw_text(x, y, concat(global.levels_beat, "of", global.total_levels));

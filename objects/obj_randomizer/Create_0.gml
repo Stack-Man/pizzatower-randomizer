@@ -7,6 +7,10 @@ loadedini = false;
 current_powerup = poweruptype.none;
 global.print_connection_debug = false;
 
+global.levels_beat = 0;
+global.beat_all_levels = false;
+global.total_levels = 4;
+
 global.first_test_name = "test";
 global.test_name = "test";
 
@@ -26,17 +30,9 @@ ignore_rooms = [
 global.boss_levels = [boss_pepperman, boss_vigilante, boss_noise, boss_fakepep, boss_pizzaface];
 
 //TODO:
-
-//remove hungry pilalr destroy from git
-
-//gustavo/peppino door skips door exit naimation
-//gustavo to peppino causes velocity in the wrong direction
-//modify scr_switchpep/gus to not reset state
-
 //taxi does not work, problem wiht door being set
 
-//ctop only ever gets 3 rooms
-//give ctop priority with construction and its own loop for adding levels
+//ctop only ever gets 3 rooms even with priority
 
 //floor progression since toppins are a no go (always give $50 for every level? require beating all or X levels?)
 //fix gustavo door/transition messuips, save door state and duirection then set them after doing the switch?

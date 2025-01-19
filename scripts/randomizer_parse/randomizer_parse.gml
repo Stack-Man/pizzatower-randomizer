@@ -186,7 +186,7 @@ function rd_parse_rooms()
 				
 				if (ds_map_exists(thisroom, "doors"))
 				{
-					if (array_contains(ignore_rooms, ds_map_find_value(thisroom, "title")) ) //skip this room
+					if (rd_array_contains(ignore_rooms, ds_map_find_value(thisroom, "title")) ) //skip this room
 						continue;
 					
 					var parsed_room = rd_parse_doors(thisroom);
@@ -283,18 +283,6 @@ function rd_branch_NPT(path)
 
 function rd_NPT_branch(path)
 {
-	show_debug_message(concat("check NPT branch for: ", path) );
-	show_debug_message(concat("defined?: ", path != undefined ) );
-	
-	if (path != undefined)
-	{
-		show_debug_message(concat("notpizzatime?: ", path.pathtime == pathtime.notpizzatime ) );
-		show_debug_message(concat("oneway?: ", path.oneway ) );
-		show_debug_message(concat("exit branch?: ", path.exitdoor.branch ) );
-		
-		show_debug_message(concat("NPT branch valid?: ", ((path != undefined) && (path.pathtime == pathtime.notpizzatime || path.oneway) && path.exitdoor.branch) ) );
-	}
-	
 	return (path != undefined) && (path.pathtime == pathtime.notpizzatime || path.oneway) && path.pathtime != pathtime.pizzatime && path.exitdoor.branch;
 }
 

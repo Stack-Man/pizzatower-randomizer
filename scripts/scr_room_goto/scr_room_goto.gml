@@ -14,7 +14,10 @@ function scr_room_goto(_room)
 	
 	var current_room = room;
 
-	var tpf = 12
+	with (obj_randomizer)
+	{
+		//alarm[4] = 100;
+	}
 
 	if (global.panic && global.fill < 30 * 12)
 	{

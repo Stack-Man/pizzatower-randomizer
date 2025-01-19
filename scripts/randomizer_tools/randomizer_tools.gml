@@ -160,7 +160,7 @@ function rd_prioritize_rooms_of_type(potential_rooms, roomorder)
 	{
 		var thisroom = ds_list_find_value(potential_rooms, p);
 			
-		if ( !array_contains(roomorder, thisroom.roomtype) )
+		if ( !rd_array_contains(roomorder, thisroom.roomtype) )
 			ds_list_add(result_rooms, thisroom);
 			
 	}
@@ -191,13 +191,13 @@ function rd_filter_paths_by_start_and_roomtype(
 {
 	var unfiltered_paths = rd_filter_paths_by_start(from_room, desired_transition_type, desired_dir, desired_time, desired_letter);
 	
-	if (from_room.title == global.test_name)
+	if (from_room.title == global.first_test_name  || global.print_connection_debug)
 	{
-		show_debug_message( concat("unfiltered paths size for ", global.test_name, ": ", ds_list_size(unfiltered_paths) ) );
+		show_debug_message( concat("unfiltered paths size for ", from_room.title, ": ", ds_list_size(unfiltered_paths) ) );
 		show_debug_message( concat("Using branch start? exit? ", use_branch_start, " and  ", use_branch_exit) );
 	}
 	
-	if ( ! array_contains(desired_roomtypes, roomtype.oneway) ) //filter out oneway paths from potentialoneway rooms
+	if ( ! rd_array_contains(desired_roomtypes, roomtype.oneway) ) //filter out oneway paths from potentialoneway rooms
 	{
 	
 		var filtered_paths = ds_list_create();
@@ -699,7 +699,22 @@ function rd_gustavo()
 			if (hsp < 0) //make negative for gus, since its only positive as peppino
 				movespeed = hsp;
 			
-			ratmount_movespeed = abs(movespeed);
+			ratmount_movespeed = min(12, abs(movespeed) );
+			
+			if (abs(movespeed) >= 12)
+				gustavodash = 51;
+			
+			if (movespeed > 12)
+				movespeed = 12;
+			
+			if (movespeed < -12)
+				movespeed = -12;
+			
+			if (hsp > 12)
+				hsp = 12;
+			
+			if (hsp < -12)
+				hsp = -12;
 		}
 	}
 	with obj_swapmodefollow
@@ -707,4 +722,55 @@ function rd_gustavo()
 		isgustavo = true;
 		get_character_spr();
 	}
+}
+
+function rd_check_levels_beat()
+{
+	ini_open_from_string(obj_savesystem.ini_str);
+	
+	global.total_levels = 4;
+	
+	if (room == tower_1 || room == tower_johngutterhall || room == tower_entrancehall)
+	{
+		rd_check_levels(["entrance", "ruin", "dungeon", "medieval"]);
+	}
+	else if (room == tower_2)
+	{
+		rd_check_levels(["saloon", "farm", "badland", "graveyard"]);
+	}
+	else if (room == tower_3)
+	{
+		rd_check_levels(["space", "minigolf", "plage", "forest"]);
+	}
+	else if (room == tower_4)
+	{
+		rd_check_levels(["freezer", "industrial", "sewer", "street"]);
+	}
+	else if (room == tower_5 || room == tower_pizzafacehall || room == tower_outside)
+	{
+		global.total_levels = 3;
+		rd_check_levels(["war", "kidsparty", "chateau"]);
+	}	
+		
+	ini_close();
+}
+
+function rd_check_levels(level_names)
+{
+	var beat_all = true;
+	var beat_total = 0;
+	
+	for (var l = 0; l < array_length(level_names); l++)
+	{
+		var highscore = ini_read_real("Highscore", level_names[l], -1);
+		
+		if (highscore == -1)
+			beat_all = false;
+		else
+			beat_total++;
+		
+	}
+	
+	global.beat_all_levels = beat_all;
+	global.levels_beat = beat_total;
 }

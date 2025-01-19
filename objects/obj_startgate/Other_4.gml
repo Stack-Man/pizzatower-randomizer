@@ -1,4 +1,4 @@
-if global.panic || (!ds_map_exists(global.transition_map, targetRoom) && !array_contains(global.boss_levels, targetRoom) )
+if global.panic || (!ds_map_exists(global.transition_map, targetRoom) && !rd_array_contains(global.boss_levels, targetRoom) )
 {
 	instance_destroy();
 	instance_create(x, y + 144, obj_rubble);
