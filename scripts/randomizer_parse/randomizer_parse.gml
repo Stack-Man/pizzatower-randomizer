@@ -182,6 +182,16 @@ function rd_parse_rooms()
 		
 		if (level != undefined)
 		{
+			var this_version = "0";
+			
+			if (ds_map_exists(level, "version"))
+			{
+				this_version = ds_map_find_value(level, "version");
+				
+				if (this_version != version)
+					global.outdated_json = true;
+			}
+			
 			var rooms = ds_map_find_value(level, "rooms")
 			
 			for (var i = 0; i < ds_list_size(rooms); i++)

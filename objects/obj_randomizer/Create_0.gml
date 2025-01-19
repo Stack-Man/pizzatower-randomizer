@@ -7,6 +7,7 @@ loadedini = false;
 current_powerup = poweruptype.none;
 global.print_connection_debug = false;
 global.missing_json = 0;
+global.outdated_json = false;
 
 global.levels_beat = 0;
 global.beat_all_levels = false;

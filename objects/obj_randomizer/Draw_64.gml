@@ -40,7 +40,11 @@ if variable_global_exists("smallfont")
 		draw_text(8, 24, concat("MISSING ", global.missing_json," JSON FILES IN ", working_directory, "json") );
 		draw_set_font(global.smallfont);
 	}
-		
+	
+	if (global.outdated_json)
+	{
+		draw_text(8, 48, "OUTDATED JSON");
+	}
 	
 	/*with (obj_player1)
 	{
