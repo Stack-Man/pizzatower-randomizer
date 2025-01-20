@@ -67,8 +67,6 @@ function rd_construct_levels()
 			
 	}
 	
-	show_debug_message( concat("Created ", ds_list_size(levels), " levels") );
-	
 	for (var k = 0; k < ds_list_size(levels); k++)
 	{
 		var level = ds_list_find_value(levels, k);
@@ -91,6 +89,7 @@ function rd_construct_levels()
 	//free the memory afterwards
 	ds_map_destroy(global.all_rooms);
 	
+	show_debug_message( concat("Created ", ds_list_size(levels), " levels") );
 	return ds_list_size(levels);
 }
 

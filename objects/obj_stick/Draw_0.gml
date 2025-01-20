@@ -10,5 +10,5 @@ if drawing
 	var cy = (y - 130) + money_y;
 	draw_sprite(spr_stickmoney, 0, cx, cy);
 	//draw_text(cx + 20, cy, maxscore);
-	draw_text(cx + 20, cy, concat(global.levels_beat, "OF", global.total_levels) );
+	draw_text(cx + 20, cy, concat(global.total_levels, "OF", global.total_levels) );
 }

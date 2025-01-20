@@ -30,7 +30,7 @@ max_branches = 2;
 max_rooms = 10;
 
 ignore_rooms = [
-"forest_G1", "plage_shipmain", 
+"forest_G1", "plage_shipmain",
 "tower_1", "tower_johngutterhall", "tower_2", "tower_3", "tower_4", "tower_5", "ruin_11",
 "tower_tutorial1N", "trickytreat_1", 
 "medieval_6"];

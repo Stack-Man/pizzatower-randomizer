@@ -8,6 +8,11 @@
 
 alarm[2] = 2;
 
+with (obj_lapportal)
+{
+	instance_destroy(self);
+}
+
 with (obj_door)
 {
 	if (!variable_instance_exists(self, "targetRoom"))

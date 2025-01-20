@@ -210,7 +210,7 @@
             },
             "doors": [
                 {
-                    "letter": "taxi",
+                    "letter": "taxistart",
                     "type": "taxi",
                     "startonly": true,
                     "notpizzatime": true
@@ -234,7 +234,7 @@
             },
             "doors": [
                 {
-                    "letter": "taxi",
+                    "letter": "taxistart",
                     "type": "taxi",
                     "startonly": true,
                     "notpizzatime": true
@@ -256,7 +256,7 @@
             "loop": true,
             "doors": [
                 {
-                    "letter": "taxi",
+                    "letter": "taxistart",
                     "type": "taxi",
                     "startonly": true,
                     "notpizzatime": true
@@ -285,7 +285,7 @@
             },
             "doors": [
                 {
-                    "letter": "taxi",
+                    "letter": "taxistart",
                     "type": "taxi",
                     "startonly": true,
                     "powerup": {
@@ -316,7 +316,7 @@
             "gerome": true,
             "doors": [
                 {
-                    "letter": "taxi",
+                    "letter": "taxistart",
                     "type": "taxi",
                     "startonly": true,
                     "powerup": {

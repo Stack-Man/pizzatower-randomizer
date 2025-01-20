@@ -486,7 +486,12 @@ function rd_clear_transformation()
 	{
 		rd_peppino();
 	}
-
+	
+	if (instance_exists(obj_player1) && obj_player1.isgustavo) //clear natural gustavo from street jail or forest G1
+	{
+		rd_peppino();
+	}
+	
 	current_powerup = poweruptype.none;
 }
 
@@ -735,27 +740,50 @@ function rd_check_levels_beat()
 	
 	if (room == tower_1 || room == tower_johngutterhall || room == tower_entrancehall)
 	{
-		rd_check_levels(["entrance", "ruin", "dungeon", "medieval"]);
+		global.total_levels = rd_check_levels_exist([entrance_1, ruin_1, dungeon_1, medieval_1]);
+		global.levels_beat = rd_check_levels(["entrance", "ruin", "dungeon", "medieval"]);
+		
 	}
 	else if (room == tower_2)
 	{
-		rd_check_levels(["saloon", "farm", "badland", "graveyard"]);
+		global.total_levels = rd_check_levels_exist([saloon_1, farm_2, badland_1, graveyard_1]);
+		global.levels_beat = rd_check_levels(["saloon", "farm", "badland", "graveyard"]);
 	}
 	else if (room == tower_3)
 	{
-		rd_check_levels(["space", "minigolf", "plage", "forest"]);
+		global.total_levels = rd_check_levels_exist([space_1, minigolf_1, plage_entrance, medieval_1]);
+		global.levels_beat = rd_check_levels(["space", "minigolf", "plage", "forest"]);
 	}
 	else if (room == tower_4)
 	{
-		rd_check_levels(["freezer", "industrial", "sewer", "street"]);
+		global.total_levels = rd_check_levels_exist([freezer_1, industrial_1, sewer_1, street_intro]);
+		global.levels_beat = rd_check_levels(["freezer", "industrial", "sewer", "street"]);
 	}
 	else if (room == tower_5 || room == tower_pizzafacehall || room == tower_outside)
 	{
-		global.total_levels = 3;
-		rd_check_levels(["war", "kidsparty", "chateau"]);
+		global.total_levels = rd_check_levels_exist([war_1, kidsparty_1, chateau_1]);
+		global.levels_beat = rd_check_levels(["war", "kidsparty", "chateau"]);
 	}	
-		
+	
+	global.beat_all_levels = global.levels_beat == global.total_levels;
+	
 	ini_close();
+}
+
+function rd_check_levels_exist(level_indexes)
+{
+	var total = 0;
+	
+	for (var l = 0; l < array_length(level_indexes); l++)
+	{
+		var index = level_indexes[l];
+		
+		if (ds_map_exists(global.transition_map, index))
+			total++;
+	}
+	
+	return total;
+	
 }
 
 function rd_check_levels(level_names)
@@ -774,8 +802,8 @@ function rd_check_levels(level_names)
 		
 	}
 	
-	global.beat_all_levels = beat_all;
-	global.levels_beat = beat_total;
+	//global.beat_all_levels = beat_all;
+	return beat_total;
 }
 
 function rd_send_to_door(door_object)
