@@ -1,351 +1,215 @@
 {
-	"rooms" :
-	[
-		{
-			"title" : "saloon_1",
-			"maxscore" : 0,
-			"entrance" : true,
-			"loop" : true,
-			"doors" :
-			[
-				{
-					"letter" : "A",
-					"type" : "leveldoor",
-					"entrance" : true
-				},
-				
-				{
-					"letter" : "B",
-					"type" : "horizontal",
-					"dir" : "right"
-				},
-				
-				{
-					"letter" : "C",
-					"type" : "box",
-					"dir" : "down",
-					"loop" : true
-				}
-			]
-		},
-		
-		{
-			"title" : "saloon_2",
-			"maxscore" : 0,
-			"toppin" :
+	"version" : "0.2",
+		"rooms": [
 			{
-				"type" : "mushroom"
+				"title": "dungeon_1",
+				"maxscore": 0,
+				"entrance": true,
+				"lap2": true,
+				"doors": [
+					{
+						"letter": "A",
+						"type": "leveldoor",
+						"entrance": true
+					},
+					{
+						"letter": "B",
+						"type": "vertical",
+						"dir": "down"
+					}
+				]
 			},
-			"doors" :
-			[
-				{
-					"letter" : "A",
-					"type" : "horizontal",
-					"dir" : "right",
-					"startonly" : true,
-					"pizzatime" : true
-				},
-				
-				{
-					"letter" : "B",
-					"type" : "horizontal",
-					"dir" : "left",
-					"notpizzatimestart" : true,
-					"pizzatimeexit" : true
-				},
-				
-				{
-					"letter" : "C",
-					"type" : "door",
-					"exitonly" : true
-				}
-			]
-		},
-		
-		{
-			"title" : "saloon_2b",
-			"maxscore" : 0,
-			"secret" :
 			{
-				"secret" : true,
-				"pizzatime" : true
-			},
-			"doors" :
-			[
-				{
-					"letter" : "C",
-					"type" : "door"
+				"title": "dungeon_2",
+				"maxscore": 0,
+				"toppin": {
+					"type": "mushroom"
 				},
-				
-				{
-					"letter" : "D",
-					"type" : "horizontal",
-					"dir" : "right",
-					"exitonly" : true,
-					"notpizzatime" : true
-				}
-			]
-		},
-		
-		{
-			"title" : "saloon_3",
-			"maxscore" : 0,
-			"loop" : true,
-			"toppin" :
+				"doors": [
+					{
+						"letter": "B",
+						"type": "vertical",
+						"dir": "up"
+					},
+					{
+						"letter": "C",
+						"type": "vertical",
+						"dir": "down"
+					}
+				]
+			},
 			{
-				"type" : "cheese"
+				"title": "dungeon_3",
+				"maxscore": 0,
+				"toppin": {
+					"type": "cheese"
+				},
+				"secret": {
+					"secret": true,
+					"notpizzatime": true
+				},
+				"doors": [
+					{
+						"letter": "C",
+						"type": "vertical",
+						"dir": "up"
+					},
+					{
+						"letter": "A",
+						"type": "vertical",
+						"dir": "down"
+					}
+				]
 			},
-			"doors" :
-			[
-				{
-					"letter" : "A",
-					"type" : "horizontal",
-					"dir" : "left",
-					"pizzatime" : true
-				},
-				
-				{
-					"letter" : "B",
-					"type" : "horizontal",
-					"dir" : "right",
-					"branch" : true
-				},
-				
-				{
-					"letter" : "C",
-					"type" : "door",
-					"notpizzatime" : true
-				},
-				
-				{
-					"letter" : "F",
-					"type" : "door",
-					"gerome" : true,
-					"loop" : true,
-					"branch" : true
-				}
-			]
-		},
-		
-		{
-			"title" : "saloon_3b",
-			"maxscore" : 0,
-			"doors" :
-			[
-				{
-					"letter" : "C",
-					"type" : "door",
-					"exitonly" : true
-				},
-				
-				{
-					"letter" : "D",
-					"type" : "horizontal",
-					"dir" : "left"
-				}
-			]
-		},
-		
-		{
-			"title" : "saloon_4",
-			"maxscore" : 0,
-			"toppin" :
 			{
-				"type" : "tomato"
+				"title": "dungeon_4",
+				"maxscore": 0,
+				"toppin": {
+					"type": "tomato",
+					"notpizzatime": true
+				},
+				"doors": [
+					{
+						"letter": "A",
+						"type": "vertical",
+						"pizzatimeexit" : true,
+						"dir": "up"
+					},
+					{
+						"letter": "C",
+						"type": "vertical",
+						"dir": "down"
+					}
+				]
 			},
-			"doors" :
-			[
-				{
-					"letter" : "A",
-					"type" : "horizontal",
-					"dir" : "right",
-					"pizzatime" : true
-				},
-				
-				{
-					"letter" : "B",
-					"type" : "horizontal",
-					"dir" : "left",
-					"pizzatimeexit" : true
-				},
-				
-				{
-					"letter" : "C",
-					"type" : "door",
-					"notpizzatime" : true
-				}
-			]
-		},
-		
-		{
-			"title" : "saloon_4b",
-			"maxscore" : 0,
-			"doors" :
-			[
-				{
-					"letter" : "A",
-					"type" : "horizontal",
-					"dir" : "right",
-					"exitonly" : true
-				},
-				
-				{
-					"letter" : "C",
-					"type" : "door"
-				}
-			]
-		},
-		
-		{
-			"title" : "saloon_5",
-			"maxscore" : 0,
-			"key" : true,
-			"toppin" :
 			{
-				"type" : "sausage"
+				"title": "dungeon_5",
+				"maxscore": 0,
+				"secret": {
+					"secret": true
+				},
+				"doors": [
+					{
+						"letter": "C",
+						"type": "vertical",
+						"dir": "up"
+					},
+					{
+						"letter": "D",
+						"type": "vertical",
+						"dir": "down"
+					}
+				]
 			},
-			"secret" :
 			{
-				"secret" : true
+				"title": "dungeon_6",
+				"maxscore": 0,
+				"doors": [
+					{
+						"letter": "D",
+						"type": "vertical",
+						"dir": "up"
+					},
+					{
+						"letter": "A",
+						"type": "vertical",
+						"dir": "down"
+					}
+				]
 			},
-			"doors" :
-			[
-				{
-					"letter" : "A",
-					"type" : "horizontal",
-					"dir" : "left",
-					"pizzatime" : true
-				},
-				
-				{
-					"letter" : "B",
-					"type" : "horizontal",
-					"dir" : "right",
-					"exitonly" : true,
-					"ratblocked" : true,
-					"pizzatime" : true
-				},
-				
-				{
-					"letter" : "C",
-					"type" : "door",
-					"notpizzatime" : true
-				}
-			]
-		},
-		
-		{
-			"title" : "saloon_5b",
-			"maxscore" : 0,
-			"loop" : true,
-			"secret" :
 			{
-				"secret" : true
+				"title": "dungeon_7",
+				"maxscore": 0,
+				"doors": [
+					{
+						"letter": "A",
+						"type": "vertical",
+						"dir": "up"
+					},
+					{
+						"letter": "B",
+						"type": "vertical",
+						"dir": "down"
+					},
+					{
+						"letter": "F",
+						"type": "door",
+						"gerome": true,
+						"loop": true
+					}
+				]
 			},
-			"doors" :
-			[
-				{
-					"letter" : "A",
-					"type" : "horizontal",
-					"dir" : "left",
-					"startonly" : true
-				},
-				
-				{
-					"letter" : "B",
-					"type" : "horizontal",
-					"dir" : "right"
-				},
-				
-				{
-					"letter" : "C",
-					"type" : "door",
-					"loop" : true
-				}
-			]
-		},
-		
-		{
-			"title" : "saloon_6",
-			"maxscore" : 0,
-			"gerome" : true,
-			"pillar" : true,
-			"doors" :
-			[
-				{
-					"letter" : "B",
-					"type" : "horizontal",
-					"dir" : "left",
-					"exitonly" : true
-				},
-				
-				{
-					"letter" : "C",
-					"type" : "door",
-					"notpizzatime" : true
-				}
-			]
-		},
-		
-		{
-			"title" : "saloon_6b",
-			"maxscore" : 0,
-			"toppin" :
 			{
-				"type" : "pineapple"
+				"title": "dungeon_treasure",
+				"treasure": true,
+				"doors": [
+					{
+						"letter": "F",
+						"type": "door"
+					}
+				]
 			},
-			"doors" :
-			[
-				{
-					"letter" : "B",
-					"type" : "horizontal",
-					"dir" : "left"
+			{
+				"title": "dungeon_8",
+				"maxscore": 0,
+				"doors": [
+					{
+						"letter": "B",
+						"type": "vertical",
+						"dir": "up"
+					},
+					{
+						"letter": "A",
+						"type": "vertical",
+						"dir": "down"
+					}
+				]
+			},
+			{
+				"title": "dungeon_9",
+				"maxscore": 0,
+				"toppin": {
+					"type": "sausage pineapple"
 				},
-				
-				{
-					"letter" : "C",
-					"type" : "door",
-					"locked" : true
-				}
-			]
-		},
-		
-		{
-			"title" : "saloon_lap",
-			"maxscore" : 0,
-			"lap2" : true,
-			"doors" :
-			[
-				{
-					"letter" : "C",
-					"type" : "box",
-					"dir" : "up"
-				}
-			]
-		},
-		
-		{
-			"title" : "saloon_treasure",
-			"maxscore" : 0,
-			"doors" :
-			[
-				{
-					"letter" : "F",
-					"type" : "door"
-				}
-			]
-		},
-		
-		{
-			"title" : "saloon_secret1"
-		},
-		
-		{
-			"title" : "saloon_secret2"
-		},
-		
-		{
-			"title" : "saloon_secret3"
-		}
-	]
-}
+				"secret": {
+					"secret": true
+				},
+				"doors": [
+					{
+						"letter": "A",
+						"type": "vertical",
+						"dir": "up"
+					},
+					{
+						"letter": "B",
+						"type": "horizontal",
+						"dir": "right"
+					}
+				]
+			},
+			{
+				"title": "dungeon_10",
+				"maxscore": 0,
+				"pillar": true,
+				"doors": [
+					{
+						"letter": "B",
+						"type": "horizontal",
+						"dir": "left"
+					}
+				]
+			},
+			
+			{
+				"title": "dungeon_secret1"
+			},
+			
+			{
+				"title": "dungeon_secret2"
+			},
+			
+			{
+				"title": "dungeon_secret3"
+			}
+		]
+}	

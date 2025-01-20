@@ -1,5 +1,5 @@
 {
-	"version" : "0.1",
+	"version" : "0.2",
 		"rooms" : 
 		[
 			{
@@ -334,11 +334,6 @@
 			{
 				"title" : "farm_12",
 				"maxscore": 0,
-				"oneway": {
-					"pairs": [
-							[ "A", "B" ]
-						]
-				},
 				"doors": [
 					{
 						"letter" : "A",
@@ -359,11 +354,6 @@
 				"title" : "farm_13",
 				"maxscore": 0,
 				"pizzatime" : true,
-				"oneway": {
-					"pairs": [
-							[ "C", "D" ]
-						]
-				},
 				"doors": [
 					{
 						"letter" : "C",

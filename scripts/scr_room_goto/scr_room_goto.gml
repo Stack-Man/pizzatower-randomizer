@@ -41,9 +41,13 @@ function scr_room_goto(_room)
 			var new_room_id = ds_map_find_value(destination, "roomid");
 			var new_targetDoor = ds_map_find_value(destination, "letter");
 			
-			show_debug_message( concat("Tried to go from ", room_get_name(current_room), " ", obj_player.targetDoor, " to ", room_get_name(new_room_id), " ", new_targetDoor) );
+			
 			obj_player.targetDoor = new_targetDoor;
 
+			var msg = concat("Tried to go from ", room_get_name(current_room), " ", current_room, " ", current_targetDoor, " to ", room_get_name(new_room_id), " ", new_room_id, " ", new_targetDoor);
+			global.room_msg = msg;
+			show_debug_message( msg );
+			
 			room_goto(new_room_id);
 			
 			with (obj_randomizer) //trigger the enter room logic
@@ -67,7 +71,9 @@ function scr_room_goto(_room)
 		}
 		else
 		{
-			show_debug_message( concat("Returning to same room ", room_get_name(current_room), " ", obj_player.targetDoor, " to ", room_get_name(current_room), " ", obj_player.targetDoor) );
+			var msg = concat("Returning to same room ", room_get_name(current_room), " ", current_room, " current door: ", current_targetDoor);
+			global.room_msg = msg;
+			show_debug_message(msg);
 			room_goto(current_room);
 		}
 		

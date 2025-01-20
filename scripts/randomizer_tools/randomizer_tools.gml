@@ -777,3 +777,43 @@ function rd_check_levels(level_names)
 	global.beat_all_levels = beat_all;
 	global.levels_beat = beat_total;
 }
+
+function rd_send_to_door(door_object)
+{
+	if (instance_exists(door_object))
+	{
+		global.door_x = door_object.x;
+		
+		if hallway == 1
+		{
+			var true_direction = 0;
+			
+			if (place_meeting(door_object.x, door_object.y, obj_hallway) )
+			{
+				with ( instance_place(door_object.x, door_object.y, obj_hallway) )
+				{
+					true_direction = image_xscale * -1;
+				}
+			}
+			
+			global.true_direction = true_direction;
+			
+			x = door_object.x + (true_direction * 100);
+		}	
+		else if box == 1
+		{
+			x = door_object.x + 32;
+		}
+		else
+		{
+			x = door_object.x + 16;
+		}
+		
+		global.door_x_offset = x - global.door_x;
+			
+		y = door_object.y - 14;
+		
+		global.door_y = door_object.y;
+		
+	}
+}

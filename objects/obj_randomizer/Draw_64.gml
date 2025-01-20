@@ -46,6 +46,31 @@ if variable_global_exists("smallfont")
 		draw_text(8, 48, "OUTDATED JSON");
 	}
 	
+	draw_set_font(-1);
+	draw_text(8, 48 + 24, global.room_msg);
+	draw_set_font(global.smallfont);
+	
+	/*with (obj_player1)
+	{
+		draw_set_font(global.smallfont);
+		
+		var hallwaystr = hallwaydirection;
+		
+		if (hallwaydirection < 0)
+			hallwaystr = concat("M", hallwaystr);
+			
+		var truestr = global.true_direction;
+	
+		if (truestr < 0)
+			truestr = concat("M", truestr);
+		
+		var vals = concat("HALLWAY: ", hallway, " DIR: ", hallwaystr, " TRUE: ", truestr, " BOX: ", box, " TARGET: ", targetDoor);
+		var target = concat("X: ", global.door_x, " OFFSET: ", global.door_x_offset, " Y: ", global.door_y);
+		
+		draw_text(8, 48 + 24 + 24, vals);
+		draw_text(8, 48 + 48 + 24, target);
+	}*/
+	
 	/*with (obj_player1)
 	{
 		draw_text(8, 48, state);

@@ -1,5 +1,5 @@
 depth = -6000;
-version = "0.1";
+version = "0.2";
 validversion = true;
 loadedjson = false;
 loadedini = false;
@@ -8,6 +8,12 @@ current_powerup = poweruptype.none;
 global.print_connection_debug = false;
 global.missing_json = 0;
 global.outdated_json = false;
+
+global.room_msg = "";
+global.door_x_offset = 0;
+global.door_x = 0;
+global.door_y = 0;
+global.true_direction = 0;
 
 global.levels_beat = 0;
 global.beat_all_levels = false;
@@ -33,11 +39,7 @@ global.boss_levels = [boss_pepperman, boss_vigilante, boss_noise, boss_fakepep, 
 
 //TODO:
 //taxi does not work, problem wiht door being set
-
-//ctop only ever gets 3 rooms even with priority
-
-//floor progression since toppins are a no go (always give $50 for every level? require beating all or X levels?)
-//fix gustavo door/transition messuips, save door state and duirection then set them after doing the switch?
+//hallway transition offset is not consistent, can cause weirdness or softlocks
 
 //minigolf_8 has the loop to itself
 //plage_shipmain has loop to itself between different doors and weird door setup
@@ -46,7 +48,6 @@ global.boss_levels = [boss_pepperman, boss_vigilante, boss_noise, boss_fakepep, 
 //medievakl_6 softlocks if you pick up the knight powerup and go down the slope
 
 //Ignore the shared rooms in CTOP and main level for now, add transition map exception later
-//ignore tower tutorial1N cause whatever bro
 
 level_names = [ 
 "tutorial", "tutorial_noise", "trickytreat",

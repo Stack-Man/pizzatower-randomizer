@@ -1,5 +1,5 @@
 {
-	"version" : "0.1",
+	"version" : "0.2",
     "rooms": [
         {
             "title": "street_intro",
@@ -172,6 +172,8 @@
                     "letter": "B",
                     "type": "door",
                     "pizzatimestart": true,
+					"exitonly": true,
+					"ratblocked" : true
                     "powerup": {
                         "type": "gustavo"
                     }

@@ -1,5 +1,5 @@
 {
-	"version" : "0.1",
+  "version" : "0.2",
   "rooms": [
     {
       "title": "industrial_1",
@@ -27,7 +27,8 @@
         {
           "letter": "E",
           "type": "door",
-          "pizzatime": true
+          "pizzatime": true,
+		  "loop" : true
         },
         {
           "letter": "F",

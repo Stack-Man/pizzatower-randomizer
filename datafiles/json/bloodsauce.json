@@ -1,5 +1,5 @@
 {
-	"version" : "0.1",
+	"version" : "0.2",
 		"rooms": [
 			{
 				"title": "dungeon_1",
@@ -72,13 +72,13 @@
 					{
 						"letter": "A",
 						"type": "vertical",
-						"startonly" : true,
-						"ratblocked" : true,
 						"dir": "up"
 					},
 					{
 						"letter": "C",
 						"type": "vertical",
+						"exitonly" : true,
+						"ratblocked" : true,
 						"dir": "down"
 					}
 				]
