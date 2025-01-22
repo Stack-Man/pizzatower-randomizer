@@ -14,27 +14,53 @@ function rd_generate_new(use_new_seed = false)
 		global.all_rooms = rd_parse_rooms();
 		
 		if (!global.missing_json)
-		{
-			var johns = ds_list_size(rd_get_rooms_of_type([roomtype.john, roomtype.johnbranching]));
-			var entrances = ds_list_size( rd_get_rooms_of_type( [roomtype.entrance, roomtype.entrancebranching] ) );
-	
-			show_debug_message( concat("Johns: ", johns, " entrances: ", entrances) );
-	
-			var created = rd_construct_levels();
-
-			ds_map_destroy(global.sequence_used_rooms);
-			ds_map_destroy(global.all_rooms);
-			ds_map_destroy(global.connection_tested_rooms);
-			ds_map_destroy(global.sequence_tested_rooms);
-			ds_list_destroy(global.connection_tested_exits);
-	
-			if (variable_global_exists("font_map"))
-				create_transformation_tip( concat("Generated ", created, " of ", "21", " levels") );
-		
-			rd_save_seed();
-		}
+			rd_construct_levels();
 	}
 
+	rd_save_log();
+}
+
+function rd_save_log()
+{
+	var file = file_text_open_write( concat("randomizer/logs/", seed, ".log") );
+	file_text_write_string(file, global.log);
+	file_text_close(file);
+}
+
+function rd_key(create)
+{
+	if (create)
+	{
+		global.key_inv = true;
+	
+		with (obj_player1)
+			instance_create(x, y, obj_keyfollow);
+	}
+	else
+	{
+		global.key_inv = false;
+		
+		with (obj_keyfollow)
+			instance_destroy(self);
+	}
+}
+
+function rd_gerome(create)
+{
+	if (create)
+	{
+		global.gerome = true;
+	
+		with (obj_player1)
+			instance_create(x, y, obj_geromefollow);
+	}
+	else
+	{
+		global.gerome = false;
+		
+		with (obj_geromefollow)
+			instance_destroy(self);
+	}
 }
 
 function rd_reset()
@@ -168,24 +194,11 @@ function rd_prioritize_rooms_of_type(potential_rooms, roomorder)
 			
 	}
 	
-	/*show_debug_message("Prioritized rooms: ");
-	
-	for (var p = 0; p < ds_list_size(result_rooms); p++)
-	{
-		var thisroom = ds_list_find_value(result_rooms, p);
-			
-		show_debug_message(concat("Room of type ", thisroom.roomtype, ": ", thisroom.title));
-			
-	}*/
-	
-	return result_rooms;
-	
+	return result_rooms;	
 }
 
 function rd_filter_paths_by_start(from_room, desired_type, desired_dir, desired_time, desired_letter = "")
 {
-	//show_debug_message( concat("Filtering start paths for ", from_room.title));
-	
 	return rd_filter_paths(from_room, desired_type, desired_dir, desired_time, desired_letter, true);
 }
 
@@ -193,12 +206,6 @@ function rd_filter_paths_by_start_and_roomtype(
 	from_room, desired_transition_type,  desired_dir, desired_time, desired_roomtypes, desired_letter = "", use_branch_start = false, use_branch_exit = false)
 {
 	var unfiltered_paths = rd_filter_paths_by_start(from_room, desired_transition_type, desired_dir, desired_time, desired_letter);
-	
-	if (from_room.title == global.first_test_name  || global.print_connection_debug)
-	{
-		show_debug_message( concat("unfiltered paths size for ", from_room.title, ": ", ds_list_size(unfiltered_paths) ) );
-		show_debug_message( concat("Using branch start? exit? ", use_branch_start, " and  ", use_branch_exit) );
-	}
 	
 	if ( ! rd_array_contains(desired_roomtypes, roomtype.oneway) ) //filter out oneway paths from potentialoneway rooms
 	{
@@ -218,21 +225,9 @@ function rd_filter_paths_by_start_and_roomtype(
 			var bad_start = (path.startdoor.startonly && !path.startdoor.ratblocked );
 			var bad_exit = (path.exitdoor.exitonly && !path.exitdoor.ratblocked);
 			
-			if ( (bad_start || bad_exit) && !good_branch )
-			{
-				if (from_room.title == global.test_name)
-				{
-					show_debug_message( concat("bad oneway path for ", global.test_name, path ) );
-				}
-			}
-			else
-			{
+			if ( !(bad_start || bad_exit) || good_branch )
 				ds_list_add(filtered_paths, path);
-				if (from_room.title == global.test_name)
-				{
-					show_debug_message( concat("good not oneway path for ", global.test_name, path ) );
-				}
-			}
+				
 		}
 
 		ds_list_destroy(unfiltered_paths);
@@ -276,7 +271,7 @@ function rd_print_connection_path(connection)
 		next = next.second;
 	}
 	
-	show_debug_message( concat("Path: ", path) );
+	rd_add_to_log( concat("Path: ", path) );
 }
 
 function rd_count_rooms(sequence)
@@ -377,7 +372,10 @@ function rd_get_door_struct(door)
 		
 		letter : ds_map_find_value(door, "letter"),
 		type : rd_convert_transitiontype(ds_map_find_value(door, "type")),
-		dir : rd_convert_transitiondir(ds_map_find_value(door, "dir"))
+		dir : rd_convert_transitiondir(ds_map_find_value(door, "dir")),
+		
+		pizzatimestart : ds_map_exists(door, "pizzatimestart"),
+		notpizzatimestart : ds_map_exists(door, "notpizzatimestart")
 		
 	};
 	
@@ -844,4 +842,9 @@ function rd_send_to_door(door_object)
 		global.door_y = door_object.y;
 		
 	}
+}
+
+function rd_add_to_log(msg)
+{
+	global.log = concat(global.log, msg, "\n");
 }

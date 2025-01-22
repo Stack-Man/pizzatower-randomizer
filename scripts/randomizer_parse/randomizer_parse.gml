@@ -22,7 +22,7 @@ function rd_init(use_new_seed = false)
 
 		if (should_load_json)
 		{
-			show_debug_message(concat("Loading seed ", directory) );
+			rd_add_to_log(concat("Loading seed ", directory) );
 			
 			var final_map = undefined;
 			
@@ -72,11 +72,6 @@ function rd_init(use_new_seed = false)
 					ds_map_add_map(global.powerup_map, room_id, letters_map);
 				}
 				
-				if (ds_map_exists(global.transition_map, minigolf_1))
-					show_debug_message("minigolf_1 exists")
-				else
-					show_debug_message("minigolf_1 does not exists")
-				
 				seed = ds_map_find_value(final_map, "seed");
 				
 				var found_version = ds_map_find_value(final_map, "version");
@@ -98,7 +93,7 @@ function rd_init(use_new_seed = false)
 		seed = floor(random_range(-2147483648, 2147483647));
 	}
 	
-	show_debug_message( concat("Seed: ", seed) );
+	rd_add_to_log( concat("Seed: ", seed) );
 	
 	random_set_seed(seed);
 	
@@ -138,7 +133,7 @@ function rd_save_seed()
 	var directory = concat("randomizer/", seed, ".json");
 	var json = json_encode(final_map);
 	
-	show_debug_message( concat("Saving seed ", seed, " to ", directory) );
+	rd_add_to_log( concat("Saving seed ", seed, " to ", directory) );
 	rd_save_to_json(json, directory);
 }
 
@@ -159,7 +154,7 @@ function rd_parse_rooms()
 	{
 		var level = undefined;
 		var directory = concat(working_directory, "/json/", jsons[j], ".json");
-		show_debug_message( concat("Parsing Level: ", directory ) );
+		rd_add_to_log( concat("Parsing Level: ", directory ) );
 		
 		if (file_exists(directory))
 		{
@@ -214,8 +209,7 @@ function rd_parse_rooms()
 		
 	}
 	
-	
-	show_debug_message(concat("parsed room size: ", ds_map_size(parsed_rooms)));
+	rd_add_to_log(concat("parsed room size: ", ds_map_size(parsed_rooms)));
 	
     return parsed_rooms;
 }
@@ -246,18 +240,12 @@ function rd_check_path_for_roomtype(path, current_type)
 
 //Doesnt get called if the branch type is already branchstart or branchend
 //maybe change because that means it never checks both pt and npt to ensure the other is valid
-function rd_check_paths_for_branchtype(path_ab, path_ba, current_type, show_debug = false)
+function rd_check_paths_for_branchtype(path_ab, path_ba, current_type)
 {	
 	if ((path_ab != undefined && !path_ab.startdoor.branch && !path_ab.exitdoor.branch)
 	||  (path_ba != undefined && !path_ba.startdoor.branch && !path_ba.exitdoor.branch))
 	{
-		if (show_debug)
-		{
-			show_debug_message(concat("At least one path of chateau_7 or farm_4 is not branch: ", path_ab, path_ba) );
-		}
-		
 		return current_type; //branch check failed
-		
 	}
 	
 	//path == undefined means the other is a oneway
@@ -269,14 +257,6 @@ function rd_check_paths_for_branchtype(path_ab, path_ba, current_type, show_debu
 	
 	var branch_PT = rd_branch_PT(path_ab) || rd_branch_PT(path_ba);
 	var PT_branch = rd_PT_branch(path_ab) || rd_PT_branch(path_ba);
-	
-	if (show_debug)
-	{
-		show_debug_message(concat("path_ab: ", path_ab));
-		show_debug_message(concat(" path_ba: ", path_ba));
-		show_debug_message(concat("branch_NPT: ", branch_NPT, " NPT_branch: ", NPT_branch," branch_PT: ", branch_PT, " PT_branch: ", PT_branch) );
-	}
-	
 	
 	if ( (branch_NPT && ! NPT_branch) || (!branch_PT && PT_branch) )
 		return roomtype.branchstart;
@@ -404,11 +384,6 @@ function rd_parse_powerup(door, room_index)
 		else if (ds_map_exists(powerup, "notpizzatime") )
 			powerup_path_time = pathtime.notpizzatime;
 					
-		/*var start_powerup = {
-			poweruptype : ds_map_find_value(powerup, "type"),
-			poweruptime : powerup_path_time
-		};*/
-		
 		var start_powerup = ds_map_create();
 		ds_map_add(start_powerup, "poweruptype", ds_map_find_value(powerup, "type"));
 		ds_map_add(start_powerup, "poweruptime", powerup_path_time);
@@ -422,7 +397,7 @@ function rd_parse_powerup(door, room_index)
 
 function rd_parse_doors(thisroom)
 {
-	show_debug_message( concat("Parsing: ", ds_map_find_value(thisroom, "title") ) );
+	rd_add_to_log( concat("Parsing: ", ds_map_find_value(thisroom, "title") ) );
 	
 	var doors  = ds_map_find_value(thisroom, "doors"); //Holds doors in the room, don't prematurely delete, it will get delted with parsed_level later
 	var filtered_doors;
@@ -499,12 +474,6 @@ function rd_parse_doors(thisroom)
 	
 	//Check for john, entrance, branch variant, or branchmid
 	found_room_type = rd_check_all_paths_for_special_branch(found_paths, has_pillar, has_entrance, found_room_type);
-	
-	if (found_room_type == roomtype.john || found_room_type == roomtype.entrance)
-		show_debug_message( concat(room_title, " is john or entrance ") );
-	
-	if (found_room_type == roomtype.johnbranching || found_room_type == roomtype.entrancebranching)
-		show_debug_message( concat(room_title, " is john branching or entrance branching") );
 
 	if (ds_list_size(filtered_doors) <= 1 && found_room_type != roomtype.entrance && found_room_type != roomtype.john)
 		found_room_type = roomtype.loop;
@@ -529,7 +498,7 @@ function rd_parse_doors(thisroom)
 		roomtype : found_room_type
 	};
 	
-	show_debug_message( concat("Parsed: ", ds_map_find_value(thisroom, "title"), " type: ", found_room_type ) );
+	rd_add_to_log( concat("Parsed: ", ds_map_find_value(thisroom, "title"), " type: ", found_room_type ) );
 	
 	return parsed_room;
 }

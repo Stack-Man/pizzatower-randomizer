@@ -1,5 +1,5 @@
 {
-  "version" : "0.2",
+  "version" : "0.3",
   "rooms": [
     {
       "title": "industrial_1",
@@ -58,7 +58,8 @@
           "letter": "A",
           "type": "vertical",
           "dir": "up",
-          "exitonly": true
+          "exitonly": true,
+		  "notpizzatime" : true
         },
         {
           "letter": "E",

@@ -1,12 +1,42 @@
 // @description remove unused transitions
-
-
 //upon entering the room, remove unused transitions and put obj_solid in place of hallways
 
-//TODO: deleting obj_geromedoor leaves behind an obj_door that crashes the game (in pizzascape?)
-//TODO: delete secret eyes
-
 alarm[2] = 2;
+
+if (instance_exists(obj_keydoor))
+{
+	var create = false;
+	
+	with (obj_keydoor)
+	{
+		create = sprite_index == spr_doorkeyopen;
+	}
+	
+	if (create)
+		rd_key(true);
+}
+else
+{
+	rd_key(false);
+}
+
+if (instance_exists(obj_geromedoor))
+{
+	var create = false;
+	
+	with (obj_geromedoor)
+	{
+		create = sprite_index == spr_gerome_opendoor;;
+	}
+	
+	if (create)
+		rd_gerome(true);
+}
+else
+{
+	rd_gerome(false);
+}
+
 
 with (obj_lapportal)
 {
@@ -61,12 +91,6 @@ if (ds_map_exists(global.transition_map, room))
 		if (!ds_map_exists(room_transitions, "taxi"))
 			instance_destroy(self);
 	}
-	
-	/*with (obj_spaceshuttle)
-	{
-		if (!ds_map_exists(room_transitions, "rocket"))
-			instance_destroy(self);
-	}*/
 	
 	with (obj_secretportal)
 	{

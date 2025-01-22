@@ -14,11 +14,6 @@ function scr_room_goto(_room)
 	
 	var current_room = room;
 
-	with (obj_randomizer)
-	{
-		//alarm[4] = 100;
-	}
-
 	if (global.panic && global.fill < 30 * 12)
 	{
 		global.fill = 30 * 12; //extend time for long levels
@@ -35,12 +30,8 @@ function scr_room_goto(_room)
 		{
 			var destination = ds_map_find_value(ds_map_find_value(global.transition_map, current_room), current_targetDoor);
 	
-			//var new_room_id = destination.roomid;
-			//var new_targetDoor = destination.letter;
-			
 			var new_room_id = ds_map_find_value(destination, "roomid");
 			var new_targetDoor = ds_map_find_value(destination, "letter");
-			
 			
 			obj_player.targetDoor = new_targetDoor;
 
