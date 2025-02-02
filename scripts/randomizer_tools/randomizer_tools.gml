@@ -207,6 +207,11 @@ function rd_filter_paths_by_start_and_roomtype(
 {
 	var unfiltered_paths = rd_filter_paths_by_start(from_room, desired_transition_type, desired_dir, desired_time, desired_letter);
 	
+	if (from_room.title == global.debug_room_title)
+	{
+		rd_add_to_log( concat(rd_buffer(), global.debug_room_title, " unfiltered size: ", ds_list_size(unfiltered_paths)) );
+	}
+	
 	if ( ! rd_array_contains(desired_roomtypes, roomtype.oneway) ) //filter out oneway paths from potentialoneway rooms
 	{
 	
@@ -375,7 +380,9 @@ function rd_get_door_struct(door)
 		dir : rd_convert_transitiondir(ds_map_find_value(door, "dir")),
 		
 		pizzatimestart : ds_map_exists(door, "pizzatimestart"),
-		notpizzatimestart : ds_map_exists(door, "notpizzatimestart")
+		notpizzatimestart : ds_map_exists(door, "notpizzatimestart"),
+		
+		notpizzatimeexitonly : ds_map_exists(door, "notpizzatimeexitonly")
 		
 	};
 	
@@ -467,7 +474,6 @@ function rd_clear_transformation()
 	}
 	
 	//Clear natural and given shotgun
-	//TODO: clear war flashing red background
 	with (obj_player)
 	{
 		if shotgunAnim

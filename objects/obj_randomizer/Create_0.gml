@@ -1,7 +1,7 @@
 depth = -6000;
 
 //TODO:
-//dungeon_4 can only start notpizzatime but can exit pizzatime
+//keydoor thing isnt working in transition clearing alarm
 
 //plage_shipmain has loop to itself between different doors and weird door setup
 //forest_G1 has loop to itself between different doors
@@ -16,6 +16,10 @@ depth = -6000;
 //TODO: consistently makes 20 out of 21 levels
 //may be that allow_to.. isnt also checking for branchany when allowing a notpizzatime path, but adding this makes it fail a lot
 //supposeduly because its activating when its not supposed to then
+//TODO:
+//freezer_9_2 may cause issues with A if the same level uses freezer_9 as well
+
+global.debug_room_title = "freezer_9";
 
 //loading
 version = "0.3";
@@ -51,9 +55,9 @@ max_branches = 2;
 max_rooms = 10;
 
 ignore_rooms = [
-"forest_G1", "plage_shipmain", "dungeon_4",
+"forest_G1", "plage_shipmain",
 "tower_1", "tower_johngutterhall", "tower_2", "tower_3", "tower_4", "tower_5",
-"tower_tutorial1N", "trickytreat_1", 
+"tower_tutorial1N", "trickytreat_1", "freezer_9_2",
 "medieval_6"];
 
 global.boss_levels = [boss_pepperman, boss_vigilante, boss_noise, boss_fakepep, boss_pizzaface];
@@ -67,7 +71,7 @@ level_names = [
 "dontmakeasound", "pizzascare", "war", "crumblingtowerofpizza"
 ];
 
-twoway_types = [roomtype.twoway, roomtype.potentialoneway, roomtype.ratblockedtwoway, roomtype.potentialratblockedtwoway];
+twoway_types = [                 roomtype.potentialoneway, roomtype.twoway, roomtype.ratblockedtwoway, roomtype.potentialratblockedtwoway];
 oneway_types = [roomtype.oneway, roomtype.potentialoneway, roomtype.twoway, roomtype.ratblockedtwoway, roomtype.potentialratblockedtwoway];
 
 saved_hsp = 0;

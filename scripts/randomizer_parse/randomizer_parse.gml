@@ -2,6 +2,18 @@ function rd_init(use_new_seed = false)
 {
 	seed = 0;
 	
+	//TODO: debug, set to 0 when not in use
+	override_seed = 0;
+	
+	if (override_seed != 0)
+	{
+		seed = override_seed;
+		rd_add_to_log("override seed used");
+		random_set_seed(seed);
+		return true;
+	}
+	
+	
 	if (!use_new_seed)
 	{
 		rd_create_or_read_ini();
@@ -214,7 +226,6 @@ function rd_parse_rooms()
     return parsed_rooms;
 }
 
-//TODO: change to check all paths at once
 function rd_check_path_for_roomtype(path, current_type)
 {
 	if (path == undefined)
@@ -339,11 +350,25 @@ function rd_check_all_paths_for_special_branch(paths, has_pillar, has_entrance, 
 
 function rd_parse_path(start_door, exit_door, has_pillar)
 {
+	rd_add_to_log( concat("Parsing ", start_door.letter, " to ", exit_door.letter) );
+	
 	if (start_door.exitonly || exit_door.startonly)
+	{
+		rd_add_to_log( concat("Above failed due to start door exitonly or exit door startonly") );
 		return undefined;
+	}
+	
+	if (start_door.notpizzatimeexitonly && (start_door.notpizzatime || exit_door.notpizzatime))
+	{
+		rd_add_to_log( concat("Above failed due to start being a notpizzatimeexitonly and the path being notpizzatime") );
+		return undefined;
+	}
 	
 	if (!has_pillar && ((start_door.pizzatime && exit_door.notpizzatime) || (start_door.notpizzatime && exit_door.pizzatime)) )
+	{	
+		rd_add_to_log( concat("Above failed due to mismatching times and not a pillar room") );
 		return undefined;
+	}
 		
 	var found_pathtime = pathtime.any;
 	
@@ -455,7 +480,7 @@ function rd_parse_doors(thisroom)
 			
 			//may have yet to check a branch path, or a branchany that may be more restrictive due to PT/NPT branch path
 			if (found_room_type != roomtype.branchstart && found_room_type != roomtype.branchend)
-				found_room_type = rd_check_paths_for_branchtype(path_ab, path_ba, found_room_type, room_title == "graveyard_5c");
+				found_room_type = rd_check_paths_for_branchtype(path_ab, path_ba, found_room_type);
 			
 			if (found_room_type != roomtype.branchstart && found_room_type != roomtype.branchend && found_room_type != roomtype.branchany &&
 				found_room_type != roomtype.oneway && found_room_type != roomtype.potentialoneway)

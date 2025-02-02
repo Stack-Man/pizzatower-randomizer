@@ -48,7 +48,7 @@
 						"type": "horizontal",
 						"dir": "right",
 						"branch" : true,
-						"exitonly" : true,
+						"notpizzatimeexitonly" : true,
 						"ratblocked" : true
 					},
 					

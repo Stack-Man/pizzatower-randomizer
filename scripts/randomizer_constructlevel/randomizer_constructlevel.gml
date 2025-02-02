@@ -82,10 +82,52 @@ function rd_create_level(first_room)
 			{
 				rd_add_to_log( concat("Failed to construct: ", first_room.title, " with war exit") );
 			}
-		}
-			
-			
+		}	
 	}
+	
+	/*var entrances_left = rd_filter_out_rooms(rd_get_rooms_of_type([roomtype.entrance, roomtype.entrancebranching]), global.sequence_tested_rooms);
+	var johns_left = rd_filter_out_rooms(rd_get_rooms_of_type([roomtype.john, roomtype.johnbranching]), global.sequence_tested_rooms);
+	var branchstart_left = rd_filter_out_rooms(rd_get_rooms_of_type([roomtype.branchstart]), global.sequence_tested_rooms);
+	var branchend_left = rd_filter_out_rooms(rd_get_rooms_of_type([roomtype.branchend]), global.sequence_tested_rooms);
+	var branchany_left = rd_filter_out_rooms(rd_get_rooms_of_type([roomtype.branchany]), global.sequence_tested_rooms);
+	
+	var msg = "entrances: ";
+	
+	for (var e = 0; e < ds_list_size(entrances_left); e++)
+	{
+		msg = concat(msg, ds_list_find_value(entrances_left, e).title, ", ");
+	}
+	
+	msg = concat(msg, "\n Johns: ");
+	
+	for (var e = 0; e < ds_list_size(johns_left); e++)
+	{
+		msg = concat(msg, ds_list_find_value(johns_left, e).title, ", ");
+	}
+	
+	msg = concat(msg, "\n Branch Start: ");
+	
+	for (var e = 0; e < ds_list_size(branchstart_left); e++)
+	{
+		msg = concat(msg, ds_list_find_value(branchstart_left, e).title, ", ");
+	}
+	
+	msg = concat(msg, "\n Branch End: ");
+	
+	for (var e = 0; e < ds_list_size(branchend_left); e++)
+	{
+		msg = concat(msg, ds_list_find_value(branchend_left, e).title, ", ");
+	}
+	
+	msg = concat(msg, "\n Branch Any: ");
+	
+	for (var e = 0; e < ds_list_size(branchany_left); e++)
+	{
+		msg = concat(msg, ds_list_find_value(branchany_left, e).title, ", ");
+	}
+	
+	
+	rd_add_to_log(msg);*/
 }
 
 function rd_pad_level(level, rooms_to_reach)
@@ -534,27 +576,56 @@ function rd_continue_sequence(sequence, last_is_john, last_room, last_room_is_en
 function rd_find_connections_start(first_room, last_room, roomtypes, pathtimes, 
 start_letter = "", exit_letter = "", last_start_letter = "", last_exit_letter = "", 
 use_start = true, use_exit = true, use_last_start = true, use_last_exit = true,
-use_branch_start = false, use_branch_exit = false, adding_inbetween = false, allow_to_branch_notpizzatime = false)
+use_branch_start = false, use_branch_exit = false, adding_inbetween = false)
 {	
 	ds_list_clear(global.connection_tested_exits);
 	ds_map_clear(global.connection_tested_rooms);
 	
 	global.test_string = concat("depth: ", global.recursion_depth, " start ", first_room.title);
 	
-	//initialize first paths with allow_to_branch_notpizzatime in case of direct connection to branch
+	rd_add_to_log(concat(rd_buffer(), "connections start: ", first_room.title, " to ", last_room.title));
+	
+
+	var first_room_pathtimes = pathtimes;
+	
+	//If we are in a branchend 
+	//OR we are in a branchany and we're not doing so during a return
+	//by the fact that it is the first_room we MUST be leaving it!
+	if (   (rd_check_type(first_room, roomtype.branchend))
+		|| (rd_check_type(first_room, roomtype.branchany) && !rd_array_contains(pathtimes, pathtime.pizzatime) )
+		)
+	{
+		//allow the first room if it is a branch, to use a notpizzatime route
+		//since we are exiting the room from a different door, it does not matter that it is a notpizzatime route
+		first_room_pathtimes = [pathtime.any, pathtime.notpizzatime]; 
+	}
+	
+	if (first_room.title == global.debug_room_title)
+	{
+		rd_add_to_log(concat(rd_buffer(), " first_room_pathtimes of above: ", first_room_pathtimes) );
+		rd_add_to_log(concat(rd_buffer(), " use branch start? exit? ", use_branch_start, " ", use_branch_exit) );
+		rd_add_to_log(concat(rd_buffer(), " roomtype: ", first_room.roomtype) );
+	}
+	
+	
 	var first_paths =  rd_filter_paths_by_start_and_roomtype(
 		first_room, 
 		transition.none, transitiondir.none, 
-		pathtimes, roomtypes
+		first_room_pathtimes, roomtypes,
+		
 		);
 	
 	var connections = ds_list_create();
+	
+	rd_add_to_log(concat(rd_buffer(), "connections start: ", first_room.title, " to ", last_room.title));
 	
 	//Try to connect all paths directly to last room
 	//All possible connections are returned;
 	
 	if (!adding_inbetween) //false if we are adding rooms inbetween
 	{
+		rd_add_to_log(concat(rd_buffer(), "first paths for ", first_room.title, ": ", ds_list_size(first_paths)));
+		
 		for (var f = 0; f < ds_list_size(first_paths); f++)
 		{
 			var first_path = ds_list_find_value(first_paths, f);
@@ -562,20 +633,18 @@ use_branch_start = false, use_branch_exit = false, adding_inbetween = false, all
 			var correct_start = start_letter == "" || (use_start && start_letter == first_path.startdoor.letter) || (!use_start && start_letter != first_path.startdoor.letter);
 			var correct_exit = exit_letter == "" || (use_exit && exit_letter == first_path.exitdoor.letter) || (!use_exit && exit_letter != first_path.exitdoor.letter);
 		
+			rd_add_to_log(concat(rd_buffer(), "direct first path ", f + 1, " of ", ds_list_size(first_paths), " correct start? exit? ", correct_start, " ", correct_exit));
+			rd_add_to_log(concat(rd_buffer(), "first path of above: ", first_path));
+		
 			if (correct_start && correct_exit)
 			{
 				var temp = global.test_string;
 			
 				global.test_string = concat(global.test_string, " ", first_path.exitdoor.letter, " -> ", last_room.title);
 			
-				//allow to connection connecting to a branchstart to use a notpizzatime route in the branch room itself
-				var direct_pathtimes = pathtimes;
-				
-				if (allow_to_branch_notpizzatime && rd_check_type(last_room, roomtype.branchstart) )
-					direct_pathtimes = [pathtime.any, pathtime.notpizzatime];
-			
+				//Try to connect first room directly to last room
 				var direct_connection = rd_connect_directly(
-					first_room, first_path, last_room, roomtypes, direct_pathtimes, 
+					first_room, first_path, last_room, roomtypes, pathtimes, 
 					last_start_letter, last_exit_letter, 
 					use_last_start, use_last_exit, 
 					use_branch_start, use_branch_exit);
@@ -604,6 +673,9 @@ use_branch_start = false, use_branch_exit = false, adding_inbetween = false, all
 		var correct_start = start_letter == "" || (use_start && start_letter == first_path.startdoor.letter) || (!use_start && start_letter != first_path.startdoor.letter);
 		var correct_exit = exit_letter == "" || (use_exit && exit_letter == first_path.exitdoor.letter) || (!use_exit && exit_letter != first_path.exitdoor.letter);
 		
+		rd_add_to_log(concat(rd_buffer(), "indirect first path ", f + 1, " of ", ds_list_size(first_paths), " correct start? exit? ", correct_start, " ", correct_exit));
+		rd_add_to_log(concat(rd_buffer(), "first path of above: ", first_path));
+		
 		if (correct_start && correct_exit)
 		{
 			//Don't repeat exits that have been tested in the connection before
@@ -631,7 +703,7 @@ use_branch_start = false, use_branch_exit = false, adding_inbetween = false, all
 				last_start_letter, last_exit_letter,
 				use_last_start, use_last_exit,
 				use_branch_start, use_branch_exit,
-				adding_inbetween, allow_to_branch_notpizzatime);
+				adding_inbetween);
 				
 			if (new_connection != undefined)
 				ds_list_add(connections, new_connection);
@@ -650,7 +722,7 @@ function rd_find_connections(connection, last_room, roomtypes, pathtimes,
 last_start_letter = "", last_exit_letter = "", 
 use_last_start = true, use_last_exit = true,
 use_branch_start = false, use_branch_exit = false,
-adding_inbetween = false, allow_to_branch_notpizzatime = false)
+adding_inbetween = false)
 {
 	//Already complete
 	if (connection.second != undefined)
@@ -731,15 +803,9 @@ adding_inbetween = false, allow_to_branch_notpizzatime = false)
 			
 			ds_list_add(temp_used_exits, exitpair);
 			
-			//not sure why i have to check if its branchstart also, the allow_to... should be covering it
-			//but removing this decreases the success rate
-			var direct_pathtimtes = pathtimes;
-			
-			if (allow_to_branch_notpizzatime && rd_check_type(last_room, roomtype.branchstart))
-				direct_pathtimtes = [pathtime.any, pathtime.notpizzatime];
-			
+			//Try to connect this match room and path to last room with a path
 			var new_connection = rd_connect_directly(
-				match_room, match_path, last_room, roomtypes, direct_pathtimtes, 
+				match_room, match_path, last_room, roomtypes, pathtimes, 
 				last_start_letter, last_exit_letter, 
 				use_last_start, use_last_exit, 
 				use_branch_start, use_branch_exit);
@@ -811,7 +877,7 @@ adding_inbetween = false, allow_to_branch_notpizzatime = false)
 				last_start_letter, last_exit_letter, 
 				use_last_start, use_last_exit,
 				use_branch_start, use_branch_exit,
-				adding_inbetween, allow_to_branch_notpizzatime);
+				adding_inbetween);
 
 			if (next_connection != undefined && next_connection.second != undefined) //a valid connection was found
 			{
@@ -834,16 +900,41 @@ function rd_connect_directly(first_room, first_path, last_room, roomtypes, patht
 last_start_letter, last_exit_letter, use_last_start, use_last_exit, 
 use_branch_start = false, use_branch_exit = false)
 {
+	var last_path_pathtimes = pathtimes;
+
+	//connecting directly to a branchstart from the branch door start (IE not returning to it)
+	//OR connecting directly to a branchany from a branch door start AND we're not using pizzatime routes (IE not returning to it AND its not being used as a branch end)
+	if (   (rd_check_type(last_room, roomtype.branchstart) && use_branch_start)	
+		|| (rd_check_type(last_room, roomtype.branchany) && use_branch_start && !rd_array_contains(pathtimes, pathtime.pizzatime) )
+	   )
+	{
+		var msg3 = concat("Using exception pathtimes for: ");	
+		rd_add_to_log(msg3);
+		
+		last_path_pathtimes = [pathtime.any, pathtime.notpizzatime];	   
+	}
+		
+	
 	var potential_last_paths = rd_filter_paths_by_start_and_roomtype(
 		last_room, 
 		first_path.exitdoor.type, 
 		rd_get_opposite_dir(first_path.exitdoor.dir), 
-		pathtimes,
+		last_path_pathtimes,
 		roomtypes,
 		"",
 		use_branch_start, use_branch_exit);
 	
 	var last_paths = ds_list_create();
+	
+	var msg = concat("Trying to directly connect ", first_room.title, " ", first_path.startdoor.letter, " ", first_path.exitdoor.letter, 
+					 " to ", last_room.title, " ", last_start_letter, " ", last_exit_letter, "use last? ", use_last_start, " ", use_last_exit, 
+					 " branch start? ", use_branch_start, " branch exit? ", use_branch_exit);
+	
+	var msg2 = concat("Potential Last Paths Size: ", ds_list_size(potential_last_paths) );
+	
+	
+	rd_add_to_log(msg);
+	rd_add_to_log(msg2);
 	
 	//Determine which paths have valid letters/is branch
 	for (var plp = 0; plp < ds_list_size(potential_last_paths); plp++)
@@ -857,6 +948,9 @@ use_branch_start = false, use_branch_exit = false)
 		var correct_branch_start = ( !use_branch_start || (use_branch_start && potential_last_path.startdoor.branch) );
 		var correct_branch_exit = ( !use_branch_exit || (use_branch_exit && potential_last_path.exitdoor.branch) )
 		var correct_branch = (correct_branch_start && correct_branch_exit) || last_room.roomtype == roomtype.john || last_room.roomtype == roomtype.johnbranching;
+
+		var msg3 = concat("PLP ", plp, " start? exit? branch? ", correct_start, " ", correct_exit, " ", correct_branch);
+		rd_add_to_log(msg3);
 
 		if (correct_start && correct_exit && correct_branch)
 		{
@@ -950,19 +1044,22 @@ function rd_link_connections(connection)
 function rd_check_title(title)
 {
 	if (title == "badland_5_2" || title == "badland_5_3")
-		return "badland_5"
+		return "badland_5";
 	
 	if (title == "industrial_2_2")
-		return "industrial_2"
+		return "industrial_2";
 		
 	if (title == "industrial_3_2")
-		return "industrial_3"
+		return "industrial_3";
 		
 	if (title == "industrial_4_2")
-		return "industrial_4"
+		return "industrial_4";
 	
 	if (title == "ruin_11_2")
-		return "ruin_11"
+		return "ruin_11";
+	
+	if (title == "freezer_9_2")
+		return "freezer_9";
 	
 	return title;
 }
@@ -1071,7 +1168,17 @@ function rd_filter_paths(from_room, desired_type, desired_dir, desired_times, de
 			if ( !rd_array_contains(pathtime.any) )
 				type_matches = false;
 		}
-				
+		
+		if (from_room.title == global.debug_room_title)
+		{
+			rd_add_to_log( concat(rd_buffer(), "checking ", global.debug_room_title, " path: ", path) );
+			rd_add_to_log( concat(rd_buffer(), "of above time?: ", time_matches, 
+			" type?: ", type_matches, 
+			" letter?: ", (p_letter == desired_letter || desired_letter == ""),
+			" dir?: ", (p_dir == desired_dir || desired_dir == transitiondir.none) 
+			) );
+		}
+		
 		if (	time_matches
 			&&  type_matches
 			&& (p_letter == desired_letter || desired_letter == "")
@@ -1079,9 +1186,8 @@ function rd_filter_paths(from_room, desired_type, desired_dir, desired_times, de
 			)
 			{
 				ds_list_add(valid_paths, path);
-				
 			}
-		
+
 	}
 	
 	return valid_paths;
@@ -1099,7 +1205,9 @@ function rd_get_rooms_of_type(roomtypes_arr)
 		var thisroom = arr[i];
 		
 		if (rd_array_contains(roomtypes_arr, thisroom.roomtype ) )
+		{
 			ds_list_add(potential_rooms, thisroom);
+		}
 			
 	}
 	
