@@ -588,11 +588,10 @@ use_branch_start = false, use_branch_exit = false, adding_inbetween = false)
 
 	var first_room_pathtimes = pathtimes;
 	
-	//If we are in a branchend 
-	//OR we are in a branchany and we're not doing so during a return
+	//If we are in a branchend or branchany AND we're not doing so during a return
 	//by the fact that it is the first_room we MUST be leaving it!
-	if (   (rd_check_type(first_room, roomtype.branchend))
-		|| (rd_check_type(first_room, roomtype.branchany) && !rd_array_contains(pathtimes, pathtime.pizzatime) )
+	if ( 
+		(rd_check_type(first_room, roomtype.branchend) || rd_check_type(first_room, roomtype.branchany) )  && !rd_array_contains(pathtimes, pathtime.pizzatime) 
 		)
 	{
 		//allow the first room if it is a branch, to use a notpizzatime route
@@ -617,8 +616,6 @@ use_branch_start = false, use_branch_exit = false, adding_inbetween = false)
 	
 	var connections = ds_list_create();
 	
-	rd_add_to_log(concat(rd_buffer(), "connections start: ", first_room.title, " to ", last_room.title));
-	
 	//Try to connect all paths directly to last room
 	//All possible connections are returned;
 	
@@ -635,6 +632,7 @@ use_branch_start = false, use_branch_exit = false, adding_inbetween = false)
 		
 			rd_add_to_log(concat(rd_buffer(), "direct first path ", f + 1, " of ", ds_list_size(first_paths), " correct start? exit? ", correct_start, " ", correct_exit));
 			rd_add_to_log(concat(rd_buffer(), "first path of above: ", first_path));
+			rd_add_to_log(concat(rd_buffer(), "desired path of above, start: ", start_letter, " use? ", use_start, " exit: ", exit_letter, " use? ", use_exit));
 		
 			if (correct_start && correct_exit)
 			{
@@ -653,6 +651,10 @@ use_branch_start = false, use_branch_exit = false, adding_inbetween = false)
 			
 				if (direct_connection != undefined)
 					ds_list_add(connections, direct_connection);
+				
+			}
+			else
+			{
 				
 			}
 		}
@@ -682,7 +684,13 @@ use_branch_start = false, use_branch_exit = false, adding_inbetween = false)
 			var exitpair = rd_get_exit_struct(first_path);
 			
 			if (rd_list_contains_exit(global.connection_tested_exits, exitpair) )
+			{
+				rd_add_to_log( concat(rd_buffer(), " did not repeat above path due to exitpair") );
+				
 				continue;
+			}
+			
+			rd_add_to_log( concat(rd_buffer(), " continuing connection") );
 			
 			if (!adding_inbetween) //prevents adding inbetween from excluding the valid exit type from being tested
 				ds_list_add(global.connection_tested_exits, exitpair);
@@ -765,10 +773,14 @@ adding_inbetween = false)
 	var stored_match_paths = ds_list_create(); //TODO: delete list, sub lists are handled
 	var temp_used_exits = ds_list_create();
 	
+	rd_add_to_log( concat(rd_buffer(), " match rooms size: ", ds_list_size(match_rooms)) );
+	
 	//Try to find a match room that connects to last
 	for (var mr = 0; mr < ds_list_size(match_rooms); mr++)
 	{
 		var match_room = ds_list_find_value(match_rooms, mr);
+
+		rd_add_to_log( concat(rd_buffer(), " match room ", mr, " of ", ds_list_size(match_rooms), " ", match_room.title) );
 
 		var temp = global.test_string;
 
@@ -786,10 +798,15 @@ adding_inbetween = false)
 		ds_list_add(stored_match_paths, match_paths);
 		ds_list_mark_as_list(stored_match_paths, mr); //auto delete sublists
 		
+		rd_add_to_log( concat(rd_buffer(), " match paths size: ", ds_list_size(match_paths)) );
+	
+		
 		for (var mp = 0; mp < ds_list_size(match_paths); mp++)
 		{
 			var match_path = ds_list_find_value(match_paths, mp);
 			var exitpair = rd_get_exit_struct(match_path);
+			
+			rd_add_to_log( concat(rd_buffer(), " match paths ", mp, " of ", ds_list_size(match_paths), " path: ", match_path.startdoor.letter, " to ", match_path.exitdoor.letter ) );
 			
 			var temp3 = global.test_string;
 			global.test_string = concat(global.test_string, " ", match_path.startdoor.letter, " ", match_path.exitdoor.letter, " -> ", last_room.title);
@@ -798,6 +815,8 @@ adding_inbetween = false)
 			if (rd_list_contains_exit(global.connection_tested_exits, exitpair) 
 			|| rd_list_contains_exit(temp_used_exits, exitpair)) //Skip path exits that have already been tested directly
 			{
+				rd_add_to_log( concat(rd_buffer(), "did not use match path ", mp, " due to exitpair") );
+				
 				continue;
 			}
 			

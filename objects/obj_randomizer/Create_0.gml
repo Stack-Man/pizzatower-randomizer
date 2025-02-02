@@ -1,25 +1,27 @@
 depth = -6000;
 
+//TODO: debug, set to 0 when not in use
+//TODO: seed -1665320109, farm-2 fails to war construct due to actually being out of rooms with pizzabox exits
+//TODO: seed 884798006, ancientcheese farm_4 connects to saloon_6 but with notpizzatime to saloon's pizzatime and saloon's notpizzatime to farm_4s pizzatime
+override_seed = 0;
+
 //TODO:
 //keydoor thing isnt working in transition clearing alarm
+
+//priotize entrances with unique exits to decrease the chance of failure (bloodsauce, plage, farm)
 
 //plage_shipmain has loop to itself between different doors and weird door setup
 //forest_G1 has loop to itself between different doors
 //trickytreat_1 resets the level state when entering it
 //medievakl_6 softlocks if you pick up the knight powerup and go down the slope
+//freezer_9_2 may cause issues with A if the same level uses freezer_9 as well
 
 //Ignore the shared rooms in CTOP and main level for now, add transition map exception later
 
 //noise keeps jetpack
 //gustavo persist with swap mode
 
-//TODO: consistently makes 20 out of 21 levels
-//may be that allow_to.. isnt also checking for branchany when allowing a notpizzatime path, but adding this makes it fail a lot
-//supposeduly because its activating when its not supposed to then
-//TODO:
-//freezer_9_2 may cause issues with A if the same level uses freezer_9 as well
-
-global.debug_room_title = "freezer_9";
+global.debug_room_title = "farm_2";
 
 //loading
 version = "0.3";

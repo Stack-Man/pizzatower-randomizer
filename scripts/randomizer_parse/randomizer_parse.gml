@@ -2,9 +2,6 @@ function rd_init(use_new_seed = false)
 {
 	seed = 0;
 	
-	//TODO: debug, set to 0 when not in use
-	override_seed = 0;
-	
 	if (override_seed != 0)
 	{
 		seed = override_seed;

@@ -278,12 +278,14 @@
 					"type" : "horizontal",
 					"dir" : "left",
 					"pizzatime" : true,
+					"exitonly" : true
 				},
 				
 				{
 					"letter" : "C",
 					"type" : "door",
-					"notpizzatime" : true
+					"notpizzatime" : true,
+					"startonly": true
 				}
 			]
 		},
