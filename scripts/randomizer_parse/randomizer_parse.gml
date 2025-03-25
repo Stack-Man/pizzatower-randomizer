@@ -345,6 +345,7 @@ function rd_check_all_paths_for_special_branch(paths, has_pillar, has_entrance, 
 	return current_type; //check failed
 }
 
+
 function rd_parse_path(start_door, exit_door, has_pillar)
 {
 	rd_add_to_log( concat("Parsing ", start_door.letter, " to ", exit_door.letter) );
