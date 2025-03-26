@@ -1,5 +1,5 @@
 {
-	"version" : "0.3",
+	"version" : "0.4",
 	"rooms" :
 	[
 		{
@@ -151,7 +151,7 @@
 				{
 					"letter" : "E",
 					"type" : "horizontal",
-					"dir" : "left",
+					"dir" : "right",
 					"pizzatime" : true,
 					"powerup" :
 					{

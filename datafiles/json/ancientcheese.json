@@ -1,5 +1,5 @@
 {
-	"version" : "0.3",
+	"version" : "0.4",
 			"rooms": [
 				{
 					"title" : "ruin_1",
@@ -261,7 +261,7 @@
 						{
 							"letter" : "B",
 							"type": "box",
-							"dir": "up",
+							"dir": "down",
 							"notpizzatime": true,
 							"startonly" : true
 						},

@@ -1,7 +1,7 @@
 #Author: Stack Man
 #Date: 3-25-2025
 
-from enums import BranchType, PathTime, DoorType, DoorDir, AccessType
+from enums import BranchType, PathTime, DoorType, DoorDir, AccessType, RoomType
 
 """A Level is a datatype that contains an intial sequence
     Room        entrance        : The first room in the level.
@@ -66,6 +66,7 @@ class Connection():
     String  name        : Name of the room
     [Path]  paths       : A list of Path.
     Enum    branch_type : Type of branch this room is. (NONE, START, END, ANY, or MID). Branch type is enforced by in game obstacles.
+	Enum	room_type	: Type of room.				   (ONEWAY, TWOWAY, BRANCH, ENTRANCE, JOHN, LOOP, WAREXIT, CTOPEXIT, CTOPENTRANCE)
     
     A "branch" room has two paths. One for pizzatime and one for not.
     
@@ -81,7 +82,7 @@ class Connection():
                   |- exit
     entrance --->/
         
-    "ANY" (either entrance or exit reuse is possible)
+    "ANY" (branching door can be used as entrance or exit)
     
     "MID" (neither entrance nor exit reuse is possible)
         IE: there are two mutually exclusive paths in different times in the same room.
@@ -93,10 +94,12 @@ class Connection():
               \<--- return <-- mid branch leave <-- mid return
 """
 def Room():
-    def __init__(self, str: name, [Path]: paths, BranchType: branch_type):
+    def __init__(self, str: name, [Path]: paths, BranchType: branch_type, RoomType: room_type):
         self.name = name
         self.paths = paths
         self.branch_type = branch_type
+		self.room_type = room_type
+		
         
     def __str__(self):
         return f"{self.name}"

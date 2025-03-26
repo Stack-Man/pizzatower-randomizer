@@ -1,5 +1,5 @@
 {
-	"version" : "0.3",
+	"version" : "0.4",
 	"rooms" :
 	[
 		{
@@ -107,7 +107,8 @@
 				{
 					"letter" : "B",
 					"type" : "horizontal",
-					"dir" : "left"
+					"dir" : "left",
+					"notpizzatimeexit" : true
 				},
 				
 				{
@@ -128,7 +129,8 @@
 					"letter" : "E",
 					"type" : "door",
 					"exitonly" : true,
-					"ratblocked" : true
+					"ratblocked" : true,
+					"pizzatimestart" : true
 				},
 				
 				{
