@@ -161,16 +161,19 @@ def Door():
         return f"{self.letter}"
         
 """RoomRequirements packages a RoomType and a BranchType
-    Enum    room_type
-    Enum    branch_type
+    Enum    			room_type
+    Enum    			branch_type
+	PathRequirements	path_requirements: optional, room must contain at least one path that matches 
 """
 def RoomRequirements():
     def __init__(self,
         RoomType: room_type,
-        BranchType: branch_type):
+        BranchType: branch_type,
+		PathRequirements: path_requirements = None):
         
         self.room_type = room_type
         self.branch_type = branch_type
+		self.path_requirements = path_requirements
     
     def __str__(self):
         return "RoomReq: " + str(self.room_type) + ", " + str(self.branch_type)
@@ -179,7 +182,7 @@ def RoomRequirements():
     Room                first_room
     Room                last_room
     PathRequirements    first_path_requirements     :reqs for the path in the first_room
-    PathRequirements    between_path_requirements   :reqs for any other path
+    RoomRequirements    between_room_requirements   :reqs for new rooms
     PathRequirements    last_path_requirements      :reqs for the path in the last_room
 """
 def ConnectionRequirements():

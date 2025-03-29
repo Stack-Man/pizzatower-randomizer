@@ -49,32 +49,37 @@ def create_sequences(Sequence: current_sequence, str: first_path_start_letter):
     #should we create a return_connection
     needs_return = !current_sequence.first_room_is_end_branch
     
-    #determine room, path, and branch requirements
+    #determine room, path, and branch Requirements
     room_types = ONEWAY_TYPES if needs_return else TWOWAY_TYPES
     
     branch_type = BranchType.END if needs_return else BranchType.START
     john_branch_type = BranchType.NONE if needs_return else BranchType.END
-    room_requirements = [RoomRequirements(RoomType.BRANCH, branch_type), 
+    all_branch_room_requirements = [RoomRequirements(RoomType.BRANCH, branch_type), 
                          RoomRequirements(RoomType.JOHN, john_branch_type)] #TODO: prioritize john with max branches limit
     
     to_path_times = [PathTime.ANY, PathTime.NOTPIZZATIME] if needs_return else [PathTime.ANY] #to_path must be traversible both ways if no return
     return_path_times = [PathTime.ANY, PathTime.PIZZATIME]
+	
+	RoomRequirements: between_room_requirements = RoomRequirements(
+		room_types,
+		BranchType.NONE,
+		PathRequirements(to_path_times)
+		)
     
-    for branch in get_rooms(room_requirements):
+    for branch in get_rooms(all_branch_room_requirements):
         
-        to_connection_requirement = create_connection_requirement(Sequence.first_room, branch, False, first_path_start_letter)
-        PathRequirement: between_path_requirement = PathRequirement(to_path_times)
-        to_connection_requirement.between_path_requirements = between_path_requirement
+        to_connection_requirements = create_connection_requirements(Sequence.first_room, branch, False, first_path_start_letter)
+        to_connection_requirements.between_room_requirements = between_room_requirements
         
         #TODO: return last path letter as well from create connections?
-        for to_connection, last_room_start_letter in create_connections(to_connection_requirement):
+        for to_connection, last_room_start_letter in create_connections(None, to_connection_requirements):
         
             #TODO: add connection rooms to temp_sequence_rooms so they aren't used deeper in the sequence
             current_sequence.to_connection = to_connection
             
             #I'm leaving out the last_path loop because I'm assuming that there's only every one valid last path at the end
             #of the connection considering the restrictions with branch doors and path time
-            #TODO: make connection creator ignore loop doors in sequence first or last room?
+            #TODO: maybe make connection creator ignore loop doors in sequence first or last room
             
             if !needs_return:  
                 new_sequence = continue_sequence(current_sequence, branch, last_room_start_letter)
@@ -86,9 +91,9 @@ def create_sequences(Sequence: current_sequence, str: first_path_start_letter):
                 #branch door and path_times reqs will cause the correct path to be chosen
                 #TODO: confirm this is actually the case
                 #TODO may not be the case for branching john rooms? may have to reformat john rooms to have two distinct paths one for pizza and one for notpizza
-                return_connection_requirement = create_connection_requirement(branch, Sequence.first_room, True, "", first_path_start_letter)
+                return_connection_requirements = create_connection_requirements(branch, Sequence.first_room, True, "", first_path_start_letter)
                 
-                for return_connection in create_connection(return_connection_requirement):
+                for return_connection in create_connection(None, return_connection_requirements):
                 
                     #TODO: add return connection rooms to temp
                     current_sequence.return_connection = return_connection
@@ -130,6 +135,59 @@ def continue_sequence(Sequence: current_sequence, Room: last_room, str: last_roo
         return None       
     else:
         return current_sequence
+
+
+def create_connections(Connection: current_connection, ConnectionRequirements: requirements):
+	
+	#initialization for first round
+	if current_connection == None:
+		current_connection = Connection(
+			requirements.first_room,
+			None,
+			None
+		)
+	
+
+	#TODO: also remember tested exits
+	for current_path in get_paths(requirements.first_path_requirements):
+	
+		#if current_path.exit matches a previously failed exit, skip it
+	
+		current_connection.path = current_path
+		
+		for last_connection in create_connection_last(current_connection, requirements):
+			if last_connection != None
+				yield last_connection
+
+		next_room_requirements = requirements.between_room_requirements.deepcopy()
+		next_room_requirements.path_requirements = update_path_requirements(next_room_requirements.path_requirements, current_path)
+
+		for next_room in get_rooms(next_room_requirements):
+			incomplete_connection = Connection(
+				next_room,
+				None,
+				None
+			)
+			
+			next_connection_requirements = requirements.deepcopy()
+			next_connection_requirements.first_path_requirements = new_connection_requirements.between_room_requirements.path_requirements
+			
+			for next_connection in create_connections(incomplete_connection, next_connection_requirements):
+				if next_connection != None:
+					current_connection.next_connection = next_connection
+					yield current_connection
+			
+			
+		current_connection.next_connection = None
+		
+		#add current_path.exit to failed exits (global)
+	
+	pass
+
+#TODO:
+def create_connection_last(Connection: current_connection, ConnectionRequirements: requirements):
+	
+	pass
 
 
 

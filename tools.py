@@ -2,7 +2,7 @@
 #Date: 3-26-2025
 
 from enums import BranchType, RoomType
-from objects import Room, PathRequirement, ConnectionRequirement
+from objects import Room, PathRequirements, ConnectionRequirements
 
 def check_room_type(Room: room, RoomType: room_type):
     return room.room_type == room_type
@@ -10,7 +10,8 @@ def check_room_type(Room: room, RoomType: room_type):
 def check_room_branch_type(Room: room, BranchType: branch_type):
     return room.branch_type == branch_type
 
-def create_connection_requirement(Room: first_room, Room: last_room, bool: is_return, str: first_path_start_letter = "", str: last_path_exit_letter = ""):
+def create_connection_requirements(Room: first_room, Room: last_room, bool: is_return, str: first_path_start_letter = "", str: last_path_exit_letter = ""):
+	"""Doesn't create the between_room_requirements, that is created separately outside this function"""
 
     branch_path_time = PathTime.PIZZATIME if is_return else PathTime.NOTPIZZATIME
     first_exception_type = RoomType.JOHN if is_return else RoomType.ENTRANCE
@@ -27,7 +28,7 @@ def create_connection_requirement(Room: first_room, Room: last_room, bool: is_re
     if !check_room_type(first_room, first_exception_type) and check_room_branch_type(first_room, BranchType.START)
         first_path_start_use_branch = True
     
-    PathRequirement: first_path_requirement = PathRequirement(
+    PathRequirements: first_path_requirements = PathRequirements(
         first_path_times, 
         start_letter = first_path_start_letter, 
         start_use_branch = first_path_start_use_branch)
@@ -42,16 +43,38 @@ def create_connection_requirement(Room: first_room, Room: last_room, bool: is_re
     if !check_room_branch_type(last_room, last_exception_type) and check_room_branch_type(last_room, BranchType.END)
         last_path_exit_use_branch = True
     
-    PathRequirement: last_path_requirement = PathRequirement(
+    PathRequirements: last_path_requirements = PathRequirements(
         last_path_times,
         exit_letter = last_path_exit_letter,
         exit_use_branch = last_path_exit_use_branch)
 
-    ConnectionRequirement: connection_requirement = ConnectionRequirement(
+    ConnectionRequirements: connection_requirements = ConnectionRequirements(
         first_room,
         last_room,
-        first_path_requirement,
+        first_path_requirements,
         None,
-        last_path_requirement)    
+        last_path_requirements)    
 
-    return connection_requirement
+    return connection_requirements
+
+#TODO:
+def update_path_requirements(PathRequirements: original_requirements, Path: path):
+	pass
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
