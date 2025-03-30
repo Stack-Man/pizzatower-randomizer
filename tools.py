@@ -2,7 +2,7 @@
 #Date: 3-26-2025
 
 from typing import List
-from enums import BranchType, RoomType, PathTime
+from enums import BranchType, RoomType, PathTime, DoorDir
 from objects import Room, PathRequirements, ConnectionRequirements, Path, Door, Connection
 
 def check_room_type(room: Room, room_type : RoomType):
@@ -19,6 +19,9 @@ def exit_matches(path: Path, exits: List[Door]):
             return True
 
     return False
+
+def doors_connect(a: Door, b: Door):
+    return a.door_type == b.door_type and a.door_dir == opposite_dir(b.door_type)
 
 def create_connection_requirements(first_room: Room, last_room: Room, is_return: bool, first_path_start_letter: str = "", last_path_exit_letter: str = ""):
     """Doesn't create the between_room_requirements, that is created separately outside this function"""
@@ -67,16 +70,6 @@ def create_connection_requirements(first_room: Room, last_room: Room, is_return:
 
     return connection_requirements
 
-#TODO:
-"""Update path requirements to look for paths that connect to a specific path's exit
-
-    original_requierments:  The original PR
-    path                 :  The path whose exit should be matched to with this path requirement's start
-    connection_used_exits
-
-"""
-def update_path_requirements(original_requirements: PathRequirements, path: Path) -> PathRequirements:
-    pass
 
 def yield_connections(connection: Connection):
     current_connection = connection
@@ -99,6 +92,9 @@ def remove_connection_rooms_from_list(connection: Connection, rooms: List[str]) 
 
     return rooms
 
+#TODO:
+def opposite_dir(type: DoorDir):
+    pass
 
 
 

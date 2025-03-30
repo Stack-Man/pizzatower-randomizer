@@ -1,3 +1,0 @@
-#TODO: Define
-ONEWAY_TYPES = []
-TWOWAY_TYPES = []
