@@ -170,6 +170,8 @@ class Level():
     Bool    start_use_branch    :If start Door.is_branch should be True
     Bool    exit_use_branch     :"" ""
     [Enum]  path_times          :allowed times for this path
+    Enum    start_door_type     :start door of path must match this type
+    Enum    start_door_dir      :"" ""
 """
 class PathRequirements():
     def __init__(self,
@@ -179,7 +181,9 @@ class PathRequirements():
         use_start_letter: bool = True,
         use_exit_letter: bool = True,
         start_use_branch: bool= False,
-        exit_use_branch: bool = False):
+        exit_use_branch: bool = False,
+        start_door_type: DoorType = DoorType.ANY,
+        start_door_dir: DoorDir = DoorDir.ANY):
         
         self.start_letter = start_letter
         self.exit_letter = exit_letter
@@ -188,6 +192,8 @@ class PathRequirements():
         self.start_use_branch = start_use_branch
         self.exit_use_branch = exit_use_branch
         self.path_times = path_times
+        self.start_door_type = start_door_type
+        self.start_door_dir = start_door_dir
     
     def __str__(self):      
         sb = " branch" if self.start_use_branch else ""
@@ -205,7 +211,7 @@ class PathRequirements():
 """RoomRequirements packages a RoomType and a BranchType
     Enum                room_type
     Enum                branch_type
-    PathRequirements    path_requirements: optional, room must contain at least one path that matches 
+    PathRequirements    path_requirements: optional, room must contain at least one path whose start matches this path's exit
 """
 class RoomRequirements():
     def __init__(self,

@@ -68,15 +68,35 @@ def create_connection_requirements(first_room: Room, last_room: Room, is_return:
     return connection_requirements
 
 #TODO:
+"""Update path requirements to look for paths that connect to a specific path's exit
+
+    original_requierments:  The original PR
+    path                 :  The path whose exit should be matched to with this path requirement's start
+    connection_used_exits
+
+"""
 def update_path_requirements(original_requirements: PathRequirements, path: Path) -> PathRequirements:
     pass
 
-#TODO:
-def add_connection_rooms_to_list(connection: Connection, rooms: List[Room]) -> List[Room]:
+def yield_connections(connection: Connection):
+    current_connection = connection
+
+    while (current_connection != None):
+        yield current_connection
+        current_connection = current_connection.next_connection
+
+def add_connection_rooms_to_list(connection: Connection, rooms: List[str]) -> List[str]:
+
+    for c in yield_connections(connection):
+        rooms.append(c.room.name)
+
     return rooms
 
-#TODO:
-def remove_connection_rooms_from_list(connection: Connection, rooms: List[Room]) -> List[Room]:
+def remove_connection_rooms_from_list(connection: Connection, rooms: List[str]) -> List[str]:
+
+    for c in yield_connections(connection):
+        rooms.remove(c.room.name)
+
     return rooms
 
 
