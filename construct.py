@@ -44,8 +44,9 @@ def create_war_level(level: Level):
     pass
 
 
-#TODO: use yield generators to get connections instead of finding all of them
-#TODO: make john rooms have a fake door for the JOHN
+sequence_used_rooms: List[Room] = []
+
+#TODO: make john rooms have a fake door for the JOHN ?
 #TODO: define ONEWAY_TYPES and TWOWAY_TYPES
 def create_sequences(current_sequence: Sequence, first_path_start_letter: str):
 
@@ -73,16 +74,17 @@ def create_sequences(current_sequence: Sequence, first_path_start_letter: str):
         PathRequirements(to_path_times)
         )
     
+    global sequence_used_rooms
+
     for branch in get_rooms(all_branch_room_requirements):
         
         to_connection_requirements = create_connection_requirements(Sequence.first_room, branch, False, first_path_start_letter)
         to_connection_requirements.between_room_requirements = between_room_requirements
         
-        #TODO: return last path letter as well from create connections?
         for to_connection, last_room_start_letter in create_connections(None, to_connection_requirements):
         
-            #TODO: add connection rooms to temp_sequence_rooms so they aren't used deeper in the sequence
             current_sequence.to_connection = to_connection
+            sequence_used_rooms = add_connection_rooms_to_list(to_connection, sequence_used_rooms)
             
             #I'm leaving out the last_path loop because I'm assuming that there's only every one valid last path at the end
             #of the connection considering the restrictions with branch doors and path time
@@ -98,25 +100,26 @@ def create_sequences(current_sequence: Sequence, first_path_start_letter: str):
                 #branch door and path_times reqs will cause the correct path to be chosen
                 #TODO: confirm this is actually the case
                 #TODO may not be the case for branching john rooms? may have to reformat john rooms to have two distinct paths one for pizza and one for notpizza
+                #or have an exception for them
                 return_connection_requirements = create_connection_requirements(branch, Sequence.first_room, True, "", first_path_start_letter)
                 
                 for return_connection in create_connections(None, return_connection_requirements):
                 
-                    #TODO: add return connection rooms to temp
                     current_sequence.return_connection = return_connection
+                    sequence_used_rooms = add_connection_rooms_to_list(return_connection, sequence_used_rooms)
                     
                     new_sequence = continue_sequence(current_sequence, branch, last_room_start_letter)
                 
                     if new_sequence != None:
                         return new_sequence
                     
-                    #TODO: remove return connection rooms from temp
                     current_sequence.return_connection = None
+                    sequence_used_rooms = remove_connection_rooms_from_list(return_connection, sequence_used_rooms)
                     
                     pass
                     
-            #TODO: remove connection rooms from temp since they weren't used
             current_sequence.to_connection = None
+            sequence_used_rooms = remove_connection_rooms_from_list(to_connection, sequence_used_rooms)
         
             pass
     
@@ -144,6 +147,9 @@ def continue_sequence(current_sequence: Sequence, last_room: Room, last_room_sta
         return current_sequence
 
 
+connection_used_exits: List[Door] = []
+
+#yield a complete connection and the start letter of last room
 def create_connections(current_connection: Connection, requirements: ConnectionRequirements):
     
     #initialization for first round
@@ -154,20 +160,28 @@ def create_connections(current_connection: Connection, requirements: ConnectionR
             None
         )
     
+    global connection_used_exits
 
-    #TODO: also remember tested exits
     for current_path in get_paths(requirements.first_path_requirements):
     
-        #if current_path.exit matches a previously failed exit, skip it
+        #if exit type has been previously used, skip it
+        if exit_matches(current_path, connection_used_exits):
+            continue
     
         current_connection.path = current_path
+
+        #If we are unable to use this exit type to create a successful connection string, 
+        #we should never try that exit type again
+        connection_used_exits.append(current_path.exit_door)
         
-        for last_connection in create_connection_last(current_connection, requirements):
-            yield last_connection
+        for last_connection, last_path_start_letter in create_connection_last(current_connection, requirements):
+            yield last_connection, last_path_start_letter
 
         next_room_requirements = requirements.between_room_requirements.deepcopy()
         next_room_requirements.path_requirements = update_path_requirements(next_room_requirements.path_requirements, current_path)
 
+        #no need to filter out rooms that don't have a new exit type
+        #because it will iterate through all paths of that room in next recursion and check for new exits
         for next_room in get_rooms(next_room_requirements):
             incomplete_connection = Connection(
                 next_room,
@@ -178,18 +192,16 @@ def create_connections(current_connection: Connection, requirements: ConnectionR
             next_connection_requirements = requirements.deepcopy()
             next_connection_requirements.first_path_requirements = next_connection_requirements.between_room_requirements.path_requirements
             
-            for next_connection in create_connections(incomplete_connection, next_connection_requirements):
+            for next_connection, last_path_start_letter in create_connections(incomplete_connection, next_connection_requirements):
                 current_connection.next_connection = next_connection
-                yield current_connection
+                yield current_connection, last_path_start_letter
             
             
         current_connection.next_connection = None
-        
-        #add current_path.exit to failed exits (global)
-    
+
     pass
 
-#TODO:
+#TODO: yield complete connection and last_room_start_letter
 def create_connection_last(current_connection: Connection, requirements: ConnectionRequirements):
     
     pass

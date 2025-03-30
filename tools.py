@@ -1,14 +1,24 @@
 #Author: Stack Man
 #Date: 3-26-2025
 
+from typing import List
 from enums import BranchType, RoomType, PathTime
-from objects import Room, PathRequirements, ConnectionRequirements, Path
+from objects import Room, PathRequirements, ConnectionRequirements, Path, Door, Connection
 
 def check_room_type(room: Room, room_type : RoomType):
     return room.room_type == room_type
 
 def check_room_branch_type(room: Room, branch_type: BranchType):
     return room.branch_type == branch_type
+
+def exit_matches(path: Path, exits: List[Door]):
+    exit_door = path.exit_door
+
+    for exit in exits:
+        if exit_door.door_type == exit.door_type and exit_door.door_dir == exit.door_dir: 
+            return True
+
+    return False
 
 def create_connection_requirements(first_room: Room, last_room: Room, is_return: bool, first_path_start_letter: str = "", last_path_exit_letter: str = ""):
     """Doesn't create the between_room_requirements, that is created separately outside this function"""
@@ -58,10 +68,16 @@ def create_connection_requirements(first_room: Room, last_room: Room, is_return:
     return connection_requirements
 
 #TODO:
-def update_path_requirements(original_requirements: PathRequirements, path: Path):
+def update_path_requirements(original_requirements: PathRequirements, path: Path) -> PathRequirements:
     pass
 
+#TODO:
+def add_connection_rooms_to_list(connection: Connection, rooms: List[Room]) -> List[Room]:
+    return rooms
 
+#TODO:
+def remove_connection_rooms_from_list(connection: Connection, rooms: List[Room]) -> List[Room]:
+    return rooms
 
 
 
