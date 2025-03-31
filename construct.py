@@ -6,6 +6,7 @@ from objects import Level, Sequence, Connection, ConnectionRequirements, RoomReq
 from enums import PathTime, RoomType, BranchType
 from search import *
 from tools import *
+from constants import ONEWAY_TYPES, TWOWAY_TYPES
 
 def create_all_levels(levels: List[Level]):
     
@@ -56,7 +57,7 @@ def create_sequences(current_sequence: Sequence, first_path_start_letter: str):
     needs_return = not current_sequence.first_room_is_end_branch
 
     #determine room, path, and branch Requirements
-    room_types = [RoomType.ONEWAY, RoomType.TWOWAY] if needs_return else [RoomType.TWOWAY]
+    room_types = ONEWAY_TYPES if needs_return else TWOWAY_TYPES
     
     branch_type = BranchType.END if needs_return else BranchType.START
     john_branch_type = BranchType.NONE if needs_return else BranchType.END
@@ -220,11 +221,45 @@ def create_connection_last(current_connection: Connection, cr: ConnectionRequire
         yield current_connection, path.start_door.letter
 
 #TODO:
-def pad_level(level: Level, rooms_to_reach: int):
+def pad_level(level: Level, target_room_count: int):
+
+    initial_rooms = count_rooms(level.initial_sequence)
+    total_rooms_added = 0
+
+    for seq in yield_sequences(level.initial_sequence):
+        max_rooms_to_add = target_room_count - initial_rooms - total_rooms_added
+        total_rooms_added += pad_sequence(seq, max_rooms_to_add)
+
+    return total_rooms_added
+
+#TODO:
+def pad_sequence(seq: Sequence, max_rooms_to_add: int):
+
+    has_return = seq.return_connection != None
+    room_types = ONEWAY_TYPES if has_return else TWOWAY_TYPES
+
+    rr = RoomRequirements(room_types, BranchType.NONE)
+
+    total_rooms_added = 0
+
+    total_rooms_added += pad_connection(seq.to_connection, max_rooms_to_add, rr)
+    total_rooms_added += pad_connection(seq.return_connection, max_rooms_to_add - total_rooms_added, rr)
+    
+    return total_rooms_added
+
     pass
 
 #TODO:
-def add_rooms_inbetween(connection: Connection, cr: ConnectionRequirements, max_rooms_to_add: int, is_to_connection: bool = False):
+def pad_connection(connection: Connection, max_rooms_to_add: int, rr: RoomRequirements):
+
+    for con in yield_connections(connection):
+        #use create connection last to add rooms inbetween con and con.next
+        #add inbetween con and con.next if not none
+        #increment total added
+        pass
+        
+    
+
     pass
 
 

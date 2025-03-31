@@ -3,7 +3,7 @@
 
 from typing import List
 from enums import BranchType, RoomType, PathTime, DoorDir
-from objects import Room, PathRequirements, ConnectionRequirements, Path, Door, Connection
+from objects import Room, PathRequirements, ConnectionRequirements, Path, Door, Connection, Sequence
 
 def check_room_type(room: Room, room_type : RoomType):
     return room.room_type == room_type
@@ -71,12 +71,23 @@ def create_connection_requirements(first_room: Room, last_room: Room, is_return:
     return connection_requirements
 
 
+def yield_sequences(sequence: Sequence):
+    current_sequence = sequence
+
+    while (current_sequence != None):
+        next_sequence = current_sequence.next_seqeunce
+        yield current_sequence
+        current_sequence = next_sequence
+
 def yield_connections(connection: Connection):
     current_connection = connection
 
+    #save next_connection first in yielded connection's next is modified
+    #we want to iterate over only the original connections when padding
     while (current_connection != None):
+        next_connection = current_connection.next_connection
         yield current_connection
-        current_connection = current_connection.next_connection
+        current_connection = next_connection
 
 def add_connection_rooms_to_list(connection: Connection, rooms: List[str]) -> List[str]:
 
@@ -91,6 +102,23 @@ def remove_connection_rooms_from_list(connection: Connection, rooms: List[str]) 
         rooms.remove(c.room.name)
 
     return rooms
+
+def count_rooms(sequence: Sequence):
+    total = 0
+
+    for seq in yield_sequences(sequence):
+        total += count_rooms_in_connection(seq.to_connection)
+        total += count_rooms_in_connection(seq.return_connection)
+
+    return total
+
+def count_rooms_in_connection(connection: Connection):
+    total = 0
+
+    for con in yield_connections(connection):
+        total += 1
+
+    return total
 
 #TODO:
 def opposite_dir(type: DoorDir):

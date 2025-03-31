@@ -139,14 +139,14 @@ class Sequence():
         first_room: Room,
         first_room_is_end_branch: bool):
         
-        self.to_conection = to_connection
+        self.to_connection = to_connection
         self.return_connection = return_connection
         self.next_seqeunce = next_sequence
         self.first_room = first_room
         self.first_room_is_end_branch = first_room_is_end_branch
 
     def __str__(self):
-        return f"    [Sequence: to: {self.to_conection}, return: {self.return_connection}] \n{self.next_seqeunce}"
+        return f"    [Sequence: to: {self.to_connection}, return: {self.return_connection}] \n{self.next_seqeunce}"
 
 
 """A Level is a datatype that contains an intial sequence
