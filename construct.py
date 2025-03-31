@@ -6,7 +6,6 @@ from objects import Level, Sequence, Connection, ConnectionRequirements, RoomReq
 from enums import PathTime, RoomType, BranchType
 from search import *
 from tools import *
-from constants import ONEWAY_TYPES, TWOWAY_TYPES
 
 def create_all_levels(levels: List[Level]):
     
@@ -73,6 +72,12 @@ def create_sequences(current_sequence: Sequence, first_path_start_letter: str):
         PathRequirements(to_path_times)
         )
     
+    return_between_room_requirements = RoomRequirements(
+        room_types,
+        BranchType.NONE,
+        PathRequirements(return_path_times)
+    )
+    
     global sequence_used_rooms
 
     for branch in get_rooms(all_branch_room_requirements):
@@ -101,7 +106,8 @@ def create_sequences(current_sequence: Sequence, first_path_start_letter: str):
                 #TODO may not be the case for branching john rooms? may have to reformat john rooms to have two distinct paths one for pizza and one for notpizza
                 #or have an exception for them
                 return_connection_requirements = create_connection_requirements(branch, Sequence.first_room, True, "", first_path_start_letter)
-                
+                return_connection_requirements.branch_room_requirements = return_between_room_requirements
+
                 for return_connection in create_connections(None, return_connection_requirements):
                 
                     current_sequence.return_connection = return_connection
@@ -161,30 +167,30 @@ def create_connections(current_connection: Connection, cr: ConnectionRequirement
     
     global connection_used_exits
 
-    for current_path in get_paths(cr.first_room, cr.first_path_requirements):
+    #trim_paths removes paths from the room that:
+    #   * can't connect to the last_path's exit (stored in path requirements)
+    #   * have an exit that has already been tried in the current connection string (conection_used_exits)
+    #   * or otherwise don't meet the room requirement's path requirements
+    for current_path in trim_paths(cr.first_room, cr.first_path_requirements, connection_used_exits):
         current_connection.path = current_path
 
         #Never try the same exit type in a connection string more than once
-        #An exit type that fails to continue to last_room cannot do so regardles of its room or position in the string
+        #An exit type that fails to continue to last_room once cannot do so regardles of its room or position in the string
         connection_used_exits.append(current_connection.path.exit_door)
         
         for last_connection, last_path_start_letter in create_connection_last(current_connection, cr):
             yield last_connection, last_path_start_letter
 
 
-        #Update between room requirements path requirements with the current path
-        #this will ensure that the room has a path whose start matches the current end
+        #the first path of the next connection is a "between" path
+        #and its start should connect withthe current_path's exit
         next_connection_requirements = cr.deepcopy()
         next_connection_requirements.first_path_requirements = next_connection_requirements.between_room_requirements.path_requirements
+        next_connection_requirements.first_path_requirements.start_door_type = current_path.exit_door.door_type
+        next_connection_requirements.first_path_requirements.start_door_dir = opposite_dir(current_path.exit_door.door_dir)
 
-        #this removes paths from the room that:
-        #   * can't connect to the current_path's exit
-        #   * have an exit that has already been tried in the current connection string
-        #   * don't meet the room requirement's path requirements
-        #this means we don't have to check for that ourselves as we iterate over those paths in the next recursive call
-        #TODO: should I move this trim to the outer loop (current_path in get_paths())? Currently this will perform redundant trimming with pathRequirements
-        #TODO: will have to rework path_requirements to include a start door to match and a list of exit doors to exclude
-        for next_room in get_rooms_and_trim_paths(next_connection_requirements.between_room_requirements, current_connection.path.exit_door, connection_used_exits):
+
+        for next_room in get_rooms(next_connection_requirements.between_room_requirements):
             incomplete_connection = Connection(
                 next_room,
                 None,
@@ -205,7 +211,7 @@ def create_connections(current_connection: Connection, cr: ConnectionRequirement
 def create_connection_last(current_connection: Connection, cr: ConnectionRequirements):
     
     #last_path start must connect to current_path exit
-    #TODO: may need an exception to prevent one-ways from being chosen when they shouldn't be (that was in the original code)
+    #TODO: may need an exception to prevent one-ways from being chosen when they shouldn't be (it  was in the original code)
     for path in trim_paths(cr.last_room, cr.last_path_requirements, current_connection.path.exit_door):
 
         connection_last = Connection(cr.last_room, path, None)
@@ -213,10 +219,13 @@ def create_connection_last(current_connection: Connection, cr: ConnectionRequire
 
         yield current_connection, path.start_door.letter
 
+#TODO:
+def pad_level(level: Level, rooms_to_reach: int):
+    pass
 
-
-
-
+#TODO:
+def add_rooms_inbetween(connection: Connection, cr: ConnectionRequirements, max_rooms_to_add: int, is_to_connection: bool = False):
+    pass
 
 
 

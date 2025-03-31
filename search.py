@@ -17,18 +17,17 @@ def get_paths(room: Room, pr: PathRequirements):
     pass
 
 
-""" yields paths of a room if that have a:
-    * start that can connect to door_to_connect_with_start
-    * exit that is not in exits_to_trim
-    * and meet the path requirements
+""" yields paths of a room if that:
+    * has exit that is not in exits_to_trim
+    * and meets the path requirements
 """
-def trim_paths(room: Room, pr: PathRequirements, door_to_connect_with_start: Door, exits_to_trim: List[Door] = None):
+def trim_paths(room: Room, pr: PathRequirements, exits_to_trim: List[Door] = None):
     for new_path in get_paths(room, pr):
 
-        good_start = doors_connect(door_to_connect_with_start, new_path.start_door)
         good_exit = exits_to_trim == None or not exit_matches(new_path.exit_door, exits_to_trim)
 
-        yield new_path
+        if good_exit:
+            yield new_path
 
 
 """yields deepcopies of rooms with their paths trimmed"""
