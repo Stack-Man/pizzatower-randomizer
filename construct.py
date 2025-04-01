@@ -36,7 +36,9 @@ def create_one_level(level: Level):
         )
     
     #Recursively create rest of sequences
-    return create_sequences(incomplete_sequence, "A")
+    level.initial_sequence = create_sequences(incomplete_sequence, "A")
+    
+    return level
 
 
 #TODO:
@@ -79,7 +81,7 @@ def create_sequences(current_sequence: Sequence, first_path_start_letter: str):
         PathRequirements(return_path_times)
     )
     
-    global sequence_used_rooms
+    global sequence_used_room_names
 
     for branch in get_rooms(all_branch_room_requirements):
         
@@ -89,7 +91,7 @@ def create_sequences(current_sequence: Sequence, first_path_start_letter: str):
         for to_connection, last_room_start_letter in create_connections(None, to_connection_requirements):
         
             current_sequence.to_connection = to_connection
-            sequence_used_rooms = add_connection_rooms_to_list(to_connection, sequence_used_rooms)
+            sequence_used_room_names = add_connection_rooms_to_list(to_connection, sequence_used_room_names)
             
             #I'm leaving out the last_path loop because I'm assuming that there's only every one valid last path at the end
             #of the connection considering the restrictions with branch doors and path time
@@ -109,10 +111,10 @@ def create_sequences(current_sequence: Sequence, first_path_start_letter: str):
                 return_connection_requirements = create_connection_requirements(branch, Sequence.first_room, True, "", first_path_start_letter)
                 return_connection_requirements.branch_room_requirements = return_between_room_requirements
 
-                for return_connection in create_connections(None, return_connection_requirements):
+                for return_connection, _letter in create_connections(None, return_connection_requirements):
                 
                     current_sequence.return_connection = return_connection
-                    sequence_used_rooms = add_connection_rooms_to_list(return_connection, sequence_used_rooms)
+                    sequence_used_room_names = add_connection_rooms_to_list(return_connection, sequence_used_room_names)
                     
                     new_sequence = continue_sequence(current_sequence, branch, last_room_start_letter)
                 
@@ -120,12 +122,12 @@ def create_sequences(current_sequence: Sequence, first_path_start_letter: str):
                         return new_sequence
                     
                     current_sequence.return_connection = None
-                    sequence_used_rooms = remove_connection_rooms_from_list(return_connection, sequence_used_rooms)
+                    sequence_used_room_names = remove_connection_rooms_from_list(return_connection, sequence_used_room_names)
                     
                     pass
                     
             current_sequence.to_connection = None
-            sequence_used_rooms = remove_connection_rooms_from_list(to_connection, sequence_used_rooms)
+            sequence_used_room_names = remove_connection_rooms_from_list(to_connection, sequence_used_room_names)
         
             pass
     
@@ -156,7 +158,9 @@ def continue_sequence(current_sequence: Sequence, last_room: Room, last_room_sta
 connection_used_exits: List[Door] = []
 
 #yield a complete connection and the start letter of last room
-def create_connections(current_connection: Connection, cr: ConnectionRequirements):
+#pass connect_first as False and the *first* iteration won't try to connect directly to last
+#subsequent iterations will revert to default behavior
+def create_connections(current_connection: Connection, cr: ConnectionRequirements, connect_first = True):
     
     #initialization for first round
     if current_connection == None:
@@ -179,8 +183,9 @@ def create_connections(current_connection: Connection, cr: ConnectionRequirement
         #An exit type that fails to continue to last_room once cannot do so regardles of its room or position in the string
         connection_used_exits.append(current_connection.path.exit_door)
         
-        for last_connection, last_path_start_letter in create_connection_last(current_connection, cr):
-            yield last_connection, last_path_start_letter
+        if connect_first:
+            for last_connection, last_path_start_letter in create_connection_last(current_connection, cr):
+                yield last_connection, last_path_start_letter
 
 
         #the first path of the next connection is a "between" path
@@ -208,6 +213,7 @@ def create_connections(current_connection: Connection, cr: ConnectionRequirement
     pass
 
 #Tries to create connection to requirements.last_room
+#next_connection defaults to None and is used when padding levels
 #yield: connection with connection to last
 def create_connection_last(current_connection: Connection, cr: ConnectionRequirements):
     
@@ -217,10 +223,10 @@ def create_connection_last(current_connection: Connection, cr: ConnectionRequire
 
         connection_last = Connection(cr.last_room, path, None)
         current_connection.next_connection = connection_last
-
+        
         yield current_connection, path.start_door.letter
 
-#TODO:
+
 def pad_level(level: Level, target_room_count: int):
 
     initial_rooms = count_rooms(level.initial_sequence)
@@ -232,7 +238,7 @@ def pad_level(level: Level, target_room_count: int):
 
     return total_rooms_added
 
-#TODO:
+
 def pad_sequence(seq: Sequence, max_rooms_to_add: int):
 
     has_return = seq.return_connection != None
@@ -247,20 +253,62 @@ def pad_sequence(seq: Sequence, max_rooms_to_add: int):
     
     return total_rooms_added
 
-    pass
 
-#TODO:
-def pad_connection(connection: Connection, max_rooms_to_add: int, rr: RoomRequirements):
+def pad_connection(connection: Connection, max_rooms_to_add: int, between_req: RoomRequirements):
+    
+    global sequence_used_room_names
+    total_rooms_added = 0
 
-    for con in yield_connections(connection):
-        #use create connection last to add rooms inbetween con and con.next
-        #add inbetween con and con.next if not none
-        #increment total added
+    for first_con in yield_connections(connection):
+
+        if total_rooms_added >= max_rooms_to_add:
+            break
+
+        first_room = first_con.room
+        first_path = first_con.path
+
+        last_con = first_con.next_connection
+        last_room = last_con.room
+        last_path = last_con.path
+
+        #The first and last path should remain the same
+        fp_req = PathRequirements([first_path.path_time], first_path.start_door.letter, first_path.exit_door.letter)
+        lp_req = PathRequirements([last_path.path_time], last_path.start_door.letter, last_path.exit_door.letter)
+        con_req = ConnectionRequirements(first_room, last_room, fp_req, between_req, lp_req)
+
+        #create a new connection with first_room and last_room
+        #connect the new last to the original last.next
+        #replace the original first.next with new first.next
+        try:
+            #pass False so the first iteration does not try to connect directly to last (since that would result in the exact same connection)
+            new_connection, _letter = next(create_connections(None, con_req, False))
+
+            rooms_added = count_rooms_in_connection(new_connection) - 2 # -2 b/c first/last are the same
+            
+            #don't add new connection if it surpasses the max desired rooms
+            if total_rooms_added + rooms_added <= max_rooms_to_add:
+                total_rooms_added += rooms_added
+
+                add_connection_rooms_to_list(new_connection, sequence_used_room_names)
+                set_last_connection(new_connection, last_con.next_connection)
+                first_con.next_connection = new_connection.next_connection
+
+        except StopIteration:
+            pass
+
         pass
         
+    return total_rooms_added
+
+
+#iterate until the last connection, then set that connection's next to new_last
+def set_last_connection(original_connections: Connection, new_last: Connection):
+
+    last_connection = None
+
+    for con in yield_connections(original_connections):
+        last_connection = con
     
-
-    pass
-
+    last_connection.next_connection = new_last
 
 
