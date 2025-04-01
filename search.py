@@ -3,7 +3,7 @@
 
 from typing import List
 from objects import Room,  RoomRequirements, PathRequirements, Path, Door
-from tools import exit_matches, doors_connect
+from tools import exit_matches
 
 #TODO:
 """ Yields rooms that match the RoomRequirements."""

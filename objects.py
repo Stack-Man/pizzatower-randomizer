@@ -154,9 +154,10 @@ class Sequence():
     Sequence    initial_sequence: The first sequence in the level.
 """
 class Level():
-    def __init__(self, entrance: Room, initial_sequence: Sequence ):
+    def __init__(self, entrance: Room, initial_sequence: Sequence, is_war: bool = False ):
         self.entrance: Room = entrance
         self.initial_sequence: Sequence = initial_sequence
+        self.is_war: bool = is_war
     
     def __str__(self):
         return f"Level: {self.initial_sequence}"
@@ -172,6 +173,7 @@ class Level():
     [Enum]  path_times          :allowed times for this path
     Enum    start_door_type     :start door of path must match this type
     Enum    start_door_dir      :"" ""
+    Bool    allow_Oneways       :if path can be a oneway
 """
 class PathRequirements():
     def __init__(self,
@@ -183,7 +185,8 @@ class PathRequirements():
         start_use_branch: bool= False,
         exit_use_branch: bool = False,
         start_door_type: DoorType = DoorType.ANY,
-        start_door_dir: DoorDir = DoorDir.ANY):
+        start_door_dir: DoorDir = DoorDir.ANY,
+        allow_oneways: bool = False):
         
         self.start_letter = start_letter
         self.exit_letter = exit_letter
@@ -194,6 +197,7 @@ class PathRequirements():
         self.path_times = path_times
         self.start_door_type = start_door_type
         self.start_door_dir = start_door_dir
+        self.allow_oneways = allow_oneways
     
     def __str__(self):      
         sb = " branch" if self.start_use_branch else ""
@@ -212,16 +216,19 @@ class PathRequirements():
     Enum                room_type
     Enum                branch_type
     PathRequirements    path_requirements: optional, room must contain at least one path whose start matches this path's exit
+    String              name: optional
 """
 class RoomRequirements():
     def __init__(self,
-        room_type: RoomType,
-        branch_type: BranchType,
-        path_requirements: PathRequirements = None):
+        room_type: RoomType = RoomType.NORMAL,
+        branch_type: BranchType = BranchType.NONE,
+        path_requirements: PathRequirements = None,
+        name: str = None):
         
         self.room_type = room_type
         self.branch_type = branch_type
         self.path_requirements = path_requirements
+        self.name = name
     
     def __str__(self):
         return "RoomReq: " + str(self.room_type) + ", " + str(self.branch_type) + ", " + str(self.path_requirements)

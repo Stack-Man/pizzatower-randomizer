@@ -1,4 +1,5 @@
 from enums import RoomType
 
-ONEWAY_TYPES = [RoomType.ONEWAY, RoomType.TWOWAY]
-TWOWAY_TYPES = [RoomType.TWOWAY]
+CTOP_ENTRANCE = "tower_finalhallway"
+CTOP_EXIT = "tower_entrancehall"
+WAR_EXIT = "war_13"

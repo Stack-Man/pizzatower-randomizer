@@ -40,12 +40,9 @@ class AccessType(Enum):
     EXITONLY = 2
 
 class RoomType(Enum):
-    ONEWAY = 0
-    TWOWAY = 1
+    ANY = 0
+    NORMAL = 1
     BRANCH = 2
     ENTRANCE = 3
     JOHN = 4
     LOOP = 5
-    WAREXIT = 6
-    CTOPEXIT = 7
-    CTOPENTRANCE = 8

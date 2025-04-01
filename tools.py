@@ -23,7 +23,7 @@ def exit_matches(path: Path, exits: List[Door]):
 def doors_connect(a: Door, b: Door):
     return a.door_type == b.door_type and a.door_dir == opposite_dir(b.door_type)
 
-def create_connection_requirements(first_room: Room, last_room: Room, is_return: bool, first_path_start_letter: str = "", last_path_exit_letter: str = ""):
+def create_connection_requirements(first_room: Room, last_room: Room, is_return: bool, first_path_start_letter: str = "", last_path_exit_letter: str = "", use_oneways = False):
     """Doesn't create the between_room_requirements, that is created separately outside this function"""
 
     branch_path_time = PathTime.PIZZATIME if is_return else PathTime.NOTPIZZATIME
@@ -44,7 +44,8 @@ def create_connection_requirements(first_room: Room, last_room: Room, is_return:
     first_path_requirements = PathRequirements(
         first_path_times, 
         start_letter = first_path_start_letter, 
-        start_use_branch = first_path_start_use_branch)
+        start_use_branch = first_path_start_use_branch,
+        allow_oneways = use_oneways)
     
     #same as first but if last_room is a non-branching John
     last_path_times =  [branch_path_time] if not check_room_branch_type(last_room, BranchType.NONE) else [PathTime.ANY]
@@ -59,7 +60,8 @@ def create_connection_requirements(first_room: Room, last_room: Room, is_return:
     last_path_requirements = PathRequirements(
         last_path_times,
         exit_letter = last_path_exit_letter,
-        exit_use_branch = last_path_exit_use_branch)
+        exit_use_branch = last_path_exit_use_branch,
+        allow_oneways = use_oneways)
 
     connection_requirements = ConnectionRequirements(
         first_room,
@@ -82,7 +84,7 @@ def yield_sequences(sequence: Sequence):
 def yield_connections(connection: Connection):
     current_connection = connection
 
-    #save next_connection first in yielded connection's next is modified
+    #save next_connection first in case yielded connection's next is modified
     #we want to iterate over only the original connections when padding
     while (current_connection != None):
         next_connection = current_connection.next_connection
@@ -102,6 +104,16 @@ def remove_connection_rooms_from_list(connection: Connection, rooms: List[str]) 
         rooms.remove(c.room.name)
 
     return rooms
+
+#iterate until the last connection, then set that connection's next to new_last
+def set_last_connection(original_connections: Connection, new_last: Connection):
+
+    last_connection = None
+
+    for con in yield_connections(original_connections):
+        last_connection = con
+    
+    last_connection.next_connection = new_last
 
 def count_rooms(sequence: Sequence):
     total = 0
