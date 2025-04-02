@@ -14,8 +14,8 @@ from enums import *
     Enum    path_time           : When this door is accessible (BOTH, PIZZATIME, NOTPIZZATIME)
     
     Enum    access_type         : How this door can be used (ANY, STARTONLY, EXITONLY)
-    Enum    start_time          : When this door can be used if its a start (BOTH, PIZZATIME, NOTPIZZATIME)
-    Enum    exit_time           : When this door can be used if its an exit (BOTH, PIZZATIME, NOTPIZZATIME)
+    Enum    path_time_if_start       : If this door is a start, when it can be used (BOTH, PIZZATIME, NOTPIZZATIME)
+    Bool    if_notpizzatime_exit_only: If the time is notpizzatime, if this door must be used as an exit
 """
 class Door():
     def __init__(self,
@@ -26,8 +26,8 @@ class Door():
         initially_blocked: bool,
         path_time: PathTime,
         access_type: AccessType,
-        start_time: PathTime,
-        exit_time: PathTime):
+        path_time_if_start: PathTime,
+        if_notpizzatime_exit_only: bool):
 
         self.letter = letter
         self.door_type = door_type
@@ -36,8 +36,8 @@ class Door():
         self.initially_blocked = initially_blocked
         self.path_time = path_time
         self.access_type = access_type
-        self.start_time = start_time
-        self.exit_time = exit_time
+        self.path_time_if_start = path_time_if_start
+        self.if_notpizzatime_exit_only = if_notpizzatime_exit_only
         
     def __str__(self):
         return f"{self.letter}"
@@ -92,6 +92,9 @@ class Path():
               \<--- return <-- mid branch leave <-- mid return
 """
 class Room():
+    name = "title"
+    doors = "doors"
+
     def __init__(self, name: str, paths: List[Path], branch_type: BranchType, room_type: RoomType):
         self.name = name
         self.paths = paths
