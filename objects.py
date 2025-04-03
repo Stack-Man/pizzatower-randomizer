@@ -27,7 +27,8 @@ class Door():
         path_time: PathTime,
         access_type: AccessType,
         path_time_if_start: PathTime,
-        if_notpizzatime_exit_only: bool):
+        if_notpizzatime_exit_only: bool,
+        is_loop: bool):
 
         self.letter = letter
         self.door_type = door_type
@@ -38,6 +39,7 @@ class Door():
         self.access_type = access_type
         self.path_time_if_start = path_time_if_start
         self.if_notpizzatime_exit_only = if_notpizzatime_exit_only
+        self.is_loop = is_loop
         
     def __str__(self):
         return f"{self.letter}"
@@ -50,11 +52,12 @@ class Door():
     Bool    oneway      : Whether the path can be backtracked or not.
 """
 class Path():
-    def __init__(self, start_door: Door, exit_door: Door, path_time: PathTime, oneway: bool):
+    def __init__(self, start_door: Door, exit_door: Door, path_time: PathTime, oneway: bool, loop: bool):
         self.start_door = start_door
         self.exit_door = exit_door
         self.path_time = path_time
         self.oneway = oneway
+        self.loop = loop
     
     def __str__(self):
         return f"{self.start_door} to {self.exit_door}"

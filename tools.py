@@ -132,9 +132,19 @@ def count_rooms_in_connection(connection: Connection):
 
     return total
 
-#TODO:
+
 def opposite_dir(type: DoorDir):
-    pass
+    match type:
+        case DoorDir.LEFT:
+            return DoorDir.RIGHT
+        case DoorDir.RIGHT:
+            return DoorDir.LEFT
+        case DoorDir.UP:
+            return DoorDir.DOWN
+        case DoorDir.DOWN:
+            return DoorDir.UP
+        case _:
+            return type
 
 
 
