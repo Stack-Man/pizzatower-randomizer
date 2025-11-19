@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 #Author: Stack Man
 #Date 11/17/2025
 
