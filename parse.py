@@ -1,37 +1,35 @@
 #Author: Stack Man
 #Date 11/17/2025
 
-#TODO: decide how to handle outer path creation (room to room) vs inner path creation (door to door in a room)
-#how to efficinetly pick a room that has a good path out?
 
 """
 Read an input .json file and output a graph
 """
 
 """
-Every Room, its doors, and each type of Transtion are represented as nodes in a graph.
+Nodes in the graph represent Room, Doors, Tnransitions, and Paths
+Should paths be their own node or just an edge between doors?
 
 Room: 
-    A single room instance
+    A single room instance. Represented by a cluster of Doors.
     * name
 
 Door:
     A specific transition in a room
     * letter
-
-Room-Door Edge:
-    A directional edge that implies an exit (room > door) or a start (room < door)
-    * Time: [Any/Pizzatime/NotPizzatime]
-    * Direction: [Any/Left/Right/Up/Down]
+    
+Path:
+    A directional edge between Doors in a Room.
 
 Transition:
     A type of transition
     * type
 
 Door-Transition Edge:
-    A bidirectional edge that associates doors with each 
+    A directional edge that associates doors with each 
     other, allowing traversal between rooms using a 
     (room - door - transition - door - room) pattern
+    Implies a start (transition > door) or an exit (door > transition)
 
 Transition-Transition Edge:
     Temporary Edges added when randomizer mode allows cross-type transitions
@@ -45,16 +43,8 @@ Formatting of the JSON and description of its parameters:
 import json
 import networkx as nx
 from enums import PathTime, DoorDir
-
-ROOMS = "rooms"
-ROOM_TITLE = "title"
-ROOM_DOORS = "doors"
-
-DOOR_TYPE = "type"
-DOOR_LETTER = "letter"
-
-DOOR_EXIT_ONLY = "exitonly"
-DOOR_START_ONLY = "startonly"
+from graph import doors_to_nodes, paths_to_nodes
+from json_keys import *
 
 def read_json(filename):
     #try:
@@ -77,6 +67,9 @@ def read_json(filename):
 #   Separate graphs and switch between or should I mark edges with branch info?
 #Mark nodes as door/room/transition
 
+#TODO TODO: rework to parse paths and create edges between doors in the same room
+#instead of edges between doors and a room
+#also rework transition door edges to be directional
 def parse_json(data):
     G = nx.DiGraph()
     transition_names = []
@@ -89,52 +82,16 @@ def parse_json(data):
         #skip rooms with no doors (secrets)
         if doors is None:
             continue
-        else:
-            G.add_node(room_title)
         
-        for door in doors:
-            
-            main_dir = get_dir(door)
-            
-            transition_type = door[DOOR_TYPE] + "_" + str(main_dir)
-            
-            #Add new Transition node
-            if transition_type not in G:
-                G.add_node(transition_type)
-                transition_names.append(transition_type)
-            
-            #Add new Door node for this room
-            door_letter = door[DOOR_LETTER]
-            door_node_index = room_title + "_" + door_letter
-            
-            G.add_node(door_node_index)
-            
-            #TODO: consider pizzatimestart, ratblocked, and other special params
-            
-            exit_only = DOOR_EXIT_ONLY in door
-            start_only = DOOR_START_ONLY in door
-            
-            path_time = get_path_time(door)
-            
-            exit_dir = get_dir(door)
-            start_dir = flip_dir(exit_dir)
-            
-            #room - door (exit)
-            if not start_only:
-                G.add_edge(room_title, door_node_index)
-                G[room_title][door_node_index]["time"] = path_time
-                G[room_title][door_node_index]["dir"] = exit_dir
-                
-            #room - door (start)
-            if not exit_only:
-                G.add_edge(door_node_index, room_title)
-                G[door_node_index][room_title]["time"] = path_time
-                G[door_node_index][room_title]["dir"] = flip_dir
-                
-            
-            #door - transition and transition - door
-            G.add_edge(door_node_index, transition_type)
-            G.add_edge(transition_type, door_node_index)
+        #Add doors, new transitions, and Door-Transition edges to G
+        G, new_transition_names = doors_to_nodes(G, doors, room_title)
+        
+        #TODO: fill out second param
+        #Find Paths
+        paths = parse_paths(doors, is_john = False, room_name = room_title)
+        
+        #Add Door-Door edges to G
+        G = paths_to_nodes(G, paths, room_title)
         
     return G, transition_names
 
@@ -171,9 +128,6 @@ def join_transitions(G, all_transitions):
     #Match transitions in any way
     
     return G
-
-DOOR_PIZZATIME = "pizzatime"
-DOOR_NOTPIZZATIME = "notpizzatime"
 
 def get_path_time(door):
     if (DOOR_PIZZATIME in door):
@@ -259,34 +213,7 @@ def parse_room(room: Dict) -> Room:
     branch_type = BranchType.NONE #TODO:
 
     #parse paths
-    paths = []
-    
-    #for every door
-    for a in range(0, len(doors)):
-
-        door_a = doors[a]
-
-        #handle one door rooms
-        c = a if len(doors) <= 1 else a + 1
-        parse_powerup(door_a, room_name)
-
-        #for every door after that
-        for b in range(c, len(doors)):
-
-            door_b = doors[b]
-
-            path_ab = parse_path(door_a, door_b, is_john)
-            path_ba = parse_path(door_a, door_b, is_john)
-
-            if branch_type != BranchType.START and branch_type != BranchType.END:
-                branch_type = check_paths_for_branch_type(path_ab, path_ba, branch_type)
-                
-            if path_ab != None:
-                paths.append(path_ab)
-            
-            #don't double add loop paths
-            if path_ba != None and door_a.letter != door_b.letter:
-                paths.append(path_ba)
+    paths = parse_paths(doors, is_jonh, room_name)
 
     room_type = find_room_type(paths, is_john, is_entrance, branch_type)
 
@@ -299,12 +226,6 @@ def parse_room(room: Dict) -> Room:
 
     return room
 
-DOOR_BRANCH = "banch"
-DOOR_INITIALLY_BLOCKED = "ratblocked"
-DOOR_PIZZATIMESTART = "pizzatimestart"
-DOOR_NOTPIZZATIMESTART = "notpizzatimestart"
-DOOR_NOTPIZZATIMEEXITONLY = "notpizzatimeexitonly"
-DOOR_LOOP = "loop"
 
 #TODO: rework path time to be start path time and exit path time
 #TODO: rework Door object to be a struct with properties instead of a class
@@ -354,6 +275,41 @@ def parse_door(door: Dict) -> Door:
 
     return door
 
+
+def parse_paths(doors, is_john, room_name):
+    #parse paths
+    paths = []
+    
+    #for every door
+    for a in range(0, len(doors)):
+
+        door_a = doors[a]
+
+        #handle one door rooms
+        c = a if len(doors) <= 1 else a + 1
+        
+        #TODO: implement powerup
+        parse_powerup(door_a, room_name)
+
+        #for every door after that
+        for b in range(c, len(doors)):
+
+            door_b = doors[b]
+
+            path_ab = parse_path(door_a, door_b, is_john)
+            path_ba = parse_path(door_a, door_b, is_john)
+
+            if branch_type != BranchType.START and branch_type != BranchType.END:
+                branch_type = check_paths_for_branch_type(path_ab, path_ba, branch_type)
+                
+            if path_ab != None:
+                paths.append(path_ab)
+            
+            #don't double add loop paths
+            if path_ba != None and door_a.letter != door_b.letter:
+                paths.append(path_ba)
+    
+    return paths
 
 def parse_path(start_door: Door, exit_door: Door, is_john):
 
