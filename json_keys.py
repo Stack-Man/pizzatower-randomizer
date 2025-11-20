@@ -17,3 +17,5 @@ DOOR_PIZZATIMESTART = "pizzatimestart"
 DOOR_NOTPIZZATIMESTART = "notpizzatimestart"
 DOOR_NOTPIZZATIMEEXITONLY = "notpizzatimeexitonly"
 DOOR_LOOP = "loop"
+
+DOOR_DIR = "dir"

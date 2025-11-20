@@ -9,6 +9,7 @@ import math
 
 def hub_layout(G, hubs, transitions):
     pos = {}
+    print(str(hubs))
     
     #place hubs equally spaced on two vertical lines
     
@@ -54,18 +55,25 @@ def hub_layout(G, hubs, transitions):
         
         #print(str(h_x) + "=" + str(hub_distance) + "*" + str(col))
         
-        pos[h_node] = (h_x, h_y)
+        #pos[h_node] = (h_x, h_y)
         
         print(str(h_node) + " at " + str(h_x) + ", " + str(h_y))
         
         doors = G.neighbors(str(h_node))
-        space_per_door = space_per_hub / len(list(doors))
+        list_doors = list(doors)
+        door_count = len(list_doors)
         
         #=================================================
         #Place all doors in the space alloted for that hub
-        #Space Equally
+        #In a circle
         #=================================================
         
+        circ = nx.circular_layout(G.subgraph(list_doors), center = (col, h_y))
+        print(circ)
+        pos.update(circ)
+        
+        
+        """
         for k, d_node in enumerate(G.neighbors(str(h_node))):
             
             d_x = col * door_distance
@@ -74,10 +82,12 @@ def hub_layout(G, hubs, transitions):
             pos[str(d_node)] = (d_x, d_y)
             
             #print(str(d_node) + " at " + str(d_x) + ", " + str(d_y))
-        
-        
+        """
+    
+    #remoe room nodes so that theyre not included in the visualization
+    G.remove_nodes_from(hubs)
 
-    return pos
+    return G, pos 
 
 def test_parse(filename):
     G = read_json(filename)
@@ -104,7 +114,7 @@ def test_parse(filename):
             node_sizes.append(small_node)
     
 
-    pos = hub_layout(G, hubs, transitions)
+    G, pos = hub_layout(G, hubs, transitions)
     nx.draw(G, pos,
         with_labels=True, 
         node_color="lightblue", 

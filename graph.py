@@ -1,6 +1,13 @@
 from json_keys import *
 import networkx as nx
+from enums import get_dir, get_path_time, flip_dir
 
+#==========================================
+# Params:
+#   G: graph containing all current doors and transitions
+#   doors: dict containing info of door (TODO: parse as Door object first instead?)
+#   room_title: name of room the doors are from
+#==========================================
 def doors_to_nodes(G, doors, room_title):
     transition_names = []
 
@@ -23,6 +30,7 @@ def doors_to_nodes(G, doors, room_title):
         door_title = room_title + "_" + door_letter
         
         G.add_node(door_title)
+        G.add_edge(room_title, door_title)#used just to associate doors to rooms
         
         #TODO: consider pizzatimestart, ratblocked, and other special params
         

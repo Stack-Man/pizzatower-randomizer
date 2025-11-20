@@ -11,7 +11,7 @@ Nodes in the graph represent Room, Doors, Tnransitions, and Paths
 Should paths be their own node or just an edge between doors?
 
 Room: 
-    A single room instance. Represented by a cluster of Doors.
+    A single room instance. Contains one way edges to each of its doors
     * name
 
 Door:
@@ -44,7 +44,8 @@ import json
 import networkx as nx
 from enums import PathTime, DoorDir
 from graph import doors_to_nodes, paths_to_nodes
-from json_keys import *
+from json_keys import * 
+from enums import get_path_time, get_dir, flip_dir
 
 def read_json(filename):
     #try:
@@ -82,6 +83,8 @@ def parse_json(data):
         #skip rooms with no doors (secrets)
         if doors is None:
             continue
+        else:
+            G.add_node(room_title)
         
         #Add doors, new transitions, and Door-Transition edges to G
         G, new_transition_names = doors_to_nodes(G, doors, room_title)
@@ -129,43 +132,6 @@ def join_transitions(G, all_transitions):
     
     return G
 
-def get_path_time(door):
-    if (DOOR_PIZZATIME in door):
-        return PathTime.PIZZATIME
-    elif (DOOR_NOTPIZZATIME in door):
-        return PathTime.NOTPIZZATIME
-    else:
-        return PathTime.BOTH
-
-DOOR_DIR = "dir"
-
-def get_dir(door):
-    door_dir = door.get(DOOR_DIR)
-    
-    if door_dir is None:
-        return DoorDir.NONE
-    elif door_dir == "up":
-        return DoorDir.UP
-    elif door_dir == "down":
-        return DoorDir.DOWN
-    elif door_dir == "left":
-        return DoorDir.LEFT
-    elif door_dir == "right":
-        return DoorDir.RIGHT
-    else:
-        return DoorDir.ANY
-
-def flip_dir(door_dir):
-    if door_dir == DoorDir.UP:
-        return DoorDir.DOWN
-    elif door_dir == DoorDir.DOWN:
-        return DoorDir.UP
-    elif door_dir == DoorDir.LEFT:
-        return DoorDir.RIGHT
-    elif door_dir == DoorDir.RIGHT:
-        return DoorDir.LEFT
-    else:
-        return dir
 
 from typing import List, Dict
 from constants import JSON_NAMES
@@ -228,7 +194,6 @@ def parse_room(room: Dict) -> Room:
 
 
 #TODO: rework path time to be start path time and exit path time
-#TODO: rework Door object to be a struct with properties instead of a class
 def parse_door(door: Dict) -> Door:
 
     letter = door.get(DOOR_LETTER)
@@ -242,7 +207,7 @@ def parse_door(door: Dict) -> Door:
     initially_blocked = DOOR_INITIALLY_BLOCKED in door
     path_time = get_path_time(door)
     
-    access_type = AccessType.Any
+    access_type = AccessType.ANY
 
     if DOOR_START_ONLY in door:
         access_type = AccessType.STARTONLY
@@ -260,7 +225,7 @@ def parse_door(door: Dict) -> Door:
     #if notpizzatime, must be used as an exit
     if_notpizzatime_exit_only = DOOR_NOTPIZZATIMEEXITONLY in door
 
-    is_loop = door_loop in door
+    is_loop = DOOR_LOOP in door
 
     door = Door(letter,
                 door_type,
@@ -277,24 +242,26 @@ def parse_door(door: Dict) -> Door:
 
 
 def parse_paths(doors, is_john, room_name):
+    branch_type = BranchType.NONE #TODO: moved from parse_room temporarily
+
     #parse paths
     paths = []
     
     #for every door
     for a in range(0, len(doors)):
 
-        door_a = doors[a]
+        door_a = parse_door(doors[a])
 
         #handle one door rooms
         c = a if len(doors) <= 1 else a + 1
         
         #TODO: implement powerup
-        parse_powerup(door_a, room_name)
+        #parse_powerup(door_a, room_name)
 
         #for every door after that
         for b in range(c, len(doors)):
 
-            door_b = doors[b]
+            door_b = parse_door(doors[b])
 
             path_ab = parse_path(door_a, door_b, is_john)
             path_ba = parse_path(door_a, door_b, is_john)
@@ -311,7 +278,7 @@ def parse_paths(doors, is_john, room_name):
     
     return paths
 
-def parse_path(start_door: Door, exit_door: Door, is_john):
+def parse_path(start_door, exit_door, is_john):
 
     #start is exitonly or exit is startonly
     if start_door.access_type == AccessType.EXITONLY or exit_door.access_type == AccessType.STARTONLY:
