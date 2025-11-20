@@ -1,6 +1,9 @@
 #Author: Stack Man
 #Date 11/17/2025
 
+#TODO: decide how to handle outer path creation (room to room) vs inner path creation (door to door in a room)
+#how to efficinetly pick a room that has a good path out?
+
 """
 Read an input .json file and output a graph
 """
@@ -296,46 +299,47 @@ def parse_room(room: Dict) -> Room:
 
     return room
 
+DOOR_BRANCH = "banch"
+DOOR_INITIALLY_BLOCKED = "ratblocked"
+DOOR_PIZZATIMESTART = "pizzatimestart"
+DOOR_NOTPIZZATIMESTART = "notpizzatimestart"
+DOOR_NOTPIZZATIMEEXITONLY = "notpizzatimeexitonly"
+DOOR_LOOP = "loop"
 
+#TODO: rework path time to be start path time and exit path time
+#TODO: rework Door object to be a struct with properties instead of a class
 def parse_door(door: Dict) -> Door:
 
-    letter = door.get("letter")
-    door_type = door.get("type")
-
-    door_dir = door.get("dir")
+    letter = door.get(DOOR_LETTER)
+    door_type = door.get(DOOR_TYPE)
+    door_dir = door.get(DOOR_DIR)
 
     if door_dir == None:
         door_dir = DoorDir.NONE
 
-    is_branch = "branch" in door
-    initially_blocked = "ratblocked" in door
-
-    path_time = PathTime.BOTH
-
-    if "notpizzatime" in door:
-        path_time = PathTime.NOTPIZZATIME
-    elif "pizzatime" in door:
-        path_time = PathTime.PIZZATIME
+    is_branch = DOOR_BRANCH in door
+    initially_blocked = DOOR_INITIALLY_BLOCKED in door
+    path_time = get_path_time(door)
     
     access_type = AccessType.Any
 
-    if "startonly" in door:
+    if DOOR_START_ONLY in door:
         access_type = AccessType.STARTONLY
-    elif "exitonly" in door:
+    elif DOOR_EXIT_ONLY in door:
         access_type = AccessType.EXITONLY
     
     #if used as a start, must be this time
     path_time_if_start = PathTime.BOTH
 
-    if "pizzatimestart" in door:
+    if DOOR_PIZZATIMESTART in door:
         path_time_if_start = PathTime.PIZZATIME
-    elif "notpizzatimestart" in door:
+    elif DOOR_NOTPIZZATIMESTART in door:
         path_time_if_start = PathTime.NOTPIZZATIME
 
     #if notpizzatime, must be used as an exit
-    if_notpizzatime_exit_only = "notpizzatimeexitonly" in door
+    if_notpizzatime_exit_only = DOOR_NOTPIZZATIMEEXITONLY in door
 
-    is_loop = "loop" in door
+    is_loop = door_loop in door
 
     door = Door(letter,
                 door_type,
