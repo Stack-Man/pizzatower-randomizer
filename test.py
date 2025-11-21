@@ -9,7 +9,6 @@ import math
 
 def hub_layout(G, hubs, transitions):
     pos = {}
-    print(str(hubs))
     
     #place hubs equally spaced on two vertical lines
     
@@ -28,10 +27,7 @@ def hub_layout(G, hubs, transitions):
         t_x = 0
         t_y = i * transition_step_height
         
-        pos[str(t_node)] = (t_x, t_y)
-        
-        print(str(t_node) + " at " + str(t_x) + ", " + str(t_y))
-        
+        pos[str(t_node)] = [t_x, t_y]
         total_height = total_height + transition_step_height
     
     hubs_per_column = len(hubs)/2
@@ -53,11 +49,7 @@ def hub_layout(G, hubs, transitions):
         col = 1 if i % 2 == 0 else -1
         h_x = hub_distance * col
         
-        #print(str(h_x) + "=" + str(hub_distance) + "*" + str(col))
-        
-        #pos[h_node] = (h_x, h_y)
-        
-        print(str(h_node) + " at " + str(h_x) + ", " + str(h_y))
+        pos[h_node] = (h_x, h_y)
         
         doors = G.neighbors(str(h_node))
         list_doors = list(doors)
@@ -68,65 +60,41 @@ def hub_layout(G, hubs, transitions):
         #In a circle
         #=================================================
         
-        circ = nx.circular_layout(G.subgraph(list_doors), center = (col, h_y))
-        print(circ)
+        d_x = door_distance * col
+        circ = nx.circular_layout(G.subgraph(list_doors), scale = door_count * 100, center = [d_x, h_y])
         pos.update(circ)
-        
-        
-        """
-        for k, d_node in enumerate(G.neighbors(str(h_node))):
-            
-            d_x = col * door_distance
-            d_y = h_y + k * space_per_door
-            
-            pos[str(d_node)] = (d_x, d_y)
-            
-            #print(str(d_node) + " at " + str(d_x) + ", " + str(d_y))
-        """
-    
-    #remoe room nodes so that theyre not included in the visualization
-    G.remove_nodes_from(hubs)
 
-    return G, pos 
+    return pos 
 
 def test_parse(filename):
     G = read_json(filename)
 
     door_endings = ["_A", "_B", "_C", "_D", "_E", "_F", "_G"]
     transition_words = ["door", "box", "horizontal", "vertical", "rocket", "taxi"]
-    
-    node_sizes = []
+
     transitions = []
     hubs = []
-    
-    large_node = 500
-    small_node = 100
+    nodelist = []
     
     for node in G.nodes():
         
         if any(sub in str(node) for sub in transition_words):
             transitions.append(node)
-            node_sizes.append(large_node)
         elif not any(sub in str(node) for sub in door_endings):
             hubs.append(node)
-            node_sizes.append(large_node)
         else:
-            node_sizes.append(small_node)
+            nodelist.append(node)
     
-
-    G, pos = hub_layout(G, hubs, transitions)
+    pos = hub_layout(G, hubs, transitions)
+    
+    G.remove_nodes_from(hubs)
+    G.remove_nodes_from(transitions)
+    
     nx.draw(G, pos,
         with_labels=True, 
         node_color="lightblue", 
-        node_size=node_sizes, 
-        font_size=10)
-    
-    #edge_labels = {}
-    #for u, v, data in G.edges(data=True):
-        #if 'time' in data:
-            #edge_labels[(u, v)] = f"T:{data['time']}\nD:{data['dir']}"
-        
-    #nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_color='red')
+        node_size=500, 
+        font_size=10, nodelist = nodelist)
     
     plt.title(f"{filename} graph")
     plt.show()

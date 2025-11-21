@@ -1,13 +1,14 @@
 from json_keys import *
 import networkx as nx
-from enums import get_dir, get_path_time, flip_dir
+from enums import *
 
 #==========================================
 # Params:
 #   G: graph containing all current doors and transitions
-#   doors: dict containing info of door (TODO: parse as Door object first instead?)
+#   doors: dict containing info of doors
 #   room_title: name of room the doors are from
 #==========================================
+#TODO: switch to using door objects
 def doors_to_nodes(G, doors, room_title):
     transition_names = []
 
@@ -17,8 +18,8 @@ def doors_to_nodes(G, doors, room_title):
     #======================================
     for door in doors:
         
-        main_dir = get_dir(door) 
-        transition_title = door[DOOR_TYPE] + "_" + str(main_dir)
+        exit_dir = door.door_dir
+        transition_title = door.door_type + "_" + str(exit_dir)
         
         #Add new Transition node
         if transition_title not in G:
@@ -26,7 +27,7 @@ def doors_to_nodes(G, doors, room_title):
             transition_names.append(transition_title)
         
         #Add new Door node for this room
-        door_letter = door[DOOR_LETTER]
+        door_letter = door.letter
         door_title = room_title + "_" + door_letter
         
         G.add_node(door_title)
@@ -34,12 +35,11 @@ def doors_to_nodes(G, doors, room_title):
         
         #TODO: consider pizzatimestart, ratblocked, and other special params
         
-        exit_only = DOOR_EXIT_ONLY in door
-        start_only = DOOR_START_ONLY in door
+        exit_only = door.access_type == AccessType.EXITONLY
+        start_only = door.access_type == AccessType.STARTONLY
         
-        path_time = get_path_time(door)
-        
-        exit_dir = get_dir(door)
+        path_time = door.path_time
+
         start_dir = flip_dir(exit_dir)
         
         #transition > door (start)
@@ -58,4 +58,25 @@ def doors_to_nodes(G, doors, room_title):
 
 
 def paths_to_nodes(G, paths, room_title):
+    #Get path objects
+    #add edges between nodes in G based on the paths
+    #add information to each edge
+    
+    print("Paths of: " + str(room_title))
+    
+    for path in paths:
+        
+        #TODO: consistent func for constructing the node name
+        door_a = room_title + "_" + str(path.start_door.letter)
+        door_b = room_title + "_" + str(path.exit_door.letter)
+        
+        print("     new edge: " + door_a + ", " + door_b)
+        
+        G.add_edge(door_a, door_b)
+        
+        if not path.oneway:
+            G.add_edge(door_b, door_a)
+        
+        #TODO: add other info to the edge
+    
     return G
