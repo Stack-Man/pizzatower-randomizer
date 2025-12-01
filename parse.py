@@ -286,7 +286,7 @@ def parse_paths(doors, is_john, room_name):
             door_b = doors[b]
 
             path_ab = parse_path(door_a, door_b, is_john)
-            path_ba = parse_path(door_a, door_b, is_john)
+            path_ba = parse_path(door_b, door_a, is_john)
 
             if branch_type != BranchType.START and branch_type != BranchType.END:
                 branch_type = check_paths_for_branch_type(path_ab, path_ba, branch_type)
@@ -304,29 +304,26 @@ def parse_path(start_door, exit_door, is_john):
 
     #start is exitonly or exit is startonly
     if start_door.access_type == AccessType.EXITONLY or exit_door.access_type == AccessType.STARTONLY:
-        #print(" mismatch start/exit access type")
-        return None
-
-    #path is notpizzatime but start door can only be exit in notpizzatime
-    if start_door.if_notpizzatime_exit_only and (start_door.path_time == PathTime.NOTPIZZATIME or exit_door.path_time == PathTime.NOTPIZZATIME):
-        #print(" mismatch start time")
         return None
 
     #path time mismatch, unless it is in a john room
-    if not is_john and (start_door.path_time != PathTime.BOTH or exit_door.path_time != PathTime.BOTH) and start_door.path_time != exit_door.path_time:
-        #print(" mismatch time and not john")
+    #path times of start and exit must match or at least one is BOTH
+    if not is_john and (start_door.start_path_time is not PathTime.BOTH or exit_door.exit_path_time is not PathTime.BOTH) and start_door.start_path_time is not exit_door.exit_path_time:
         return None
-
+    
+    #Determine which path_time to set the path
     path_time = PathTime.BOTH
 
     if not is_john:
-        if start_door.path_time == PathTime.PIZZATIME or exit_door.path_time == PathTime.PIZZATIME:
+        if start_door.start_path_time == PathTime.PIZZATIME or exit_door.exit_path_time == PathTime.PIZZATIME:
             path_time = PathTime.PIZZATIME
         
-        if start_door.path_time == PathTime.NOTPIZZATIME or exit_door.path_time == PathTime.NOTPIZZATIME:
+        if start_door.start_path_time == PathTime.NOTPIZZATIME or exit_door.exit_path_time == PathTime.NOTPIZZATIME:
             path_time = PathTime.NOTPIZZATIME
     
+    #oneway = start or exit only but not initially blocked
     is_oneway = (start_door.access_type == AccessType.STARTONLY and not start_door.initially_blocked) or (exit_door.access_type == AccessType.EXITONLY and not exit_door.initially_blocked)
+    
     is_loop = start_door.is_loop or exit_door.is_loop
 
     new_path = Path(start_door, exit_door, path_time, is_oneway, is_loop)

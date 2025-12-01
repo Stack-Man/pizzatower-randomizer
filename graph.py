@@ -69,9 +69,11 @@ def paths_to_nodes(G, paths, room_title):
         door_b = room_title + "_" + str(path.exit_door.letter)
 
         G.add_edge(door_a, door_b)
+        G[door_a][door_b]["path"] = path
         
         if not path.oneway:
             G.add_edge(door_b, door_a)
+            G[door_a][door_b]["path"] = path
         
         #TODO: add other info to the edge
     

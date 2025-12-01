@@ -11,11 +11,10 @@ from enums import *
     
     Bool    is_branch           : Whether this door is re-used in two paths as part of a branch room.
     Bool    initially_blocked   : Whether this door must be used first before back-tracking is possible. (IE rat obstacle).
-    Enum    path_time           : When this door is accessible (BOTH, PIZZATIME, NOTPIZZATIME)
+    Enum    start_path_time     : When this door is accessible as a start (BOTH, PIZZATIME, NOTPIZZATIME)
+    Enum    exit_path_time      : When this door is accessible as an exit (BOTH, PIZZATIME, NOTPIZZATIME)
     
     Enum    access_type         : How this door can be used (ANY, STARTONLY, EXITONLY)
-    Enum    path_time_if_start       : If this door is a start, when it can be used (BOTH, PIZZATIME, NOTPIZZATIME)
-    Bool    if_notpizzatime_exit_only: If the time is notpizzatime, if this door must be used as an exit
 """
 class Door():
     def __init__(self,
@@ -35,20 +34,28 @@ class Door():
         self.door_dir = door_dir
         self.is_branch = is_branch
         self.initially_blocked = initially_blocked
-        self.path_time = path_time
+        
+        #Convert special parameters into individual path time
+        #for start and exit
+        if if_notpizzatime_exit_only:
+            self.start_path_time = PathTime.pizzatime
+            self.exit_path_time = path_time
+        else:
+            self.start_path_time = path_time_if_start
+            self.exit_path_time = path_time
+            
         self.access_type = access_type
-        self.path_time_if_start = path_time_if_start
-        self.if_notpizzatime_exit_only = if_notpizzatime_exit_only
         self.is_loop = is_loop
         
     def __str__(self):
         return f"{self.letter}"
 
 
-"""A Path is a valid route between two Doors
+"""A Path is a valid route between two Doors with a specific start and exit
     Door    start_door  : Start of the path.
     Door    exit_door   : End of path.
-    Enum    path_time    : When this path is accessible (BOTH, PIZZATIME, NOTPIZZATIME).
+    Enum    path_time   : When this path is accessible (BOTH, PIZZATIME, NOTPIZZATIME).
+                          The reverse path is a separate path object
     Bool    oneway      : Whether the path can be backtracked or not.
 """
 class Path():
