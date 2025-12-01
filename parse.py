@@ -47,6 +47,10 @@ from graph import doors_to_nodes, paths_to_nodes
 from json_keys import * 
 from enums import get_path_time, get_dir, flip_dir
 
+#============================================
+#  JSON IO 
+#============================================
+
 def parse_level_jsons():
     rooms = []
 
@@ -70,7 +74,10 @@ def read_json(filename):
         
         #TODO: repeated parsing then joining of transitions with all transition names
         
-        parsed, new_transitions = parse_json(file)
+        parsed, new_transitions = parse_json_to_graph(file)
+        
+        print(f" new transitions from parse json to graph: {new_transitions}")
+        
         return join_transitions(parsed, new_transitions)
             
     #except Exception as e:
@@ -86,7 +93,10 @@ def read_json(filename):
 #TODO TODO: rework to parse paths and create edges between doors in the same room
 #instead of edges between doors and a room
 #also rework transition door edges to be directional
-def parse_json(data):
+#==================================================
+# JSON to Graph
+#==================================================
+def parse_json_to_graph(data):
     G = nx.DiGraph()
     transition_names = []
 
@@ -96,7 +106,7 @@ def parse_json(data):
         #TODO: parse room data
         room = parse_room(room)
         room_title = room.name
-        is_john = room.is_john
+        is_john = room.room_type == RoomType.JOHN
         
         #skip rooms with no doors (secrets)
         if doors is None:
@@ -106,10 +116,11 @@ def parse_json(data):
 
         #Add doors, new transitions, and Door-Transition edges to G
         G, new_transition_names = doors_to_nodes(G, doors, room_title)
+        transition_names.extend(new_transition_names)
         
         #TODO: pass room object instead of two params
         #Find Paths
-        paths = parse_paths(doors, is_john = room.is_john, room_name = room_title)
+        paths = parse_paths(doors, is_john = is_john, room_name = room_title)
         
         #Add Door-Door edges to G
         G = paths_to_nodes(G, paths, room_title)
@@ -119,17 +130,23 @@ def parse_json(data):
 JOIN_TRANSITION_NAMES = ["horizontal", "vertical", "box"]
 
 def join_transitions(G, all_transitions):
-
     #MODE: matching perfect
     #Match transitions with the same type and consistent directions
+    print(f" all transitions inside join transitions: {all_transitions}")
+    
     for name in JOIN_TRANSITION_NAMES:
+        
+        print(f"    name to check: {name}")
         
         nodes_to_join = []
         
         for node in G.nodes():
         
+            #print(f"        {node}")
+        
             if name in str(node) and str(node) in all_transitions:
                 nodes_to_join.append(node)
+                print(f"    node to join: {node}")
                 
         for node_a in nodes_to_join:
             for node_b in nodes_to_join:
@@ -158,13 +175,13 @@ from enums import RoomType, BranchType, DoorDir, PathTime, AccessType
 # Parse Dict to Objects
 #=================================
 
-
 def parse_room(room: Dict) -> Room:
     doors = []
 
-    for door in room[Room.doors]:
-        new_door = parse_door(door)
-        doors.append(new_door)
+    if Room.doors in room:
+        for door in room[Room.doors]:
+            new_door = parse_door(door)
+            doors.append(new_door)
 
     is_john = "pillar" in room
     is_entrance = "entrance" in room
@@ -173,7 +190,7 @@ def parse_room(room: Dict) -> Room:
     branch_type = BranchType.NONE #TODO:
 
     #parse paths
-    paths = parse_paths(doors, is_jonh, room_name)
+    paths = parse_paths(doors, is_john, room_name)
 
     room_type = find_room_type(paths, is_john, is_entrance, branch_type)
 
@@ -250,8 +267,6 @@ def parse_door(door: Dict) -> Door:
 def parse_paths(doors, is_john, room_name):
     branch_type = BranchType.NONE #TODO: moved from parse_room temporarily
 
-    print("parsing paths of " + room_name + " door count: " + str(len(doors)))
-
     #parse paths
     paths = []
     
@@ -259,8 +274,6 @@ def parse_paths(doors, is_john, room_name):
     for a in range(0, len(doors)):
 
         door_a = doors[a]
-        
-        print("     door " + str(door_a.letter))
 
         #handle one door rooms
         c = a if len(doors) <= 1 else a + 1
@@ -272,8 +285,6 @@ def parse_paths(doors, is_john, room_name):
         for b in range(c, len(doors)):
 
             door_b = doors[b]
-            
-            print("     with door " + str(door_b.letter))
 
             path_ab = parse_path(door_a, door_b, is_john)
             path_ba = parse_path(door_a, door_b, is_john)
@@ -288,25 +299,23 @@ def parse_paths(doors, is_john, room_name):
             if path_ba != None and door_a.letter != door_b.letter:
                 paths.append(path_ba)
     
-    print("     Found paths: " + str(len(paths)))
-    
     return paths
 
 def parse_path(start_door, exit_door, is_john):
 
     #start is exitonly or exit is startonly
     if start_door.access_type == AccessType.EXITONLY or exit_door.access_type == AccessType.STARTONLY:
-        print(" mismatch start/exit access type")
+        #print(" mismatch start/exit access type")
         return None
 
     #path is notpizzatime but start door can only be exit in notpizzatime
     if start_door.if_notpizzatime_exit_only and (start_door.path_time == PathTime.NOTPIZZATIME or exit_door.path_time == PathTime.NOTPIZZATIME):
-        print(" mismatch start time")
+        #print(" mismatch start time")
         return None
 
     #path time mismatch, unless it is in a john room
     if not is_john and (start_door.path_time != PathTime.BOTH or exit_door.path_time != PathTime.BOTH) and start_door.path_time != exit_door.path_time:
-        print(" mismatch time and not john")
+        #print(" mismatch time and not john")
         return None
 
     path_time = PathTime.BOTH

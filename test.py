@@ -87,8 +87,16 @@ def test_parse(filename):
     
     pos = hub_layout(G, hubs, transitions)
     
-    G.remove_nodes_from(hubs)
-    G.remove_nodes_from(transitions)
+    #G.remove_nodes_from(hubs)
+    
+    #TODO: removed for debug
+    #G.remove_nodes_from(transitions)
+    
+    nodelist.extend(hubs)
+    nodelist.extend(transitions)
+    
+    print("hubs: " + str(hubs))
+    print("transitions: " + str(transitions))
     
     nx.draw(G, pos,
         with_labels=True, 

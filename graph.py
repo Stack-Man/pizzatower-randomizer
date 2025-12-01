@@ -62,16 +62,12 @@ def paths_to_nodes(G, paths, room_title):
     #add edges between nodes in G based on the paths
     #add information to each edge
     
-    print("Paths of: " + str(room_title))
-    
     for path in paths:
         
         #TODO: consistent func for constructing the node name
         door_a = room_title + "_" + str(path.start_door.letter)
         door_b = room_title + "_" + str(path.exit_door.letter)
-        
-        print("     new edge: " + door_a + ", " + door_b)
-        
+
         G.add_edge(door_a, door_b)
         
         if not path.oneway:
