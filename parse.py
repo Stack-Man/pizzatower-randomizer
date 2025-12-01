@@ -89,10 +89,6 @@ def read_json(filename):
 #   Branch room detection
 #   Separate graphs and switch between or should I mark edges with branch info?
 #Mark nodes as door/room/transition
-
-#TODO TODO: rework to parse paths and create edges between doors in the same room
-#instead of edges between doors and a room
-#also rework transition door edges to be directional
 #==================================================
 # JSON to Graph
 #==================================================
@@ -156,12 +152,15 @@ def join_transitions(G, all_transitions):
     
     #MODE: matching directional
     #Match transitions that have consistent directions, but possibly different types
+    #TODO:
     
     #MODE: arbitrary no turnarounds
     #Match transitions in any way, but don't allow left/left, right/right, up/up, or down/down
+    #TODO:
     
     #MODE: arbitrary no restrictions
     #Match transitions in any way
+    #TODO:
     
     return G
 
