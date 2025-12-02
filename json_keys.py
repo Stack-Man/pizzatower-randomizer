@@ -19,3 +19,9 @@ DOOR_NOTPIZZATIMEEXITONLY = "notpizzatimeexitonly"
 DOOR_LOOP = "loop"
 
 DOOR_DIR = "dir"
+
+NODE_TRANSITION = "transition"
+NODE_DOOR = "door"
+NODE_ROOM = "room"
+NODE_PATH = "path"
+NODE_ROOM_TITLE = "room_title"

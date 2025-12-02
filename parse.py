@@ -12,18 +12,22 @@ Should paths be their own node or just an edge between doors?
 
 Room: 
     A single room instance. Contains one way edges to each of its doors
-    * name
+    * name: room_title
+    * NODE_ROOM: Room Object
 
 Door:
     A specific transition in a room
-    * letter
+    * name: room_title_letter
+    * NODE_DOOR: Door Object
     
 Path:
     A directional edge between Doors in a Room.
+    * NODE_PATH: Path Object
 
 Transition:
     A type of transition
-    * type
+    * name: transition_type.DoorDir
+    * NODE_TRANSITION: bool
 
 Door-Transition Edge:
     A directional edge that associates doors with each 
@@ -51,44 +55,35 @@ from enums import get_path_time, get_dir, flip_dir
 #  JSON IO 
 #============================================
 
-def parse_level_jsons():
+def read_level_jsons():
     rooms = []
+
+    G = nx.DiGraph()
 
     for json_name in JSON_NAMES:
         dir = "/json/" + json_name + ".json"
-        data = read_json_file(dir)
-        
-        if data != None:
-            for room in data["rooms"]:
-                new_room = parse_room(room)
-                rooms.append(new_room)
+        new_G = read_json(dir)
+        nx.compose(G, new_G)
 
     #TODO: seeded shuffle of rooms
     return rooms
 
 def read_json(filename):
-    #try:
     with open(filename, "r") as f:
         file = json.load(f)
         print("JSON data loaded successfully:")
-        
-        #TODO: repeated parsing then joining of transitions with all transition names
-        
+
         parsed, new_transitions = parse_json_to_graph(file)
-        
-        print(f" new transitions from parse json to graph: {new_transitions}")
-        
-        return join_transitions(parsed, new_transitions)
-            
-    #except Exception as e:
-        #print(f"Error: {e}")
+
+        return join_transitions_in_graph(parsed, new_transitions)
 
 #TODO:
-#Parse special parameters (startonly, ratblocked)
 #Parse branch rooms separately (different graph for branch start/branch exit?)
 #   Branch room detection
-#   Separate graphs and switch between or should I mark edges with branch info?
-#Mark nodes as door/room/transition
+#I should have brnach types on different "layers" and traversing these layers requires going through specific layers
+#before returning to the "main" layer. I can perform "mini iterations" between brnach layers in order to connect them if necessary
+#Something like this:
+# level start > main layer traverse > branch start > mini main layer traverse (x2 to connect both branches) > branch end > return to main layer > level end or branch start
 #==================================================
 # JSON to Graph
 #==================================================
@@ -99,24 +94,24 @@ def parse_json_to_graph(data):
     for room in data[ROOMS]:
         doors = parse_doors(room)
         
-        #TODO: parse room data
         room = parse_room(room)
         room_title = room.name
-        is_john = room.room_type == RoomType.JOHN
         
         #skip rooms with no doors (secrets)
         if doors is None:
             continue
         else:
             G.add_node(room_title)
+            G.nodes[room_title][NODE_ROOM] = room
 
         #Add doors, new transitions, and Door-Transition edges to G
         G, new_transition_names = doors_to_nodes(G, doors, room_title)
         transition_names.extend(new_transition_names)
         
-        #TODO: pass room object instead of two params
         #Find Paths
-        paths = parse_paths(doors, is_john = is_john, room_name = room_title)
+        paths = parse_paths(doors, is_john = room.room_type == RoomType.JOHN, room_name = room_title)
+        
+        #TODO: determine branch type. Mark branch type on paths?
         
         #Add Door-Door edges to G
         G = paths_to_nodes(G, paths, room_title)
@@ -125,14 +120,11 @@ def parse_json_to_graph(data):
 
 JOIN_TRANSITION_NAMES = ["horizontal", "vertical", "box"]
 
-def join_transitions(G, all_transitions):
+def join_transitions_in_graph(G, all_transitions):
     #MODE: matching perfect
     #Match transitions with the same type and consistent directions
-    print(f" all transitions inside join transitions: {all_transitions}")
-    
+
     for name in JOIN_TRANSITION_NAMES:
-        
-        print(f"    name to check: {name}")
         
         nodes_to_join = []
         
@@ -186,6 +178,10 @@ def parse_room(room: Dict) -> Room:
     is_entrance = "entrance" in room
     room_name = room[Room.name]
 
+
+    #TODO: setup processing for branch and room type
+    #remove paths checking here, do it later
+    #or maybe I could do it here and remove the extra parse in read json instead
     branch_type = BranchType.NONE #TODO:
 
     #parse paths
@@ -215,7 +211,6 @@ def parse_doors(room):
         
     return doors
 
-#TODO: rework path time to be start path time and exit path time
 def parse_door(door: Dict) -> Door:
 
     letter = door.get(DOOR_LETTER)
@@ -264,8 +259,6 @@ def parse_door(door: Dict) -> Door:
 
 
 def parse_paths(doors, is_john, room_name):
-    branch_type = BranchType.NONE #TODO: moved from parse_room temporarily
-
     #parse paths
     paths = []
     
@@ -288,9 +281,6 @@ def parse_paths(doors, is_john, room_name):
             path_ab = parse_path(door_a, door_b, is_john)
             path_ba = parse_path(door_b, door_a, is_john)
 
-            if branch_type != BranchType.START and branch_type != BranchType.END:
-                branch_type = check_paths_for_branch_type(path_ab, path_ba, branch_type)
-                
             if path_ab != None:
                 paths.append(path_ab)
             
