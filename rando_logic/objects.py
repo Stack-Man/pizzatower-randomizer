@@ -97,3 +97,21 @@ class Door():
         
     def __str__(self):
         return f"{self.letter}"
+
+"""A Path is a valid route between two Doors with a specific start and exit
+    Door    start_door  : Start of the path.
+    Door    exit_door   : End of path.
+    Enum    path_time   : When this path is accessible (BOTH, PIZZATIME, NOTPIZZATIME).
+                          The reverse path is a separate path object
+    Bool    oneway      : Whether the path can be backtracked or not.
+"""
+class Path():
+    def __init__(self, start_door: Door, exit_door: Door, path_time: PathTime, oneway: bool, loop: bool):
+        self.start_door = start_door
+        self.exit_door = exit_door
+        self.path_time = path_time
+        self.oneway = oneway
+        self.loop = loop
+    
+    def __str__(self):
+        return f"{self.start_door} to {self.exit_door}"

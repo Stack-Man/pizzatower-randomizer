@@ -170,66 +170,64 @@ def doors_to_path(start_door, exit_door, is_john_room)
 #   Object Helpers
 #-------------------
 def get_branch_type(room):
-    #Check for doors that contain "branch"
-    #TODO: figure out what branchstart and branchend values mean
+    #branchstart and branchend values mean the door is a branchmid?
     
-    #get paths that start or end on the branch door and dont include "loop"
+    paths = room.paths
     
+    has_branch_NPT = False
+    has_NPT_branch = False
+    has_branch_PT = False
+    has_PT_branch = False
     
-    return None #TODO
+    for path in paths:
+        branch_NPT = branch_NPT(path)
+        NPT_branch = NPT_branch(path)
+        branch_PT = branch_PT(path)
+        PT_branch = PT_branch(path)
+        
+        has_branch_NPT = has_branch_NPT or branch_NPT
+        has_NPT_branch = has_NPT_branch or NPT_branch
+        has_branch_PT = has_branch_PT or branch_PT
+        has_PT_branch = has_PT_branch or PT_branch
     
+    if (has_branch_NPT and not has_NPT_branch) or (has_PT_branch and not has_branch_PT):
+        return BranchType.START
+    
+    if (has_NPT_branch and not has_branch_NPT) or (has_branch_PT and not has_PT_branch):
+        return BranchType.END
+    
+    if (has_branch_NPT and has_NPT_branch) or (has_branch_PT and has_PT_branch):
+        return BranchType.ANY
+    
+    return BranchType.NONE
+
+#branch_NPT = path starts at branch and is NPT
+#NPT_branch = path ends at branch and is (NPT or [oneway and not PT])
+#branch_PT = path start at branch is PT
+#PT_branch = path end at branch is (PT or [oneway and not NPT])
+
+#paths start at branch must be the correct time (IE not only oneway)
+#otherwise nothing stops the player from doubling back the wrong way
+
+def branch_NPT(path):
+    return branch_TIME(path, PathTime.NOTPIZZATIME)
+
+def NPT_branch(path):
+    return TIME_branch(path, PathTime.NOTPIZZATIME, PathTime.PIZZATIME)
+
+def branch_PT(path):
+    return branch_TIME(path, PathTime.PIZZATIME)
+
+def PT_branch(path):
+    return TIME_branch(path, PathTime.PIZZATIME, PathTime.NOTPIZZATIME)
+
+def branch_TIME(path, time):
+    return path.start_diir.branch and path.path_time == time
+
+def TIME_branch(path, time, wrong_time):
+    return path.exit_door.branch and (path.path_time = time or path.oneway) and path.path_time is not wrong_time
+
 """
-function rd_check_paths_for_branchtype(path_ab, path_ba, current_type)
-{	
-	if ((path_ab != undefined && !path_ab.startdoor.branch && !path_ab.exitdoor.branch)
-	||  (path_ba != undefined && !path_ba.startdoor.branch && !path_ba.exitdoor.branch))
-	{
-		return current_type; //branch check failed
-	}
-	
-	//path == undefined means the other is a oneway
-	//to branch path (ba) being oneway is a valid alternative to being notpizzatime/pizzatime exclusive
-	
-	//Check both in case branch is a or b
-	var branch_NPT = rd_branch_NPT(path_ab) || rd_branch_NPT(path_ba);
-	var NPT_branch = rd_NPT_branch(path_ab) || rd_NPT_branch(path_ba);
-	
-	var branch_PT = rd_branch_PT(path_ab) || rd_branch_PT(path_ba);
-	var PT_branch = rd_PT_branch(path_ab) || rd_PT_branch(path_ba);
-	
-	if ( (branch_NPT && ! NPT_branch) || (!branch_PT && PT_branch) )
-		return roomtype.branchstart;
-	
-	if ( (NPT_branch && ! branch_NPT) || (!PT_branch && branch_PT) )
-		return roomtype.branchend;
-	
-	if ( (branch_NPT && NPT_branch) || (branch_PT && PT_branch) )
-		return roomtype.branchany;
-	
-	return current_type; //branch check failed
-}
-
-function rd_branch_NPT(path)
-{
-	return (path != undefined) && path.startdoor.branch && path.pathtime == pathtime.notpizzatime;
-}
-
-function rd_NPT_branch(path)
-{
-	return (path != undefined) && (path.pathtime == pathtime.notpizzatime || path.oneway) && path.pathtime != pathtime.pizzatime && path.exitdoor.branch;
-}
-
-function rd_branch_PT(path)
-{
-	return (path != undefined) && path.startdoor.branch && path.pathtime == pathtime.pizzatime;
-}
-
-function rd_PT_branch(path)
-{
-	return (path != undefined) && (path.pathtime == pathtime.pizzatime || path.oneway) && path.pathtime != pathtime.notpizzatime  && path.exitdoor.branch;
-}
-
-
 function rd_check_all_paths_for_special_branch(paths, has_pillar, has_entrance, current_type)
 {
 	var has_pizzatime = false;
