@@ -30,13 +30,12 @@ def json_to_room(json_room):
     doors = json_to_doors(json_room)
     paths = doors_to_paths(doors, is_john_room)
     
-    room = Room(room_name, doors, paths)
+    room = Room(room_name, doors, paths, is_john_room, is_entrance_room)
     
-    branch_type = get_branch_type(room)
-    room_type = get_room_type(room, branch_type)
+    room.branch_type = get_branch_type(room)
+    room.room_type =  get_room_type(room)
     
-    room.branch_type = branch_type
-    room.room_type = room_type
+    #TODO: check for CTOP Entrance, CTOP Exit, War EXIT
     
     return room
     
@@ -172,14 +171,12 @@ def doors_to_path(start_door, exit_door, is_john_room)
 def get_branch_type(room):
     #branchstart and branchend values mean the door is a branchmid?
     
-    paths = room.paths
-    
     has_branch_NPT = False
     has_NPT_branch = False
     has_branch_PT = False
     has_PT_branch = False
     
-    for path in paths:
+    for path in room.paths:
         branch_NPT = branch_NPT(path)
         NPT_branch = NPT_branch(path)
         branch_PT = branch_PT(path)
@@ -189,6 +186,10 @@ def get_branch_type(room):
         has_NPT_branch = has_NPT_branch or NPT_branch
         has_branch_PT = has_branch_PT or branch_PT
         has_PT_branch = has_PT_branch or PT_branch
+    
+    for door in room.doors:
+        if (door.branchstart or door.branchend):
+            return BranchType.MID
     
     if (has_branch_NPT and not has_NPT_branch) or (has_PT_branch and not has_branch_PT):
         return BranchType.START
@@ -227,56 +228,20 @@ def branch_TIME(path, time):
 def TIME_branch(path, time, wrong_time):
     return path.exit_door.branch and (path.path_time = time or path.oneway) and path.path_time is not wrong_time
 
-"""
-function rd_check_all_paths_for_special_branch(paths, has_pillar, has_entrance, current_type)
-{
-	var has_pizzatime = false;
-	var has_notpizzatime = false;
-	
-	var has_branchstart = false;
-	
-	for (var p = 0; p < ds_list_size(paths); p++)
-	{
-		var path = ds_list_find_value(paths, p);
-		
-		//TODO: may be redundant with the below check
-		if (path.pathtime == pathtime.pizzatime)
-			has_pizzatime = true;
-		else if (path.pathtime == pathtime.notpizzatime)
-			has_notpizzatime = true;
-		
-		//Accounts for john branching paths as well which are marked as pathtime.any
-		if (path.startdoor.pizzatime || path.exitdoor.pizzatime)
-			has_pizzatime = true;
-		
-		if (path.startdoor.notpizzatime || path.exitdoor.notpizzatime)
-			has_notpizzatime = true;
-		
-		if (has_pizzatime && has_notpizzatime)
-		{
-			if (has_pillar)
-				return roomtype.johnbranching;
-				
-			if (has_entrance)
-				return roomtype.entrancebranching;
-		}
-		
-		if (path.startdoor.branchstart)
-			return roomtype.branchmid;
-	}
-	
-	if (has_pillar)
-		return roomtype.john;
-	
-	if (has_entrance)
-		return roomtype.entrance;
-	
-	return current_type; //check failed
-}
-"""
-
 def get_room_type(room):
-    return None #TODO
+    if (room.has_john):
+        return RoomType.JOHN
+    
+    if (room.has_entrance):
+        return RoomType.ENTRANCE
+    
+    if (room.branchtype is not BranchType.NONE):
+        return RoomType.BRANCH
+    
+    if (len(room.paths) == 1):
+        return RoomType.LOOP
+    
+    return RoomType.NORMAL
 
 def get_dir(door):
     door_dir = door.get(DOOR_DIR)

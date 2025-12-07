@@ -5,7 +5,9 @@ from enums import *
     [Door]  doors       : A list of Door
     [Path]  paths       : A list of Path.
     Enum    branch_type : Type of branch this room is. (NONE, START, END, ANY, or MID). Branch type is enforced by in game obstacles.
-    Enum    room_type    : Type of room.                   (ONEWAY, TWOWAY, BRANCH, ENTRANCE, JOHN, LOOP, WAREXIT, CTOPEXIT, CTOPENTRANCE)
+    Enum    room_type   : Type of room.                   (NORMAL, BRANCH, ENTRANCE, JOHN, LOOP)
+    Bool    has_john    : If a John pillar is present in the room
+    Bool    has_entrance: If an entrance door is present in the room
     
     A "branch" room has two paths. One for pizzatime and one for not.
     
@@ -33,15 +35,14 @@ from enums import *
               \<--- return <-- mid branch leave <-- mid return
 """
 class Room():
-    name = "title"
-    doors = "doors"
-
-    def __init__(self, name, doors, paths):
+    def __init__(self, name, doors, paths, john, entrance):
         self.name = name
         self.doors = doors
         self.paths = paths
         self.branch_type = None
         self.room_type = None
+        self.has_john = john
+        self.has_entrance = entrance
         
         
     def __str__(self):
