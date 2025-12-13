@@ -1,5 +1,6 @@
 from enums import *
 from json_keys import *
+from objects import *
 
 #-------------------
 #   JSON to Object
@@ -45,6 +46,7 @@ def json_to_doors(json_room):
         return []
     
     doors = []
+    json_doors = json_room[JSON_DOORS]
     
     for json_door in json_doors:
         door = json_to_door(json_door)
@@ -135,7 +137,7 @@ def doors_to_paths(doors, is_john_room):
     
     return paths
 
-def doors_to_path(start_door, exit_door, is_john_room)
+def doors_to_path(start_door, exit_door, is_john_room):
 
     #start is exitonly or exit is startonly
     if start_door.access_type == AccessType.EXITONLY or exit_door.access_type == AccessType.STARTONLY:
@@ -177,15 +179,15 @@ def get_branch_type(room):
     has_PT_branch = False
     
     for path in room.paths:
-        branch_NPT = branch_NPT(path)
-        NPT_branch = NPT_branch(path)
-        branch_PT = branch_PT(path)
-        PT_branch = PT_branch(path)
+        is_branch_NPT = branch_NPT(path)
+        is_NPT_branch = NPT_branch(path)
+        is_branch_PT = branch_PT(path)
+        is_PT_branch = PT_branch(path)
         
-        has_branch_NPT = has_branch_NPT or branch_NPT
-        has_NPT_branch = has_NPT_branch or NPT_branch
-        has_branch_PT = has_branch_PT or branch_PT
-        has_PT_branch = has_PT_branch or PT_branch
+        has_branch_NPT = has_branch_NPT or is_branch_NPT
+        has_NPT_branch = has_NPT_branch or is_NPT_branch
+        has_branch_PT = has_branch_PT or is_branch_PT
+        has_PT_branch = has_PT_branch or is_PT_branch
     
     for door in room.doors:
         if (door.branchstart or door.branchend):
@@ -223,10 +225,10 @@ def PT_branch(path):
     return TIME_branch(path, PathTime.PIZZATIME, PathTime.NOTPIZZATIME)
 
 def branch_TIME(path, time):
-    return path.start_diir.branch and path.path_time == time
+    return path.start_door.branch and path.path_time == time
 
 def TIME_branch(path, time, wrong_time):
-    return path.exit_door.branch and (path.path_time = time or path.oneway) and path.path_time is not wrong_time
+    return path.exit_door.branch and (path.path_time == time or path.oneway) and path.path_time is not wrong_time
 
 def get_room_type(room):
     if (room.has_john):
@@ -235,7 +237,7 @@ def get_room_type(room):
     if (room.has_entrance):
         return RoomType.ENTRANCE
     
-    if (room.branchtype is not BranchType.NONE):
+    if (room.branch_type is not BranchType.NONE):
         return RoomType.BRANCH
     
     if (len(room.paths) == 1):

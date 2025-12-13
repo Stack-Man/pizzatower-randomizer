@@ -23,8 +23,6 @@ class DoorType(Enum):
     SECRET = 5
     ROCKET = 6
     TAXI = 7
-    UPDOWN = 8      #For option to match doors directionally only
-    LEFTRIGHT = 9
     ANY = 10
     
 class DoorDir(Enum):

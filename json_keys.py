@@ -13,7 +13,7 @@ DOOR_NOTPIZZATIME = "notpizzatime"
 
 DOOR_BRANCH = "branch"
 DOOR_BRANCH_START = "branchstart"
-DOOR_BRANCH = "branchend"
+DOOR_BRANCH_END = "branchend"
 DOOR_INITIALLY_BLOCKED = "ratblocked"
 DOOR_PIZZATIMESTART = "pizzatimestart"
 DOOR_NOTPIZZATIMESTART = "notpizzatimestart"

@@ -54,7 +54,7 @@ class Room():
     Enum    door_type           : Transition type of this door (VERTICAL, HORIZONTAL, DOOR, BOX, SECRET, ROCKET, TAXI, NONE)
     Enum    door_dir            : Direction this door faces. (UP DOWN LEFT RIGHT NONE)
     
-    Bool    is_branch           : Whether this door is re-used in two paths as part of a branch room.
+    Bool    branch              : Whether this door is re-used in two paths as part of a branch room.
     Bool    initially_blocked   : Whether this door must be used first before back-tracking is possible. (IE rat obstacle).
     Enum    start_path_time     : When this door is accessible as a start (BOTH, PIZZATIME, NOTPIZZATIME)
     Enum    exit_path_time      : When this door is accessible as an exit (BOTH, PIZZATIME, NOTPIZZATIME)
@@ -66,7 +66,7 @@ class Door():
         letter: str,
         door_type: DoorType,
         door_dir: DoorDir,
-        is_branch: bool,
+        branch: bool,
         is_branch_start: bool,
         is_branch_end: bool,
         initially_blocked: bool,
@@ -79,9 +79,9 @@ class Door():
         self.letter = letter
         self.door_type = door_type
         self.door_dir = door_dir
-        self.is_branch = is_branch
-        self.is_branch_start = is_branch_start
-        self.is_branch_end = is_branch_end
+        self.branch = branch
+        self.branchstart = is_branch_start
+        self.branchend = is_branch_end
         self.initially_blocked = initially_blocked
         
         #Convert special parameters into individual path time
