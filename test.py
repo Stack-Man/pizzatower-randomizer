@@ -8,7 +8,7 @@ import numpy as np
 import math
 
 from object_creation import json_to_rooms
-from layer_creation import rooms_to_TW_and_OW_layers
+from layer_creation import rooms_to_layers
 
 LAYER_PATH = "path"
 LAYER_DOOR = "door"
@@ -40,6 +40,10 @@ def hub_layout(G, hubs, transitions):
         total_height = total_height + transition_step_height
     
     hubs_per_column = len(hubs)/2
+    
+    if (hubs_per_column == 0):
+        hubs_per_column = 1
+    
     space_per_hub = total_height  / hubs_per_column
     
     hub_distance = 2000
@@ -96,7 +100,7 @@ def draw_layer(layer, name):
     nodelist.extend(hubs)
     nodelist.extend(transitions)
         
-    plt.figure(figsize=(6, 5))
+    fig = plt.figure(figsize=(6, 5))
 
     nx.draw(layer, pos,
             with_labels=True, 
@@ -105,6 +109,8 @@ def draw_layer(layer, name):
             font_size=10, nodelist = nodelist)
             
     plt.title(name)
+
+    fig.canvas.manager.set_window_title(layer.graph["name"])
     plt.show(block=False)
 
 def test_parse(filename):
@@ -115,12 +121,11 @@ def test_parse(filename):
 
         rooms = json_to_rooms(file)
 
-        layer1, layer2, layer3, layer4 = rooms_to_TW_and_OW_layers(rooms)
-
-        draw_layer(layer1, f"{filename} – Layer 1 (TW hubs)")
-        draw_layer(layer2, f"{filename} – Layer 2 (OW)")
-        draw_layer(layer3, f"{filename} – Layer 3 (TW-other)")
-        draw_layer(layer4, f"{filename} – Layer 4 (??? your custom)")
+        layers = rooms_to_layers(rooms)
+        
+        for layer in layers:
+            print("drawing layer " + str(layer.graph["name"]))
+            draw_layer(layer, "Layer")
 
         plt.show()
         

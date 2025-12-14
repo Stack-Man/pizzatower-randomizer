@@ -9,55 +9,92 @@ import networkx as nx
 def rooms_to_layers(rooms):
     
     TW_start_layer, TW_exit_layer, OW_start_layer, OW_exit_layer = rooms_to_TW_and_OW_layers(rooms)
-    branch_start_layer, branch_end_layer = rooms_to_branch_layers(rooms)
-    john_layer, branch_john_layer = rooms_to_john_layer(rooms)
-    entrance_layer, branch_entrance_layer = rooms_to_entrance_layer(rooms)
+    BS_start_layer, BS_exit_layer, BE_start_layer, BE_exit_layer = rooms_to_branch_layers(rooms)
+    J_start_layer, J_exit_layer, JB_start_layer, JB_exit_layer = rooms_to_john_layer(rooms)
+    E_start_layer, E_exit_layer, EB_start_layer, EB_exit_layer = rooms_to_entrance_layer(rooms)
     
-    return
+    layers = [TW_start_layer, TW_exit_layer, OW_start_layer, OW_exit_layer, BS_start_layer, BS_exit_layer, BE_start_layer, BE_exit_layer, J_start_layer, J_exit_layer, JB_start_layer, JB_exit_layer, E_start_layer, E_exit_layer, EB_start_layer, EB_exit_layer]
+    
+    return layers
 
-#RoomType.NORMAL
-#Four Copies, one with and one without oneway paths
-#One layer for starts one layer for exits
-def rooms_to_TW_and_OW_layers(all_rooms):
+def rooms_to_layer(rooms):
+    start = nx.DiGraph()
+    exit = nx.DiGraph()
+
+    layers = [start, exit]
+
+    def layer_selector(path):
+        yield start, exit
+
+    populate_layers(rooms, layers, layer_selector)
+
+    return start, exit
     
-    rooms = filter_rooms(all_rooms, RoomType.NORMAL)
-    
-    TW_start_layer = nx.DiGraph()
-    TW_exit_layer = nx.DiGraph()
-    OW_start_layer = nx.DiGraph()
-    OW_exit_layer = nx.DiGraph()
-    
-    layers = [TW_start_layer, TW_exit_layer, OW_start_layer, OW_exit_layer]
-    
+#TODO: path in exit layer may go both ways for two way paths
+#but we want it to be a one way transaction
+#start door > exit door > transition
+#not
+#start door > exit door > start door (or any other possible door) > transition
+#so we should make the connecting start door in the exit layer distinct from the "start door" in the exit layer
+#so there may be two copies of each door, one used only for exits and one used for only starts
+#need to modify popualte_layers and add_path_to_layer
+def populate_layers(rooms, layers, layer_selector):
     for room in rooms:
         room_id = room.name
-        
+
         #add room
         for layer in layers:
             layer.add_node(room_id)
             layer.nodes[room_id][LAYER_TYPE] = LAYER_ROOM
-        
-        
+
+       
         for door in room.doors:
             door_id = (room.name, door.letter)
-            
+
             #add door and connect room to door
             for layer in layers:
                 layer.add_node(door_id)
                 layer.nodes[door_id][LAYER_TYPE] = LAYER_DOOR
                 layer.add_edge(room_id, door_id)
-        
+            
             #connect door to door (virtual, by id)
-        
-        
+
+        #add paths between layers
+        #with layers yielded by external selector function
         for path in room.paths:
-            add_path_to_layers(room_id, path, OW_start_layer, OW_exit_layer)
-            
-            if not path.oneway:
-                add_path_to_layers(room_id, path, TW_start_layer, TW_exit_layer)
-            
-            
-    return TW_start_layer, TW_exit_layer, OW_start_layer, OW_exit_layer
+            for start_layer, exit_layer in layer_selector(path):
+                add_path_to_layers(room_id, path, start_layer, exit_layer)
+
+
+#RoomType.NORMAL
+#Four Copies, one with and one without oneway paths
+#One layer for starts one layer for exits
+def rooms_to_TW_and_OW_layers(all_rooms):
+    rooms = filter_rooms(all_rooms, RoomType.NORMAL)
+
+    TW_start = nx.DiGraph()
+    TW_exit = nx.DiGraph()
+    OW_start = nx.DiGraph()
+    OW_exit = nx.DiGraph()
+    
+    TW_start.graph["name"] = "TW_start"
+    TW_exit.graph["name"] = "TW_exit"
+    OW_start.graph["name"] = "OW_start"
+    OW_exit.graph["name"] = "OW_exit"
+
+    layers = [TW_start, TW_exit, OW_start, OW_exit]
+
+    def layer_selector(path):
+        # OW always
+        yield OW_start, OW_exit
+
+        # TW only if not oneway
+        if not path.oneway:
+            yield TW_start, TW_exit
+
+    populate_layers(rooms, layers, layer_selector)
+
+    return TW_start, TW_exit, OW_start, OW_exit
 
 LAYER_PATH = "path"
 LAYER_DOOR = "door"
@@ -93,31 +130,73 @@ def add_path_to_layers(room_id, path, start_layer, exit_layer):
     return
 
 #RoomType.BRANCH
-#Two layers
-def rooms_to_branch_layers(rooms):
-    return
+#Four layers
+#   BranchType.START or BranchType.ANY  (start and exit)
+#   BranchType.END or BranchType.ANY    (start and exit)
 
-#BranchType.START or BranchType.ANY
-def rooms_to_branch_start_layer(rooms):
-    return
-
-#BranchType.END or BranchType.ANY
-def rooms_to_branch_end_layer(rooms):
-    return
+def rooms_to_branch_layers(all_rooms):
+    
+    branch_rooms = filter_rooms(all_rooms, RoomType.BRANCH)
+    
+    B_any_rooms = filter_rooms_by_branch(branch_rooms, BranchType.ANY)
+    B_start_rooms = filter_rooms_by_branch(branch_rooms, BranchType.START)
+    B_end_rooms = filter_rooms_by_branch(branch_rooms, BranchType.END)
+    
+    #TODO: BranchType.MID
+    
+    B_start_rooms.extend(B_any_rooms)
+    B_end_rooms.extend(B_any_rooms)
+    
+    BS_start_layer, BS_exit_layer = rooms_to_layer(B_start_rooms)
+    BE_start_layer, BE_exit_layer = rooms_to_layer(B_end_rooms)
+    
+    BS_start_layer.graph["name"] = "BS_start_layer"
+    BS_exit_layer.graph["name"] = "BS_exit_layer"
+    BE_start_layer.graph["name"] = "BE_start_layer"
+    BE_exit_layer.graph["name"] = "BE_exit_layer"
+    
+    return BS_start_layer, BS_exit_layer, BE_start_layer, BE_exit_layer
 
 #RoomType.JOHN
-def rooms_to_john_layer(rooms):
-    return
+def rooms_to_john_layer(all_rooms):
+    JBE_start_layer, JBE_exit_layer,  J_start_layer, J_exit_layer = type_and_branch_to_layers(all_rooms, RoomType.JOHN, BranchType.END)
+    
+    JBE_start_layer.graph["name"] = "JBE_start_layer"
+    JBE_exit_layer.graph["name"] = "JBE_exit_layer"
+    J_start_layer.graph["name"] = "J_start_layer"
+    J_exit_layer.graph["name"] = "J_exit_layer"
+    
+    return  J_start_layer, J_exit_layer, JBE_start_layer, JBE_exit_layer
 
 #RoomType.ENTRANCE
-def rooms_to_entrance_layer(rooms):
-    return
+def rooms_to_entrance_layer(all_rooms):
+    EBS_start_layer, EBS_exit_layer,  E_start_layer, E_exit_layer = type_and_branch_to_layers(all_rooms, RoomType.ENTRANCE, BranchType.START)
+    
+    EBS_start_layer.graph["name"] = "EBS_start_layer"
+    EBS_exit_layer.graph["name"] = "EBS_exit_layer"
+    E_start_layer.graph["name"] = "E_start_layer"
+    E_exit_layer.graph["name"] = "E_exit_layer"
+    
+    return E_start_layer, E_exit_layer, EBS_start_layer, EBS_exit_layer  
+
+def type_and_branch_to_layers(all_rooms, room_type, branch_type):
+    
+    type_rooms = filter_rooms(all_rooms, room_type)
+    type_branch_rooms = filter_rooms_by_branch(type_rooms, branch_type)
+    type_rooms = filter_rooms_by_branch(type_rooms, BranchType.NONE)
+    
+    TBT_start_layer, TBT_exit_layer = rooms_to_layer(type_branch_rooms)
+    T_start_layer, T_exit_layer = rooms_to_layer(type_rooms)
+    
+    return T_start_layer, T_exit_layer, TBT_start_layer, TBT_exit_layer
 
 def filter_rooms(rooms, room_type):
     return [room for room in rooms if room.room_type == room_type]
 
 def filter_rooms_by_branch(rooms, branch_type):
     return [room for room in rooms if room.branch_type == branch_type]
+
+
 
 
 
