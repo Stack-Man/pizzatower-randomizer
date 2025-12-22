@@ -6,6 +6,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
 import math
+import random
 
 from object_creation import json_to_rooms
 from layer_creation import rooms_to_layers
@@ -74,7 +75,8 @@ def hub_layout(G, hubs, transitions):
         #=================================================
         
         d_x = door_distance * col
-        circ = nx.circular_layout(G.subgraph(list_doors), scale = door_count * 100, center = [d_x, h_y])
+        d_y = h_y + random.random() * 50 + 200
+        circ = nx.circular_layout(G.subgraph(list_doors), scale = door_count * 100, center = [d_x, d_y])
         pos.update(circ)
 
     return pos 
@@ -103,7 +105,7 @@ def draw_layer(layer, name):
     fig = plt.figure(figsize=(6, 5))
 
     nx.draw(layer, pos,
-            with_labels=True, 
+            with_labels=False, 
             node_color="lightblue", 
             node_size=500, 
             font_size=10, nodelist = nodelist)
@@ -111,6 +113,13 @@ def draw_layer(layer, name):
     plt.title(name)
 
     fig.canvas.manager.set_window_title(layer.graph["name"])
+    
+    nx.draw_networkx_labels(
+        layer,
+        pos,
+        font_color="red"   # <-- label color
+    )
+    
     plt.show(block=False)
 
 def test_parse(filename):

@@ -170,6 +170,9 @@ def doors_to_path(start_door, exit_door, is_john_room):
 #-------------------
 #   Object Helpers
 #-------------------
+
+#TODO: branch detection is not working?
+#layer room filters cannot find any branch rooms
 def get_branch_type(room):
     #branchstart and branchend values mean the door is a branchmid?
     
