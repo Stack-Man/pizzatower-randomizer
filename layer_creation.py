@@ -109,16 +109,24 @@ def populate_start_and_exit_layer(rooms, layer_id, path_selector = lambda e: Tru
 
 def add_start_exit_path_to_layer(room_id, path, layer, layer_id):
     
+    add_one_start_exit_path_to_layer(room_id, path.start_door, path.exit_door, layer, layer_id)
+    
+    if not path.oneway:
+        add_one_start_exit_path_to_layer(room_id, path.exit_door, path.start_door, layer, layer_id)
+    
+    return
+    
+def add_one_start_exit_path_to_layer(room_id, start_door, exit_door, layer, layer_id):
     #add start transition node
     #Layer name, start/exit, door type, door direction
-    start_transition_id = (layer_id, LAYER_START_ID, path.start_door.door_type, path.start_door.door_dir)
+    start_transition_id = (layer_id, LAYER_START_ID, start_door.door_type, start_door.door_dir)
     layer.add_node(start_transition_id)
     
     #marker that this node is a layer node
     layer.nodes[start_transition_id][LAYER_TYPE] = LAYER_TRANSITION
     
     #add exit transition node
-    exit_transition_id = (layer_id, LAYER_EXIT_ID, path.exit_door.door_type, path.exit_door.door_dir)
+    exit_transition_id = (layer_id, LAYER_EXIT_ID, exit_door.door_type, exit_door.door_dir)
     layer.add_node(exit_transition_id)
     layer.nodes[exit_transition_id][LAYER_TYPE] = LAYER_TRANSITION
     
@@ -126,12 +134,12 @@ def add_start_exit_path_to_layer(room_id, path, layer, layer_id):
     #add path as attribute to this edge
     
     #Layer name, start/exit, room name, door letter
-    start_door_id = (layer_id, LAYER_START_ID, room_id, path.start_door.letter)
+    start_door_id = (layer_id, LAYER_START_ID, room_id, start_door.letter)
     layer.add_edge(start_transition_id, start_door_id)
     layer[start_transition_id][start_door_id][LAYER_PATH] = path
     
     #connect exit door to exit transition type to in exit layer
-    exit_door_id = (layer_id, LAYER_EXIT_ID, room_id, path.exit_door.letter)
+    exit_door_id = (layer_id, LAYER_EXIT_ID, room_id, exit_door.letter)
     layer.add_edge(exit_door_id, exit_transition_id)
     
     #connect start door in start layer to exit door in exit layer

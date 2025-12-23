@@ -20,6 +20,8 @@ def json_to_rooms(json):
     for json_room in json_rooms:
         room = json_to_room(json_room)
         rooms.append(room)
+        
+        print(str(room.name) + " " + str(room.room_type) + " " + str(room.branch_type))
     
     return rooms
 
@@ -176,6 +178,8 @@ def doors_to_path(start_door, exit_door, is_john_room):
 def get_branch_type(room):
     #branchstart and branchend values mean the door is a branchmid?
     
+    print("branch check of " + str(room.name))
+    
     has_branch_NPT = False
     has_NPT_branch = False
     has_branch_PT = False
@@ -191,19 +195,31 @@ def get_branch_type(room):
         has_NPT_branch = has_NPT_branch or is_NPT_branch
         has_branch_PT = has_branch_PT or is_branch_PT
         has_PT_branch = has_PT_branch or is_PT_branch
+       
+        print("     path" + str(path.start_door.letter) + " to " + str(path.exit_door.letter))
+        print("         branch_npt" + str(has_branch_NPT) + "     is branch_npt" + str(is_branch_NPT) )
+        print("         npt_branch" + str(has_NPT_branch) + "     is npt_branch" + str(is_NPT_branch) )
+        print("         branch_pt" + str(has_branch_PT) + "     is branch_pt" + str(is_branch_PT) )
+        print("         pt_branch" + str(has_PT_branch) + "     is pt_branch" + str(is_PT_branch) )
     
     for door in room.doors:
         if (door.branchstart or door.branchend):
+            print("     type: branch mid")
             return BranchType.MID
     
     if (has_branch_NPT and not has_NPT_branch) or (has_PT_branch and not has_branch_PT):
+        print("     type: branch start")
         return BranchType.START
     
     if (has_NPT_branch and not has_branch_NPT) or (has_branch_PT and not has_PT_branch):
+        print("     type: branch end")
         return BranchType.END
     
     if (has_branch_NPT and has_NPT_branch) or (has_branch_PT and has_PT_branch):
+        print("     type: branch any")
         return BranchType.ANY
+    
+    print("     type: branch NONE")
     
     return BranchType.NONE
 
@@ -228,9 +244,13 @@ def PT_branch(path):
     return TIME_branch(path, PathTime.PIZZATIME, PathTime.NOTPIZZATIME)
 
 def branch_TIME(path, time):
+    print("             branch-" + str(time) + " real: " + str(path.start_door.branch) + "-" + path.path_time)
+
     return path.start_door.branch and path.path_time == time
 
 def TIME_branch(path, time, wrong_time):
+    print("             " + str(time) + "-branch real: " + str(path.exit_door.branch) + "-" + path.path_time + "one way? " + str(path.oneway))
+
     return path.exit_door.branch and (path.path_time == time or path.oneway) and path.path_time is not wrong_time
 
 def get_room_type(room):
