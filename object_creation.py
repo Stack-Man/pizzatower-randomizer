@@ -30,6 +30,8 @@ def json_to_room(json_room):
     is_entrance_room = JSON_ENTRANCE in json_room
     room_name = json_room[JSON_ROOM_NAME]
     
+    print("room: " + str(room_name))
+    
     doors = json_to_doors(json_room)
     paths = doors_to_paths(doors, is_john_room)
     
@@ -80,7 +82,7 @@ def json_to_door(json_door):
         access_type = AccessType.EXITONLY
     
     #if used as a start, must be this time
-    path_time_if_start = PathTime.BOTH
+    path_time_if_start = path_time
 
     if DOOR_PIZZATIMESTART in json_door:
         path_time_if_start = PathTime.PIZZATIME
@@ -104,6 +106,8 @@ def json_to_door(json_door):
                 path_time_if_start,
                 if_notpizzatime_exit_only,
                 is_loop)
+    
+    print("     door " + str(letter) + " start time: " + str(door.start_path_time) + " exit time: " + str(door.exit_path_time))
     
     return door
 
@@ -141,13 +145,21 @@ def doors_to_paths(doors, is_john_room):
 
 def doors_to_path(start_door, exit_door, is_john_room):
 
+    print("     path " + str(start_door.letter) + " to " + str(exit_door.letter))
+
     #start is exitonly or exit is startonly
     if start_door.access_type == AccessType.EXITONLY or exit_door.access_type == AccessType.STARTONLY:
+        print("     path FAIL " + str(start_door.access_type) + " is EXITONLY or " + str(exit_door.access_type) + " is STARTONLY")
         return None
 
     #path time mismatch, unless it is in a john room
     #path times of start and exit must match or at least one is BOTH
-    if not is_john_room and (start_door.start_path_time is not PathTime.BOTH or exit_door.exit_path_time is not PathTime.BOTH) and start_door.start_path_time is not exit_door.exit_path_time:
+    
+    one_is_both = start_door.start_path_time is PathTime.BOTH or exit_door.exit_path_time is PathTime.BOTH
+    times_match = start_door.start_path_time is exit_door.exit_path_time
+    
+    if not is_john_room and not times_match and not one_is_both:
+        print("     path FAIL " + str(start_door.start_path_time) + " is NOT " + str(exit_door.exit_path_time) + " and neither is BOTH")
         return None
     
     #Determine which path_time to set the path
@@ -173,7 +185,6 @@ def doors_to_path(start_door, exit_door, is_john_room):
 #   Object Helpers
 #-------------------
 
-#TODO: branch detection is not working?
 #layer room filters cannot find any branch rooms
 def get_branch_type(room):
     #branchstart and branchend values mean the door is a branchmid?
@@ -186,6 +197,9 @@ def get_branch_type(room):
     has_PT_branch = False
     
     for path in room.paths:
+        
+        print("     path" + str(path.start_door.letter) + " to " + str(path.exit_door.letter))
+        
         is_branch_NPT = branch_NPT(path)
         is_NPT_branch = NPT_branch(path)
         is_branch_PT = branch_PT(path)
@@ -196,7 +210,7 @@ def get_branch_type(room):
         has_branch_PT = has_branch_PT or is_branch_PT
         has_PT_branch = has_PT_branch or is_PT_branch
        
-        print("     path" + str(path.start_door.letter) + " to " + str(path.exit_door.letter))
+        
         print("         branch_npt" + str(has_branch_NPT) + "     is branch_npt" + str(is_branch_NPT) )
         print("         npt_branch" + str(has_NPT_branch) + "     is npt_branch" + str(is_NPT_branch) )
         print("         branch_pt" + str(has_branch_PT) + "     is branch_pt" + str(is_branch_PT) )
@@ -244,14 +258,15 @@ def PT_branch(path):
     return TIME_branch(path, PathTime.PIZZATIME, PathTime.NOTPIZZATIME)
 
 def branch_TIME(path, time):
-    print("             branch-" + str(time) + " real: " + str(path.start_door.branch) + "-" + path.path_time)
+    print("             branch-" + str(time) + " real: " + str(path.start_door.branch) + "-" + str(path.exit_door.exit_path_time))
 
-    return path.start_door.branch and path.path_time == time
+    #return path.start_door.branch and path.path_time == time
+    return path.start_door.branch and path.exit_door.exit_path_time == time
 
 def TIME_branch(path, time, wrong_time):
-    print("             " + str(time) + "-branch real: " + str(path.exit_door.branch) + "-" + path.path_time + "one way? " + str(path.oneway))
+    print("             " + str(time) + "-branch real: " + str(path.start_door.start_path_time) + "-" + str(path.exit_door.branch) + "   one way? " + str(path.oneway))
 
-    return path.exit_door.branch and (path.path_time == time or path.oneway) and path.path_time is not wrong_time
+    return path.exit_door.branch and (path.start_door.start_path_time == time or path.oneway) and path.start_door.start_path_time is not wrong_time
 
 def get_room_type(room):
     if (room.has_john):

@@ -1,7 +1,3 @@
-TODO: branch detection or branch filtering is failing
-
-
-
 "Layer" concept taken to the extreme
 
 

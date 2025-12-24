@@ -109,14 +109,14 @@ def populate_start_and_exit_layer(rooms, layer_id, path_selector = lambda e: Tru
 
 def add_start_exit_path_to_layer(room_id, path, layer, layer_id):
     
-    add_one_start_exit_path_to_layer(room_id, path.start_door, path.exit_door, layer, layer_id)
+    add_one_start_exit_path_to_layer(room_id, path, path.start_door, path.exit_door, layer, layer_id)
     
     if not path.oneway:
-        add_one_start_exit_path_to_layer(room_id, path.exit_door, path.start_door, layer, layer_id)
+        add_one_start_exit_path_to_layer(room_id, path, path.exit_door, path.start_door, layer, layer_id)
     
     return
     
-def add_one_start_exit_path_to_layer(room_id, start_door, exit_door, layer, layer_id):
+def add_one_start_exit_path_to_layer(room_id, path, start_door, exit_door, layer, layer_id):
     #add start transition node
     #Layer name, start/exit, door type, door direction
     start_transition_id = (layer_id, LAYER_START_ID, start_door.door_type, start_door.door_dir)

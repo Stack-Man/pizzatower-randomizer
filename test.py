@@ -134,7 +134,7 @@ def test_parse(filename):
         
         for layer in layers:
             print("drawing layer " + str(layer.graph["name"]))
-            #draw_layer(layer, "Layer")
+            draw_layer(layer, "Layer")
 
         plt.show()
         
