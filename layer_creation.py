@@ -1,7 +1,8 @@
 from enums import *
 import networkx as nx
 import node_id_objects as nio
-from node_id_objects import StartExitType
+from node_id_objects import StartExitType, NodeType
+from object_creation import flip_dir
 
 #==========================================
 #   Layer Creation
@@ -23,6 +24,8 @@ def rooms_to_layers(rooms):
     E, EB = rooms_to_entrance_layer(rooms)
     
     layers = [TW, OW, BS, BE, J, JB, E, EB]
+    
+    add_initial_transitions_to_layers(layers, TraversalMode.MATCHING_PERFECT)
     
     return layers
     
@@ -56,7 +59,6 @@ def populate_start_and_exit_layer(rooms, layer_id, path_selector = lambda e: Tru
        
         for door in room.doors:
             
-
             #add door and connect room to door
             for layer_type_id in layer_ids:
                 
@@ -69,39 +71,39 @@ def populate_start_and_exit_layer(rooms, layer_id, path_selector = lambda e: Tru
         #add paths between layers
         for path in room.paths:
             if path_selector(path):
-                add_start_exit_path_to_layer(room_id, path, layer, layer_id)
+                add_start_exit_path_to_layer(room.name, path, layer, layer_id)
     
     return layer
 
-def add_start_exit_path_to_layer(room_id, path, layer, layer_id):
+def add_start_exit_path_to_layer(room_name, path, layer, layer_id):
     
-    add_one_start_exit_path_to_layer(room_id, path, path.start_door, path.exit_door, layer, layer_id)
+    add_one_start_exit_path_to_layer(room_name, path, path.start_door, path.exit_door, layer, layer_id)
     
     if not path.oneway:
-        add_one_start_exit_path_to_layer(room_id, path, path.exit_door, path.start_door, layer, layer_id)
+        add_one_start_exit_path_to_layer(room_name, path, path.exit_door, path.start_door, layer, layer_id)
     
     return
     
-def add_one_start_exit_path_to_layer(room_id, path, start_door, exit_door, layer, layer_id):
+def add_one_start_exit_path_to_layer(room_name, path, start_door, exit_door, layer, layer_id):
     #add start transition node
     #Layer name, start/exit, door type, door direction
     start_transition_id = nio.create_transition_node_id(layer_id, StartExitType.START, start_door.door_type, start_door.door_dir)
     layer.add_node(start_transition_id)
     
     #add exit transition node
-    exit_transition_id = nio.create_transition_node_id((layer_id, StartExitType.EXIT, exit_door.door_type, exit_door.door_dir)
+    exit_transition_id = nio.create_transition_node_id(layer_id, StartExitType.EXIT, exit_door.door_type, exit_door.door_dir)
     layer.add_node(exit_transition_id)
     
     #connect start transition type to start door in start layer
     #add path as attribute to this edge
     
     #Layer name, start/exit, room name, door letter
-    start_door_id = (layer_id, LAYER_START_ID, room_id, start_door.letter)
+    start_door_id = nio.create_door_node_id(layer_id, StartExitType.START, room_name, start_door.letter)
     layer.add_edge(start_transition_id, start_door_id)
     layer[start_transition_id][start_door_id][LAYER_PATH] = path
     
     #connect exit door to exit transition type to in exit layer
-    exit_door_id = (layer_id, LAYER_EXIT_ID, room_id, exit_door.letter)
+    exit_door_id = nio.create_door_node_id(layer_id, StartExitType.EXIT, room_name, exit_door.letter)
     layer.add_edge(exit_door_id, exit_transition_id)
     
     #connect start door in start layer to exit door in exit layer
@@ -201,6 +203,78 @@ def filter_rooms(rooms, room_type):
 
 def filter_rooms_by_branch(rooms, branch_type):
     return [room for room in rooms if room.branch_type == branch_type]
+
+def add_initial_transitions_to_layers(layers, traversal_mode):
+    transition_node_ids = []
+    
+    #gather transition nodes
+    for layer in layers:
+        
+        for node in layer.nodes():
+            
+            print(str(node))
+            
+            if node.node_type == NodeType.TRANSITION:
+                transition_node_ids.append(node)
+    
+    #convert transition_node_ids to only those that are unique
+    
+    unique_tids = []
+    
+    for tnid in transition_node_ids:
+        tid = nio.create_transition_id(StartExitType.NONE, tnid.inner_id.door_type, tnid.inner_id.door_dir)
+        
+        if tid not in unique_tids:
+            unique_tids.append(tid)
+    
+    #add initial transitions to each layer
+    for layer in layers:
+        add_initial_transitions_to_layer(layer, unique_tids, traversal_mode)
+
+#Add transitions with INITIAL type as nodes to layer
+#connect INITIAL transitions to START transitions according to
+#connection mode
+def add_initial_transitions_to_layer(layer, unique_transition_ids, traversal_mode):
+    #MODE: matching directional
+    #Match transitions that have consistent directions, but possibly different types
+    #TODO:
+    
+    #MODE: arbitrary no turnarounds
+    #Match transitions in any way, but don't allow left/left, right/right, up/up, or down/down
+    #TODO:
+    
+    #MODE: arbitrary no restrictions
+    #Match transitions in any way
+    #TODO:
+    
+    match traversal_mode:
+        case TraversalMode.MATCHING_PERFECT:
+            #Match transitions with the same type and consistent directions
+            add_initial_transitions_to_layer_matching_perfect(layer, unique_transition_ids)
+            return 
+        case _:
+            return
+
+def add_initial_transitions_to_layer_matching_perfect(layer, unique_transition_ids):
+    
+    print(f"adding to layer {str(layer)}")
+    layer_id = layer.name
+    
+    for utid in unique_transition_ids:
+        
+        initial_ntid = nio.create_transition_node_id(layer_id, StartExitType.INITIAL, utid.door_type, utid.door_dir)
+        compare_ntid = nio.create_transition_node_id(layer_id, StartExitType.START, utid.door_type, flip_dir(utid.door_dir))
+        
+        compare_ntids = [compare_ntid]
+        
+        layer.add_node(initial_ntid)
+        
+        #add edge between initial and all start tids that have the same door type but flipped dir
+        for node in layer.nodes():
+            if node in compare_ntids:
+                layer.add_edge(initial_ntid, node)
+    
+    return layer
 
 
 

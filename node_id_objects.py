@@ -19,22 +19,26 @@ class NodeType(Enum):
 class Node_ID():
     
     def __init__(self, layer_id, node_type: NodeType, inner_id):
-        self.layer_id = layer_id
+        self.layer_id = layer_id 
         self.node_type = node_type
         self.inner_id = inner_id
         
         
     def __str__(self):
-        return f"{self.layer_id} {str(self.node_type)} {str(self.inner_id)}"
+        return f"NODE: {self.layer_id} {str(self.node_type)} ({str(self.inner_id)})"
     
     def __eq__(self, other):
         return self.layer_id == other.layer_id and self.node_type == other.node_type and self.inner_id == other.inner_id
-
+    
+    #necessary so that we can use it in a networkx graph
+    def __hash__(self):
+        return hash((self.layer_id, self.node_type, self.inner_id))
 
 class StartExitType(Enum):
     NONE = 0
     START = 1
     EXIT = 2
+    INITIAL = 3
     
 class Transition_ID():
     
@@ -44,11 +48,15 @@ class Transition_ID():
         self.door_dir = door_dir
     
     def __str__(self):
-        return f"{str(self.start_exit_type)} {str(self.door_type)} {str(self.door_dir)}"
+        return f"TRANSITION: {str(self.start_exit_type)} {str(self.door_type)} {str(self.door_dir)}"
     
     def __eq__(self, other):
+        print(f"compare {str(self)} to {str(other)}")
+        
         return self.start_exit_type == other.start_exit_type and self.door_type == other.door_type and self.door_dir == other.door_dir
 
+    def __hash__(self):
+        return hash((self.start_exit_type, self.door_type, self.door_dir))
 
 class Door_ID():
     
@@ -58,10 +66,13 @@ class Door_ID():
         self.letter = letter
     
     def __str__(self):
-        return f"{str(self.start_exit_type)} {str(self.room_id)} {str(self.letter)}"
+        return f"DOOR: {str(self.start_exit_type)} ({str(self.room_id)}) {str(self.letter)}"
     
     def __eq__(self, other):
         return self.start_exit_type == other.start_exit_type and self.room_id == other.room_id and self.letter == other.letter
+    
+    def __hash__(self):
+        return hash((self.start_exit_type, self.room_id, self.letter))
 
 
 def create_door_node_id(layer_id, start_exit_type: StartExitType, room_id, letter):
@@ -77,6 +88,12 @@ def create_transition_node_id(layer_id, start_exit_type: StartExitType, door_typ
     node_id = Node_ID(layer_id, NodeType.TRANSITION, transition_id)
     
     return node_id
+
+def create_transition_id(start_exit_type: StartExitType, door_type: DoorType, door_dir: DoorDir):
+    
+    transition_id = Transition_ID(start_exit_type, door_type, door_dir)
+    
+    return transition_id
 
 def create_room_node_id(layer_id, room_name):
     

@@ -309,7 +309,7 @@ def flip_dir(door_dir):
     elif door_dir == DoorDir.RIGHT:
         return DoorDir.LEFT
     else:
-        return dir
+        return door_dir
 
 def get_path_time(door):
     if (DOOR_PIZZATIME in door):

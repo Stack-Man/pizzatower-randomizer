@@ -1,3 +1,5 @@
+import node_id_objects as nio
+
 def find_path_through_all_layers(entrance_layer, branchentrance_layer, twoway_layer, branchstart_layer, oneway_layer, branchend_layer, brannchjohn_layer, john_layer):
     
     #start
@@ -18,7 +20,14 @@ def find_path_through_all_layers(entrance_layer, branchentrance_layer, twoway_la
         #END
     pass
 
-def find_path_in_layer(layer, start_index):
+def find_path_in_layer_from_transition(layer, initial_door_type, initial_door_dir):
+    
+    #pick potential transition types using inital values and
+    #a graph linking allowed transitions
+    
+    #perhaps add all transitions labled as "initial" and connect them to valid
+    #"start" transitions depending on traversal rules
+    
     
     pass
     

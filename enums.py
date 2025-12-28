@@ -45,3 +45,11 @@ class RoomType(Enum):
     ENTRANCE = 3
     JOHN = 4
     LOOP = 5
+
+class TraversalMode(Enum):
+    NONE = 0
+    MATCHING_PERFECT = 1
+    MATCHING_DIRECTIONAL = 2
+    ARBITRARY_NO_TURNAROUNDS = 3
+    ARBITRARY_NO_RESTRICTIONS = 4
+    
