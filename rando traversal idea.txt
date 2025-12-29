@@ -52,6 +52,9 @@ each MVP layer:
 MVP Construction Rules:
 	1. Disconnect paths that use a repeated exit (an exit type appearing previously in the path)
 	2. Disconnect paths that could connect to a previous entrance (could we collapse with above rule somehow?)
+    
+    we could collapse it. if there is such an exit that connects to an entrance, that entrance must connect to a previously used exit (including the initial transition nodes as an "exit")
+    we dont care that we remove a room that could be the singular room inbetween two end points this way because that room is redundant and we can add it in later
 	
 Algorithm:
 	For all initial transition nodes:
@@ -63,6 +66,10 @@ Algorithm:
 	2b. Terminate if path ends at exit transition node
 	2c. Remove edge if there are no other neighbors to the edge start (IE, possibly supporting another path)
 
+    may also want to include the length of the path as we shrink? maybe for viable paths, we do perform the flow backwards without edge removal, just to count the length of the path?
+    no that wont work because of branches, or maybe we can store all viable found paths and their lengths and then just choose one
+    may have to create some data structure to store info like length,a nd which branches to take to "reconstruct" the path of that length
+    it would also store info on what type of exit that path has so we can quickly choose in cases where the end point matters (such as when adding redundant paths to the MVP)
 
 Summary:
 	Flow Forward: Grow path until redundant exit
@@ -128,6 +135,17 @@ Adding rooms to Minium Viable Paths:
     and we could not just add a redundant path to a MVP but we can add a redundant path inbetween an existing redundant path, if necessary, to increase the size of the path as needed
     
 the larger logic of all of this could treat any "layer" as we would a room, ignoring its insides and inspecting only the start and exit types
+
+what about when start a new layer? which exit paths should connect?
+we should use all of them, even if they connect to at least one endpoint entrance
+this si because the shrink phase will desize them if it goes bad and teh redundancy check ensures we dont get duplicate path exits branching from the same path
+
+the initial transition nodes may be redundant now since we are actually connecting the layers together
+similar reasoning to why when we combined the start and exit layers into one we removed the redundant node that would otherwise help connect them
+
+
+
+
 
 
 
