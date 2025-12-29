@@ -75,3 +75,81 @@ in the end not all paths terminate at the final layer's end branch
 we use a copy of the layer we just processed because all paths that failed to grow in this iteration cannot possibly do so in the next
 
 we also need to trim initial nodes that have no connection to any valid exit path 
+
+because of how endpoint traversal works, each MVP layer does not verify that it can continue all the way to the a john end
+in this case, what we can do is the following:
+
+repeat the algorithm but for the larger layers, removing paths that do not end at at least one john exit
+
+so now we also have to construct larger MVP layers for the following:
+
+Entrance > John
+Entrance > (Start Branch > End Branch) > John
+Entrance > (Start Branch > John Branch)
+Entrance Branch > (End Branch > John)
+Entrance Branch > John Branch
+
+This encapsulates possible start > end combinations
+we cannot use a faulty end branch, for example, because such a path would be shrunk away
+
+now the question is if this process takes too long because we have to redo it every time we finish a level to remove the new bad paths
+maybe we can devise a better algorithm since all we're doing is removing bad paths.
+we would just flow through from each initial node along every path and do only the shrink process to trim dead end paths
+
+Pairs of levels would be treated as a single MVP layer, which means we calculate MVP layers for the following first:
+
+Entrance > John
+(Start Branch > End Branch)
+(Start Branch > John Branch)
+Entrance Branch > John Branch
+(End Branch > John)
+
+Then use those pairs to calculate the following larger MVP layers:
+
+Entrance > (Start Branch > End Branch) > John
+Entrance > (Start Branch > John Branch)
+Entrance Branch > (End Branch > John)
+
+
+these paired MVP layers could be treated as just one big room with multiple entrances/exits and paths through it
+we could add one or more of these inbetween any existing "rooms" with the same process we would use to add new rooms inbetween MVPs
+
+
+Adding rooms to Minium Viable Paths:
+
+    Additional rooms are, by definition, redundant. That means that at least one of the rooms will have a redundant exit type.
+    when we add a room, we either add a single room whose entrance and exits match the exit and entrance of the adjacent rooms OR a series of rooms that do the same
+    
+    therefore, we could use a similar process to construct "minimum viable paths" of a series of rooms
+    but the intention is NOT to connect to an entrance/john transition, but just any possible type of transition
+    
+    maybe this means when we identify a redundant path that stops growing, we dont just remove it, we transplant it to another layer
+    all these paths can then be used to connect existing MVPs after choosing.
+    and we could not just add a redundant path to a MVP but we can add a redundant path inbetween an existing redundant path, if necessary, to increase the size of the path as needed
+    
+the larger logic of all of this could treat any "layer" as we would a room, ignoring its insides and inspecting only the start and exit types
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
