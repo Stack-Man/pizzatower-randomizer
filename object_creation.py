@@ -61,11 +61,11 @@ def json_to_doors(json_room):
 def json_to_door(json_door):
     
     letter = json_door.get(DOOR_LETTER)
-    door_type = json_door.get(DOOR_TYPE)
-    door_dir = json_door.get(DOOR_DIR)
+    j_door_type = json_door.get(DOOR_TYPE)
+    j_door_dir = json_door.get(DOOR_DIR)
 
-    if door_dir == None:
-        door_dir = DoorDir.NONE
+    door_dir = get_dir(j_door_dir)
+    door_type = get_door_type(j_door_type)
 
     is_branch = DOOR_BRANCH in json_door
     is_branch_start = DOOR_BRANCH_START in json_door
@@ -161,6 +161,8 @@ def doors_to_path(start_door, exit_door, is_john_room):
     if not is_john_room and not times_match and not one_is_both:
         print("     path FAIL " + str(start_door.start_path_time) + " is NOT " + str(exit_door.exit_path_time) + " and neither is BOTH")
         return None
+    
+    #TODO: should leveldoors have a path to exit?
     
     #Determine which path_time to set the path
     path_time = PathTime.BOTH
@@ -283,18 +285,16 @@ def get_room_type(room):
     
     return RoomType.NORMAL
 
-def get_dir(door):
-    door_dir = door.get(DOOR_DIR)
-    
-    if door_dir is None:
+def get_dir(j_door_dir):
+    if j_door_dir is None:
         return DoorDir.NONE
-    elif door_dir == "up":
+    elif j_door_dir == "up":
         return DoorDir.UP
-    elif door_dir == "down":
+    elif j_door_dir == "down":
         return DoorDir.DOWN
-    elif door_dir == "left":
+    elif j_door_dir == "left":
         return DoorDir.LEFT
-    elif door_dir == "right":
+    elif j_door_dir == "right":
         return DoorDir.RIGHT
     else:
         return DoorDir.ANY
@@ -319,4 +319,24 @@ def get_path_time(door):
     else:
         return PathTime.BOTH
 
-        
+def get_door_type(j_door_type):
+    if j_door_type is None:
+        return DoorType.NONE
+    elif j_door_type == "horizontal":
+        return DoorType.HORIZONTAL
+    elif j_door_type == "vertical":
+        return DoorType.VERTICAL
+    elif j_door_type == "door":
+        return DoorType.DOOR
+    elif j_door_type == "box":
+        return DoorType.BOX
+    elif j_door_type == "secret":
+        return DoorType.SECRET
+    elif j_door_type == "rocket":
+        return DoorType.ROCKET
+    elif j_door_type == "taxi":
+        return DoorType.TAXI
+    elif j_door_type == "leveldoor":
+        return DoorType.LEVELDOOR
+    else:
+        return DoorType.ANY

@@ -25,7 +25,8 @@ class Node_ID():
         
         
     def __str__(self):
-        return f"NODE: {self.layer_id} {str(self.node_type)} ({str(self.inner_id)})"
+        #return f"N: {self.layer_id} {str(self.node_type)} \n({str(self.inner_id)})"
+        return f"{str(self.inner_id)}"
     
     def __eq__(self, other):
         return self.layer_id == other.layer_id and self.node_type == other.node_type and self.inner_id == other.inner_id
@@ -48,10 +49,10 @@ class Transition_ID():
         self.door_dir = door_dir
     
     def __str__(self):
-        return f"TRANSITION: {str(self.start_exit_type)} {str(self.door_type)} {str(self.door_dir)}"
+        return f"T: {str(self.door_type)} {str(self.door_dir)}"
     
     def __eq__(self, other):
-        print(f"compare {str(self)} to {str(other)}")
+        #print(f"compare {str(self)} to {str(other)}")
         
         return self.start_exit_type == other.start_exit_type and self.door_type == other.door_type and self.door_dir == other.door_dir
 
@@ -66,7 +67,7 @@ class Door_ID():
         self.letter = letter
     
     def __str__(self):
-        return f"DOOR: {str(self.start_exit_type)} ({str(self.room_id)}) {str(self.letter)}"
+        return f"D: ({str(self.room_id)}) {str(self.letter)}"
     
     def __eq__(self, other):
         return self.start_exit_type == other.start_exit_type and self.room_id == other.room_id and self.letter == other.letter

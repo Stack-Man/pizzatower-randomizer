@@ -29,48 +29,66 @@ def hub_layout(G, hubs, transitions):
     
     #for each transition, place it equally spaced on a central line
     
-    transition_step_height = 1000
-    
-    total_height = 0
-    
     #=========================================
-    #Place all transitions in a veritcal line
+    #Sort transitions by type
     #=========================================
-    yi = 0
-    ys = 0
-    ye = 0
+    i_ts = []
+    s_ts = []
+    e_ts = []
     
-    for i, t_node in enumerate(transitions):
-        
-        x = 0
-        
+    for t_node in transitions:
         se_type = t_node.inner_id.start_exit_type
         
-        y = 0
-        
-        if  se_type == StartExitType.INITIAL:
-            x = 0
-            yi = yi + 1
-            
-            y = yi * transition_step_height
+        if se_type == StartExitType.INITIAL:
+            i_ts.append(t_node)
         elif se_type == StartExitType.START:
-            x = 1000
-            ys = ys + 1 + 200
-            
-            y = ys * transition_step_height
+            s_ts.append(t_node)
         else:
-            x = 2000
-            ye = ye + 1 + 100
-            
-            y = ye * transition_step_height
-        
-        t_x = x
-        t_y = y
-        
-        pos[t_node] = [t_x, t_y]
-        total_height = total_height + transition_step_height
+            e_ts.append(t_node)
     
-    hubs_per_column = len(hubs)/2
+    i_col = 0
+    s_col = 1000
+    e_col = 4000
+    
+    i_height = 0
+    s_height = 0
+    e_height = 0
+    
+    transition_step_height = 1500
+    
+    #=========================================
+    #Place all transitions in three veritcal lines
+    #=========================================
+    for i, t in enumerate(i_ts):
+        
+        t_x = i_col
+        t_y = i * transition_step_height
+        pos[t] = [t_x, t_y]
+        
+        i_height = i_height + transition_step_height
+    
+    for i, t in enumerate(s_ts):
+        
+        t_x = s_col
+        t_y = i * transition_step_height + 300
+        pos[t] = [t_x, t_y]
+        
+        s_height = s_height + transition_step_height
+    
+    for i, t in enumerate(e_ts):
+        
+        t_x = e_col
+        t_y = i * transition_step_height + 600
+        pos[t] = [t_x, t_y]
+        
+        e_height = e_height + transition_step_height
+    
+    
+    total_height = max(i_height, s_height, e_height)
+    
+    
+    #hubs_per_column = len(hubs)/2
+    hubs_per_column = len(hubs)
     
     if (hubs_per_column == 0):
         hubs_per_column = 1
@@ -79,13 +97,16 @@ def hub_layout(G, hubs, transitions):
     
     hub_distance = 4000
     
-    door_distance = hub_distance / 2
+    start_door_distance = 2000
+    exit_door_distance = 3000
     
     #===========================================
-    #Place all rooms (hubs) in two veritcal line
+    #Place all rooms (hubs) in one veritcal line
     #Space and divide equally
     #===========================================
     for i, h_node in enumerate(hubs):
+        
+        #print(f"Pos for: {str(h_node)}")
         
         #row = math.ceil(i / 2)
         row = i
@@ -95,21 +116,59 @@ def hub_layout(G, hubs, transitions):
         col = 1
         h_x = hub_distance * col
         
-        pos[h_node] = (h_x, h_y)
+        #pos[h_node] = (h_x, h_y)
+        #pos[h_node] = (0, 0)
         
         doors = G.neighbors(h_node)
         list_doors = list(doors)
         door_count = len(list_doors)
         
+        #==================================================
+        #Place all doors in two vertical lines by door type
+        #==================================================
+        
+        print(f"    doors count: {str(door_count)}")
+        
+        start_doors = []
+        exit_doors = []
+        
+        for door in list_doors:
+            
+            #print(f"        doors to check: {str(door)}")
+            
+            if door.inner_id.start_exit_type == StartExitType.START:
+                #print(f"        added start: {str(door)}")
+                start_doors.append(door)
+            else:
+                #print(f"        added exit: {str(door)}")
+                exit_doors.append(door)
+        
+        for i, d in enumerate(start_doors):
+            #print(f"    Pos for: {str(d)}")
+            
+            d_x = start_door_distance * col
+            d_y = h_y + i * (space_per_hub / len(start_doors)) - 300
+            pos[d] = (d_x, d_y)
+        
+        for i, d in enumerate(exit_doors):
+            #print(f"    Pos for: {str(d)}")
+            
+            d_x = exit_door_distance * col
+            d_y = h_y + i * (space_per_hub / len(exit_doors)) - 600
+            pos[d] = (d_x, d_y)
+        
+        """
         #=================================================
         #Place all doors in the space alloted for that hub
         #In a circle
         #=================================================
         
+        
         d_x = door_distance * col
         d_y = h_y + random.random() * 50 + 200
         circ = nx.circular_layout(G.subgraph(list_doors), scale = door_count * 100, center = [d_x, d_y])
         pos.update(circ)
+        """
 
     return pos 
 
@@ -117,8 +176,6 @@ def draw_layer(layer, name):
     transitions = []
     hubs = []
     nodelist = []
-    
-    
     
     for node in layer.nodes():
 
@@ -139,9 +196,14 @@ def draw_layer(layer, name):
         else:
             nodelist.append(node)"""
     
+    
+    
     pos = hub_layout(layer, hubs, transitions)
     
-    nodelist.extend(hubs)
+    for n in hubs:
+        layer.remove_node(n)
+    
+    #nodelist.extend(hubs)
     nodelist.extend(transitions)
     
     nodes_without_pos = [n for n in layer.nodes if n not in pos]

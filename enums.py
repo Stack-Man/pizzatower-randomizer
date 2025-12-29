@@ -23,6 +23,7 @@ class DoorType(Enum):
     SECRET = 5
     ROCKET = 6
     TAXI = 7
+    LEVELDOOR = 8
     ANY = 10
     
 class DoorDir(Enum):

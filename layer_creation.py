@@ -263,7 +263,12 @@ def add_initial_transitions_to_layer_matching_perfect(layer, unique_transition_i
     for utid in unique_transition_ids:
         
         initial_ntid = nio.create_transition_node_id(layer_id, StartExitType.INITIAL, utid.door_type, utid.door_dir)
-        compare_ntid = nio.create_transition_node_id(layer_id, StartExitType.START, utid.door_type, flip_dir(utid.door_dir))
+        
+        
+        
+        compare_ntid = nio.create_transition_node_id(layer_id, StartExitType.START, utid.door_type, my_flip_dir(utid.door_dir))
+        
+        print(f" {str(initial_ntid)} vs {str(compare_ntid)}")
         
         compare_ntids = [compare_ntid]
         
@@ -277,7 +282,17 @@ def add_initial_transitions_to_layer_matching_perfect(layer, unique_transition_i
     return layer
 
 
-
+def my_flip_dir(door_dir: DoorDir):
+    if door_dir == DoorDir.UP:
+        return DoorDir.DOWN
+    elif door_dir == DoorDir.DOWN:
+        return DoorDir.UP
+    elif door_dir == DoorDir.LEFT:
+        return DoorDir.RIGHT
+    elif door_dir == DoorDir.RIGHT:
+        return DoorDir.LEFT
+    else:
+        return door_dir
 
 
 
