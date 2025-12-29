@@ -1,0 +1,77 @@
+to identify dead ends quickly, it becomes necessary to understand how we will move through layers
+for end points, this is easy but for repeated segments, it could be tricky
+what's needed to connect endpoints is a "minimum viable path"
+Theorem P = any room that is strictly unnecessary can be added later without reducing the potential path set
+
+
+we could connect all layers into a single graph
+but intentionally repeat some layers multiple times
+the number of times we repeat say the two-way layer could be static (4-5) or repeat until no new rooms gain a "path" to an endpoint
+there is also the issue of repeated rooms in a path
+this is irrelevant since any path that includes itself twice could work fine including itself only once accoirding to Theorem P
+
+this also means that we can remove any path from the layer that exits into any door type that could connect to any start it has
+
+this would leave us with layers that cannot loop into themselves, making it easier to identify when all paths have reached a dead end or an endpoint
+
+from this minimum viable paths layer, we can use it to bridge edge points and dynamic edit it to exclude used paths during the walk
+so we do not repeat paths in the same walk
+
+may need t oinstead construct a unique mvp layer for each type of end point and each type of start point
+
+constructing levels with multiple branches could be even trickier? could use similar theorem but where to end it?
+could potentially go on forever... well thats right we dont actually need all possible paths
+just the minimum viable ones
+and we can construct branchs separately and insert them later if needed
+
+or wait, can we?
+it would be harder to find a spot to slot in a branch segment (front and back need to match) than to slot in just a start branch
+
+
+MVP types:
+
+Entrance > John (no branch level)
+Entrance > Start Branch
+Start Branch > End Branch
+End Branch > Start Branch (Allows multiple branches in a level, like above)
+Entrance Branch > John Branch
+Entrance Branch > End Branch
+Start Branch > John Branch
+End Branch > John
+
+
+So in summary:
+
+Construct Minimum Viable Path (MVP) layers to connect end point layers
+each MVP layer:
+	* is made up of multiple of the underlying layer
+	* lacks redundant or "unnecessary" rooms
+	* cannot have repeated rooms in its paths, following the rules below
+
+
+MVP Construction Rules:
+	1. Disconnect paths that use a repeated exit (an exit type appearing previously in the path)
+	2. Disconnect paths that could connect to a previous entrance (could we collapse with above rule somehow?)
+	
+Algorithm:
+	For all initial transition nodes:
+	1. Flow forward along each path.
+	1b. Terminate and remove edge that disobeys the above rules
+	
+	For all final paths:
+	2. Flow backwards from end of paths
+	2b. Terminate if path ends at exit transition node
+	2c. Remove edge if there are no other neighbors to the edge start (IE, possibly supporting another path)
+
+
+Summary:
+	Flow Forward: Grow path until redundant exit
+	Flow Backward: Shrink path until branch
+	Flow Backward: Shrink continues past branch if all other branches have already shrunk
+	Repeat: Add a copy of just used layer and repeat the process
+
+
+in the end not all paths terminate at the final layer's end branch
+we use a copy of the layer we just processed because all paths that failed to grow in this iteration cannot possibly do so in the next
+
+we also need to trim initial nodes that have no connection to any valid exit path 
