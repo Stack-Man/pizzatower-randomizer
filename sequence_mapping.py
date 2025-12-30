@@ -47,6 +47,46 @@ also consider: if we find a path A > F then we have no need to find A > D > F ? 
 
 :thinking:
 
+mayhaps, instead of finding all possible paths in order to know a length
+we just record the immediate paths and perform actual checking to see if the path we chose works or not, IE if it eventually leads to our desired point
+
+the problem is a flow of directed edges i want to go from A to F without entering a dead end
+okay, i could have a full graph of all edges
+
+if i want to knwo A > F
+lets assume i get A > F dierctly
+now i want to extend A > F
+
+i want to be able to extend multiple rooms at a time
+for example, if i did only one,
+A > D > F but if no such D > f exists, then the sqeuence
+
+A > D > B > F where A > D, D > B, and B > F exist, will never arise
+
+need some way to identify repeated structures i nthe normalized graph and
+point ot those instead of repeating alraedy known information
+
+FOR EXAMPLE
+
+A > B > C > D >E
+and
+A > G > C > D >E
+
+ostensibly, C > D> E is a repeated sturcture
+and if there are any branches from C D or E
+those would be repeated too
+
+so really the graph could look like
+    B
+A <   > C - D - E
+    G
+
+so i could store it like
+
+A > [B, G] > C > D > E
+
+lets imagine an even larger structure, seen in problem.png!
+
 """
 
 #Algorithm
