@@ -105,17 +105,18 @@ we would just flow through from each initial node along every path and do only t
 
 Pairs of levels would be treated as a single MVP layer, which means we calculate MVP layers for the following first:
 
-Entrance > John
-(Start Branch > End Branch)
-(Start Branch > John Branch)
-Entrance Branch > John Branch
-(End Branch > John)
+Entrance > Two Way > John
+(Start Branch > One Way >  End Branch)
+(Start Branch > One Way > John Branch)
+Entrance Branch > One Way > John Branch
+(End Branch > Two Way > John)
 
 Then use those pairs to calculate the following larger MVP layers:
 
-Entrance > (Start Branch > End Branch) > John
-Entrance > (Start Branch > John Branch)
-Entrance Branch > (End Branch > John)
+Entrance > Two Way > (Start Branch > End Branch)
+(Start Branch > End Branch) > Two Way > John
+Entrance > Two Way > (Start Branch > John Branch)
+Entrance Branch > Two Way > (End Branch > John)
 
 
 these paired MVP layers could be treated as just one big room with multiple entrances/exits and paths through it

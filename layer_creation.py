@@ -121,11 +121,17 @@ def rooms_to_TW_and_OW_layers(all_rooms):
     def valid_path_for_two_way_layer(path):
         return not path.oneway
 
-    TW_layer = rooms_to_layer(rooms, "Two Way", valid_path_for_two_way_layer)
-    OW_layer = rooms_to_layer(rooms, "One Way")
+    TW = nio.create_layer_id("Two Way")
+    OW = nio.create_layer_id("One Way")
+
+    TW_layer = rooms_to_layer(rooms, TW, valid_path_for_two_way_layer)
+    OW_layer = rooms_to_layer(rooms, OW)
     
     TW_layer.graph["name"] = "Two Way"
     OW_layer.graph["name"] = "One Way"
+    
+    TW_layer.graph["layer_id"] = TW
+    OW_layer.graph["layer_id"] = OW
     
     return TW_layer, OW_layer
     
@@ -154,11 +160,17 @@ def rooms_to_branch_layers(all_rooms):
     B_start_rooms.extend(B_any_rooms)
     B_end_rooms.extend(B_any_rooms)
     
-    BS_layer = rooms_to_layer(B_start_rooms, "Branch Start")
-    BE_layer = rooms_to_layer(B_end_rooms, "Branch End")
+    BS = nio.create_layer_id("Branch Start")
+    BE = nio.create_layer_id("Branch End")
+    
+    BS_layer = rooms_to_layer(B_start_rooms, BS)
+    BE_layer = rooms_to_layer(B_end_rooms, BE)
     
     BS_layer.graph["name"] = "Branch Start"
     BE_layer.graph["name"] = "Branch End"
+    
+    BS_layer.graph["layer_id"] = BS
+    BE_layer.graph["layer_id"] = BE
     
     return BS_layer, BE_layer
 
@@ -166,10 +178,16 @@ def rooms_to_branch_layers(all_rooms):
 #RoomType.JOHN
 def rooms_to_john_layer(all_rooms):
     
-    JBE_layer, J_layer = type_and_branch_to_layers(all_rooms, RoomType.JOHN, BranchType.END, "John Branch", "John")
+    JBE = nio.create_layer_id("John Branch")
+    J = nio.create_layer_id("John")
+    
+    JBE_layer, J_layer = type_and_branch_to_layers(all_rooms, RoomType.JOHN, BranchType.END, JBE, J)
     
     JBE_layer.graph["name"] = "John Branch"
     J_layer.graph["name"] = "John"
+    
+    JBE_layer.graph["layer_id"] = JBE
+    J_layer.graph["layer_id"] = J
     
     return J_layer, JBE_layer 
     
@@ -177,10 +195,16 @@ def rooms_to_john_layer(all_rooms):
 #RoomType.ENTRANCE
 def rooms_to_entrance_layer(all_rooms):
     
-    EBS_layer, E_layer = type_and_branch_to_layers(all_rooms, RoomType.ENTRANCE, BranchType.START, "Entrance Branch", "Entrance")
+    EBS = nio.create_layer_id("Entrance Branch")
+    E = nio.create_layer_id("Entrance")
+    
+    EBS_layer, E_layer = type_and_branch_to_layers(all_rooms, RoomType.ENTRANCE, BranchType.START, EBS, E)
     
     EBS_layer.graph["name"] = "Entrance Branch"
     E_layer.graph["name"] = "Entrance"
+    
+    EBS_layer.graph["layer_id"] = EBS
+    E_layer.graph["layer_id"] = E
     
     return E_layer, EBS_layer
     
