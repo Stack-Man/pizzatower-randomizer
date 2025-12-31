@@ -56,8 +56,8 @@ class Node_ID():
         self.layer_id = layer_id 
         self.node_type = node_type
         self.inner_id = inner_id
-        self.path = []
-        
+        self.start_letters = []
+        self.room_paths = []
     
     def __str__(self):
         #return f"N: {self.layer_id} {str(self.node_type)} \n({str(self.inner_id)})"
@@ -65,6 +65,14 @@ class Node_ID():
     
     def __eq__(self, other):
         return self.layer_id == other.layer_id and self.node_type == other.node_type and self.inner_id == other.inner_id
+    
+    #let exit door know of all start doors that lead to it
+    def add_start_letter(self, letter):
+        self.start_letters.append(letter)
+    
+    #let exit transition know which paths lead to it
+    def add_room_path(self, room_path):
+        self.room_paths.append(room_path)
     
     #necessary so that we can use it in a networkx graph
     def __hash__(self):
