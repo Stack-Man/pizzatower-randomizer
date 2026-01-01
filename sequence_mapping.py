@@ -48,6 +48,13 @@ For Step 2, use concurrency to process every node N simultaneously.
 Use Locks before read to prevent simultaneous reads to ensure only the lowest value is written.
 Should a thread encounter a lock, remember that node and come back to it later. proceed to the next reverse neighbor R2
 
+ACTUALLY is such a lock needed?
+in round R all nodes pass back steps of length R
+therefore, there is no need to care what order the nodes in round R read and write
+as all nodes writing step R[N] will be doing so with the same value of N[N]
+what IS Necessary is that all threads are synced to rounds
+so upon reaching the end of a round, wait until all theads are ready to continue
+
 ---------------------------------------
 GROWING A PATH FROM A TO F
 ---------------------------------------
