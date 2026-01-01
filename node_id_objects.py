@@ -50,6 +50,12 @@ class Layer_ID():
 def create_layer_id(layer_id):
     return Layer_ID(layer_id)
 
+class RoomPath():
+    def __init__(self, room_name, start_letter, exit_letter):
+        self.room_name = room_name
+        self.start_letter = start_letter
+        self.exit_letter = exit_letter
+
 class Node_ID():
     
     def __init__(self, layer_id, node_type: NodeType, inner_id):
@@ -67,12 +73,15 @@ class Node_ID():
         return self.layer_id == other.layer_id and self.node_type == other.node_type and self.inner_id == other.inner_id
     
     #let exit door know of all start doors that lead to it
-    def add_start_letter(self, letter):
-        self.start_letters.append(letter)
+    def add_start_letter(self, N):
+        self.start_letters.append(N.inner_id.letter)
     
     #let exit transition know which paths lead to it
-    def add_room_path(self, room_path):
-        self.room_paths.append(room_path)
+    def add_room_paths(self, N):
+        
+        for SL in N.start_letters:
+            rp = RoomPath(N.inner_id.room_id, SL, N.inner_id.letter)
+            self.room_paths.append(room_path)
     
     #necessary so that we can use it in a networkx graph
     def __hash__(self):
