@@ -1,31 +1,89 @@
 """
+---------------------------------------
+STRUCTURE OF GRAPH
+---------------------------------------
+Construct a directed bipartite graph with two sets: Start Endpoitnts and Exit Endpoints
+Start > Exit edges represents all paths with those types of endpoints
+Exit > Start edges represent edges in the transition matrix
+
+The Transition Matrix is a graph showing which start endpoints and exit endpoint 
+is allowed to lead to in the next room
+
+
+---------------------------------------
+FINDING A PATH FROM A TO F
+---------------------------------------
 For any path between two endpoints A and F
-the interals of the path are irrelevant.
-The only necessary qualities of the path are that its endpoints
-match A and F
+the internals of the path are irrelevant.
 
-Consider some path from A to F, A > F
-If no such direct path A > F exists
-there may be some larger sequence that
-bridges the gap, A > B > F
+Consider identifying some path from A to F
+The shortest path from A to F is n steps long
+The next node in this path after A is n-1 steps away from F
 
-The sequence A > B > F is comprised of two subpaths
-A > B and B > F
-Repeat the logic used for A > F on these two subpaths
-IE, A > C > B and B > D > F
-Repeat the process until all subpaths terminate at some direct path between two end points
+From node A n steps away from F move to any neighbor node that is n-1 steps away from F
+Repeat until F is 0 steps away (on F)
 
-This process could be used not just to identify paths between two endpoint layers, 
-but between any two rooms, allowing easier lengthening of any path.
+----------------------------
+ALGORITHM - FIND PATH A TO F
+----------------------------
+Assume every node contains a dictionary storing the shortest number of steps to every node
+The number of steps to reach node F from A is written as A[F]
 
-In actuality, a path A > B > F is actually represented as two pairs of paths, A > B and B > F,
-IE: (A > B) > (B > F)
-B > B is unnecessary to find.
-the two sub paths may grow as described
-this strucure also allows arbitrary replacement,
-IE: (A > B) > (D > F)
-this allows different traversal modes with non-matching door types
+1. Look at A[F]
+2. For each neighbor N of A
+3. If N[F] = A[F] - 1 then set A = N and goto step 1 
+3b.Choose path P of room R, then remove all paths of room R from graph and reflow if any edges become disconnected
+4. Else If N[F] = 0, end
+
+
+-------------------------------
+ALGORITHM - FIND A[N] FOR ALL N (FLOW)
+-------------------------------
+1. For every node N, N[N] = 0
+2. For every node N
+3. For every reverse neighbor R of N
+4. R[N] = Min( N[N], R[N]
+
+For Step 2, use concurrency to process every node N simultaneously.
+Use Locks before read to prevent simultaneous reads to ensure only the lowest value is written.
+Should a thread encounter a lock, remember that node and come back to it later. proceed to the next reverse neighbor R2
+
+---------------------------------------
+GROWING A PATH FROM A TO F
+---------------------------------------
+For any path between two endpoints A and F
+with N steps across nodes from S0 to SN where A = S0 and F = SN ( S0 > S1 > S2 ... SN-1 > SN )
+any segment from any node SX in that path to any node after it SY where Y > X
+can be replaced with some path SG > SH such that the length of SGH is larger than SXY
+
+From node SX, look at the remaining steps to SY
+choose some neighbor of SX, SP such that SP[SY] = SX[SY] - 1
+AND such that SP != SX+1 (the node originally after X)
+
+By choosing SX and SY randomly we are able to possibly create ANY sequence of rooms
+For example (without length increasing)
+XABY > XDEY if SX = X and SY = Y
+XABY > XACY if SX = A and SY = Y
+
+The initial path of length N takes priority over any other path of the same length N
+If we randomize the order of paths in the graph, we can have the ability to choose different
+initial paths as well. Therefore, there is no concern of always choosing the same length paths
+in the same order.
+
+
+--------------------------------------
+ALGORITHM - GROW LENGTH OF PATH A TO F
+--------------------------------------
+1. For path AF of length N choose X, Y from [0, N] where Y > X
+2. For at least one neighbor of X, look for at least one path XY where X + 1 in XY != X + 1 in AF and X+1[Y] >= X[Y]
+
+3a. If such a path exists: For each room R of every path P in segment X to Y readd all paths from room R to the graph and reflow if any new edges were added
+4a. Find Path XY where X + 1 in XY != X + 1 in AF and X+1[Y] >= X[Y]
+
+3b. Else move X and Y and goto step 2
 """
+
+
 
 from node_id_objects import NodeType, StartExitType
 
@@ -119,7 +177,6 @@ def is_node_type(node, node_type, se_type):
 def construct_endpoint_graph(paths_by_type, traversal_mode):
     #Construct directed bipartite graph where edges are paths and nodes are endpoint types
     #Connect exit nodes to matching start nodes using transition matrix
-    #TODO:
     
     endpoint_graph = nx.DiGraph()
     start_points = []
