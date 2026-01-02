@@ -2,19 +2,25 @@ from enums import *
 import networkx as nx
 import node_id_objects as nio
 from node_id_objects import StartExitType, NodeType
-from object_creation import flip_dir
 
-#==========================================
-#   Layer Creation
-#==========================================
-#All Rooms
-#Divide into room types for different layers
-#each layer is divided into two sub layers:
-    #sl (start_layer) transition > start door
-    #el (end_layer) exit door > transition and start door > exit door
-    #el also has two copies of each door to make starts and exits distinct nodes
-    #connect sl and el through the start door
-#this creates a distinct flow through the graph preventing unwanted backtracking
+"""
+------------------------
+STRUCTURE OF LAYER GRAPH
+------------------------
+The graph consists of 4 "levels"
+
+1. Transition, Start
+2. Door, Start
+3. Door, Exit
+4. Transition, Exit
+
+Two copies of each Transition type and Door letter exist, labeled either Start or Exit
+This creates a distinct flow from a Transition > Door > Door > Transition
+prventing unwanted backtracking.
+
+Transition Start > Door Start and Door Exit > Transition Exit edges mark a door as that type of transition
+Door Start > Door Exit edges represent a path in that room between those two doors
+"""
 
 def rooms_to_layers(rooms):
     
@@ -28,30 +34,39 @@ def rooms_to_layers(rooms):
     return layers
     
 
-def rooms_to_layer(rooms, layer_id, path_selector = lambda e: True):
-    
-    print(str(len(rooms)) + " rooms to layer " + str(layer_id))
-    
-    msg = ""
-    
-    for room in rooms:
-        msg += ", " + str(room.name)
-    
-    print("rooms: " + msg)
-    
-    return populate_start_and_exit_layer(rooms, layer_id, path_selector)
+def rooms_to_layer(rooms, path_selector = lambda e: True):
+    return populate_start_and_exit_layer(rooms, path_selector)
 
 
 #start/exit layers are virtual layers within a single greater layer
 #each door exits twice in the layer, once in start and once in exit
 #providing a way to create distinct directionality as you move through the
 #layer and preventing unwanted backtracking
-def populate_start_and_exit_layer(rooms, layer_id, path_selector = lambda e: True):
+"""
+---------------------------------
+ALGORITHM - CONSTRUCT LAYER GRAPH
+---------------------------------
+Assume we have an already filtered list of rooms
+
+1. For every room R
+2.      For every door letter D in R
+3.          Add R_D to G
+4.      For every path P in R
+5.          Add edge R_P to G
+
+3b. Add R_D as R_D_START and R_D_EXIT
+
+5b. Add P_START and P_EXIT (P_S/P_E, P_door_type, P_dir) type to G as Transition Nodes
+5c. Add R_P as (R_D_START, R_D_EXIT)
+5d. Add reverse of 5b and 5c if P is not oneway
+
+"""
+def populate_start_and_exit_layer(rooms, path_selector = lambda e: True):
     layer = nx.DiGraph()
     layer_ids = [StartExitType.START, StartExitType.EXIT]
 
     for room in rooms:
-        room_id = nio.create_room_node_id(layer_id, room.name)
+        room_id = nio.create_room_node_id(room.name)
 
         layer.add_node(room_id)
        
@@ -61,7 +76,7 @@ def populate_start_and_exit_layer(rooms, layer_id, path_selector = lambda e: Tru
             for layer_type_id in layer_ids:
                 
                 #Layer name, start/exit, room name, door letter
-                door_id = nio.create_door_node_id(layer_id, layer_type_id, room.name, door.letter)
+                door_id = nio.create_door_node_id(layer_type_id, room.name, door.letter)
                 
                 layer.add_node(door_id)
                 layer.add_edge(room_id, door_id)    
@@ -69,39 +84,40 @@ def populate_start_and_exit_layer(rooms, layer_id, path_selector = lambda e: Tru
         #add paths between layers
         for path in room.paths:
             if path_selector(path):
-                add_start_exit_path_to_layer(room.name, path, layer, layer_id)
+                add_start_exit_path_to_layer(room.name, path, layer)
     
     return layer
 
-def add_start_exit_path_to_layer(room_name, path, layer, layer_id):
+#add path and reverse if not oneway
+def add_start_exit_path_to_layer(room_name, path, layer):
     
-    add_one_start_exit_path_to_layer(room_name, path, path.start_door, path.exit_door, layer, layer_id)
+    add_one_start_exit_path_to_layer(room_name, path, path.start_door, path.exit_door, layer)
     
-    if not path.oneway:
-        add_one_start_exit_path_to_layer(room_name, path, path.exit_door, path.start_door, layer, layer_id)
+    #only allow start > exit if oneway or initially blocked on either side
+    if not path.oneway and not path.start_door.initially_blocked and not path.exit_door.initially_blocked:
+        add_one_start_exit_path_to_layer(room_name, path, path.exit_door, path.start_door, layer)
     
     return
     
-def add_one_start_exit_path_to_layer(room_name, path, start_door, exit_door, layer, layer_id):
+def add_one_start_exit_path_to_layer(room_name, path, start_door, exit_door, layer):
     #add start transition node
     #Layer name, start/exit, door type, door direction
-    start_transition_id = nio.create_transition_node_id(layer_id, StartExitType.START, start_door.door_type, start_door.door_dir)
+    start_transition_id = nio.create_transition_node_id(StartExitType.START, start_door.door_type, start_door.door_dir)
     layer.add_node(start_transition_id)
     
     #add exit transition node
-    exit_transition_id = nio.create_transition_node_id(layer_id, StartExitType.EXIT, exit_door.door_type, exit_door.door_dir)
+    exit_transition_id = nio.create_transition_node_id(StartExitType.EXIT, exit_door.door_type, exit_door.door_dir)
     layer.add_node(exit_transition_id)
     
     #connect start transition type to start door in start layer
     #add path as attribute to this edge
     
     #Layer name, start/exit, room name, door letter
-    start_door_id = nio.create_door_node_id(layer_id, StartExitType.START, room_name, start_door.letter)
-    layer.add_edge(start_transition_id, start_door_id)
-    layer[start_transition_id][start_door_id][LAYER_PATH] = path
+    start_door_id = nio.create_door_node_id(StartExitType.START, room_name, start_door.letter)
+    layer.add_edge(start_transition_id, start_door_id) 
     
     #connect exit door to exit transition type to in exit layer
-    exit_door_id = nio.create_door_node_id(layer_id, StartExitType.EXIT, room_name, exit_door.letter)
+    exit_door_id = nio.create_door_node_id(StartExitType.EXIT, room_name, exit_door.letter)
     layer.add_edge(exit_door_id, exit_transition_id)
     
     #connect start door in start layer to exit door in exit layer
@@ -111,37 +127,27 @@ def add_one_start_exit_path_to_layer(room_name, path, start_door, exit_door, lay
 
 
 #RoomType.NORMAL
-#Four Copies, one with and one without oneway paths
-#One layer for starts one layer for exits
+#Two layers, one with and one without oneway paths
+#TODO: oneway paths needs to also consider path time
+#in case of oneway paths that have extra pizzatime blocks for no reason
+#or maybe handle those as special cases
 def rooms_to_TW_and_OW_layers(all_rooms):
     rooms = filter_rooms(all_rooms, RoomType.NORMAL)
 
     def valid_path_for_two_way_layer(path):
         return not path.oneway
 
-    TW = nio.create_layer_id("Two Way")
-    OW = nio.create_layer_id("One Way")
-
-    TW_layer = rooms_to_layer(rooms, TW, valid_path_for_two_way_layer)
-    OW_layer = rooms_to_layer(rooms, OW)
+    TW_layer = rooms_to_layer(rooms, valid_path_for_two_way_layer)
+    OW_layer = rooms_to_layer(rooms)
     
     TW_layer.graph["name"] = "Two Way"
     OW_layer.graph["name"] = "One Way"
     
-    TW_layer.graph["layer_id"] = TW
-    OW_layer.graph["layer_id"] = OW
-    
     return TW_layer, OW_layer
     
 
-LAYER_PATH = "path"
-LAYER_DOOR = "door"
-LAYER_ROOM = "room"
-LAYER_TRANSITION = "transition"
-LAYER_TYPE = "type"
-
 #RoomType.BRANCH
-#Four layers
+#Two layers
 #   BranchType.START or BranchType.ANY  (start and exit)
 #   BranchType.END or BranchType.ANY    (start and exit)
 
@@ -158,64 +164,43 @@ def rooms_to_branch_layers(all_rooms):
     B_start_rooms.extend(B_any_rooms)
     B_end_rooms.extend(B_any_rooms)
     
-    BS = nio.create_layer_id("Branch Start")
-    BE = nio.create_layer_id("Branch End")
-    
-    BS_layer = rooms_to_layer(B_start_rooms, BS)
-    BE_layer = rooms_to_layer(B_end_rooms, BE)
+    BS_layer = rooms_to_layer(B_start_rooms)
+    BE_layer = rooms_to_layer(B_end_rooms)
     
     BS_layer.graph["name"] = "Branch Start"
     BE_layer.graph["name"] = "Branch End"
-    
-    BS_layer.graph["layer_id"] = BS
-    BE_layer.graph["layer_id"] = BE
     
     return BS_layer, BE_layer
 
 
 #RoomType.JOHN
 def rooms_to_john_layer(all_rooms):
-    
-    JBE = nio.create_layer_id("John Branch")
-    J = nio.create_layer_id("John")
-    
-    JBE_layer, J_layer = type_and_branch_to_layers(all_rooms, RoomType.JOHN, BranchType.END, JBE, J)
+    JBE_layer, J_layer = type_and_branch_to_layers(all_rooms, RoomType.JOHN, BranchType.END)
     
     JBE_layer.graph["name"] = "John Branch"
     J_layer.graph["name"] = "John"
-    
-    JBE_layer.graph["layer_id"] = JBE
-    J_layer.graph["layer_id"] = J
     
     return J_layer, JBE_layer 
     
 
 #RoomType.ENTRANCE
 def rooms_to_entrance_layer(all_rooms):
-    
-    EBS = nio.create_layer_id("Entrance Branch")
-    E = nio.create_layer_id("Entrance")
-    
-    EBS_layer, E_layer = type_and_branch_to_layers(all_rooms, RoomType.ENTRANCE, BranchType.START, EBS, E)
+    EBS_layer, E_layer = type_and_branch_to_layers(all_rooms, RoomType.ENTRANCE, BranchType.START)
     
     EBS_layer.graph["name"] = "Entrance Branch"
     E_layer.graph["name"] = "Entrance"
     
-    EBS_layer.graph["layer_id"] = EBS
-    E_layer.graph["layer_id"] = E
-    
     return E_layer, EBS_layer
     
 
-
-def type_and_branch_to_layers(all_rooms, room_type, branch_type, branch_layer_id, layer_id):
+def type_and_branch_to_layers(all_rooms, room_type, branch_type):
     
     type_rooms = filter_rooms(all_rooms, room_type)
     type_branch_rooms = filter_rooms_by_branch(type_rooms, branch_type)
     type_rooms = filter_rooms_by_branch(type_rooms, BranchType.NONE)
     
-    TBT_layer = rooms_to_layer(type_branch_rooms, branch_layer_id)
-    T_layer = rooms_to_layer(type_rooms,layer_id)
+    TBT_layer = rooms_to_layer(type_branch_rooms)
+    T_layer = rooms_to_layer(type_rooms)
     
     return TBT_layer, T_layer
     

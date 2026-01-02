@@ -1,4 +1,5 @@
 import networkx as nx
+from node_id_objects import StartExitType
 
 """
 ---------------------------------------
@@ -26,16 +27,10 @@ The number of steps to reach node F from A is written as A[F]
 4. Else If N[F] = 0, end
 """
 
-#TODO: consider whether we are picking a path in a room
-#or choosing the next start transition to connect to
-#right now we choose a path between every kind of endpoint, but
-#thats not right, check StartExitType of the endpoint to do so
-#also associate each chosen endpoint with the path chosen
-#so if we remove any section of endpoints, we can see the paths that are being removed as well
-
+#RETURN: List of (Endpoint, Path) for every chosen Endpoint and their related path
+#EXIT endpoints have Path set as None
 def find_path(G, all_paths, A, F):
-    
-    chosen_paths = []
+
     chosen_endpoints = []
     
     while not A == F: #N[F] == 0
@@ -43,10 +38,12 @@ def find_path(G, all_paths, A, F):
         for N in G.neighbors(A):
             if N[F] == A[F] - 1:
                 
-                chosen_path = choose_path(G, all_paths, A, N)
-                chosen_paths.append(chosen_path)
-
-                chosen_endpoints.append(A) #TODO: associate path with endpoint
+                chosen_path = None
+                
+                if A.start_exit_type == StartExitType.START:
+                    chosen_path = choose_path(G, all_paths, A, N)
+                    
+                chosen_endpoints.append((A, chosen_path))
  
                 A = N
                 
@@ -54,7 +51,7 @@ def find_path(G, all_paths, A, F):
     
     chosen_endpoints.append(F)
 
-    return chosen_paths, chosen_endpoints
+    return chosen_endpoints
 
 def choose_path(G, all_paths, A, F): #TODO: check if we need path or not
     

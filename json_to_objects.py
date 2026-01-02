@@ -145,11 +145,8 @@ def doors_to_paths(doors, is_john_room):
 
 def doors_to_path(start_door, exit_door, is_john_room):
 
-    print("     path " + str(start_door.letter) + " to " + str(exit_door.letter))
-
     #start is exitonly or exit is startonly
     if start_door.access_type == AccessType.EXITONLY or exit_door.access_type == AccessType.STARTONLY:
-        print("     path FAIL " + str(start_door.access_type) + " is EXITONLY or " + str(exit_door.access_type) + " is STARTONLY")
         return None
 
     #path time mismatch, unless it is in a john room
@@ -159,49 +156,29 @@ def doors_to_path(start_door, exit_door, is_john_room):
     times_match = start_door.start_path_time is exit_door.exit_path_time
     
     if not is_john_room and not times_match and not one_is_both:
-        print("     path FAIL " + str(start_door.start_path_time) + " is NOT " + str(exit_door.exit_path_time) + " and neither is BOTH")
         return None
-    
-    #TODO: should leveldoors have a path to exit?
-    
-    #Determine which path_time to set the path
-    path_time = PathTime.BOTH
-
-    if not is_john_room:
-        if start_door.start_path_time == PathTime.PIZZATIME or exit_door.exit_path_time == PathTime.PIZZATIME:
-            path_time = PathTime.PIZZATIME
-        
-        if start_door.start_path_time == PathTime.NOTPIZZATIME or exit_door.exit_path_time == PathTime.NOTPIZZATIME:
-            path_time = PathTime.NOTPIZZATIME
     
     #oneway = start or exit only but not initially blocked
     is_oneway = (start_door.access_type == AccessType.STARTONLY and not start_door.initially_blocked) or (exit_door.access_type == AccessType.EXITONLY and not exit_door.initially_blocked)
     
     is_loop = start_door.is_loop or exit_door.is_loop
 
-    path = Path(start_door, exit_door, path_time, is_oneway, is_loop)
+    path = Path(start_door, exit_door, is_oneway, is_loop)
 
     return path
 
 #-------------------
 #   Object Helpers
 #-------------------
-
-#layer room filters cannot find any branch rooms
 def get_branch_type(room):
     #branchstart and branchend values mean the door is a branchmid?
-    
-    print("branch check of " + str(room.name))
-    
+
     has_branch_NPT = False
     has_NPT_branch = False
     has_branch_PT = False
     has_PT_branch = False
     
     for path in room.paths:
-        
-        print("     path" + str(path.start_door.letter) + " to " + str(path.exit_door.letter))
-        
         is_branch_NPT = branch_NPT(path)
         is_NPT_branch = NPT_branch(path)
         is_branch_PT = branch_PT(path)
@@ -211,31 +188,19 @@ def get_branch_type(room):
         has_NPT_branch = has_NPT_branch or is_NPT_branch
         has_branch_PT = has_branch_PT or is_branch_PT
         has_PT_branch = has_PT_branch or is_PT_branch
-       
-        
-        print("         branch_npt" + str(has_branch_NPT) + "     is branch_npt" + str(is_branch_NPT) )
-        print("         npt_branch" + str(has_NPT_branch) + "     is npt_branch" + str(is_NPT_branch) )
-        print("         branch_pt" + str(has_branch_PT) + "     is branch_pt" + str(is_branch_PT) )
-        print("         pt_branch" + str(has_PT_branch) + "     is pt_branch" + str(is_PT_branch) )
     
     for door in room.doors:
         if (door.branchstart or door.branchend):
-            print("     type: branch mid")
             return BranchType.MID
     
     if (has_branch_NPT and not has_NPT_branch) or (has_PT_branch and not has_branch_PT):
-        print("     type: branch start")
         return BranchType.START
     
     if (has_NPT_branch and not has_branch_NPT) or (has_branch_PT and not has_PT_branch):
-        print("     type: branch end")
         return BranchType.END
     
     if (has_branch_NPT and has_NPT_branch) or (has_branch_PT and has_PT_branch):
-        print("     type: branch any")
         return BranchType.ANY
-    
-    print("     type: branch NONE")
     
     return BranchType.NONE
 
@@ -311,10 +276,10 @@ def flip_dir(door_dir):
     else:
         return door_dir
 
-def get_path_time(door):
-    if (DOOR_PIZZATIME in door):
+def get_path_time(j_door):
+    if (DOOR_PIZZATIME in j_door):
         return PathTime.PIZZATIME
-    elif (DOOR_NOTPIZZATIME in door):
+    elif (DOOR_NOTPIZZATIME in j_door):
         return PathTime.NOTPIZZATIME
     else:
         return PathTime.BOTH

@@ -8,13 +8,13 @@ import numpy as np
 import math
 import random
 
-from object_creation import json_to_rooms
+from json_to_objects import json_to_rooms
 from layer_creation import rooms_to_layers
 from node_id_objects import NodeType, StartExitType
 import node_id_objects as nio
 from path_mapping import paths_to_endpoints
-from path_creation import flow
-from path_mapping import Endpoint
+from path_traversal import flow
+from path_objects import Endpoint
 
 from enums import *
 

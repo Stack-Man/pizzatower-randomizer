@@ -1,24 +1,7 @@
 from node_id_objects import NodeType, StartExitType
 import networkx as nx
+from path_objects import Endpoint, RoomPath
 
-class Endpoint():
-    def __init__(self, node):
-        self.door_type = node.inner_id.door_type
-        self.door_dir = node.inner_id.door_dir
-        self.start_exit_type = node.inner_id.start_exit_type
-        self.steps = {}
-        self.next_steps = {}
-        
-        self.steps["NONE"] = "NONE"
-    
-    def __str__(self):
-        return f"{self.door_type} {self.door_dir}"
-    
-    def __eq__(self, other):
-        return self.door_type == other.door_type and self.door_dir == other.door_dir and self.start_exit_type == other.start_exit_type
-    
-    def __hash__(self):
-        return hash((self.door_type, self.door_dir, self.start_exit_type))
 
 def paths_to_endpoints(G):
     paths = categorize_paths(G)
@@ -122,6 +105,7 @@ def BFS(G, start_node):
                 for neighbor in G.neighbors(n):
                     plan_visit.append(neighbor)
 
+#RETURN: Dict of (Start Endpoint, Exit Endpoint) as Key and a list of RoomPath as values
 def categorize_paths(G):
     
     start_nodes = []
@@ -143,7 +127,7 @@ def categorize_paths(G):
             if is_node_type(B, NodeType.TRANSITION, StartExitType.EXIT):
                 
                 EP_B = Endpoint(B)
-                paths[(EP_SN, EP_B)] = B.room_paths
+                paths[(EP_SN, EP_B)] = B.room_paths #contains all paths that lead to B
                 
             else:
                 ds = is_node_type(B, NodeType.DOOR, StartExitType.START)
@@ -154,10 +138,19 @@ def categorize_paths(G):
                     if ds:
                         neighbor.add_start_letter(B)
                     elif de:
-                        neighbor.add_room_paths(B)
+                        rps = get_room_paths(B)
+                        neighbor.add_room_paths(rps)
     
     return paths
 
+def get_room_paths(N):
+    room_paths = []
+    
+    for SL in N.start_letters:
+        rp = RoomPath(N.inner_id.room_id, SL, N.inner_id.letter)
+        room_paths.append(rp)
+    
+    return room_paths
 
 def is_node_type(node, node_type, se_type):
     return node.node_type == node_type and node.inner_id.start_exit_type == se_type

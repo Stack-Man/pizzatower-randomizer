@@ -107,10 +107,9 @@ class Door():
     Bool    oneway      : Whether the path can be backtracked or not.
 """
 class Path():
-    def __init__(self, start_door: Door, exit_door: Door, path_time: PathTime, oneway: bool, loop: bool):
+    def __init__(self, start_door: Door, exit_door: Door, oneway: bool, loop: bool):
         self.start_door = start_door
         self.exit_door = exit_door
-        #self.path_time = path_time #debug, is this useful? might need to always use door path time instead
         self.oneway = oneway
         self.loop = loop
     
