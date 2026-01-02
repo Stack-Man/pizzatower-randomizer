@@ -11,6 +11,12 @@ import random
 from object_creation import json_to_rooms
 from layer_creation import rooms_to_layers
 from node_id_objects import NodeType, StartExitType
+import node_id_objects as nio
+from path_mapping import paths_to_endpoints
+from path_creation import flow
+from path_mapping import Endpoint
+
+from enums import *
 
 LAYER_PATH = "path"
 LAYER_DOOR = "door"
@@ -234,6 +240,26 @@ def draw_layer(layer, name):
     
     plt.show(block=False)
 
+def draw_tree(G):
+    
+    set1 = []
+    
+    for node in G.nodes():
+        if node.start_exit_type == StartExitType.START:
+            set1.append(node)
+    
+    pos = nx.bipartite_layout(G , set1)
+    plt.figure(figsize=(8, 6))
+    nx.draw(G, pos, with_labels=True, node_size=5000, node_color="skyblue", font_size=10, font_weight="bold")
+    
+    for node in G.nodes:
+        print(f"Node {node}:")
+        
+        for k, v in node.steps.items():
+            print(f"    {k}: {v}")
+    
+    plt.show(block=False)
+
 def test_parse(filename):
 
     with open(filename, "r") as f:
@@ -243,13 +269,58 @@ def test_parse(filename):
         rooms = json_to_rooms(file)
 
         layers = rooms_to_layers(rooms)
+        test_layer = None
         
         for layer in layers:
-            print("drawing layer " + str(layer.graph["name"]))
-            draw_layer(layer, "Layer")
+            print("layer " + str(layer.graph["name"]))
+            
+            if layer.graph["name"] == "Two Way":
+                test_layer = layer
+                break
+            
+            #draw_layer(layer, "Layer")
+        
+        ep_graph = paths_to_endpoints(test_layer)
+        ep_graph = flow(ep_graph)
+        
+        draw_tree(ep_graph)
 
         plt.show()
         
     return
+
+def test_flow():
     
-test_parse("datafiles/json/johngutter.json")
+    G = nx.DiGraph()
+    
+    AN = nio.create_transition_node_id("A", StartExitType.START, "A", 1)
+    BN = nio.create_transition_node_id("B", StartExitType.START, "B", 1)
+    CN = nio.create_transition_node_id("C", StartExitType.START, "C", 1)
+    DN = nio.create_transition_node_id("D", StartExitType.EXIT, "D", 2)
+    EN = nio.create_transition_node_id("E", StartExitType.EXIT, "E", 2)
+    FN = nio.create_transition_node_id("F", StartExitType.EXIT, "F", 2)
+    
+    A = Endpoint(AN)
+    B = Endpoint(BN)
+    C = Endpoint(CN)
+    D = Endpoint(DN)
+    E = Endpoint(EN)
+    F = Endpoint(FN)
+    
+    G.add_edge(A, D)
+    G.add_edge(D, B)
+    G.add_edge(B, E)
+    G.add_edge(E, C)
+    G.add_edge(C, F)
+    G.add_edge(F, A)
+    G.add_edge(A, F)
+    G.add_edge(A, E)
+    
+    ep_graph = flow(G)
+    
+    draw_tree(ep_graph)
+    plt.show()
+    
+
+#test_parse("datafiles/json/johngutter.json")
+test_flow()

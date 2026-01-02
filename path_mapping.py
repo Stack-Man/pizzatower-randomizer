@@ -1,18 +1,30 @@
 from node_id_objects import NodeType, StartExitType
+import networkx as nx
 
 class Endpoint():
     def __init__(self, node):
         self.door_type = node.inner_id.door_type
         self.door_dir = node.inner_id.door_dir
+        self.start_exit_type = node.inner_id.start_exit_type
+        self.steps = {}
+        self.next_steps = {}
+        
+        self.steps["NONE"] = "NONE"
     
     def __str__(self):
         return f"{self.door_type} {self.door_dir}"
     
     def __eq__(self, other):
-        return self.door_type == other.door_type and self.door_dir == other.door_dir
+        return self.door_type == other.door_type and self.door_dir == other.door_dir and self.start_exit_type == other.start_exit_type
     
     def __hash__(self):
-        return hash((self.door_type, self.door_dir))
+        return hash((self.door_type, self.door_dir, self.start_exit_type))
+
+def paths_to_endpoints(G):
+    paths = categorize_paths(G)
+    ep_graph = construct_endpoint_graph(paths, None)
+    
+    return ep_graph
 
 """
 ------------------
@@ -46,7 +58,7 @@ def construct_endpoint_graph(paths, traversal_mode):
     
     for ep in exit_points:
         for sp in start_points:
-            if ep.door_type == sp.door_type:
+            if ep.door_type == sp.door_type and ep.start_exit_type != sp.start_exit_type:
                 endpoint_graph.add_edge(ep, sp)
     
     return endpoint_graph
@@ -85,7 +97,7 @@ def BFS(G, start_node):
         for n in to_visit:
             
             if n not in visited:
-                visited.append(to_visit)
+                visited.append(n)
                 
                 yield n
                 
@@ -113,7 +125,7 @@ def categorize_paths(G):
             if is_node_type(B, NodeType.TRANSITION, StartExitType.EXIT):
                 
                 EP_B = Endpoint(B)
-                paths[(EP_SN, EP_B)] = B.paths
+                paths[(EP_SN, EP_B)] = B.room_paths
                 
             else:
                 ds = is_node_type(B, NodeType.DOOR, StartExitType.START)

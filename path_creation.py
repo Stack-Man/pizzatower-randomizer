@@ -1,3 +1,5 @@
+import networkx as nx
+
 """
 ---------------------------------------
 FINDING A PATH FROM A TO F
@@ -44,8 +46,103 @@ therefore, there can be no conflict if no thread starts round R + 1
 before all threads finish round R
 """
 
+import threading
+round = 0
+added_this_round = 0
+lock = threading.Lock()
+
 def flow(G):
-    return
+    print("Begin Flow of G")
+    
+    global round
+    global added_this_round
+    
+    #initial seed
+    #empty the dicts and set 0 steps to self
+    for N in G.nodes():
+        N.steps = {}
+        N.next_steps = {}
+        N.next_steps[N] = 0
+
+        
+    round = 0
+    GR = G.reverse()
+    
+    while (True):
+        
+        added_this_round = 0
+        
+        threads = []
+        
+        #move previously added steps to current steps
+        #delaying this ensures all steps added to steps are from 
+        #the previous round and not from this round in a different thread
+        
+        #also keep track how many new values are added to steps
+        #if none are added to any node's steps, the loop is finished
+        for N in GR.nodes():
+            t = threading.Thread(target=add_new, args=(N, ))
+            threads.append(t)
+            t.start()
+        
+        for t in threads:
+            t.join()
+        
+        #exit loop if no new steps are added
+        if (added_this_round == 0):
+            break
+            
+        #flow all steps in N to all of its reverse neighbors
+        for N in GR.nodes():
+            t = threading.Thread(target=pass_values, args=(GR, N))
+            threads.append(t)
+            t.start()
+        
+        for t in threads:
+            t.join()
+        
+        round = round + 1
+        
+    return GR.reverse()
+
+def add_new(N):
+    
+    curr = N.steps
+    next = N.next_steps
+    
+    added = 0
+    
+    for key, value in next.items():
+        if key not in curr:
+            curr[key] = value
+            added = added + 1
+        else:
+             print(f"   {N}[{key}] < {value} already there")
+    
+    N.steps = curr
+    N.next_steps = {}
+    
+    increment_added_this_round(added)
+
+def increment_added_this_round(a):
+    global added_this_round
+    
+    with lock:
+        added_this_round = added_this_round + a
+
+def pass_values(GR, N):
+    global round
+    
+    print(f"Passing N's steps to reverse neighbors")
+    
+    for RN in GR.neighbors(N):
+        to_add = N.steps
+        
+        #current round should always match
+        #value + 1
+        for K in to_add:
+            RN.next_steps[K] = round
+            print(f"    Added {RN}[{N}] = {round}")
 
 """
 --------------------------

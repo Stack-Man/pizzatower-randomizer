@@ -22,7 +22,7 @@ class Path_ID():
         return f"{str(self.path)} {str(self.inner_id)}"
     
     def __eq__(self, other):
-        return self.path == other.path and self.inner_id = other.inner_id
+        return self.path == other.path and self.inner_id == other.inner_id
     
     #necessary so that we can use it in a networkx graph
     def __hash__(self):
@@ -41,6 +41,7 @@ class Layer_ID():
         return f"{str(self.layer_id)} {str(self.id)}"
     
     def __eq__(self, other):
+        #print(f" {str(type(self))} == {str(type(other))}")
         return self.layer_id == other.layer_id
     
     #necessary so that we can use it in a networkx graph
@@ -81,7 +82,7 @@ class Node_ID():
         
         for SL in N.start_letters:
             rp = RoomPath(N.inner_id.room_id, SL, N.inner_id.letter)
-            self.room_paths.append(room_path)
+            self.room_paths.append(rp)
     
     #necessary so that we can use it in a networkx graph
     def __hash__(self):

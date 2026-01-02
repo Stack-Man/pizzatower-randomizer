@@ -25,7 +25,7 @@ def rooms_to_layers(rooms):
     
     layers = [TW, OW, BS, BE, J, JB, E, EB]
     
-    add_initial_transitions_to_layers(layers, TraversalMode.MATCHING_PERFECT)
+    #add_initial_transitions_to_layers(layers, TraversalMode.MATCHING_PERFECT)
     
     return layers
     
