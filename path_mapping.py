@@ -24,7 +24,7 @@ def paths_to_endpoints(G):
     paths = categorize_paths(G)
     ep_graph = construct_endpoint_graph(paths, None)
     
-    return ep_graph
+    return ep_graph, paths
 
 """
 ------------------
@@ -44,7 +44,7 @@ def construct_endpoint_graph(paths, traversal_mode):
     start_points = []
     exit_points = []
     
-    for endpoint_pair in paths.keys():
+    for endpoint_pair in paths.items():
         start_point = endpoint_pair[0]
         exit_point = endpoint_pair[1]
         
@@ -55,6 +55,24 @@ def construct_endpoint_graph(paths, traversal_mode):
     
     #TODO: traversal mode
     #current basic traversal mode, connect directly to matching type, dir ignored
+    
+    #MODE: matching perfect
+    #Match transitions with the same type and consistent directions
+    #TODO:
+    
+    #MODE: matching directional
+    #Match transitions that have consistent directions, but possibly different types
+    #TODO:
+    
+    #MODE: arbitrary no turnarounds
+    #Match transitions in any way, but don't allow left/left, right/right, up/up, or down/down
+    #TODO:
+    
+    #MODE: arbitrary no restrictions
+    #Match transitions in any way
+    #TODO:
+    
+   
     
     for ep in exit_points:
         for sp in start_points:

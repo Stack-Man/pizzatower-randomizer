@@ -26,8 +26,80 @@ The number of steps to reach node F from A is written as A[F]
 4. Else If N[F] = 0, end
 """
 
-def find_path(G, A, F):
-    return
+#TODO: consider whether we are picking a path in a room
+#or choosing the next start transition to connect to
+#right now we choose a path between every kind of endpoint, but
+#thats not right, check StartExitType of the endpoint to do so
+#also associate each chosen endpoint with the path chosen
+#so if we remove any section of endpoints, we can see the paths that are being removed as well
+
+def find_path(G, all_paths, A, F):
+    
+    chosen_paths = []
+    chosen_endpoints = []
+    
+    while not A == F: #N[F] == 0
+    
+        for N in G.neighbors(A):
+            if N[F] == A[F] - 1:
+                
+                chosen_path = choose_path(G, all_paths, A, N)
+                chosen_paths.append(chosen_path)
+
+                chosen_endpoints.append(A) #TODO: associate path with endpoint
+ 
+                A = N
+                
+                break #to next while loop
+    
+    chosen_endpoints.append(F)
+
+    return chosen_paths, chosen_endpoints
+
+def choose_path(G, all_paths, A, F): #TODO: check if we need path or not
+    
+    paths_of_types = all_paths[(A, F)]
+    path = paths_of_types[0]
+    
+    remove_all_room_paths(G, path, all_paths)
+    
+    return path
+
+removed_any_edge = False
+
+def remove_all_room_paths(G, path, all_paths):
+    global removed_any_edge
+    
+    room_name = path.room_name
+    removed_any_edge = False
+    
+    threads = []
+    
+    for endpoint_pair, paths in all_paths.items():
+        t = threading.Thread(target=remove_room_paths, args=(endpoint_pair, paths, G))
+        threads.append(t)
+        t.start()
+
+    for t in threads:
+        t.join()
+    
+    if removed_any_edge:
+        G = flow(G)
+
+def remove_room_paths(endpoint_pair, paths, G):
+    global removed_any_edge
+    
+    new_paths = []
+        
+    for P in paths:
+        if not P.room_name == room_name:
+            new_paths.append(P)
+    
+    paths[endpoint_pair] = new_paths
+    
+    if len(new_paths) == 0:
+        G.remove_edge(endpoint_pair[0], endpoint_pair[1])
+        removed_any_edge = True
 
 """
 ---------------------------------------------------------------
@@ -61,8 +133,8 @@ def flow(G):
     #empty the dicts and set 0 steps to self
     for N in G.nodes():
         N.steps = {}
+        N.steps[N] = 0
         N.next_steps = {}
-        N.next_steps[N] = 0
 
         
     round = 0
@@ -70,40 +142,44 @@ def flow(G):
     
     while (True):
         
-        added_this_round = 0
-        
-        threads = []
-        
-        #move previously added steps to current steps
-        #delaying this ensures all steps added to steps are from 
-        #the previous round and not from this round in a different thread
-        
-        #also keep track how many new values are added to steps
-        #if none are added to any node's steps, the loop is finished
-        for N in GR.nodes():
-            t = threading.Thread(target=add_new, args=(N, ))
-            threads.append(t)
-            t.start()
-        
-        for t in threads:
-            t.join()
-        
-        #exit loop if no new steps are added
-        if (added_this_round == 0):
-            break
-            
-        #flow all steps in N to all of its reverse neighbors
-        for N in GR.nodes():
-            t = threading.Thread(target=pass_values, args=(GR, N))
-            threads.append(t)
-            t.start()
-        
-        for t in threads:
-            t.join()
-        
         round = round + 1
         
+        pass_values_from_all(GR) #flow backwards
+        
+        added_this_round = 0
+        
+        #finalize all new steps only after
+        #all threads in round finished
+        add_new_to_all(GR)
+        
+        if (added_this_round == 0):
+            break #end when no new steps flowed back
+        
     return GR.reverse()
+
+def add_new_to_all(GR):
+    threads = []
+        
+    #move next steps to steps
+    for N in GR.nodes():
+        t = threading.Thread(target=add_new, args=(N, ))
+        threads.append(t)
+        t.start()
+    
+    for t in threads:
+        t.join()
+
+def pass_values_from_all(GR):
+    threads = []
+        
+    #flow all steps in N to all of its reverse neighbors
+    for N in GR.nodes():
+        t = threading.Thread(target=pass_values, args=(GR, N))
+        threads.append(t)
+        t.start()
+    
+    for t in threads:
+        t.join()
 
 def add_new(N):
     
@@ -180,4 +256,7 @@ ALGORITHM - GROW LENGTH OF PATH A TO F
 """
 
 def grow_path(path):
+    
+    
+    
     return

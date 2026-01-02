@@ -25,8 +25,6 @@ def rooms_to_layers(rooms):
     
     layers = [TW, OW, BS, BE, J, JB, E, EB]
     
-    #add_initial_transitions_to_layers(layers, TraversalMode.MATCHING_PERFECT)
-    
     return layers
     
 
@@ -228,95 +226,6 @@ def filter_rooms(rooms, room_type):
 def filter_rooms_by_branch(rooms, branch_type):
     return [room for room in rooms if room.branch_type == branch_type]
 
-def add_initial_transitions_to_layers(layers, traversal_mode):
-    transition_node_ids = []
-    
-    #gather transition nodes
-    for layer in layers:
-        
-        for node in layer.nodes():
-            
-            print(str(node))
-            
-            if node.node_type == NodeType.TRANSITION:
-                transition_node_ids.append(node)
-    
-    #convert transition_node_ids to only those that are unique
-    
-    unique_tids = []
-    
-    for tnid in transition_node_ids:
-        tid = nio.create_transition_id(StartExitType.NONE, tnid.inner_id.door_type, tnid.inner_id.door_dir)
-        
-        if tid not in unique_tids:
-            unique_tids.append(tid)
-    
-    #add initial transitions to each layer
-    for layer in layers:
-        add_initial_transitions_to_layer(layer, unique_tids, traversal_mode)
-
-#Add transitions with INITIAL type as nodes to layer
-#connect INITIAL transitions to START transitions according to
-#connection mode
-def add_initial_transitions_to_layer(layer, unique_transition_ids, traversal_mode):
-    #MODE: matching directional
-    #Match transitions that have consistent directions, but possibly different types
-    #TODO:
-    
-    #MODE: arbitrary no turnarounds
-    #Match transitions in any way, but don't allow left/left, right/right, up/up, or down/down
-    #TODO:
-    
-    #MODE: arbitrary no restrictions
-    #Match transitions in any way
-    #TODO:
-    
-    match traversal_mode:
-        case TraversalMode.MATCHING_PERFECT:
-            #Match transitions with the same type and consistent directions
-            add_initial_transitions_to_layer_matching_perfect(layer, unique_transition_ids)
-            return 
-        case _:
-            return
-
-def add_initial_transitions_to_layer_matching_perfect(layer, unique_transition_ids):
-    
-    print(f"adding to layer {str(layer)}")
-    layer_id = layer.name
-    
-    for utid in unique_transition_ids:
-        
-        initial_ntid = nio.create_transition_node_id(layer_id, StartExitType.INITIAL, utid.door_type, utid.door_dir)
-        
-        
-        
-        compare_ntid = nio.create_transition_node_id(layer_id, StartExitType.START, utid.door_type, my_flip_dir(utid.door_dir))
-        
-        print(f" {str(initial_ntid)} vs {str(compare_ntid)}")
-        
-        compare_ntids = [compare_ntid]
-        
-        layer.add_node(initial_ntid)
-        
-        #add edge between initial and all start tids that have the same door type but flipped dir
-        for node in layer.nodes():
-            if node in compare_ntids:
-                layer.add_edge(initial_ntid, node)
-    
-    return layer
-
-
-def my_flip_dir(door_dir: DoorDir):
-    if door_dir == DoorDir.UP:
-        return DoorDir.DOWN
-    elif door_dir == DoorDir.DOWN:
-        return DoorDir.UP
-    elif door_dir == DoorDir.LEFT:
-        return DoorDir.RIGHT
-    elif door_dir == DoorDir.RIGHT:
-        return DoorDir.LEFT
-    else:
-        return door_dir
 
 
 
