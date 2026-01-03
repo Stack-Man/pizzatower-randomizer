@@ -131,6 +131,7 @@ def add_one_start_exit_path_to_layer(room_name, path, start_door, exit_door, lay
 #TODO: oneway paths needs to also consider path time
 #in case of oneway paths that have extra pizzatime blocks for no reason
 #or maybe handle those as special cases
+#TODO: consider loop doors
 def rooms_to_TW_and_OW_layers(all_rooms):
     rooms = filter_rooms(all_rooms, RoomType.NORMAL)
 

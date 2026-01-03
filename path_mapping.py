@@ -3,11 +3,11 @@ import networkx as nx
 from path_objects import Endpoint, RoomPath
 
 
-def paths_to_endpoints(G):
+def layer_to_paths_and_endpoints(G):
     paths = categorize_paths(G)
     ep_graph = construct_endpoint_graph(paths, None)
     
-    return ep_graph, paths
+    return paths, ep_graph
 
 """
 ------------------
@@ -27,7 +27,7 @@ def construct_endpoint_graph(paths, traversal_mode):
     start_points = []
     exit_points = []
     
-    for endpoint_pair in paths.items():
+    for endpoint_pair, paths in paths.items():
         start_point = endpoint_pair[0]
         exit_point = endpoint_pair[1]
         

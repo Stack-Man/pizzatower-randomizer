@@ -12,9 +12,9 @@ from json_to_objects import json_to_rooms
 from layer_creation import rooms_to_layers
 from node_id_objects import NodeType, StartExitType
 import node_id_objects as nio
-from path_mapping import paths_to_endpoints
-from path_traversal import flow
-from path_objects import Endpoint
+from path_mapping import layer_to_paths_and_endpoints
+from path_traversal import flow, find_path, grow_path
+from path_objects import Endpoint, RoomPath
 
 from enums import *
 
@@ -191,18 +191,6 @@ def draw_layer(layer, name):
             hubs.append(node)
         else:
             nodelist.append(node)
-
-        """
-        layer_type = layer.nodes[node].get(LAYER_TYPE)
-
-        if layer_type == LAYER_TRANSITION:
-            transitions.append(node)
-        elif layer_type == LAYER_ROOM:
-            hubs.append(node)
-        else:
-            nodelist.append(node)"""
-    
-    
     
     pos = hub_layout(layer, hubs, transitions)
     
@@ -248,9 +236,9 @@ def draw_tree(G):
         if node.start_exit_type == StartExitType.START:
             set1.append(node)
     
-    pos = nx.bipartite_layout(G , set1)
-    plt.figure(figsize=(8, 6))
-    nx.draw(G, pos, with_labels=True, node_size=5000, node_color="skyblue", font_size=10, font_weight="bold")
+    #pos = nx.bipartite_layout(G , set1)
+    #plt.figure(figsize=(8, 6))
+    #nx.draw(G, pos, with_labels=True, node_size=5000, node_color="skyblue", font_size=10, font_weight="bold")
     
     for node in G.nodes:
         print(f"Node {node}:")
@@ -258,7 +246,7 @@ def draw_tree(G):
         for k, v in node.steps.items():
             print(f"    {k}: {v}")
     
-    plt.show(block=False)
+    #plt.show(block=False)
 
 def test_parse(filename):
 
@@ -280,16 +268,79 @@ def test_parse(filename):
             
             #draw_layer(layer, "Layer")
         
-        ep_graph = paths_to_endpoints(test_layer)
-        ep_graph = flow(ep_graph)
+        print("======================== GETING PATHS, G")
+        all_paths, G = layer_to_paths_and_endpoints(test_layer)
+        print("======================== INITIAL FLOW")
+        G = flow(G)
         
-        draw_tree(ep_graph)
+        draw_tree(G)
+
+
+        A = get_endpoint(G, StartExitType.START, DoorType.HORIZONTAL, DoorDir.RIGHT)
+        F = get_endpoint(G, StartExitType.EXIT, DoorType.BOX, DoorDir.UP)
+        
+        print("======================== INITIAL PATH")
+        path = find_path(G, all_paths, A, F)
+        print_path(path)
+        
+        
+        print("======================= REMAINING paths: ")
+        
+
+        for node in G.nodes():
+            msg = f"Node {node}:"
+            
+            for N in G.neighbors(node):
+                msg2 = msg + f" > {str(N)}"
+                
+                for N2 in G.neighbors(N):
+                    if N2 is not node:
+                        msg3 = msg2 + f" > {str(N2)}"
+                        
+                        for N3 in G.neighbors(N2):
+                            
+                            if N3 is not N:
+                                msg4 = msg3 + f" > {str(N3)}"
+                                print(msg4)
+        
+        draw_tree(G)
+        
+        print("======================== GROW 1")
+        new_path = grow_path(G, all_paths, path)
+        print_path(new_path)
+        print("======================== GROW 2")
+        new_path2 = grow_path(G, all_paths, new_path)
+        print_path(new_path2)
+        
+        
+        
+        #draw_tree(G)
 
         plt.show()
         
     return
 
-def test_flow():
+def print_path(path):
+    print("path: ")
+    for S in path:
+        print(f"    {str(S[0])} via {str(S[1])} > ")
+
+def get_endpoint(G, start, type, dir):
+    for N in G.nodes():
+        if N.start_exit_type == start and N.door_type == type and N.door_dir == dir:
+            return N
+    
+    return None
+
+def print_steps(G):
+    print("Steps: ")
+    for node in G.nodes:
+        print(f"    {node}:")
+        
+        for k, v in node.steps.items():
+            print(f"        {k}: {v}")
+
+def test_path_grow():
     
     G = nx.DiGraph()
     
@@ -307,6 +358,7 @@ def test_flow():
     E = Endpoint(EN)
     F = Endpoint(FN)
     
+    G.add_edge(A, B) #if we add AB first, it should be prioritized over AD
     G.add_edge(A, D)
     G.add_edge(D, B)
     G.add_edge(B, E)
@@ -315,12 +367,51 @@ def test_flow():
     G.add_edge(F, A)
     G.add_edge(A, F)
     G.add_edge(A, E)
+   
     
-    ep_graph = flow(G)
+    #initial flow
+    G = flow(G)
     
-    draw_tree(ep_graph)
-    plt.show()
+    #print_steps(G) #TODO: D > E is not written and any other step > 1
+    
+    #room paths
+    R_AD = RoomPath("R_AD", "A", "D")
+    R_DB = RoomPath("R_DB", "D", "B")
+    R_BE = RoomPath("R_BE", "B", "E")
+    R_EC = RoomPath("R_EC", "E", "C")
+    R_CF = RoomPath("R_CF", "C", "F")
+    R_FA = RoomPath("R_FA", "F", "A")
+    R_AF = RoomPath("R_AF", "A", "F")
+    R_AE = RoomPath("R_AE", "A", "E")
+    R_AB = RoomPath("R_AB", "A", "B")
+    
+    #construct paths in all_paths
+    all_paths = {}
+    all_paths[(A, D)] = [R_AD]
+    all_paths[(D, B)] = [R_DB]
+    all_paths[(B, E)] = [R_BE]
+    all_paths[(E, C)] = [R_EC]
+    all_paths[(C, F)] = [R_CF]
+    all_paths[(F, A)] = [R_FA]
+    all_paths[(A, F)] = [R_AF]
+    all_paths[(A, E)] = [R_AE]
+    all_paths[(A, B)] = [R_AB]
+    
+    print("======================== INITIAL")
+    path = find_path(G, all_paths, A, E)
+    print_path(path)
+    #print_steps(G)
+    
+    print("======================== GROW 1")
+    new_path = grow_path(G, all_paths, path)
+    print_path(new_path)
+    #print_steps(G)
+    
+    print("======================== GROW 2")
+    new_path2 = grow_path(G, all_paths, new_path)
+    print_path(new_path2)
+    #print_steps(G)
     
 
 #test_parse("datafiles/json/johngutter.json")
-test_flow()
+test_path_grow()

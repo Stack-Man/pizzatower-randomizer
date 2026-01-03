@@ -39,7 +39,7 @@ class Node_ID():
     #let exit transition know which paths lead to it
     def add_room_paths(self, rps):
         for rp in rps:
-            room_paths.append(rp)
+            self.room_paths.append(rp)
     
     #necessary so that we can use it in a networkx graph
     def __hash__(self):
@@ -103,7 +103,7 @@ def create_door_node_id(start_exit_type: StartExitType, room_id, letter):
 def create_room_node_id(room_name):
     
     #make all room nodes use the same layer id so we can easily remove any connected nodes
-    node_id = Node_ID("room", NodeType.ROOM, room_name)
+    node_id = Node_ID(NodeType.ROOM, room_name)
     
     return node_id
 

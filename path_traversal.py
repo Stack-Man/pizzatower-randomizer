@@ -33,10 +33,19 @@ def find_path(G, all_paths, A, F):
 
     chosen_endpoints = []
     
+    
+    if F not in A.steps:
+        print("FAIL! no path from A to F")
+        return None
+    
+    print(" start at " + str(A)  + " A[F] = " + str(A.steps[F]))
+    
     while not A == F: #N[F] == 0
     
         for N in G.neighbors(A):
-            if N[F] == A[F] - 1:
+            if F in N.steps and N.steps[F] == A.steps[F] - 1:
+                
+                print(" to " + str(N) + " N[F] = " + str(N.steps[F]))
                 
                 chosen_path = None
                 
@@ -82,6 +91,15 @@ before all threads finish round R
 import threading
 round = 0
 added_this_round = False
+def set_add_true():
+    global added_this_round
+    added_this_round = True
+    #print("SET ADD TRUE")
+
+def set_add_false():
+    global added_this_round
+    added_this_round = False
+    #print("SET ADD FALSE")
 
 def flow(G): 
     global round
@@ -99,18 +117,21 @@ def flow(G):
     GR = G.reverse()
     
     while (True):
-        
         round = round + 1
+        #print("Flow round " + str(round))
         
         pass_values_from_all(GR) #flow backwards
         
-        added_this_round = False
+        set_add_false()
         
         #finalize all new steps only after
         #all threads in round finished
+        #print("add new to all")
         add_new_to_all(GR)
+
         
-        if (added_this_round):
+        if not added_this_round:
+            #print("break not added this round")
             break #end when no new steps flowed back
         
     return GR.reverse()
@@ -140,19 +161,16 @@ def pass_values_from_all(GR):
         t.join()
 
 def add_new(N):
-    global added_this_round
-    
     curr = N.steps
     next = N.next_steps
-    
-    added = 0
-    
+
     for key, value in next.items():
         if key not in curr:
             curr[key] = value
-            added_this_round = True
-        else:
-             print(f"   {N}[{key}] < {value} already there")
+            set_add_true()
+            #print("     ADDED THIS ROUND")
+        #else:
+            # print(f"   {N}[{key}] < {value} already there")
     
     N.steps = curr
     N.next_steps = {}
@@ -160,7 +178,7 @@ def add_new(N):
 def pass_values(GR, N):
     global round
     
-    print(f"Passing N's steps to reverse neighbors")
+    #print(f"Passing N's steps to reverse neighbors")
     
     for RN in GR.neighbors(N):
         to_add = N.steps
@@ -169,7 +187,7 @@ def pass_values(GR, N):
         #value + 1
         for K in to_add:
             RN.next_steps[K] = round
-            print(f"    Added {RN}[{N}] = {round}")
+            #print(f"    Added {RN}[{N}] = {round}")
 
 """
 --------------------------
@@ -209,7 +227,7 @@ ALGORITHM - GROW LENGTH OF PATH A TO F
 """
 import random
 
-def grow_path(G, endpoint_path, all_paths):
+def grow_path(G, all_paths, endpoint_path):
     
     XZs = []
     i_F = len(endpoint_path) - 1
@@ -222,33 +240,66 @@ def grow_path(G, endpoint_path, all_paths):
         i_X = random.randint(0, i_F - 1) #A <= X < Z <= F therefore X <= F - 1
         i_Z = random.randint(i_X + 1, i_F)
         
+        print("Grow segment " + str(endpoint_path[i_X][0]) + " to " + str(endpoint_path[i_Z][0]))
+        
         X = endpoint_path[i_X][0]
         Y = endpoint_path[i_X + 1][0]
         Z = endpoint_path[i_Z][0]
         
+        #temp add removed paths to check for new path
+        #TODO: probably need to account fo thef act that removed rooms is global...
+        #have to add the unadd instead of making a copy of G
+        path_XZ = get_endpoint_path_segment(endpoint_path, i_X, i_Z - 1) #include X because it is old XY, exclude Z because it will be kept for ZF
+        add_all_room_paths(G, path_XZ, all_paths) #temp readd old paths from XZ
+        
         N = check_for_new_path(G, X, Y, Z)
         
         if N:
+            
             #find separately to force our path down N instead of Y
             path_XN = find_path(G, all_paths, X, N)
             path_NZ = find_path(G, all_paths, N, Z)
 
             path_AX = get_endpoint_path_segment(endpoint_path, 0, i_X - 1) #exclude X because X is part of XN
-            path_XZ = get_endpoint_path_segment(endpoint_path, i_X, i_Z - 1) #include X because it is old XY, exclude Z because it will be kept
+            path_XN = get_endpoint_path_segment(path_XN, 0, len(path_XN) - 2) #include X, exclude N because N is part of NZ(-2 bc len is + 1)
+            path_NZ = get_endpoint_path_segment(path_NZ, 0, len(path_NZ) - 2) #include N, exclude Z because it is part of ZF (-2 bc len is + 1)
             path_ZF = get_endpoint_path_segment(endpoint_path, i_Z, i_F)   #include Z because Z from NZ does not have a room picked
             
-            add_all_room_paths(G, path_XZ, all_paths) #readd old paths from XZ
-            
-            path_AXNZF = reconstruct_endpoint_path_segment([path_AX, path_XN, path_NZ, path_ZF])
+            path_AXNZF = reconstruct_endpoint_path_from_segments([path_AX, path_XN, path_NZ, path_ZF])
             
             return path_AXNZF #TODO: report size of increase
-        
-    return endpoint_path #TODO: report size of increase (0)
+        else:
+            
+            #re-remove the used paths
+            remove_all_endpoint_path_room_paths(G, all_paths, endpoint_path)
+            
+            print("==========FAILED TO GROW!!!!")
+            
+            return endpoint_path #TODO: report size of increase (0)
+
+def print_path(path):
+    print("path: ")
+    for S in path:
+        print(f"    {str(S[0])} via {str(S[1])} > ")
 
 def check_for_new_path(G, X, Y, Z): #TODO: include target size?
     
     for N in G.neighbors(X):
-        if N is not Y and N.steps[Z] >= X.steps[Z]
+        #print("     Check for new path to Z:" + str(Z) + " from N:" + str(N))
+        
+        """
+        if N is Y:
+            print("         Fail, N is Y")
+        elif Z not in N.steps:
+            print("         Fail, Z not in N")
+            
+            for K, V in N.steps.items():
+                print(f"            {K}:{V}")
+        elif not N.steps[Z] >= X.steps[Z]:
+            print("         Fail, N < Z")
+        """
+        
+        if N is not Y and Z in N.steps and N.steps[Z] >= X.steps[Z]:
             return N
     
     return None
@@ -269,6 +320,15 @@ def get_endpoint_path_segment(endpoint_path, i_start, i_end):
         i_next = i_next + 1
     
     return segment
+
+def reconstruct_endpoint_path_from_segments(segments):
+    path = []
+    
+    for segment in segments:
+        for item in segment:
+            path.append(item)
+    
+    return path
 
 """
 --------------------------
@@ -299,6 +359,14 @@ removed_any_edge = False
 removed_paths = []
 removed_paths_by_room_and_endpoints = {}
 
+def remove_all_endpoint_path_room_paths(G, all_paths, endpoint_path):
+    
+    for endpoint_path_pair in endpoint_path:
+        path = endpoint_path_pair[1]
+        
+        if path:
+            remove_all_room_paths(G, path, all_paths)
+
 def remove_all_room_paths(G, path, all_paths):
     global removed_any_edge
     global removed_paths
@@ -310,7 +378,7 @@ def remove_all_room_paths(G, path, all_paths):
     threads = []
     
     for endpoint_pair, paths in all_paths.items():
-        t = threading.Thread(target=remove_room_paths, args=(endpoint_pair, paths, G))
+        t = threading.Thread(target=remove_room_paths, args=(endpoint_pair, room_name, paths, G, all_paths))
         threads.append(t)
         t.start()
 
@@ -327,12 +395,17 @@ def remove_all_room_paths(G, path, all_paths):
     #Store removed paths by room then by endpoint
     for endpoint_pair_and_path in removed_paths:
         
-        endpoint_pair = endpoint_pair_path[0]
-        path = endpoint_pair_path[1]
+        endpoint_pair = endpoint_pair_and_path[0]
+        path = endpoint_pair_and_path[1]
     
-        removed_paths_by_room_and_endpoints[room_name][endpoint_pair] = path
+        
+        if endpoint_pair not in removed_paths_by_room_and_endpoints[room_name]:
+            removed_paths_by_room_and_endpoints[room_name][endpoint_pair] = [path]
+        else:
+            removed_paths_by_room_and_endpoints[room_name][endpoint_pair].append(path)
+        
 
-def remove_room_paths(endpoint_pair, paths, G):
+def remove_room_paths(endpoint_pair, room_name, paths, G, all_paths):
     global removed_any_edge
     global removed_paths
     
@@ -345,13 +418,11 @@ def remove_room_paths(endpoint_pair, paths, G):
             #store removed path as its endpoint pair and the path
             removed_paths.append((endpoint_pair, P))
     
-    paths[endpoint_pair] = new_paths
+    all_paths[endpoint_pair] = new_paths
     
-    if len(new_paths) == 0:
+    if len(new_paths) == 0 and G.has_edge(endpoint_pair[0], endpoint_pair[1]): #threading check, dont remove edge if already removed, maybe could check original length instead?
         G.remove_edge(endpoint_pair[0], endpoint_pair[1])
         removed_any_edge = True
-    
-    return P
 
 added_any_edge = True
 """
@@ -401,7 +472,7 @@ def add_room_paths(room_name, G, all_paths):
     if room_name in removed_paths_by_room_and_endpoints:
         removed_paths_by_endpoint = removed_paths_by_room_and_endpoints[room_name]
         
-        for endpoint_pair, paths in removed_paths_by_endpoint:
+        for endpoint_pair, paths in removed_paths_by_endpoint.items():
             original_length = len(all_paths[endpoint_pair])
             all_paths[endpoint_pair] = paths
             
