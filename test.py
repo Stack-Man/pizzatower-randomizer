@@ -293,12 +293,12 @@ def test_flow():
     
     G = nx.DiGraph()
     
-    AN = nio.create_transition_node_id("A", StartExitType.START, "A", 1)
-    BN = nio.create_transition_node_id("B", StartExitType.START, "B", 1)
-    CN = nio.create_transition_node_id("C", StartExitType.START, "C", 1)
-    DN = nio.create_transition_node_id("D", StartExitType.EXIT, "D", 2)
-    EN = nio.create_transition_node_id("E", StartExitType.EXIT, "E", 2)
-    FN = nio.create_transition_node_id("F", StartExitType.EXIT, "F", 2)
+    AN = nio.create_transition_node_id(StartExitType.START, "A", 1)
+    BN = nio.create_transition_node_id(StartExitType.START, "B", 1)
+    CN = nio.create_transition_node_id(StartExitType.START, "C", 1)
+    DN = nio.create_transition_node_id(StartExitType.EXIT, "D", 2)
+    EN = nio.create_transition_node_id(StartExitType.EXIT, "E", 2)
+    FN = nio.create_transition_node_id(StartExitType.EXIT, "F", 2)
     
     A = Endpoint(AN)
     B = Endpoint(BN)
