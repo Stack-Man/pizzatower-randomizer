@@ -358,7 +358,7 @@ def test_path_grow():
     E = Endpoint(EN)
     F = Endpoint(FN)
     
-    G.add_edge(A, B) #if we add AB first, it should be prioritized over AD
+   
     G.add_edge(A, D)
     G.add_edge(D, B)
     G.add_edge(B, E)
@@ -367,12 +367,11 @@ def test_path_grow():
     G.add_edge(F, A)
     G.add_edge(A, F)
     G.add_edge(A, E)
+    G.add_edge(A, B) #if we add AB first, it should be prioritized over AD
    
     
     #initial flow
     G = flow(G)
-    
-    #print_steps(G) #TODO: D > E is not written and any other step > 1
     
     #room paths
     R_AD = RoomPath("R_AD", "A", "D")
