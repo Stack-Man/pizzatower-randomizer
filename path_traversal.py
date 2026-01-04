@@ -250,16 +250,20 @@ def grow_path(G, all_paths, endpoint_path):
     
     #TODO: seeded randomization
     #initialize X and Z
+    
+    
     si_X = random.randint(0, i_F - 1) #A <= X < Z <= F therefore X <= F - 1
-    si_Z = random.randint(si_X + 1, i_F)
+    max_Z_offset = i_F - si_X
+    si_Z_offset = random.randint(1, max_Z_offset) # X < X + Z <= F; X + (1) > X; X + (F - X) <= F
     
     i_X = si_X
-    i_Z = si_Z
-
+    i_Z_offset = si_Z_offset
+    i_Z = i_X + i_Z_offset
+    
     while (True):
-
         print("Grow segment " + str(endpoint_path[i_X][0]) + " to " + str(endpoint_path[i_Z][0]))
         print("     i_X, i_Z: " + str(i_X) + ", " + str(i_Z))
+        print("     off, max: " + str(i_Z_offset) + ", " + str(max_Z_offset))
         
         X = endpoint_path[i_X][0]
         Y = endpoint_path[i_X + 1][0]
@@ -292,33 +296,47 @@ def grow_path(G, all_paths, endpoint_path):
             #re-remove the readded paths since were still using them
             remove_all_endpoint_path_room_paths(G, all_paths, endpoint_path)
             
-            #advance i_X and i_Z
-            #increment X within 0 to Z
-            print("         inc X")
-            i_X = increment_wrap_around(i_X, 0, i_Z)
-            
-            #TODO: doesnt exhaust all possible combinations 
-            #because Z cannot be wrapped around to any value lower than si_X + 1
-            #X completed one round with Z, advance Z
-            if i_X == si_X:
-                #increment Z within si_X + 1, i_F
-                print("         inc Z")
-                i_Z = increment_wrap_around(i_Z, si_X + 1, i_F) 
+            #Increment Offset
+            i_Z_offset = increment_wrap_around(i_Z_offset, 1, max_Z_offset)
+
+            #if Z has finished one cycle then:
+            #offset has reached starting offset value OR
+            #offset has reached max and max is less than starting offset value
+
+            if i_Z_offset == si_Z_offset or (i_Z_offset == max_Z_offset and max_Z_offset < si_Z_offset ):
                 
-                #exhausted all combinations of X, Z
-                if i_Z == si_Z:
+                #increment to next X
+                i_X = increment_wrap_around(i_X, 0, i_F - 1)
+                
+                #reset offset so every X round starts at the same initial Z
+                i_Z_offset = si_Z_offset 
+                
+                #exhausted all combinations
+                if i_X == si_X:
                     print("==========FAILED TO GROW!!!!")
                     return endpoint_path #TODO: report size of increase (0)
+            
+            #account for increasing X so that Z = X + offset <= F
+            max_Z_offset = i_F - i_X
+            
+            #clamp in case new X limits max offset
+            i_Z_offset = min(i_Z_offset, max_Z_offset)
+            
+            #Set Z to new X + Offset
+            i_Z = i_X + i_Z_offset
    
 
-def increment_wrap_around(current, min_inclusive, max_exclusive):
+def increment_wrap_around(current, min_inclusive, max_inclusive):
     current = current + 1
     
-    if current >= max_exclusive:
-        print("             to " + str(min_inclusive))
+    if max_inclusive <= min_inclusive:
+        return max_inclusive
+    
+    if current > max_inclusive:
+        #print("             to " + str(min_inclusive))
         return min_inclusive
     else:
-        print("             to " + str(current))
+        #print("             to " + str(current))
         return current
 
 def print_path(path):
