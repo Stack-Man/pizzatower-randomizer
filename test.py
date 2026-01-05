@@ -45,9 +45,9 @@ def hub_layout(G, hubs, transitions):
     for t_node in transitions:
         se_type = t_node.inner_id.start_exit_type
         
-        if se_type == StartExitType.INITIAL:
-            i_ts.append(t_node)
-        elif se_type == StartExitType.START:
+        #if se_type == StartExitType.INITIAL:
+            #i_ts.append(t_node)
+        if se_type == StartExitType.START:
             s_ts.append(t_node)
         else:
             e_ts.append(t_node)
@@ -193,6 +193,7 @@ def draw_layer(layer, name):
             nodelist.append(node)
     
     pos = hub_layout(layer, hubs, transitions)
+    #pos = nx.spring_layout(layer)
     
     for n in hubs:
         layer.remove_node(n)
@@ -200,13 +201,13 @@ def draw_layer(layer, name):
     #nodelist.extend(hubs)
     nodelist.extend(transitions)
     
-    nodes_without_pos = [n for n in layer.nodes if n not in pos]
-    msg = "Nodes without positions: "
+    #nodes_without_pos = [n for n in layer.nodes if n not in pos]
+    #msg = "Nodes without positions: "
     
-    for n in nodes_without_pos:
-        msg += ", " + str(n) + "\n"
+    #for n in nodes_without_pos:
+        #msg += ", " + str(n) + "\n"
     
-    print(msg)
+    #print(msg)
         
     fig = plt.figure(figsize=(6, 5))
 
@@ -257,65 +258,11 @@ def test_parse(filename):
         rooms = json_to_rooms(file)
 
         layers = rooms_to_layers(rooms)
-        test_layer = None
         
         for layer in layers:
             print("layer " + str(layer.graph["name"]))
-            
-            if layer.graph["name"] == "Two Way":
-                test_layer = layer
-                break
-            
-            #draw_layer(layer, "Layer")
-        
-        print("======================== GETING PATHS, G")
-        all_paths, G = layer_to_paths_and_endpoints(test_layer)
-        print("======================== INITIAL FLOW")
-        G = flow(G)
-        
-        draw_tree(G)
-
-
-        A = get_endpoint(G, StartExitType.START, DoorType.HORIZONTAL, DoorDir.RIGHT)
-        F = get_endpoint(G, StartExitType.EXIT, DoorType.BOX, DoorDir.UP)
-        
-        print("======================== INITIAL PATH")
-        path = find_path(G, all_paths, A, F)
-        print_path(path)
-        
-        
-        print("======================= REMAINING paths: ")
-        
-
-        for node in G.nodes():
-            msg = f"Node {node}:"
-            
-            for N in G.neighbors(node):
-                msg2 = msg + f" > {str(N)}"
-                
-                for N2 in G.neighbors(N):
-                    if N2 is not node:
-                        msg3 = msg2 + f" > {str(N2)}"
-                        
-                        for N3 in G.neighbors(N2):
-                            
-                            if N3 is not N:
-                                msg4 = msg3 + f" > {str(N3)}"
-                                print(msg4)
-        
-        draw_tree(G)
-        
-        print("======================== GROW 1")
-        new_path = grow_path(G, all_paths, path)
-        print_path(new_path)
-        print("======================== GROW 2")
-        new_path2 = grow_path(G, all_paths, new_path)
-        print_path(new_path2)
-        
-        
-        
-        #draw_tree(G)
-
+            draw_layer(layer, "Layer")
+       
         plt.show()
         
     return
@@ -412,5 +359,5 @@ def test_path_grow():
     #print_steps(G)
     
 
-#test_parse("datafiles/json/johngutter.json")
-test_path_grow()
+test_parse("datafiles/json/johngutter.json")
+#test_path_grow()

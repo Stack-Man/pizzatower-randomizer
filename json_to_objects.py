@@ -159,8 +159,8 @@ def doors_to_path(start_door, exit_door, is_john_room):
         return None
     
     #oneway = start or exit only but not initially blocked
+    #initially_blocked is processed from the door itself in the objects to graph stage
     is_oneway = (start_door.access_type == AccessType.STARTONLY and not start_door.initially_blocked) or (exit_door.access_type == AccessType.EXITONLY and not exit_door.initially_blocked)
-    
     is_loop = start_door.is_loop or exit_door.is_loop
 
     path = Path(start_door, exit_door, is_oneway, is_loop)

@@ -24,12 +24,12 @@ Door Start > Door Exit edges represent a path in that room between those two doo
 
 def rooms_to_layers(rooms):
     
-    TW, OW = rooms_to_TW_and_OW_layers(rooms)
+    TW, OW_NPT, OW_PT = rooms_to_TW_and_OW_layers(rooms)
     BS, BE = rooms_to_branch_layers(rooms)
     J, JB = rooms_to_john_layer(rooms)
     E, EB = rooms_to_entrance_layer(rooms)
     
-    layers = [TW, OW, BS, BE, J, JB, E, EB]
+    layers = [TW, OW_NPT, OW_PT, BS, BE, J, JB, E, EB]
     
     return layers
     
@@ -83,8 +83,15 @@ def populate_start_and_exit_layer(rooms, path_selector = lambda e: True):
 
         #add paths between layers
         for path in room.paths:
-            if path_selector(path):
+            print("Trying path " + str(path) )
+            
+            valid_path = path_selector(path)
+            
+            if valid_path:
+                print("valid path " + str(path) + " vp " + str(valid_path))
                 add_start_exit_path_to_layer(room.name, path, layer)
+            else:
+                print("invalid path " + str(path)  + " vp " + str(valid_path))
     
     return layer
 
@@ -135,16 +142,48 @@ def add_one_start_exit_path_to_layer(room_name, path, start_door, exit_door, lay
 def rooms_to_TW_and_OW_layers(all_rooms):
     rooms = filter_rooms(all_rooms, RoomType.NORMAL)
 
+    #paths cant be oneway
+    #and have to be traversible both ways in different times
     def valid_path_for_two_way_layer(path):
-        return not path.oneway
+        a = not path.oneway
+        b = path.start_door.start_path_time == PathTime.BOTH
+        c = path.start_door.exit_path_time == PathTime.BOTH
+        d = path.exit_door.start_path_time == PathTime.BOTH
+        e = path.exit_door.exit_path_time == PathTime.BOTH
+        
+        valid = a and b and c and d and e
+        
+        return valid
+
+    def valid_for_OW_TIME_layer(path, wrong_time):
+        a = not path.start_door.start_path_time == wrong_time
+        b = not path.exit_door.start_path_time == wrong_time
+        c = not path.start_door.exit_path_time == wrong_time
+        d = not path.exit_door.exit_path_time == wrong_time
+        
+        valid = a and b and c and d
+        
+        print("path: " + str(path) + " wrong_time: " + str(wrong_time) + " a, b, c, d: " + str(path.start_door.start_path_time) + ", "+ str(path.exit_door.start_path_time) + ", "+ str(path.start_door.exit_path_time) + ", "+ str(path.exit_door.exit_path_time) )
+        print(" vp: " + str(valid) + " a, b, c, d: " + str(a) + ","+ str(b) + ","+ str(c) + ","+ str(d))
+        
+        return valid
+    
+    def valid_for_OW_NPT_layer(path):
+        return valid_for_OW_TIME_layer(path, wrong_time = PathTime.PIZZATIME)
+    
+    def valid_for_OW_PT_layer(path):
+        return valid_for_OW_TIME_layer(path, wrong_time = PathTime.NOTPIZZATIME)
+    
 
     TW_layer = rooms_to_layer(rooms, valid_path_for_two_way_layer)
-    OW_layer = rooms_to_layer(rooms)
+    OW_NPT_layer = rooms_to_layer(rooms, valid_for_OW_NPT_layer)
+    OW_PT_layer = rooms_to_layer(rooms, valid_for_OW_PT_layer)
     
     TW_layer.graph["name"] = "Two Way"
-    OW_layer.graph["name"] = "One Way"
+    OW_NPT_layer.graph["name"] = "One Way NPT"
+    OW_PT_layer.graph["name"] = "One Way PT"
     
-    return TW_layer, OW_layer
+    return TW_layer, OW_NPT_layer, OW_PT_layer
     
 
 #RoomType.BRANCH
