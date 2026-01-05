@@ -367,7 +367,7 @@ def test_path_grow():
     G.add_edge(F, A)
     G.add_edge(A, F)
     G.add_edge(A, E)
-    G.add_edge(A, B) #if we add AB first, it should be prioritized over AD
+    G.add_edge(A, B) #if we add AB first, it should be prioritized over AD, just for testing, such a path shouldnt exist because its start-start
    
     
     #initial flow
@@ -402,12 +402,12 @@ def test_path_grow():
     #print_steps(G)
     
     print("======================== GROW 1")
-    new_path = grow_path(G, all_paths, path)
+    new_path, inc = grow_path(G, all_paths, path)
     print_path(new_path)
     #print_steps(G)
     
     print("======================== GROW 2")
-    new_path2 = grow_path(G, all_paths, new_path)
+    new_path2, inc2 = grow_path(G, all_paths, new_path)
     print_path(new_path2)
     #print_steps(G)
     

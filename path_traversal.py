@@ -241,37 +241,27 @@ ALGORITHM - GROW LENGTH OF PATH A TO F
 
 3b. Else move X and Z and goto step 2
 """
-import random
+import seeded_random
 
 def grow_path(G, all_paths, endpoint_path):
     
     XZs = []
     i_F = len(endpoint_path) - 1
     
-    #TODO: seeded randomization
-    #initialize X and Z
-    
-    
-    si_X = random.randint(0, i_F - 1) #A <= X < Z <= F therefore X <= F - 1
-    max_Z_offset = i_F - si_X
-    si_Z_offset = random.randint(1, max_Z_offset) # X < X + Z <= F; X + (1) > X; X + (F - X) <= F
-    
+    si_X, si_Z = init_markers(i_F)
     i_X = si_X
-    i_Z_offset = si_Z_offset
-    i_Z = i_X + i_Z_offset
+    i_Z = si_Z
     
     while (True):
         print("Grow segment " + str(endpoint_path[i_X][0]) + " to " + str(endpoint_path[i_Z][0]))
         print("     i_X, i_Z: " + str(i_X) + ", " + str(i_Z))
-        print("     off, max: " + str(i_Z_offset) + ", " + str(max_Z_offset))
         
         X = endpoint_path[i_X][0]
         Y = endpoint_path[i_X + 1][0]
         Z = endpoint_path[i_Z][0]
         
-        #temp add removed paths to check for new path
-        #Have to readd first because we may want to use 
-        #a different path from room R that was removed 
+        #temp add removed paths
+        #so new path can use P from removed rooms R
         path_XZ = get_endpoint_path_segment(endpoint_path, i_X, i_Z - 1) #include X because it is old XY, exclude Z because it will be kept for ZF
         add_all_room_paths(G, path_XZ, all_paths) #temp readd old paths from XZ
         
@@ -291,40 +281,62 @@ def grow_path(G, all_paths, endpoint_path):
             
             path_AXNZF = reconstruct_endpoint_path_from_segments([path_AX, path_XN, path_NZ, path_ZF])
             
-            return path_AXNZF #TODO: report size of increase
+            size_increase = len(endpoint_path) - len(path_AXNZF)
+            
+            return path_AXNZF, size_increase
         else:
             #re-remove the readded paths since were still using them
             remove_all_endpoint_path_room_paths(G, all_paths, endpoint_path)
             
-            #Increment Offset
-            i_Z_offset = increment_wrap_around(i_Z_offset, 1, max_Z_offset)
+            i_X, i_Z = increment_exhaustive(si_X, si_Z, i_X, i_Z, i_F)
+            
+            if i_X == None:
+                print("======== FAILED TO GROW")
+                return endpoint_path, 0
 
-            #if Z has finished one cycle then:
-            #offset has reached starting offset value OR
-            #offset has reached max and max is less than starting offset value
+#Return two values X, Z where 0 <= X < Z <= F
+def init_markers(max_F):
+    si_X = seeded_random.randint(0, max_F - 1) #A <= X < Z <= F therefore X <= F - 1
+    max_Z_offset = max_F - si_X
+    si_Z_offset = seeded_random.randint(1, max_Z_offset) # X < X + Z <= F; X + (1) > X; X + (F - X) <= F
+    si_Z = si_X + si_Z_offset
+    
+    return si_X, si_Z
 
-            if i_Z_offset == si_Z_offset or (i_Z_offset == max_Z_offset and max_Z_offset < si_Z_offset ):
-                
-                #increment to next X
-                i_X = increment_wrap_around(i_X, 0, i_F - 1)
-                
-                #reset offset so every X round starts at the same initial Z
-                i_Z_offset = si_Z_offset 
-                
-                #exhausted all combinations
-                if i_X == si_X:
-                    print("==========FAILED TO GROW!!!!")
-                    return endpoint_path #TODO: report size of increase (0)
-            
-            #account for increasing X so that Z = X + offset <= F
-            max_Z_offset = i_F - i_X
-            
-            #clamp in case new X limits max offset
-            i_Z_offset = min(i_Z_offset, max_Z_offset)
-            
-            #Set Z to new X + Offset
-            i_Z = i_X + i_Z_offset
-   
+def increment_exhaustive(start_X, start_Z, current_X, current_Z, max_F):
+    current_Z_offset = current_Z - current_X #recalculate current offset 
+    start_Z_offset = start_Z - start_X #recalculate start offset
+    max_Z_offset = max_F - current_X #recalculate max
+    
+    #Increment Offset
+    current_Z_offset = increment_wrap_around(current_Z_offset, 1, max_Z_offset)
+
+    #if Z has finished one cycle then:
+    #offset has reached starting offset value OR
+    #offset has reached max and max is less than starting offset value
+
+    if current_Z_offset == start_Z_offset or (current_Z_offset == max_Z_offset and max_Z_offset < start_Z_offset ):
+        
+        #increment to next X
+        current_X = increment_wrap_around(current_X, 0, max_F - 1)
+        
+        #reset offset so every X round starts at the same initial Z
+        current_Z_offset = start_Z_offset 
+        
+        #exhausted all combinations
+        if current_X == start_X:
+            return None, None
+    
+    #account for increasing X so that Z = X + offset <= F
+    max_Z_offset = max_F - current_X
+    
+    #clamp in case new X limits max offset
+    current_Z_offset = min(current_Z_offset, max_Z_offset)
+    
+    #Set Z to new X + Offset
+    current_Z = current_X + current_Z_offset
+    
+    return current_X, current_Z
 
 def increment_wrap_around(current, min_inclusive, max_inclusive):
     current = current + 1
