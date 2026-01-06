@@ -352,10 +352,8 @@ def increment_wrap_around(current, min_inclusive, max_inclusive):
         return max_inclusive
     
     if current > max_inclusive:
-        #print("             to " + str(min_inclusive))
         return min_inclusive
     else:
-        #print("             to " + str(current))
         return current
 
 def print_path(path):
@@ -363,13 +361,11 @@ def print_path(path):
     for S in path:
         print(f"    {str(S[0])} via {str(S[1])} > ")
 
-def check_for_new_path(G, X, Y, Z, current_steps_X_to_Z): #TODO: include target size?
+def check_for_new_path(G, X, Y, Z, current_steps_X_to_Z):
     
     for N in G.neighbors(X):
-        if N is not Y and Z in N.steps and N.steps[Z] >= current_steps_X_to_Z:#>= X.steps[Z]:
+        if N is not Y and Z in N.steps and N.steps[Z] >= current_steps_X_to_Z:
             print(f"Found path from {str(X)} to {str(Z)} through {str(N)} with steps {N.steps[Z]} >= {current_steps_X_to_Z}")
-            #TODO: we compare to X.steps[Z] but the actual amount of steps may be longer
-            #because we may have already grown the path
             
             return N
     

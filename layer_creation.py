@@ -21,8 +21,11 @@ prventing unwanted backtracking.
 Transition Start > Door Start and Door Exit > Transition Exit edges mark a door as that type of transition
 Door Start > Door Exit edges represent a path in that room between those two doors
 """
+use_loop_paths = False
 
-def rooms_to_layers(rooms):
+def rooms_to_layers(rooms, use_loops = False):
+    
+    use_loop_paths = use_loops
     
     TW, OW_NPT, OW_PT = rooms_to_TW_and_OW_layers(rooms)
     BS, BE = rooms_to_branch_layers(rooms)
@@ -35,15 +38,7 @@ def rooms_to_layers(rooms):
     
 
 def rooms_to_layer(rooms, path_selector = lambda e: True):
-    G = populate_start_and_exit_layer(rooms, path_selector)
-    
-    #help keep track of rooms in path_traversal
-    G.readded_rooms = []
-    G.removed_rooms = []
-    
-    G.removed_paths_by_room_and_endpoints = {}
-    
-    return G
+    return populate_start_and_exit_layer(rooms, path_selector)
 
 #start/exit layers are virtual layers within a single greater layer
 #each door exits twice in the layer, once in start and once in exit
@@ -69,6 +64,8 @@ Assume we have an already filtered list of rooms
 
 """
 def populate_start_and_exit_layer(rooms, path_selector = lambda e: True):
+    global use_loop_paths
+    
     layer = nx.DiGraph()
     layer_ids = [StartExitType.START, StartExitType.EXIT]
 
@@ -92,7 +89,8 @@ def populate_start_and_exit_layer(rooms, path_selector = lambda e: True):
         for path in room.paths:
             print("Trying path " + str(path) )
             
-            valid_path = path_selector(path)
+            valid_loop = not path.is_loop or (path.is_loop and use_loop_paths)
+            valid_path = path_selector(path) and valid_loop
             
             if valid_path:
                 print("valid path " + str(path) + " vp " + str(valid_path))
@@ -145,10 +143,6 @@ def add_one_start_exit_path_to_layer(room_name, path, start_door, exit_door, lay
 
 #RoomType.NORMAL
 #Two layers, one with and one without oneway paths
-#TODO: oneway paths needs to also consider path time
-#in case of oneway paths that have extra pizzatime blocks for no reason
-#or maybe handle those as special cases
-#TODO: consider loop doors
 def rooms_to_TW_and_OW_layers(all_rooms):
     rooms = filter_rooms(all_rooms, RoomType.NORMAL)
 
