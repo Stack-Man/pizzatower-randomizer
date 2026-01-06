@@ -3,11 +3,27 @@ import networkx as nx
 from path_objects import Endpoint, RoomPath
 
 
-def layer_to_paths_and_endpoints(G):
+def layer_to_endpoints(G):
     paths = categorize_paths(G)
     ep_graph = construct_endpoint_graph(paths, None)
     
-    return paths, ep_graph
+    G_init_attributes(ep_graph, paths)
+    
+    return ep_graph
+
+def G_init_attributes(G, all_paths):
+    G.all_paths = all_paths
+    
+    G.readded_rooms = []
+    G.removed_rooms = []
+    
+    G.removed_paths_by_room_and_endpoints = {}
+    
+    G.added_any_edge = False
+    G.removed_any_edge = False
+    
+    G.removed_paths = []
+
 
 """
 ------------------

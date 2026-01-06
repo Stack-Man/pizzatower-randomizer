@@ -29,10 +29,7 @@ The number of steps to reach node F from A is written as A[F]
 
 #RETURN: List of (Endpoint, Path) for every chosen Endpoint and their related path
 #EXIT endpoints have Path set as None
-def find_path(G, all_paths, A, F, prioritize_oneway = False):
-
-    if not hasattr(G, "removed_paths_by_room_and_endpoints"):
-        G.removed_paths_by_room_and_endpoints = {}
+def find_path(G, A, F, prioritize_oneway = False):
 
     chosen_endpoints = []
     
@@ -50,7 +47,7 @@ def find_path(G, all_paths, A, F, prioritize_oneway = False):
                 chosen_path = None
                 
                 if A.start_exit_type == StartExitType.START:
-                    chosen_path = choose_path(G, all_paths, A, N, prioritize_oneway)
+                    chosen_path = choose_path(G, A, N, prioritize_oneway)
                     
                     room_name = chosen_path.room_name
                     if room_name not in G.removed_paths_by_room_and_endpoints:
@@ -68,8 +65,8 @@ def find_path(G, all_paths, A, F, prioritize_oneway = False):
 
     return chosen_endpoints
 
-def choose_path(G, all_paths, A, F, prioritize_oneway):
-    paths_of_types = all_paths[(A, F)]
+def choose_path(G, A, F, prioritize_oneway):
+    paths_of_types = G.all_paths[(A, F)]
     print("choosing from paths: " + str(A) + ", " + str(F) + ": " + str(len(paths_of_types)))
     path = paths_of_types[0]
     
@@ -80,10 +77,11 @@ def choose_path(G, all_paths, A, F, prioritize_oneway):
                 break
     
     room_name = path.room_name
+    
     if room_name not in G.removed_paths_by_room_and_endpoints:
         print("     " + str(room_name) + " not in G (yet)")
     
-    remove_all_room_paths(G, path, all_paths)
+    remove_all_room_paths_by_path(G, path)
     
     if room_name not in G.removed_paths_by_room_and_endpoints:
         print("     " + str(room_name) + " still not in G!")
@@ -251,7 +249,7 @@ ALGORITHM - GROW LENGTH OF PATH A TO F
 """
 import seeded_random
 
-def grow_path(G, all_paths, endpoint_path, prioritize_oneway = False):
+def grow_path(G, endpoint_path, prioritize_oneway = False):
     
     XZs = []
     i_F = len(endpoint_path) - 1
@@ -271,7 +269,7 @@ def grow_path(G, all_paths, endpoint_path, prioritize_oneway = False):
         #temp add removed paths
         #so new path can use P from removed rooms R
         path_XZ = get_endpoint_path_segment(endpoint_path, i_X, i_Z - 1) #include X because it is old XY, exclude Z because it will be kept for ZF
-        add_all_room_paths(G, path_XZ, all_paths) #temp readd old paths from XZ
+        add_all_room_paths(G, path_XZ) #temp readd old paths from XZ
         
         current_steps_X_to_Z = len(path_XZ)
         N = check_for_new_path(G, X, Y, Z, current_steps_X_to_Z)
@@ -279,8 +277,8 @@ def grow_path(G, all_paths, endpoint_path, prioritize_oneway = False):
         if N:
             
             #find separately to force our path down N instead of Y
-            path_XN = find_path(G, all_paths, X, N, prioritize_oneway)
-            path_NZ = find_path(G, all_paths, N, Z, prioritize_oneway)
+            path_XN = find_path(G, X, N, prioritize_oneway)
+            path_NZ = find_path(G, N, Z, prioritize_oneway)
 
             path_AX = get_endpoint_path_segment(endpoint_path, 0, i_X - 1) #exclude X because X is part of XN
             path_XN = get_endpoint_path_segment(path_XN, 0, len(path_XN) - 2) #include X, exclude N because N is part of NZ(-2 bc len is + 1)
@@ -295,7 +293,7 @@ def grow_path(G, all_paths, endpoint_path, prioritize_oneway = False):
         else:
             #re-remove the readded paths since were still using them
             #the readded paths were from path_XZ
-            remove_all_endpoint_path_room_paths(G, all_paths, path_XZ)
+            remove_all_endpoint_path_room_paths(G, path_XZ)
             
             i_X, i_Z = increment_exhaustive(si_X, si_Z, i_X, i_Z, i_F)
             
@@ -428,40 +426,37 @@ ALGORITHM - REMOVE PATHS OF ROOM FROM G
 5. If at least one edge was removed, Flow(G)
 """
 
-#removed_any_edge = False
-#removed_paths = []
-#removed_paths_by_room_and_endpoints = {}
-
-def remove_all_endpoint_path_room_paths(G, all_paths, endpoint_path):
+def remove_all_endpoint_path_room_paths(G, endpoint_path):
     for endpoint_path_pair in endpoint_path:
         path = endpoint_path_pair[1]
         
         if path:
             print("Remove from remove all endpoint path")
-            remove_all_room_paths(G, path, all_paths)
+            remove_all_room_paths_by_path(G, path)
 
-def remove_all_room_paths(G, path, all_paths):
-    #global removed_any_edge
-    #global removed_paths
-    
+def remove_all_room_paths_by_path(G, path):
     room_name = path.room_name
+    remove_all_room_paths_by_room(room_name, G)
+
+def remove_all_room_paths_by_room(room_name, G):
     G.removed_any_edge = False
     G.removed_paths = []
     
     threads = []
     
-    for endpoint_pair, paths in all_paths.items():
-        t = threading.Thread(target=remove_room_paths, args=(endpoint_pair, room_name, paths, G, all_paths))
+    G.removed_rooms.append(room_name) #keep track of rooms not in G
+    
+    for endpoint_pair, paths in G.all_paths.items():
+        t = threading.Thread(target=remove_room_paths, args=(endpoint_pair, room_name, paths, G))
         threads.append(t)
         t.start()
-
+    
     for t in threads:
         t.join()
     
     if G.removed_any_edge:
         G = flow(G)
     
-    #global removed_paths_by_room_and_endpoints
     print("     " + str(room_name) + " cleared from G to remove")
     G.removed_paths_by_room_and_endpoints[room_name] = {}
     
@@ -477,12 +472,8 @@ def remove_all_room_paths(G, path, all_paths):
             G.removed_paths_by_room_and_endpoints[room_name][endpoint_pair].append(path)
     
     print("     " + str(room_name) + " removed # types of paths: " + str(len(G.removed_paths_by_room_and_endpoints[room_name])))
-      
 
-def remove_room_paths(endpoint_pair, room_name, paths, G, all_paths):
-    #global removed_any_edge
-    #global removed_paths
-    
+def remove_room_paths(endpoint_pair, room_name, paths, G):
     new_paths = []
         
     for P in paths:
@@ -492,13 +483,12 @@ def remove_room_paths(endpoint_pair, room_name, paths, G, all_paths):
             #store removed path as its endpoint pair and the path
             G.removed_paths.append((endpoint_pair, P))
     
-    all_paths[endpoint_pair] = new_paths
+    G.all_paths[endpoint_pair] = new_paths
     
     if len(new_paths) == 0 and G.has_edge(endpoint_pair[0], endpoint_pair[1]): #threading check, dont remove edge if already removed, maybe could check original length instead?
         G.remove_edge(endpoint_pair[0], endpoint_pair[1])
         G.removed_any_edge = True
 
-#added_any_edge = True
 """
 ---------------------------------------
 ALGORITHM - ADD PATHS OF ROOM FROM G
@@ -511,9 +501,7 @@ ALGORITHM - ADD PATHS OF ROOM FROM G
 """
 
 
-def add_all_room_paths(G, endpoint_path, all_paths):
-    #global added_any_edge
-    
+def add_all_room_paths(G, endpoint_path):
     G.added_any_edge = False
     threads = []
     used_room_names = []
@@ -526,10 +514,13 @@ def add_all_room_paths(G, endpoint_path, all_paths):
         if path: 
             room_name = path.room_name
             
-            if room_name not in used_room_names: #prevent multiple threads for the same room from being created
+            if room_name not in used_room_names and room_name in G.removed_rooms: #prevent multiple threads for the same room from being created
                 used_room_names.append(room_name)
                 
-                t = threading.Thread(target=add_room_paths, args=(room_name, G, all_paths))
+                G.removed_rooms.remove(room_name)
+                G.readded_rooms.append(room_name) #keep track of rooms readded to G
+                
+                t = threading.Thread(target=add_room_paths, args=(room_name, G))
                 threads.append(t)
                 t.start()
     
@@ -539,20 +530,21 @@ def add_all_room_paths(G, endpoint_path, all_paths):
     if G.added_any_edge:
         G = flow(G)
 
-def add_room_paths(room_name, G, all_paths):
-    #global removed_paths_by_room_and_endpoints
-    #global added_any_edge
-    
+def add_room_paths(room_name, G):
     print("     " + str(room_name) + " marked to readd")
     
     if room_name in G.removed_paths_by_room_and_endpoints:
+
+        #for updating other Gs
+        if room_name in G.removed_rooms:
+             G.removed_rooms.remove(room_name)
 
         removed_paths_by_endpoint = G.removed_paths_by_room_and_endpoints[room_name]
         
         for endpoint_pair, paths in removed_paths_by_endpoint.items():
             
-            original_length = len(all_paths[endpoint_pair])
-            all_paths[endpoint_pair].extend(paths) # = paths
+            original_length = len(G.all_paths[endpoint_pair])
+            G.all_paths[endpoint_pair].extend(paths) # = paths
             
             if (original_length == 0):
                 G.add_edge(endpoint_pair[0], endpoint_pair[1])
@@ -561,4 +553,40 @@ def add_room_paths(room_name, G, all_paths):
         del G.removed_paths_by_room_and_endpoints[room_name]
     else:
         print("     " + str(room_name) + " not in G")
+
+#Update all other G to remove/readd rooms removed/readded in G
+def update_other_G(G, others):
+    
+    to_readd = G.readded_rooms
+    to_remove = G.removed_rooms
+    
+    #readd all to readd that's in O.removed
+    for O in others:
+        
+        removed = O.removed_rooms
+        
+        for room in to_readd:
+            print("O to readd ", room)
+            
+            if room in O.removed_rooms:
+                print("     O do readd ", room)
+                add_room_paths(room, O)
+    
+    #remove all in to remove
+    for O in others:
+        
+        removed = O.removed_rooms
+        
+        for room in to_remove:
+            print("O to remove ", room)
+            if room not in O.removed_rooms:
+                print("     do remove ", room)
+                remove_all_room_paths_by_room(room, O)
+            else:
+                print("     ", room, " already removed? ")
+    
+    #reflow
+    for O in others:
+        if O.added_any_edge or O.removed_any_edge:
+            O = flow(O)
 

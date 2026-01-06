@@ -35,8 +35,15 @@ def rooms_to_layers(rooms):
     
 
 def rooms_to_layer(rooms, path_selector = lambda e: True):
-    return populate_start_and_exit_layer(rooms, path_selector)
-
+    G = populate_start_and_exit_layer(rooms, path_selector)
+    
+    #help keep track of rooms in path_traversal
+    G.readded_rooms = []
+    G.removed_rooms = []
+    
+    G.removed_paths_by_room_and_endpoints = {}
+    
+    return G
 
 #start/exit layers are virtual layers within a single greater layer
 #each door exits twice in the layer, once in start and once in exit

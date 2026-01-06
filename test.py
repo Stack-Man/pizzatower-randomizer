@@ -12,8 +12,8 @@ from json_to_objects import json_to_rooms
 from layer_creation import rooms_to_layers
 from node_id_objects import NodeType, StartExitType
 import node_id_objects as nio
-from path_mapping import layer_to_paths_and_endpoints
-from path_traversal import flow, find_path, grow_path
+from path_mapping import layer_to_endpoints, G_init_attributes
+from path_traversal import flow, find_path, grow_path, update_other_G
 from path_objects import Endpoint, RoomPath
 
 from enums import *
@@ -287,8 +287,9 @@ def print_steps(G):
         for k, v in node.steps.items():
             print(f"        {k}: {v}")
 
-def test_path_grow():
-    
+
+
+def test_graph():
     G = nx.DiGraph()
     
     AN = nio.create_transition_node_id(StartExitType.START, "A", 1)
@@ -314,9 +315,8 @@ def test_path_grow():
     G.add_edge(F, A)
     G.add_edge(A, F)
     G.add_edge(A, E)
-    G.add_edge(A, B) #if we add AB first, it should be prioritized over AD, just for testing, such a path shouldnt exist because its start-start
+    G.add_edge(A, B)
    
-    
     #initial flow
     G = flow(G)
     
@@ -325,6 +325,7 @@ def test_path_grow():
     R_AD_O = RoomPath("R_AD_O", "A", "D", True)
     R_AD_O2 = RoomPath("R_AD_O2", "A", "D", True)
     R_DB = RoomPath("R_DB", "D", "B", False)
+    R_DB2 = RoomPath("R_DB", "D", "B", False)
     R_BE = RoomPath("R_BE", "B", "E", False)
     R_EC = RoomPath("R_EC", "E", "C", False)
     R_CF = RoomPath("R_CF", "C", "F", False)
@@ -336,7 +337,7 @@ def test_path_grow():
     #construct paths in all_paths
     all_paths = {}
     all_paths[(A, D)] = [R_AD, R_AD_O, R_AD_O2]
-    all_paths[(D, B)] = [R_DB]
+    all_paths[(D, B)] = [R_DB, R_DB2]
     all_paths[(B, E)] = [R_BE]
     all_paths[(E, C)] = [R_EC]
     all_paths[(C, F)] = [R_CF]
@@ -345,20 +346,124 @@ def test_path_grow():
     all_paths[(A, E)] = [R_AE]
     all_paths[(A, B)] = [R_AB]
     
+    G_init_attributes(G, all_paths)
+    
+    return G
+
+def print_Gs(G, others):
+    
+    """
+    for u, v in G.edges():
+        
+        print("G: ", u, ", ", v)
+        
+        for O in others:
+            
+            if O.has_edge(u, v):
+                print("     O has")"""
+    
+    for key, value in G.all_paths.items():
+        
+        print("G: ", key[0], ", ", key[1])
+        print("     G: " , len(value))
+        
+        for O in others:
+            
+            if key in O.all_paths:
+                
+                print("     O: ", len(O.all_paths[key]))
+        
+        
+
+def test_path_grow():
+    G = nx.DiGraph()
+    
+    AN = nio.create_transition_node_id(StartExitType.START, "A", 1)
+    BN = nio.create_transition_node_id(StartExitType.START, "B", 1)
+    CN = nio.create_transition_node_id(StartExitType.START, "C", 1)
+    DN = nio.create_transition_node_id(StartExitType.EXIT, "D", 2)
+    EN = nio.create_transition_node_id(StartExitType.EXIT, "E", 2)
+    FN = nio.create_transition_node_id(StartExitType.EXIT, "F", 2)
+    
+    A = Endpoint(AN)
+    B = Endpoint(BN)
+    C = Endpoint(CN)
+    D = Endpoint(DN)
+    E = Endpoint(EN)
+    F = Endpoint(FN)
+    
+   
+    G.add_edge(A, D)
+    G.add_edge(D, B)
+    G.add_edge(B, E)
+    G.add_edge(E, C)
+    G.add_edge(C, F)
+    G.add_edge(F, A)
+    G.add_edge(A, F)
+    G.add_edge(A, E)
+    G.add_edge(A, B)
+   
+    #initial flow
+    G = flow(G)
+    
+    #room paths
+    R_AD = RoomPath("R_AD", "A", "D", False)
+    R_AD_O = RoomPath("R_AD_O", "A", "D", True)
+    R_AD_O2 = RoomPath("R_AD_O2", "A", "D", True)
+    R_DB = RoomPath("R_DB", "D", "B", False)
+    R_DB2 = RoomPath("R_DB", "D", "B", False)
+    R_BE = RoomPath("R_BE", "B", "E", False)
+    R_EC = RoomPath("R_EC", "E", "C", False)
+    R_CF = RoomPath("R_CF", "C", "F", False)
+    R_FA = RoomPath("R_FA", "F", "A", False)
+    R_AF = RoomPath("R_AF", "A", "F", False)
+    R_AE = RoomPath("R_AE", "A", "E", False)
+    R_AB = RoomPath("R_AB", "A", "B", False)
+    
+    #construct paths in all_paths
+    all_paths = {}
+    all_paths[(A, D)] = [R_AD, R_AD_O, R_AD_O2]
+    all_paths[(D, B)] = [R_DB, R_DB2]
+    all_paths[(B, E)] = [R_BE]
+    all_paths[(E, C)] = [R_EC]
+    all_paths[(C, F)] = [R_CF]
+    all_paths[(F, A)] = [R_FA]
+    all_paths[(A, F)] = [R_AF]
+    all_paths[(A, E)] = [R_AE]
+    all_paths[(A, B)] = [R_AB]
+    
+    G_init_attributes(G, all_paths)
+    
+    #G = test_graph()
+    G2 = test_graph()
+    G3 = test_graph()
+    
+    others = [G2, G3]
+    #print_Gs(G, others)
+    
     print("======================== INITIAL")
-    path = find_path(G, all_paths, A, E, True)
+    path = find_path(G, A, E, True)
     print_path(path)
     #print_steps(G)
     
+    update_other_G(G, others)
+    print_Gs(G, others)
+    
     print("======================== GROW 1")
-    new_path, inc = grow_path(G, all_paths, path, True)
+    new_path, inc = grow_path(G, path, True)
     print_path(new_path)
     #print_steps(G)
     
+    update_other_G(G, others)
+    print_Gs(G, others)
+    
     print("======================== GROW 2")
-    new_path2, inc2 = grow_path(G, all_paths, new_path, True)
+    new_path2, inc2 = grow_path(G, new_path, True)
     print_path(new_path2)
     #print_steps(G)
+    
+    update_other_G(G, others)
+    print_Gs(G, others)
     
 
 #test_parse("datafiles/json/johngutter.json")
