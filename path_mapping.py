@@ -138,19 +138,43 @@ def categorize_paths(G):
                     if ds:
                         neighbor.add_start_letter(B)
                     elif de:
-                        rps = get_room_paths(B)
+                        rps = get_room_paths(G, B)
                         neighbor.add_room_paths(rps)
     
     return paths
 
-def get_room_paths(N):
+def get_room_paths(G, N):
     room_paths = []
     
     for SL in N.start_letters:
-        rp = RoomPath(N.inner_id.room_id, SL, N.inner_id.letter)
+        
+        room_name = N.inner_id.room_id
+        start_letter = SL
+        exit_letter = N.inner_id.letter
+        
+        is_oneway = check_oneway_path(G, room_name, start_letter, exit_letter)
+        
+        rp = RoomPath(room_name, start_letter, exit_letter, is_oneway)
+
         room_paths.append(rp)
     
     return room_paths
+
+import node_id_objects as nio
+
+def check_oneway_path(G, room_name, start_letter, exit_letter):
+    
+    door_a_index = nio.create_door_node_id(StartExitType.START, room_name, start_letter)
+    door_b_index = nio.create_door_node_id(StartExitType.EXIT, room_name, exit_letter)
+    
+    edge = G[door_a_index][door_b_index]
+    
+    if "path" in edge:
+        path = edge["path"]
+        return path.is_oneway
+    
+    return False
+    
 
 def is_node_type(node, node_type, se_type):
     return node.node_type == node_type and node.inner_id.start_exit_type == se_type

@@ -130,6 +130,9 @@ def add_one_start_exit_path_to_layer(room_name, path, start_door, exit_door, lay
     #connect start door in start layer to exit door in exit layer
     layer.add_edge(start_door_id, exit_door_id)
     
+    #add path object to that edge
+    layer[start_door_id][exit_door_id]["path"] = path
+    
     return
 
 

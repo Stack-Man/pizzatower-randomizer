@@ -34,8 +34,12 @@ TODO LIST:
 --------------------
 Before we layer traverse:
 
-3. Update choose_path to have option to prioritize oneways when possible
 4. update path_grow and path_find to alert all other layers when a room is removed or added so those layers can do the same and reflow
+    #only have to do this after we are "done" with the layer adn need to move onto the next
+    #also only for layers taht share rooms IE TW and OW
+    #so what we have to do is before any time we use TW or OW we have to check the other layers
+    #to see if there are any rooms that we need to remove/readd adn reflow first
+    #should probably store which rooms are currently added/remvoped from the graph so we can easily cross check with other layer
 5. update path_find and path_grow to have an option to prioritize of all equal length paths, teh one with the most possible oneways (hard)
 
 """

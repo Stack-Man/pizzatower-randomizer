@@ -321,19 +321,21 @@ def test_path_grow():
     G = flow(G)
     
     #room paths
-    R_AD = RoomPath("R_AD", "A", "D")
-    R_DB = RoomPath("R_DB", "D", "B")
-    R_BE = RoomPath("R_BE", "B", "E")
-    R_EC = RoomPath("R_EC", "E", "C")
-    R_CF = RoomPath("R_CF", "C", "F")
-    R_FA = RoomPath("R_FA", "F", "A")
-    R_AF = RoomPath("R_AF", "A", "F")
-    R_AE = RoomPath("R_AE", "A", "E")
-    R_AB = RoomPath("R_AB", "A", "B")
+    R_AD = RoomPath("R_AD", "A", "D", False)
+    R_AD_O = RoomPath("R_AD_O", "A", "D", True)
+    R_AD_O2 = RoomPath("R_AD_O2", "A", "D", True)
+    R_DB = RoomPath("R_DB", "D", "B", False)
+    R_BE = RoomPath("R_BE", "B", "E", False)
+    R_EC = RoomPath("R_EC", "E", "C", False)
+    R_CF = RoomPath("R_CF", "C", "F", False)
+    R_FA = RoomPath("R_FA", "F", "A", False)
+    R_AF = RoomPath("R_AF", "A", "F", False)
+    R_AE = RoomPath("R_AE", "A", "E", False)
+    R_AB = RoomPath("R_AB", "A", "B", False)
     
     #construct paths in all_paths
     all_paths = {}
-    all_paths[(A, D)] = [R_AD]
+    all_paths[(A, D)] = [R_AD, R_AD_O, R_AD_O2]
     all_paths[(D, B)] = [R_DB]
     all_paths[(B, E)] = [R_BE]
     all_paths[(E, C)] = [R_EC]
@@ -344,20 +346,20 @@ def test_path_grow():
     all_paths[(A, B)] = [R_AB]
     
     print("======================== INITIAL")
-    path = find_path(G, all_paths, A, E)
+    path = find_path(G, all_paths, A, E, True)
     print_path(path)
     #print_steps(G)
     
     print("======================== GROW 1")
-    new_path, inc = grow_path(G, all_paths, path)
+    new_path, inc = grow_path(G, all_paths, path, True)
     print_path(new_path)
     #print_steps(G)
     
     print("======================== GROW 2")
-    new_path2, inc2 = grow_path(G, all_paths, new_path)
+    new_path2, inc2 = grow_path(G, all_paths, new_path, True)
     print_path(new_path2)
     #print_steps(G)
     
 
-test_parse("datafiles/json/johngutter.json")
-#test_path_grow()
+#test_parse("datafiles/json/johngutter.json")
+test_path_grow()

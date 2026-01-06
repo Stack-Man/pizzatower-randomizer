@@ -1,8 +1,9 @@
 class RoomPath():
-    def __init__(self, room_name, start_letter, exit_letter):
+    def __init__(self, room_name, start_letter, exit_letter, is_oneway):
         self.room_name = room_name
         self.start_letter = start_letter
         self.exit_letter = exit_letter
+        self.is_oneway = is_oneway
     
     def __str__(self):
         return f"{self.room_name} {self.start_letter}{self.exit_letter}"
