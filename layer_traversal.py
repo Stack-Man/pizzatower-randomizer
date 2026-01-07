@@ -34,20 +34,36 @@ class Level():
         self.segments = [] #List of RoomSegment, PathSegment, and BranchSegment
         self.branch_count = 0
 
+class BranchPath():
+    def __init__(self):
+        self.branch_endpoint = None #endpoint
+        self.branch_NPT = None #(endpoint, RoomPath) for branch to NPT or NPT to branch
+        self.branch_PT = None #(endpoint, RoomPath) for branch to PT or PT to branch
+
 class BranchSegment():
     def __init__(self):
-        self.start_path = None #RoomPath
+        self.start_branch = None #BranchPath
         self.OW_NPT = None #PathSegment
         self.OW_PT = None #PathSegment
-        self.end_path = None #RoomPath
+        self.end_branch = None #BranchPath
+    
+    def get_last_endpoint(self):
+        return self.end_path.branch_endpoint
 
 class PathSegment():
     def __init__
-        self.paths = [] #List of RoomPath
+        self.paths = [] #List of (endpoint, RoomPath)
+    
+    def get_last_endpoint(self):
+        return self.paths[len(self.paths) - 1][0] #endpoint of last entry
 
 class RoomSegment():
     def __init__
-        self.path = None #Singular RoomPath
+        self.path = None #(endpoint, RoomPath)
+        self.endpoint = None #endpoint
+    
+    def get_last_endpoint(self):
+        return self.endpoint
 
 
 #TODO: do all levels construct then go through and grow paths after
@@ -61,13 +77,13 @@ def construct_level_from_layers(E, EBS, J, JBE, BS, BE, TW, OW_PT, OW_NPT):
     if isinstance(start_segment, BranchSegment):
         level.branch_count = level.branch_count + 1
     
-    max_branches = 1
+    max_branches = 1 #TODO: max branch parameter
     prev_segment = start_segment
     
     #choose branches
     while (level.branch_count < max_branches):
         
-        A = get_end_endpoint(prev_segment)
+        A = prev_segment.get_last_endpoint()
         twoway_segment, branch_segment = construct_two_way_to_branch_segment(BS, BE, OW_PT, OW_NPT, TW, A)
         
         level.append(twoway_segment)
@@ -78,7 +94,7 @@ def construct_level_from_layers(E, EBS, J, JBE, BS, BE, TW, OW_PT, OW_NPT):
         prev_segment = branch_segment
 
     #choose end
-    A = get_end_endpoint(prev_segment)
+    A = prev_segment.get_last_endpoint()
     twoway_segment, end_segment = construct_two_way_to_end_segment(J, JBE, BS, OW_PT, OW_NPT, TW, A)
     
     level.append(twoway_segment)
@@ -91,6 +107,11 @@ def construct_level_from_layers(E, EBS, J, JBE, BS, BE, TW, OW_PT, OW_NPT):
 
 def get_end_endpoint(segment):
     return "TODO get end endpoint"
+
+#TODO: Branch layers currently are lists of BranchRoom
+#which contain Door() and Endpoint() objects for the three doors (branch, NPT, PT)
+#use this to choose a specific branch and its paths
+
 
 def construct_two_way_to_branch_segment(BS, BE, OW_PT, OW_NPT, TW, A):
     #choose some BS
