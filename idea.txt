@@ -1,0 +1,88 @@
+Conflict resolution
+
+When a segment fails to construct any path, it may be because
+rooms necessary for the connection were consumed by a previous segment
+
+in this case, the previous segment consumed an edge, IE it took the last path from an edge type
+if it did not, then it is impossible for a failed segment to succeed if we undid that previous segment
+
+each segment in succession removes 0 or more edges from the graph
+if we can detect which edges were removed each time
+and which are necessary to make the failed segment succeed
+then we can resolve the conflict
+
+all we need to do is make the conflicting segment use a different path that does
+not consume the necessary edges
+
+so each segment should record the state of the graph at the time, which edges it consumed
+segments made after do not necessariyl have to be revokved, as long as the edges they consumed are not
+necessary ot find a path in the latest segment
+
+
+So for a failed segment, look at a previous segment
+and all removed edges up to that point
+
+for all segments removed edges see if some combination of them being readded
+could fulfill the failed edge
+
+if so, see if we can find satisfactory combinations for both of these segmetns
+
+if so, good, if not, go back a prev segmetn and try again
+
+the question is, which edges do we reflow our active graphs with?
+which combination of them can we be sure will lead to a successful path?
+
+at the least, the current prev_segment includes all edges of future ones already
+so we can look at the current prev_segment for an AF path, then check if it conflicts with any
+future segments
+and if no path that doesnt conflict exist, then go back one and try again?
+>>>maybe we can make some conclusion if such a non-conflicting path doesnte xist
+
+and we go back we include more edges,
+eventually at some point wed have to try "redoing" the paths
+so future edges get remade some other way sow e dont have a conflcit?
+
+but at what point should we detect taht?
+
+we should try minmially, so ASAP
+with every segment alwys try rebuilding conflicting future segments too?
+
+at the initial case
+we have current segment N which failed
+and prev segment N - 1 which succeeded
+
+if prev segment N-1 conflicts with current segment we can rebuild or go back 
+if we CANT rebuild, then we go back
+
+go back to N-2
+Now we see if we can rebuild N-2 WITHOUT rebuilding N-1 to create a nonconflicting path
+
+It might eb that both N-2 and N-1 need to be rebuilt to not conflict
+assuming that N-1 DID in fact conflict originally (if it didnt rebuilding it will haev no effect?)
+But may only N-2 needs to be rebuilt
+if we failed N-1 we might not be able to say that it will never be needed
+
+what makes a segment conflict?
+If rebuilding it refunds an edge that can be used to make N succeed
+
+What if multiple edges are needed to make N succeed
+but such edges were consumed by different Segments?
+
+DUNNO
+
+If we see that different edges A and B were consumed by AN and BN
+
+then we can try the combination A, B to see if N succeeds
+If so, then we have to try rebuild AN and BN in a way that does not consume A, B
+
+we also try independently if only A or only B succeeds
+
+we also remember which combinations have been tried before so if a previous segment AN2 that conumes A
+wait that doesnt make sense, if an edge is consumed by AN it cant be consumed by a different N
+
+alright so just try uniquine never before tried combinations
+
+So with each iteration back we add some number of edges X
+which adds some number of combinations, but we already tried some
+so maybe it wont be so bad
+but what is the running time?
