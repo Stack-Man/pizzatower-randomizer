@@ -20,6 +20,13 @@ prventing unwanted backtracking.
 
 Transition Start > Door Start and Door Exit > Transition Exit edges mark a door as that type of transition
 Door Start > Door Exit edges represent a path in that room between those two doors
+
+---------------------------
+STRUCTURE OF BRANCH "LAYER"
+---------------------------
+A branch layer is just a list of BranchRoom
+each BranchRoom contains the room name and three Endpoint() and Door() for the branch, NPT, and PT doors
+These three endpoints are used to coordinate the construction of the paths between branches in layer_traversal
 """
 use_loop_paths = False
 
@@ -55,12 +62,17 @@ class BranchRoom():
         self.NPT_door = NPT_door
         self.PT_door = PT_door
         
-        b_se_type = start_exit_type
-        o_se_type = StartExitType.START if start_exit_type == StartExitType.EXIT else StartExitType.EXIT #set to opposite of branch
+        self.start_exit_type = start_exit_type
+        branch_se_type = start_exit_type
+        pt_se_type = branch_se_type
+        npt_se_type = StartExitType.START if start_exit_type == StartExitType.EXIT else StartExitType.EXIT #opposite of branch
         
-        self.branch_endpoint = self.set_endpoint(branch_door, b_se_type)
-        self.NPT_endpoint = self.set_endpoint(NPT_door, o_se_type)
-        self.PT_endpoint = self.set_sendpoint(PT_door, o_se_type)
+        #if branch is enter, we exit via NPT and enter PT
+        #if branch is exit, we enter via NPT and exit PT
+        
+        self.branch_endpoint = self.set_endpoint(branch_door, branch_se_type)
+        self.NPT_endpoint = self.set_endpoint(NPT_door, npt_se_type)
+        self.PT_endpoint = self.set_sendpoint(PT_door, pt_se_type)
     
     def set_endpoint(door, se_type):
         n = FakeNode(door.door_type, door.door_dir, se_type)

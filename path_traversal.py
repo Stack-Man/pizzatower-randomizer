@@ -27,8 +27,8 @@ The number of steps to reach node F from A is written as A[F]
 4. Else If N[F] = 0, end
 """
 
-#RETURN: List of (Endpoint, Path) for every chosen Endpoint and their related path
-#EXIT endpoints have Path set as None
+#RETURN: List of (Endpoint, Path) for every chosen Endpoint and their 
+#related path EXIT endpoints have Path set as None
 def find_path(G, A, F, prioritize_oneway = False):
 
     chosen_endpoints = []
