@@ -27,6 +27,78 @@ The number of steps to reach node F from A is written as A[F]
 4. Else If N[F] = 0, end
 """
 
+def default_extractor(A):
+    return A
+
+from copy import deepcopy
+
+def find_some_path_with_refunds(G, As, Fs, AF_extractor = default_extractor, prioritize_oneway = False):
+    
+    max_edges_at_once = G.hidden_rooms
+    edge_count_to_refund_this_round = 0
+    
+    
+    
+    while (edge_count_to_refund_this_round <= max_edges_at_once):
+        
+        #for every n choose k in G: #TODO: make yielder for this
+            #n = number of edges
+            #k = edge count to refund this round
+            
+            #create a temp G with those edges refunded
+            #try to find some path AF in that G
+            #if successful, replace G with temp G and exit
+            #else try next combo
+        
+        #TODO: what assumptions can we make?
+        #if no nodes in G lead from A to F and this new node does not do so...
+        #well we havent chosen A or F yet so :v
+
+#yield every unordered combo of items
+def choose(items, k):
+    
+    if k == 1:
+        for i in items:
+            yield [i]
+    else:
+        for x, i in enumerate(items):
+            
+            items_after_i = items[x+1:]
+            
+            for rest in choose(items_after_i, k - 1):
+                yield rest.extend(i)
+        
+    
+
+def find_some_path(G, As, Fs, AF_extractor = default_extractor, prioritize_oneway = False):
+    """
+        Some lists of likely Rooms As and Fs
+        For every combination of them, try to find a path AF
+        Extract from room Au and Fu the endpoints A and F to use, depending on AF_extractor
+        
+        return the combination selected Au, Fu and the path path_AF found between them.
+        
+        if a path cannot be found, try again but by refunding hidden edges in G <--- done in outer loop
+    """
+    
+    
+    for Au in As:
+        
+        A = AF_extractor(Au)
+            
+        for Fu in Fs:
+        
+            F = AF_extractor(Fu)
+            
+            path_AF = find_path(G, A, F, prioritize_oneway) #TODO, only finds the one path and not the two that we need for a branch
+            
+            if path_AF is not None:
+                return Au, Fu, path_AF
+    
+    #Exhausted all AF combos with G
+    return None, None, None
+    
+
 #RETURN: List of (Endpoint, Path) for every chosen Endpoint and their 
 #related path EXIT endpoints have Path set as None
 def find_path(G, A, F, prioritize_oneway = False):
