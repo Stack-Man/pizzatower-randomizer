@@ -1,6 +1,169 @@
 import networkx as nx
 from node_id_objects import StartExitType
+from copy import deepcopy
 
+"""
+=====================================
+CREATING PATHS BETWEEN ENDPOINT ROOMS
+====================================
+
+When picking endpoint rooms (Branch, Entrance, John) we can't be sure which combination of two endpoints
+has a valid path that can be created between them. Additionally, its possible some valid path was consumed
+by a previous set of endpoints that didn't necessarily NEED to use it.
+
+To resolve this issue we do two things:
+
+1. Pass all possible endpoints for a segment and exhaustively try paths between combinations of them
+2. Prioritize edges that have MORE than one remaining path in that path type.
+
+The latter means that we don't need to deconstruct and rebuild segments to use an edge that segment
+consumed because it is unlikely to have consumed said edge in the first place.
+
+(Technically, this can still occur. If segment AB consumes N1 and there is segment CD NEEDS N2, then some segment FE that NEEDS N1 or N2
+will not ask AB to release N1 and AB is not prohibited from consuming it. But doing an exhaustive check to
+resolve this is hard to code and probably computationally expensive)
+
+"""
+
+def create_bridge_twoway(G, As, Fs): #As and Fs should be lists of types inheriting BaseRoom
+    
+    def twoway_endpoint_extractor(A):
+        return A.get_twoway_endpoint()
+
+    chosen_A, chosen_F, twoway_path_AF = find_some_path_with_unhides(G, As, Fs, endpoint_extractor = twoway_endpoint_extractor, prioritize_oneway = False)
+    
+    return chosen_A, chosen_F, twoway_path_AF
+
+def create_bridge_oneway(G_NPT, G_PT, BSs, BEs): #BSs and #BEs should be lists of type BranchRoom
+    
+    chosen_BS, chosen_BE, oneway_path_NPT, oneway_path_PT = find_some_branch_paths_with_unhides(G_PT, G_NPT, BSs, BEs)
+    
+    return chosen_BS, chosen_BE, oneway_path_NPT, oneway_path_PT 
+
+def default_extractor(A):
+    return A
+
+"""
+=======================================
+ALGORITHM - FIND SOME PATH WITH UNHIDES
+=======================================
+1a. K = 0
+1b. For every unordered combination of K hidden rooms in G (N choose K)
+2.      Find some path with those rooms unhidden
+3. If failed, K +=1 and repeat
+"""
+
+def find_some_path_with_unhides(G, As, Fs, endpoint_extractor = default_extractor, prioritize_oneway = False):
+    
+    max_unhidden_rooms_at_once = G.hidden_rooms
+    room_count_to_unhide_this_round = 0
+    
+    while (room_count_to_unhide_this_round <= max_unhidden_rooms_at_once):
+        
+        #try to find a path with every unique combination of hidden rooms unhidden
+        #when successful, replace G with that created G
+        for room_combination in choose(G.hidden_rooms, edge_count_to_refund_this_round):
+            
+            temp_G = deepcopy(G)
+            unhide_rooms(temp_G, room_combination) #TODO: define path_traversal.unhide_rooms
+            
+            #TODO: find two paths if branch
+            chosen_A, chosen_F, path_AF = find_some_path(temp_G, As, Fs, endpoint_extractor, prioritize_oneway)
+            
+            if path_AF is not None:
+                G = temp_G
+                return chosen_A, chosen_F, path_AF
+
+"""
+===============================================
+ALGORITHM - FIND SOME BRANCH PATH WITH UNHIDES
+===============================================
+1a. K = 0
+1b. For every unordered combination of K hidden rooms in G (N choose K)
+2.      Find some NPT path with those rooms unhidden
+3.          IF sucessful, use chosen A, F and curernt unhidden rooms to find PT path
+4.  If failed, K += 1 and repeat
+"""
+def find_some_branch_paths_with_unhides(G_PT, G_NPT, BSs, BEs):
+    #Assum As and Fs are lists of BranchRoom
+    
+    max_unhidden_rooms_at_once = G_NPT.hidden_rooms #TODO implement hiding rooms that have one path remaining in a path type
+    room_count_to_unhide_this_round = 0
+    
+    def branch_extractor_NPT(A):
+        return A.NPT_endpoint
+    
+    def branch_extractor_PT(A):
+        return A.PT_endpoint
+    
+    while (room_count_to_unhide_this_round <= max_unhidden_rooms_at_once):
+        
+        #try to find a path with every unique combination of hidden rooms unhidden
+        #when successful, replace G with that created G
+        for room_combination in choose(G_NPT.hidden_rooms, edge_count_to_refund_this_round):
+            
+            #First try to find NPT
+            temp_G_NPT = deepcopy(G_NPT)
+            unhide_rooms(temp_G_NPT, room_combination)
+            
+            chosen_BS, chosen_BE, path_NPT = find_some_path(G_NPT, BSs, BEs, endpoint_extractor = branch_extractor_NPT, prioritize_oneway = True)
+            
+            #Then try to find PT with this NPT
+            if path_NPT is not None:
+                temp_G_PT = deepcopy(G_PT) #temp_G_PT will be overriden by the next func if successful
+                unhide_rooms(temp_G_PT, room_combination) #unhide the rooms unhidden by this successful NPT
+            
+                #try find path with unhides, uses a G, F, and A  based on the current NPT
+                _, _, path_PT = find_some_path_with_unhides(temp_G_PT, [chosen_BE], [chosen_BS], endpoint_extractor = branch_extractor_PT, prioritize_oneway = True)
+                
+                if path_PT is not None: #successful, replace Gs and exit
+                    G_PT = temp_G_PT
+                    G_NPT = temp_G_NPT
+                    
+                    return chosen_BS, chosen_BE, path_NPT, path_PT
+
+#yield every unordered combo of items
+def choose(items, k):
+    
+    if k == 1:
+        for i in items:
+            yield [i]
+    else:
+        for x, i in enumerate(items):
+            
+            items_after_i = items[x+1:]
+            
+            for rest in choose(items_after_i, k - 1):
+                yield rest.append(i)
+
+"""
+---------------------
+FIND SOME PATH A TO F
+----------------------
+Some lists of likely BaseRooms As and Fs
+For every combination of them, try to find a path AF
+Extract from room Au and Fu the endpoints A and F to use, depending on AF_extractor
+
+return the combination selected Au, Fu and the path path_AF found between them.
+"""
+def find_some_path(G, As, Fs, endpoint_extractor = default_extractor, prioritize_oneway = False):
+
+    for Au in As:
+        
+        A = endpoint_extractor(Au)
+            
+        for Fu in Fs:
+        
+            F = endpoint_extractor(Fu)
+            
+            path_AF = find_path(G, A, F, prioritize_oneway)
+            
+            if path_AF is not None:
+                return Au, Fu, path_AF
+    
+    #Exhausted all AF combos with G
+    return None, None, None
+    
 """
 ---------------------------------------
 FINDING A PATH FROM A TO F
@@ -26,79 +189,6 @@ The number of steps to reach node F from A is written as A[F]
 3b. Choose path P of room R, then remove all paths of room R from graph and reflow if any edges become disconnected
 4. Else If N[F] = 0, end
 """
-
-def default_extractor(A):
-    return A
-
-from copy import deepcopy
-
-def find_some_path_with_refunds(G, As, Fs, AF_extractor = default_extractor, prioritize_oneway = False):
-    
-    max_edges_at_once = G.hidden_rooms
-    edge_count_to_refund_this_round = 0
-    
-    
-    
-    while (edge_count_to_refund_this_round <= max_edges_at_once):
-        
-        #for every n choose k in G: #TODO: make yielder for this
-            #n = number of edges
-            #k = edge count to refund this round
-            
-            #create a temp G with those edges refunded
-            #try to find some path AF in that G
-            #if successful, replace G with temp G and exit
-            #else try next combo
-        
-        #TODO: what assumptions can we make?
-        #if no nodes in G lead from A to F and this new node does not do so...
-        #well we havent chosen A or F yet so :v
-
-#yield every unordered combo of items
-def choose(items, k):
-    
-    if k == 1:
-        for i in items:
-            yield [i]
-    else:
-        for x, i in enumerate(items):
-            
-            items_after_i = items[x+1:]
-            
-            for rest in choose(items_after_i, k - 1):
-                yield rest.extend(i)
-        
-    
-
-def find_some_path(G, As, Fs, AF_extractor = default_extractor, prioritize_oneway = False):
-    """
-        Some lists of likely Rooms As and Fs
-        For every combination of them, try to find a path AF
-        Extract from room Au and Fu the endpoints A and F to use, depending on AF_extractor
-        
-        return the combination selected Au, Fu and the path path_AF found between them.
-        
-        if a path cannot be found, try again but by refunding hidden edges in G <--- done in outer loop
-    """
-    
-    
-    for Au in As:
-        
-        A = AF_extractor(Au)
-            
-        for Fu in Fs:
-        
-            F = AF_extractor(Fu)
-            
-            path_AF = find_path(G, A, F, prioritize_oneway) #TODO, only finds the one path and not the two that we need for a branch
-            
-            if path_AF is not None:
-                return Au, Fu, path_AF
-    
-    #Exhausted all AF combos with G
-    return None, None, None
-    
-
 #RETURN: List of (Endpoint, Path) for every chosen Endpoint and their 
 #related path EXIT endpoints have Path set as None
 def find_path(G, A, F, prioritize_oneway = False):
@@ -139,7 +229,6 @@ def find_path(G, A, F, prioritize_oneway = False):
 
 def choose_path(G, A, F, prioritize_oneway):
     paths_of_types = G.all_paths[(A, F)]
-    print("choosing from paths: " + str(A) + ", " + str(F) + ": " + str(len(paths_of_types)))
     path = paths_of_types[0]
     
     if prioritize_oneway:
@@ -149,16 +238,7 @@ def choose_path(G, A, F, prioritize_oneway):
                 break
     
     room_name = path.room_name
-    
-    if room_name not in G.removed_paths_by_room_and_endpoints:
-        print("     " + str(room_name) + " not in G (yet)")
-    
     remove_all_room_paths_by_path(G, path)
-    
-    if room_name not in G.removed_paths_by_room_and_endpoints:
-        print("     " + str(room_name) + " still not in G!")
-    else:
-        print("     " + str(room_name) + " in G !!!")
     
     return path
 
@@ -494,12 +574,14 @@ ALGORITHM - REMOVE PATHS OF ROOM FROM G
 5. If at least one edge was removed, Flow(G)
 """
 
+#TODO: also check for path types in G that have only one remaining path and hide it
+#or unhide it if we readd a path of that type
+
 def remove_all_endpoint_path_room_paths(G, endpoint_path):
     for endpoint_path_pair in endpoint_path:
         path = endpoint_path_pair[1]
         
         if path:
-            print("Remove from remove all endpoint path")
             remove_all_room_paths_by_path(G, path)
 
 def remove_all_room_paths_by_path(G, path):
@@ -525,7 +607,6 @@ def remove_all_room_paths_by_room(room_name, G):
     if G.removed_any_edge:
         G = flow(G)
     
-    print("     " + str(room_name) + " cleared from G to remove")
     G.removed_paths_by_room_and_endpoints[room_name] = {}
     
     #Store removed paths by room then by endpoint
@@ -538,12 +619,12 @@ def remove_all_room_paths_by_room(room_name, G):
             G.removed_paths_by_room_and_endpoints[room_name][endpoint_pair] = [path]
         else:
             G.removed_paths_by_room_and_endpoints[room_name][endpoint_pair].append(path)
-    
-    print("     " + str(room_name) + " removed # types of paths: " + str(len(G.removed_paths_by_room_and_endpoints[room_name])))
 
 def remove_room_paths(endpoint_pair, room_name, paths, G):
     new_paths = []
-        
+    
+    original_length = len(paths)
+    
     for P in paths:
         if not P.room_name == room_name:
             new_paths.append(P)
@@ -553,9 +634,13 @@ def remove_room_paths(endpoint_pair, room_name, paths, G):
     
     G.all_paths[endpoint_pair] = new_paths
     
-    if len(new_paths) == 0 and G.has_edge(endpoint_pair[0], endpoint_pair[1]): #threading check, dont remove edge if already removed, maybe could check original length instead?
+    #Dont remove edge if already removed, maybe could check original length instead? 
+    #This can happen if the original size of paths was 0
+    if len(new_paths) == 0 and not original_length == 0 : 
         G.remove_edge(endpoint_pair[0], endpoint_pair[1])
         G.removed_any_edge = True
+    
+    #TODO: if len == 1, do a hide for that path's room
 
 """
 ---------------------------------------
@@ -614,7 +699,7 @@ def add_room_paths(room_name, G):
             original_length = len(G.all_paths[endpoint_pair])
             G.all_paths[endpoint_pair].extend(paths) # = paths
             
-            if (original_length == 0):
+            if (original_length == 0): #TODO: if we add an edge, check if we should readd any hidden rooms that were removed bc the ywere the last path in the edge
                 G.add_edge(endpoint_pair[0], endpoint_pair[1])
                 G.added_any_edge = True
         
@@ -623,6 +708,7 @@ def add_room_paths(room_name, G):
         print("     " + str(room_name) + " not in G")
 
 #Update all other G to remove/readd rooms removed/readded in G
+#TODO: update with hidden rooms as well
 def update_other_G(G, others):
     
     to_readd = G.readded_rooms

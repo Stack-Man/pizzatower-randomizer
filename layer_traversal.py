@@ -69,6 +69,8 @@ class RoomSegment():
         return self.endpoint
 
 
+#TODO: redo construction to use bridge funcs from path_traversal.py
+
 #TODO: do all levels construct then go through and grow paths after
 def construct_level_from_layers(E, EBS, J, JBE, BS, BE, TW, OW_PT, OW_NPT):
     level = Level()

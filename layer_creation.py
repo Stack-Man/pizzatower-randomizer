@@ -47,36 +47,7 @@ def rooms_to_layers(rooms, use_loops = False):
 def rooms_to_layer(rooms, path_selector = lambda e: True):
     return populate_start_and_exit_layer(rooms, path_selector)
 
-#used to create Endpoint from vals directly instead of from NodeID
-class FakeNode():
-    def __init__(self, type, dir, start_exit_type):
-        self.inner_id.door_type = type
-        self.inner_id.door_dir = dir
-        self.inner_id.start_exit_type = start_exit_type
-
-#branch layers are lists of BranchRoom
-class BranchRoom():
-    def __init__(self, room_name, start_exit_type, branch_door, NPT_door, PT_door):
-        self.room_name = room_name
-        self.branch_door = branch_door
-        self.NPT_door = NPT_door
-        self.PT_door = PT_door
-        
-        self.start_exit_type = start_exit_type
-        branch_se_type = start_exit_type
-        pt_se_type = branch_se_type
-        npt_se_type = StartExitType.START if start_exit_type == StartExitType.EXIT else StartExitType.EXIT #opposite of branch
-        
-        #if branch is enter, we exit via NPT and enter PT
-        #if branch is exit, we enter via NPT and exit PT
-        
-        self.branch_endpoint = self.set_endpoint(branch_door, branch_se_type)
-        self.NPT_endpoint = self.set_endpoint(NPT_door, npt_se_type)
-        self.PT_endpoint = self.set_sendpoint(PT_door, pt_se_type)
-    
-    def set_endpoint(door, se_type):
-        n = FakeNode(door.door_type, door.door_dir, se_type)
-        return Endpoint(n)
+from layer_objects import BranchRoom, EntranceRoom, JohnRoom
 
 #TODO: test
 def rooms_to_branch_layer(rooms, se_type):
