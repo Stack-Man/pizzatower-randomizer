@@ -27,6 +27,8 @@ resolve this is hard to code and probably computationally expensive)
 
 def create_bridge_twoway(G, As, Fs): #As and Fs should be lists of types inheriting BaseRoom
     
+    print("Try Bridge Twoway")
+    
     def twoway_endpoint_extractor(A):
         return A.get_twoway_endpoint()
 
@@ -35,6 +37,8 @@ def create_bridge_twoway(G, As, Fs): #As and Fs should be lists of types inherit
     return chosen_A, chosen_F, twoway_path_AF
 
 def create_bridge_oneway(G_NPT, G_PT, BSs, BEs): #BSs and #BEs should be lists of type BranchRoom
+    
+    print("Try Bridge Oneway")
     
     chosen_BS, chosen_BE, oneway_path_NPT, oneway_path_PT = find_some_branch_paths_with_unhides(G_PT, G_NPT, BSs, BEs)
     
@@ -55,24 +59,38 @@ ALGORITHM - FIND SOME PATH WITH UNHIDES
 
 def find_some_path_with_unhides(G, As, Fs, endpoint_extractor = default_extractor, prioritize_oneway = False):
     
-    max_unhidden_rooms_at_once = G.hidden_rooms
+    print("     Find Path Unhides")
+    
+    max_unhidden_rooms_at_once = len(G.hidden_rooms)
     room_count_to_unhide_this_round = 0
     
     while (room_count_to_unhide_this_round <= max_unhidden_rooms_at_once):
         
+        print("         Try unhide round ", room_count_to_unhide_this_round)
+        
         #try to find a path with every unique combination of hidden rooms unhidden
         #when successful, replace G with that created G
-        for room_combination in choose(G.hidden_rooms, edge_count_to_refund_this_round):
+        for room_combination in choose(G.hidden_rooms, room_count_to_unhide_this_round):
+            
+            print("             try choose combination")
             
             temp_G = deepcopy(G)
-            unhide_rooms(temp_G, room_combination) #TODO: define path_traversal.unhide_rooms
+            #temp_G = G #TODO: figure out if deepcopy is messing it up
+            unhide_rooms(temp_G, room_combination)
             
-            #TODO: find two paths if branch
+            print("         Find from As to Fs")
+        
             chosen_A, chosen_F, path_AF = find_some_path(temp_G, As, Fs, endpoint_extractor, prioritize_oneway)
             
             if path_AF is not None:
                 G = temp_G
                 return chosen_A, chosen_F, path_AF
+        
+        room_count_to_unhide_this_round = room_count_to_unhide_this_round + 1 #try next round with more unhidden rooms
+    
+    #failed
+    print("     Failed to find some AF with unhides")
+    return None, None, None
 
 """
 ===============================================
@@ -87,7 +105,9 @@ ALGORITHM - FIND SOME BRANCH PATH WITH UNHIDES
 def find_some_branch_paths_with_unhides(G_PT, G_NPT, BSs, BEs):
     #Assum As and Fs are lists of BranchRoom
     
-    max_unhidden_rooms_at_once = G_NPT.hidden_rooms #TODO implement hiding rooms that have one path remaining in a path type
+    print("     Find Branch Path Unhides")
+    
+    max_unhidden_rooms_at_once = len(G_NPT.hidden_rooms)
     room_count_to_unhide_this_round = 0
     
     def branch_extractor_NPT(A):
@@ -98,14 +118,17 @@ def find_some_branch_paths_with_unhides(G_PT, G_NPT, BSs, BEs):
     
     while (room_count_to_unhide_this_round <= max_unhidden_rooms_at_once):
         
+        print("         Try unhide round ", room_count_to_unhide_this_round)
+        
         #try to find a path with every unique combination of hidden rooms unhidden
         #when successful, replace G with that created G
-        for room_combination in choose(G_NPT.hidden_rooms, edge_count_to_refund_this_round):
+        for room_combination in choose(G_NPT.hidden_rooms, room_count_to_unhide_this_round):
             
             #First try to find NPT
             temp_G_NPT = deepcopy(G_NPT)
             unhide_rooms(temp_G_NPT, room_combination)
             
+            print("         Find from BSs to BEs")
             chosen_BS, chosen_BE, path_NPT = find_some_path(G_NPT, BSs, BEs, endpoint_extractor = branch_extractor_NPT, prioritize_oneway = True)
             
             #Then try to find PT with this NPT
@@ -121,11 +144,20 @@ def find_some_branch_paths_with_unhides(G_PT, G_NPT, BSs, BEs):
                     G_NPT = temp_G_NPT
                     
                     return chosen_BS, chosen_BE, path_NPT, path_PT
+    
+        room_count_to_unhide_this_round = room_count_to_unhide_this_round + 1 #try next round with more unhidden rooms
+    
+    print("     Failed to find some BRANCH AF with unhides")
+    return None, None, None, None
 
 #yield every unordered combo of items
 def choose(items, k):
     
-    if k == 1:
+    print("     Choose ", k, " items from ", items)
+    
+    if k <= 0:
+        yield []
+    elif k == 1:
         for i in items:
             yield [i]
     else:
@@ -148,18 +180,30 @@ return the combination selected Au, Fu and the path path_AF found between them.
 """
 def find_some_path(G, As, Fs, endpoint_extractor = default_extractor, prioritize_oneway = False):
 
+    print("             Find some path in AF")
+
     for Au in As:
         
         A = endpoint_extractor(Au)
+        
+        print("                 Find from ", str(A))
             
         for Fu in Fs:
         
             F = endpoint_extractor(Fu)
             
+            print("                    to ", str(F))
+            
             path_AF = find_path(G, A, F, prioritize_oneway)
+            
+            
             
             if path_AF is not None:
                 return Au, Fu, path_AF
+            else:
+                print("                     None from ", str(A), " to ", str(F))
+    
+    print("             exhausted all A, F")
     
     #Exhausted all AF combos with G
     return None, None, None
@@ -191,12 +235,31 @@ The number of steps to reach node F from A is written as A[F]
 """
 #RETURN: List of (Endpoint, Path) for every chosen Endpoint and their 
 #related path EXIT endpoints have Path set as None
-def find_path(G, A, F, prioritize_oneway = False):
+def find_path(G, A2, F, prioritize_oneway = False):
 
     chosen_endpoints = []
     
+    A = None
+    
+    if A2 not in G.nodes():
+        return None
+    
+    #A2 starts as an Endpoint with same ID but no steps
+    #Get the actual endpoint in G to access its steps
+    for g in G.nodes():
+        if A2 == g:
+            A = g
+            break
+    
+    
+    
+    print("A type: ", type(A))
     if F not in A.steps:
-        print("FAIL! no path from A to F")
+        print("FAIL! no path from A to F but it does have")
+        
+        for f, v in A.steps.items():
+            print("     A[", str(f), "]: ", str(v))
+        
         return None
 
     while not A == F: #N[F] == 0
@@ -262,20 +325,7 @@ before all threads finish round R
 import threading
 round = 0
 added_this_round = False
-def set_add_true():
-    global added_this_round
-    added_this_round = True
-    #print("SET ADD TRUE")
-
-def set_add_false():
-    global added_this_round
-    added_this_round = False
-    #print("SET ADD FALSE")
-
 def flow(G): 
-    global round
-    global added_this_round
-    
     #initial seed
     #empty the dicts and set 0 steps to self
     for N in G.nodes():
@@ -284,16 +334,18 @@ def flow(G):
         N.next_steps = {}
 
         
-    round = 0
+    
     GR = G.reverse()
+    GR.round = 0
+    GR.added_this_round = False
     
     while (True):
-        round = round + 1
+        GR.round = GR.round + 1
         #print("Flow round " + str(round))
         
         pass_values_from_all(GR) #flow backwards
         
-        set_add_false()
+        GR.added_this_round = False
         
         #finalize all new steps only after
         #all threads in round finished
@@ -301,7 +353,7 @@ def flow(G):
         add_new_to_all(GR)
 
         
-        if not added_this_round:
+        if not GR.added_this_round:
             #print("break not added this round")
             break #end when no new steps flowed back
     
@@ -315,7 +367,7 @@ def add_new_to_all(GR):
         
     #move next steps to steps
     for N in GR.nodes():
-        t = threading.Thread(target=add_new, args=(N, ))
+        t = threading.Thread(target=add_new, args=(GR, N))
         threads.append(t)
         t.start()
     
@@ -334,14 +386,14 @@ def pass_values_from_all(GR):
     for t in threads:
         t.join()
 
-def add_new(N):
+def add_new(GR, N):
     curr = N.steps
     next = N.next_steps
 
     for key, value in next.items():
         if key not in curr:
             curr[key] = value
-            set_add_true()
+            GR.added_this_round = True
             #print("     ADDED THIS ROUND")
         #else:
             # print(f"   {N}[{key}] < {value} already there")
@@ -350,8 +402,6 @@ def add_new(N):
     N.next_steps = {}
 
 def pass_values(GR, N):
-    global round
-    
     #print(f"Passing N's steps to reverse neighbors")
     
     for RN in GR.neighbors(N):
@@ -360,7 +410,7 @@ def pass_values(GR, N):
         #current round should always match
         #value + 1
         for K in to_add:
-            RN.next_steps[K] = round
+            RN.next_steps[K] = GR.round
             #print(f"    Added {RN}[{N}] = {round}")
 
 """
@@ -589,12 +639,18 @@ def remove_all_room_paths_by_path(G, path):
     remove_all_room_paths_by_room(room_name, G)
 
 def remove_all_room_paths_by_room(room_name, G):
+    if room_name in G.removed_rooms: #if already removed dont re-remove
+        return
+    
     G.removed_any_edge = False
     G.removed_paths = []
     
     threads = []
     
     G.removed_rooms.append(room_name) #keep track of rooms not in G
+    
+    if room_name in G.readded_rooms:  #keep readded updated with rooms immediately removed after readd (such as by hide)
+        G.readded_rooms.remove(room_name)
     
     for endpoint_pair, paths in G.all_paths.items():
         t = threading.Thread(target=remove_room_paths, args=(endpoint_pair, room_name, paths, G))
@@ -620,6 +676,7 @@ def remove_all_room_paths_by_room(room_name, G):
         else:
             G.removed_paths_by_room_and_endpoints[room_name][endpoint_pair].append(path)
 
+#remove all paths of type that are from the specificed room
 def remove_room_paths(endpoint_pair, room_name, paths, G):
     new_paths = []
     
@@ -640,7 +697,14 @@ def remove_room_paths(endpoint_pair, room_name, paths, G):
         G.remove_edge(endpoint_pair[0], endpoint_pair[1])
         G.removed_any_edge = True
     
-    #TODO: if len == 1, do a hide for that path's room
+    #if len == 1, do a hide for that path's room
+    elif len(new_paths) == 1 and not original_length == 1:
+        G.remove_edge(endpoint_pair[0], endpoint_pair[1])
+        G.removed_any_edge = True
+        
+        hide_room_by_path(G, new_paths[0]) #calls remove rooms so each removed room will cascade hide to any other rooms caused by hiding the initial room
+    
+    
 
 """
 ---------------------------------------
@@ -671,7 +735,6 @@ def add_all_room_paths(G, endpoint_path):
                 used_room_names.append(room_name)
                 
                 G.removed_rooms.remove(room_name)
-                G.readded_rooms.append(room_name) #keep track of rooms readded to G
                 
                 t = threading.Thread(target=add_room_paths, args=(room_name, G))
                 threads.append(t)
@@ -685,8 +748,9 @@ def add_all_room_paths(G, endpoint_path):
 
 def add_room_paths(room_name, G):
     print("     " + str(room_name) + " marked to readd")
-    
+
     if room_name in G.removed_paths_by_room_and_endpoints:
+        G.readded_rooms.append(room_name) #keep track of rooms readded to G
 
         #for updating other Gs
         if room_name in G.removed_rooms:
@@ -697,50 +761,156 @@ def add_room_paths(room_name, G):
         for endpoint_pair, paths in removed_paths_by_endpoint.items():
             
             original_length = len(G.all_paths[endpoint_pair])
-            G.all_paths[endpoint_pair].extend(paths) # = paths
+            G.all_paths[endpoint_pair].extend(paths)
             
-            if (original_length == 0): #TODO: if we add an edge, check if we should readd any hidden rooms that were removed bc the ywere the last path in the edge
+            if (original_length == 0):
                 G.add_edge(endpoint_pair[0], endpoint_pair[1])
                 G.added_any_edge = True
+                
+                #check if unhiding any room would result only in endpoint paths > 1
+                check_if_any_room_should_unhide(G, endpoint_pair)
+                
+                #if length is still one, hide it
+                if len(G.all_paths[endpoint_pair]) == 1:
+                    hide_room_by_path(G, G.all_paths[endpoint_pair][0])
+            
+            
         
         del G.removed_paths_by_room_and_endpoints[room_name]
     else:
         print("     " + str(room_name) + " not in G")
 
 #Update all other G to remove/readd rooms removed/readded in G
-#TODO: update with hidden rooms as well
 def update_other_G(G, others):
     
     to_readd = G.readded_rooms
-    to_remove = G.removed_rooms
+    to_remove = G.removed_rooms 
+    to_hide = G.hidden_rooms
+    
     
     #readd all to readd that's in O.removed
     for O in others:
         
-        removed = O.removed_rooms
-        
         for room in to_readd:
             print("O to readd ", room)
             
-            if room in O.removed_rooms:
+            if room in O.removed_rooms or room in O.hidden_rooms:
                 print("     O do readd ", room)
                 add_room_paths(room, O)
+    
+    #hide all in to hide
+    for O in others:
+    
+        for room in to_hide:
+            print("O to hide ", room)
+            
+            if room not in O.hidden_rooms:
+                print("     do hide ", room)
+                hide_room_by_room(O, room)
+            else:
+                print("     ", room, " already hidden? ")
     
     #remove all in to remove
     for O in others:
         
-        removed = O.removed_rooms
-        
         for room in to_remove:
             print("O to remove ", room)
-            if room not in O.removed_rooms:
+            if room not in O.removed_rooms and room not in O.hidden_rooms:
                 print("     do remove ", room)
                 remove_all_room_paths_by_room(room, O)
             else:
                 print("     ", room, " already removed? ")
     
+   
+    
+    
     #reflow
     for O in others:
         if O.added_any_edge or O.removed_any_edge:
             O = flow(O)
+    
+    print("===G UPDATE===")
+    
+    for a in to_readd:
+        print("     readded: ", a)
+    
+    for r in to_remove:
+        print("     removed: ", r)
+    
+    for h in to_hide:
+        print("     hidden: ", h)
+    
+    for O in others:
+        print("===O UPDATE===")
+    
+        for a in O.readded_rooms:
+            print("     readded: ", a)
+        
+        for r in O.removed_rooms:
+            print("     removed: ", r)
+        
+        for h in O.hidden_rooms:
+            print("     hidden: ", h)
+    
+    G.readded_rooms = [] #clear because we dont need to know which were readded anymore
 
+def unhide_rooms(G, rooms):
+    
+    for room in rooms:
+        print("try unhide ", room_name)
+        
+        if room in G.hidden_rooms:
+            print("     do unhide by readd ", room_name)
+            G.hidden_rooms.remove(room)
+            add_room_paths(room, G)
+
+def hide_room_by_path(G, path):
+    room_name = path.room_name
+    hide_room_by_room(G, room_name)
+    
+
+def hide_room_by_room(G, room_name):
+    if room_name not in G.hidden_rooms:
+        G.hidden_rooms.append(room_name)
+        remove_all_room_paths_by_room(room_name, G)
+        
+        if room_name in G.removed_rooms:        #dont want to store hidden rooms in removed rooms array
+            print("     remove room from removed room after hide")
+            for r in G.removed_rooms:
+                print("         before removed: ", r)
+            
+            G.removed_rooms.remove(room_name)
+        else:
+            print("     room not in removed after hide")
+        
+            for r in G.removed_rooms:
+                print("         in removed: ", r)
+
+def check_if_any_room_should_unhide(G, endpoint_pair):
+    
+    to_unhide = []
+    
+    for room_name in G.removed_paths_by_room_and_endpoints:
+        
+        if room_name in G.hidden_rooms:
+            removed_paths_by_endpoints = G.removed_paths_by_room_and_endpoints[room_name]
+            
+            if endpoint_pair in removed_paths_by_endpoints:
+                
+                should_unhide = True
+                
+                for other_pair in removed_paths_by_endpoints:
+                    
+                    future_length = len(removed_paths_by_endpoints[other_pair]) + len(G.all_paths[other_pair])
+                    
+                    #if any endpoint type readded would not end up with more than one path, do not unhide the room at all
+                    if not future_length > 1:
+                        should_unhide = False
+                        break
+                
+                if should_unhide:
+                    to_unhide.append(room_name)
+    
+    unhide_rooms(G, to_unhide)
+                    
+    

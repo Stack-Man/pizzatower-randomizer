@@ -16,13 +16,24 @@ class Endpoint():
         self.steps = {}
         self.next_steps = {}
         
-        self.steps["NONE"] = "NONE"
+        self.steps["NO STEPS SET"] = "NO STEPS SET"
     
     def __str__(self):
         return f"{self.start_exit_type} {self.door_type} {self.door_dir}"
     
     def __eq__(self, other):
-        return self.door_type == other.door_type and self.door_dir == other.door_dir and self.start_exit_type == other.start_exit_type
+        if not isinstance(other, Endpoint):
+            return NotImplemented
+
+        return (
+            getattr(self, "door_type", None) == getattr(other, "door_type", None)
+            and getattr(self, "door_dir", None) == getattr(other, "door_dir", None)
+            and getattr(self, "start_exit_type", None) == getattr(other, "start_exit_type", None)
+        )
     
     def __hash__(self):
-        return hash((self.door_type, self.door_dir, self.start_exit_type))
+        return hash((
+            getattr(self, "door_type", None),
+            getattr(self, "door_dir", None),
+            getattr(self, "start_exit_type", None),
+        ))

@@ -79,6 +79,7 @@ class Door():
         self.letter = letter
         self.door_type = door_type
         self.door_dir = door_dir
+        self.is_branch = branch #doh!
         self.branch = branch
         self.branchstart = is_branch_start
         self.branchend = is_branch_end
@@ -111,7 +112,8 @@ class Path():
         self.start_door = start_door
         self.exit_door = exit_door
         self.oneway = oneway
-        self.loop = loop
+        self.is_oneway = oneway #doh!!
+        self.is_loop = loop
     
     def __str__(self):
         return f"{self.start_door} to {self.exit_door}"

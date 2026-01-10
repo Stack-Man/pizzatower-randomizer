@@ -2,6 +2,8 @@ from enums import *
 import networkx as nx
 import node_id_objects as nio
 from node_id_objects import StartExitType, NodeType
+from layer_objects import BranchRoom, EntranceJohnRoom
+from path_mapping import layer_to_endpoints
 
 """
 ------------------------
@@ -36,18 +38,42 @@ def rooms_to_layers(rooms, use_loops = False):
     
     TW, OW_NPT, OW_PT = rooms_to_TW_and_OW_layers(rooms)
     BS, BE = rooms_to_branch_layers(rooms)
-    J, JB = rooms_to_john_layer(rooms)
-    E, EB = rooms_to_entrance_layer(rooms)
+    J, JBE = rooms_to_john_layer(rooms)
+    E, EBS = rooms_to_entrance_layer(rooms)
     
-    layers = [TW, OW_NPT, OW_PT, BS, BE, J, JB, E, EB]
+    #TW and OW should be endpoint graphs, rest are lists of BaseRoom
+    print("TW:")
+    TW = layer_to_endpoints(TW)
+    print("OW NPT:")
+    OW_NPT = layer_to_endpoints(OW_NPT)
+    print("OW PT:")
+    OW_PT = layer_to_endpoints(OW_PT)
     
-    return layers
-    
+    return TW, OW_NPT, OW_PT, BS, BE, E, EBS, J, JBE
 
 def rooms_to_layer(rooms, path_selector = lambda e: True):
     return populate_start_and_exit_layer(rooms, path_selector)
 
-from layer_objects import BranchRoom, EntranceRoom, JohnRoom
+def rooms_to_base_room_layer(rooms, se_type):
+    
+    base_rooms = []
+    
+    for room in rooms:
+        
+        door = get_non_loop_door(room)
+        
+        ejr = EntranceJohnRoom(room.name, door, se_type)
+        base_rooms.append(ejr)
+    
+    return base_rooms
+
+from enums import *
+
+def get_non_loop_door(room):
+    
+    for door in room.doors:
+        if door.door_type is not DoorType.LEVELDOOR and not door.is_loop:
+            return door
 
 #TODO: test
 def rooms_to_branch_layer(rooms, se_type):
@@ -60,7 +86,7 @@ def rooms_to_branch_layer(rooms, se_type):
 
         #add paths between layers
         for path in room.paths:
-            print("Trying path " + str(path) )
+            #print("Trying path " + str(path) )
             
             if se_type == StartExitType.START:
                 if path.start_door.is_branch:
@@ -84,7 +110,7 @@ def rooms_to_branch_layer(rooms, se_type):
         branch_room = BranchRoom(room.name, se_type, branch_door, NPT_door, PT_door)
         branch_rooms.append(branch_room)
     
-    return layer
+    return branch_rooms
 
 #start/exit layers are virtual layers within a single greater layer
 #each door exists twice in the layer, once in start and once in exit
@@ -133,16 +159,16 @@ def populate_start_and_exit_layer(rooms, path_selector = lambda e: True):
 
         #add paths between layers
         for path in room.paths:
-            print("Trying path " + str(path) )
+            #print("Trying path " + str(path) )
             
             valid_loop = not path.is_loop or (path.is_loop and use_loop_paths)
             valid_path = path_selector(path) and valid_loop
             
             if valid_path:
-                print("valid path " + str(path) + " vp " + str(valid_path))
+                #print("valid path " + str(path) + " vp " + str(valid_path))
                 add_start_exit_path_to_layer(room.name, path, layer)
-            else:
-                print("invalid path " + str(path)  + " vp " + str(valid_path))
+            #else:
+                #print("invalid path " + str(path)  + " vp " + str(valid_path))
     
     return layer
 
@@ -213,8 +239,8 @@ def rooms_to_TW_and_OW_layers(all_rooms):
         
         valid = a and b and c and d
         
-        print("path: " + str(path) + " wrong_time: " + str(wrong_time) + " a, b, c, d: " + str(path.start_door.start_path_time) + ", "+ str(path.exit_door.start_path_time) + ", "+ str(path.start_door.exit_path_time) + ", "+ str(path.exit_door.exit_path_time) )
-        print(" vp: " + str(valid) + " a, b, c, d: " + str(a) + ","+ str(b) + ","+ str(c) + ","+ str(d))
+        #print("path: " + str(path) + " wrong_time: " + str(wrong_time) + " a, b, c, d: " + str(path.start_door.start_path_time) + ", "+ str(path.exit_door.start_path_time) + ", "+ str(path.start_door.exit_path_time) + ", "+ str(path.exit_door.exit_path_time) )
+        #print(" vp: " + str(valid) + " a, b, c, d: " + str(a) + ","+ str(b) + ","+ str(c) + ","+ str(d))
         
         return valid
     
@@ -242,55 +268,56 @@ def rooms_to_TW_and_OW_layers(all_rooms):
 #   BranchType.END or BranchType.ANY    (start and exit)
 
 def rooms_to_branch_layers(all_rooms):
-    
     branch_rooms = filter_rooms(all_rooms, RoomType.BRANCH)
     
     B_any_rooms = filter_rooms_by_branch(branch_rooms, BranchType.ANY)
     B_start_rooms = filter_rooms_by_branch(branch_rooms, BranchType.START)
     B_end_rooms = filter_rooms_by_branch(branch_rooms, BranchType.END)
     
+
     #TODO: BranchType.MID
     
     B_start_rooms.extend(B_any_rooms)
     B_end_rooms.extend(B_any_rooms)
     
+
     BS_layer = rooms_to_branch_layer(B_start_rooms, StartExitType.START)
     BE_layer = rooms_to_branch_layer(B_end_rooms, StartExitType.EXIT)
     
-    BS_layer.graph["name"] = "Branch Start"
-    BE_layer.graph["name"] = "Branch End"
+    #BS_layer.graph["name"] = "Branch Start"
+    #BE_layer.graph["name"] = "Branch End"
     
     return BS_layer, BE_layer
 
 
 #RoomType.JOHN
 def rooms_to_john_layer(all_rooms):
-    JBE_layer, J_layer = type_and_branch_to_layers(all_rooms, RoomType.JOHN, BranchType.END, StartExitType.EXIT)
+    JBE_layer, J_layer = type_and_branch_to_layers(all_rooms, RoomType.JOHN, BranchType.END, StartExitType.EXIT, StartExitType.START)
     
-    JBE_layer.graph["name"] = "John Branch"
-    J_layer.graph["name"] = "John"
+    #JBE_layer.graph["name"] = "John Branch"
+    #J_layer.graph["name"] = "John"
     
     return J_layer, JBE_layer 
     
 
 #RoomType.ENTRANCE
 def rooms_to_entrance_layer(all_rooms):
-    EBS_layer, E_layer = type_and_branch_to_layers(all_rooms, RoomType.ENTRANCE, BranchType.START, StartExitType.START)
+    EBS_layer, E_layer = type_and_branch_to_layers(all_rooms, RoomType.ENTRANCE, BranchType.START, StartExitType.START, StartExitType.EXIT)
     
-    EBS_layer.graph["name"] = "Entrance Branch"
-    E_layer.graph["name"] = "Entrance"
+    #EBS_layer.graph["name"] = "Entrance Branch"
+    #E_layer.graph["name"] = "Entrance"
     
     return E_layer, EBS_layer
     
 
-def type_and_branch_to_layers(all_rooms, room_type, branch_type, se_type):
+def type_and_branch_to_layers(all_rooms, room_type, branch_type, branch_se_type, base_se_type):
     
     type_rooms = filter_rooms(all_rooms, room_type)
     type_branch_rooms = filter_rooms_by_branch(type_rooms, branch_type)
     type_rooms = filter_rooms_by_branch(type_rooms, BranchType.NONE)
     
-    TBT_layer = rooms_to_branch_layer(type_branch_rooms, se_type)
-    T_layer = rooms_to_layer(type_rooms)
+    TBT_layer = rooms_to_branch_layer(type_branch_rooms, branch_se_type)
+    T_layer = rooms_to_base_room_layer(type_rooms, base_se_type)
     
     return TBT_layer, T_layer
     

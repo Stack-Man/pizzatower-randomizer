@@ -1,6 +1,7 @@
 from node_id_objects import NodeType, StartExitType
 import networkx as nx
 from path_objects import Endpoint, RoomPath
+from path_traversal import flow
 
 
 def layer_to_endpoints(G):
@@ -9,7 +10,9 @@ def layer_to_endpoints(G):
     
     G_init_attributes(ep_graph, paths)
     
-    return ep_graph
+    flowed = flow(ep_graph) #initialize flow
+    
+    return flowed
 
 def G_init_attributes(G, all_paths):
     G.all_paths = all_paths
@@ -23,6 +26,8 @@ def G_init_attributes(G, all_paths):
     G.removed_any_edge = False
     
     G.removed_paths = []
+    
+    G.hidden_rooms = []
 
 
 """
@@ -37,6 +42,9 @@ The Transition Matrix is a graph showing which start endpoints an exit endpoint
 is allowed to lead to in the next room
 """
 
+from json_to_objects import flip_dir
+
+#TODOOOO IMPORTANT!!!! FIX THE TRANSITION MATRIX FOR NORMAL MODE!!!!!!!
 def construct_endpoint_graph(paths, traversal_mode):
 
     endpoint_graph = nx.DiGraph()
@@ -57,7 +65,15 @@ def construct_endpoint_graph(paths, traversal_mode):
     
     #MODE: matching perfect
     #Match transitions with the same type and consistent directions
-    #TODO:
+    for ep in exit_points:
+        for sp in start_points:
+            
+            same_type = ep.door_type == sp.door_type
+            good_dir = flip_dir(ep.door_dir) == sp.door_dir #flipped matches or no flip for type
+            
+            if same_type and good_dir:
+                endpoint_graph.add_edge(ep, sp)
+    
     
     #MODE: matching directional
     #Match transitions that have consistent directions, but possibly different types
@@ -72,11 +88,11 @@ def construct_endpoint_graph(paths, traversal_mode):
     #TODO:
     
    
-    
+    """
     for ep in exit_points:
         for sp in start_points:
             if ep.door_type == sp.door_type and ep.start_exit_type != sp.start_exit_type:
-                endpoint_graph.add_edge(ep, sp)
+                endpoint_graph.add_edge(ep, sp)"""
     
     return endpoint_graph
 

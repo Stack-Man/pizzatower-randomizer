@@ -241,13 +241,16 @@ def draw_tree(G):
     #plt.figure(figsize=(8, 6))
     #nx.draw(G, pos, with_labels=True, node_size=5000, node_color="skyblue", font_size=10, font_weight="bold")
     
+    """
     for node in G.nodes:
         print(f"Node {node}:")
         
         for k, v in node.steps.items():
-            print(f"    {k}: {v}")
+            print(f"    {k}: {v}")"""
     
-    #plt.show(block=False)
+    #plt.show(block=True)
+
+from layer_traversal import create_level
 
 def test_parse(filename):
 
@@ -257,15 +260,21 @@ def test_parse(filename):
 
         rooms = json_to_rooms(file)
 
-        layers = rooms_to_layers(rooms)
+        TW, OW_NPT, OW_PT, BS, BE, E, EBS, J, JBE = rooms_to_layers(rooms)
         
-        for layer in layers:
-            print("layer " + str(layer.graph["name"]))
-            draw_layer(layer, "Layer")
-       
-        plt.show()
+        draw_tree(TW)
+        
+        return create_level(TW, OW_NPT, OW_PT, BS, BE, E, EBS, J, JBE)
         
     return
+
+def print_level(level):
+    
+    print("LEVEL: ")
+    
+    for segment in level.segments:
+        print(      "seg: ", str(segment))
+        
 
 def print_path(path):
     print("path: ")
@@ -466,5 +475,7 @@ def test_path_grow():
     print_Gs(G, others)
     
 
-#test_parse("datafiles/json/johngutter.json")
-test_path_grow()
+level = test_parse("datafiles/json/johngutter.json")
+print_level(level)
+#plt.show()
+#test_path_grow()
