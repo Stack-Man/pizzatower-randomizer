@@ -341,7 +341,7 @@
                     "dir": "down",
                     "pizzatime": true,
 					"branchexit" : true,
-					"exitonly" : true,
+					"exitonly" : true
                 },
                 {
                     "letter" : "C",

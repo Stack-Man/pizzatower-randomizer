@@ -118,17 +118,19 @@ def find_some_branch_paths_with_unhides(G_PT, G_NPT, BSs, BEs):
     
     while (room_count_to_unhide_this_round <= max_unhidden_rooms_at_once):
         
-        print("         Try unhide round ", room_count_to_unhide_this_round)
+        print("         Try branch unhide round ", room_count_to_unhide_this_round)
         
         #try to find a path with every unique combination of hidden rooms unhidden
         #when successful, replace G with that created G
         for room_combination in choose(G_NPT.hidden_rooms, room_count_to_unhide_this_round):
             
+            print("             Try unhide room combo for branch NPT ", room_combination)
+            
             #First try to find NPT
             temp_G_NPT = deepcopy(G_NPT)
             unhide_rooms(temp_G_NPT, room_combination)
             
-            print("         Find from BSs to BEs")
+            print("             Find from BSs to BEs")
             chosen_BS, chosen_BE, path_NPT = find_some_path(G_NPT, BSs, BEs, endpoint_extractor = branch_extractor_NPT, prioritize_oneway = True)
             
             #Then try to find PT with this NPT
@@ -186,7 +188,7 @@ def find_some_path(G, As, Fs, endpoint_extractor = default_extractor, prioritize
         
         A = endpoint_extractor(Au)
         
-        print("                 Find from ", str(A))
+        print("                 TRY Find from ", str(A))
             
         for Fu in Fs:
         
@@ -233,11 +235,21 @@ The number of steps to reach node F from A is written as A[F]
 3b. Choose path P of room R, then remove all paths of room R from graph and reflow if any edges become disconnected
 4. Else If N[F] = 0, end
 """
+from draw_test import draw_tree
+from path_objects import Endpoint
+from layer_objects import FakeNode
+
+def get_endpoint(type, dir, se_type):
+    n = FakeNode(type, dir, se_type)
+    return Endpoint(n)
+
 #RETURN: List of (Endpoint, Path) for every chosen Endpoint and their 
 #related path EXIT endpoints have Path set as None
 def find_path(G, A2, F, prioritize_oneway = False):
 
     chosen_endpoints = []
+    
+    G = flow(G) #TODO: for some reason some action is failing to flow and the values get messed up, the values to self are not 0 and the values seem higher than usual
     
     A = None
     
@@ -251,23 +263,34 @@ def find_path(G, A2, F, prioritize_oneway = False):
             A = g
             break
     
-    
-    
-    print("A type: ", type(A))
+    #print("A type: ", type(A))
     if F not in A.steps:
-        print("FAIL! no path from A to F but it does have")
+        print("FAIL! no path from A to F")
         
-        for f, v in A.steps.items():
-            print("     A[", str(f), "]: ", str(v))
+        for k, v in A.steps.items():
+            print("     ", k, ": ", v)
         
         return None
+    
+    #draw_tree(G)
+    
+    last_A = A
+    
+   
 
     while not A == F: #N[F] == 0
     
+        print("1. FIND: ", A, " TO ", F)
+    
         for N in G.neighbors(A):
+            print("     2. TO ", F ," THROUGH ", N, " FROM A: ", A.steps[F])
+            
+            for f, v in N.steps.items():
+                print("         N[", str(f), "]: ", str(v))
+            
             if F in N.steps and N.steps[F] == A.steps[F] - 1:
                 
-                print(" to " + str(N) + " N[F] = " + str(N.steps[F]))
+                print("     3. USING ", N)
                 
                 chosen_path = None
                 
@@ -281,10 +304,15 @@ def find_path(G, A2, F, prioritize_oneway = False):
                         print("     " + str(room_name) + " in G after exiting choose path!!")
                      
                 chosen_endpoints.append((A, chosen_path))
- 
+                
+                last_A = A
                 A = N
                 
                 break #to next while loop
+        
+        if A == last_A:
+            print("For some reason saw F in A but not in any N of A")
+            break
     
     chosen_endpoints.append((F, None)) #If F is START, assume it is being appended to some already existing path choice
 
@@ -660,7 +688,7 @@ def remove_all_room_paths_by_room(room_name, G):
     for t in threads:
         t.join()
     
-    if G.removed_any_edge:
+    if G.removed_any_edge or G.added_any_edge:
         G = flow(G)
     
     G.removed_paths_by_room_and_endpoints[room_name] = {}
@@ -743,7 +771,7 @@ def add_all_room_paths(G, endpoint_path):
     for t in threads:
         t.join()
     
-    if G.added_any_edge:
+    if G.added_any_edge or G.removed_any_edge:
         G = flow(G)
 
 def add_room_paths(room_name, G):
@@ -855,6 +883,7 @@ def update_other_G(G, others):
     G.readded_rooms = [] #clear because we dont need to know which were readded anymore
 
 def unhide_rooms(G, rooms):
+    return #TODO: debug, dont do anything
     
     for room in rooms:
         print("try unhide ", room_name)
@@ -863,6 +892,9 @@ def unhide_rooms(G, rooms):
             print("     do unhide by readd ", room_name)
             G.hidden_rooms.remove(room)
             add_room_paths(room, G)
+    
+    if G.added_any_edge or G.removed_any_edge:
+        G = flow(G)
 
 def hide_room_by_path(G, path):
     room_name = path.room_name
@@ -870,6 +902,8 @@ def hide_room_by_path(G, path):
     
 
 def hide_room_by_room(G, room_name):
+    return #TODO: debug, dont do anything
+    
     if room_name not in G.hidden_rooms:
         G.hidden_rooms.append(room_name)
         remove_all_room_paths_by_room(room_name, G)

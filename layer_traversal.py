@@ -89,7 +89,10 @@ def create_level(TW, OW_NPT, OW_PT, BS, BE, E, EBS, J, JBE):
             
             branch_A_endpoint, branch_F_endpoint, branch_path_NPT, branch_path_PT = create_bridge_oneway(OW_NPT, OW_PT, A_endpoints, F_endpoints) #TODO: takes too long
             
-            current_segment = BranchSegment(branch_A_endpoint, branch_path_NPT, branch_path_PT, branch_F_endpoint)
+            NPT_segment = PathSegment(branch_path_NPT)
+            PT_segment = PathSegment(branch_path_PT)
+            
+            current_segment = BranchSegment(branch_A_endpoint, NPT_segment, PT_segment, branch_F_endpoint)
             current_A_endpoint = branch_A_endpoint
             current_F_endpoint = branch_F_endpoint
         

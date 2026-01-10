@@ -110,7 +110,7 @@ class BranchSegment(BaseSegment):
         if self.start_branch == None or self.end_branch == None:
             return "None branch"
         
-        return "NPT: " + self.start_branch.room_name + " > " + str(OW_NPT) + " > " + self.end_branch.room_name + "\n" + "PT: " + self.start_branch.room_name + " < " + str(OW_PT) + " < " + self.end_branch.room_name
+        return "Branch: \n      NPT: " + self.start_branch.room_name + " > " + str(self.OW_NPT) + " > " + self.end_branch.room_name + "\n" + "      PT: " + self.end_branch.room_name + " > " + str(self.OW_PT) + " > " + self.start_branch.room_name
 
 class PathSegment(BaseSegment):
     def __init__(self, paths):
@@ -124,11 +124,11 @@ class PathSegment(BaseSegment):
         if self.paths == None:
             return "None Path"
         
-        msg = ""
+        msg = "Path:    "
         
         for p in self.paths:
             
-            msg += ">" + str(p[1]) + ">"
+            msg += ">" + str(p[0]) + ", " + str(p[1])
         
         return msg
 
@@ -143,4 +143,4 @@ class RoomSegment(BaseSegment):
         if (self.room is None):
             return "None Room"
         
-        return self.room.room_name
+        return "Room: " + self.room.room_name

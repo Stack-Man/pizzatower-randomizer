@@ -107,8 +107,11 @@ def rooms_to_branch_layer(rooms, se_type):
                         NPT_door = path.start_door
         
         #create branch room
-        branch_room = BranchRoom(room.name, se_type, branch_door, NPT_door, PT_door)
-        branch_rooms.append(branch_room)
+        if branch_door is not None and NPT_door is not None and PT_door is not None:
+            branch_room = BranchRoom(room.name, se_type, branch_door, NPT_door, PT_door)
+            branch_rooms.append(branch_room)
+        else:
+            print("=====ROOM ", room.name, " NOT VALID BRANCH (MISSING DOOR)")
     
     return branch_rooms
 

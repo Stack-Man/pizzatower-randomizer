@@ -104,7 +104,7 @@
 					"letter" : "B",
 					"type" : "door",
 					"locked" : true,
-					"branch" : true,
+					"branch" : true
 				},
 				
 				{

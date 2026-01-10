@@ -252,6 +252,29 @@ def draw_tree(G):
 
 from layer_traversal import create_level
 
+def test_parse_all():
+    
+    filenames = ["johngutter", "ancientcheese", "bloodsauce", "crustcove", "deepdish9", "dontmakeasound", "fastfoodsaloon"]
+    all_rooms = []
+    
+    for f in filenames:
+        
+
+        full = "datafiles/json/" + f + ".json"
+        
+        print("===DECODING ", full)
+        
+        new_rooms = test_parse(full)
+        all_rooms.extend(new_rooms)
+    
+    TW, OW_NPT, OW_PT, BS, BE, E, EBS, J, JBE = rooms_to_layers(all_rooms)
+        
+    #draw_tree(TW)
+        
+    return create_level(TW, OW_NPT, OW_PT, BS, BE, E, EBS, J, JBE) 
+    #TODO: loops forevery and has an endpoint with nothing set when adding new jsons,a mong other problems
+    #Will probably have to refactor and clean and separate code, its very messy right now and hard to work with
+
 def test_parse(filename):
 
     with open(filename, "r") as f:
@@ -260,13 +283,11 @@ def test_parse(filename):
 
         rooms = json_to_rooms(file)
 
-        TW, OW_NPT, OW_PT, BS, BE, E, EBS, J, JBE = rooms_to_layers(rooms)
-        
-        draw_tree(TW)
-        
-        return create_level(TW, OW_NPT, OW_PT, BS, BE, E, EBS, J, JBE)
-        
-    return
+        return rooms
+    
+    print("failed load of ", filename)
+    
+    return []
 
 def print_level(level):
     
@@ -475,7 +496,7 @@ def test_path_grow():
     print_Gs(G, others)
     
 
-level = test_parse("datafiles/json/johngutter.json")
+level = test_parse_all()
 print_level(level)
 #plt.show()
 #test_path_grow()
