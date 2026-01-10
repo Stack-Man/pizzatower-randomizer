@@ -19,7 +19,7 @@ class Endpoint():
         self.steps["NO STEPS SET"] = "NO STEPS SET"
     
     def __str__(self):
-        return f"{self.start_exit_type} {self.door_type} {self.door_dir}"
+        return f"{se(self.start_exit_type)} {dt(self.door_type)} {dd(self.door_dir)}"
     
     def __eq__(self, other):
         if not isinstance(other, Endpoint):
@@ -37,3 +37,46 @@ class Endpoint():
             getattr(self, "door_dir", None),
             getattr(self, "start_exit_type", None),
         ))
+
+from node_id_objects import StartExitType
+from enums import DoorType, DoorDir
+
+def se(type):
+    if type == StartExitType.START:
+        return "START"
+    else:
+        return "EXIT"
+
+def dt(type):
+    if type == DoorType.DOOR:
+        return "DOOR"
+    elif type == DoorType.HORIZONTAL:
+        return "HALL"
+    elif type == DoorType.VERTICAL:
+        return "FALL"
+    elif type == DoorType.BOX:
+        return "BOX"
+    else:
+        return type
+
+def dd(type):
+    if type == DoorDir.LEFT:
+        return "LEFT"
+    elif type == DoorDir.RIGHT:
+        return "RIGHT"
+    elif type == DoorDir.UP:
+        return "UP"
+    elif type == DoorDir.DOWN:
+        return "DOWN"
+    elif type == DoorDir.NONE:
+        return "NONE"
+    else:
+        return type
+
+
+
+
+
+
+
+

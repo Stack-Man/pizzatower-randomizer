@@ -3,7 +3,7 @@ import networkx as nx
 import node_id_objects as nio
 from node_id_objects import StartExitType, NodeType
 from layer_objects import BranchRoom, EntranceJohnRoom
-from path_mapping import layer_to_endpoints
+from path_graph import layer_to_endpoints
 
 """
 ------------------------

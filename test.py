@@ -12,8 +12,10 @@ from json_to_objects import json_to_rooms
 from layer_creation import rooms_to_layers
 from node_id_objects import NodeType, StartExitType
 import node_id_objects as nio
-from path_mapping import layer_to_endpoints, G_init_attributes
-from path_traversal import flow, find_path, grow_path, update_other_G
+from path_graph import layer_to_endpoints, G_init_attributes, update_other_G
+from path_flow import flow
+from path_grow import grow_path
+from path_traversal import find_path
 from path_objects import Endpoint, RoomPath
 
 from enums import *

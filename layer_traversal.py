@@ -1,6 +1,7 @@
 from path_traversal import create_bridge_twoway, create_bridge_oneway
 from layer_objects import Level, BranchPath, BranchSegment, PathSegment, RoomSegment
 
+
 """
 ---------------
 LEVEL STRUCTURE
@@ -41,19 +42,14 @@ def create_level(TW, OW_NPT, OW_PT, BS, BE, E, EBS, J, JBE):
     A_endpoints = E #TODO: option for EBS
     F_endpoints = BS 
     
-    print("Check TW Flow create level start:")
+    #Get A, F and path AF
+    #sync AF from TW with OW
+    #sync F from BS with BE
+    start_A_endpoint, start_F_endpoint, path_AF = create_bridge_twoway(TW, A_endpoints, F_endpoints, to_sync_G = [OW_NPT, OW_PT], to_sync_F = [BE])
     
-    for n in TW.nodes():
-        print("     ", str(n))
-        
-        for k, v in n.steps.items():
-            
-            print("             ", str(k), ":", v)
-    
-    start_A_endpoint, start_F_endpoint, path_AF = create_bridge_twoway(TW, A_endpoints, F_endpoints)
     #TODO: if failed, try with F_endpoints = J or with JBE if EBS
     
-    start = RoomSegment(start_A_endpoint)
+    start = RoomSegment(start_A_endpoint) 
     start_segment = PathSegment(path_AF)
     
     level.add_segment(start)
@@ -67,7 +63,7 @@ def create_level(TW, OW_NPT, OW_PT, BS, BE, E, EBS, J, JBE):
     current_A_endpoint = start_A_endpoint
     current_F_endpoint = start_F_endpoint
     
-    while (level.branch_count < max_branches): 
+    while (level.branch_count < max_branches): #TODO: maybe make john segment first to increase success rate since john segment is more important
         
         #A = prev_segment.get_last_endpoint()
         A = current_F_endpoint
@@ -78,7 +74,10 @@ def create_level(TW, OW_NPT, OW_PT, BS, BE, E, EBS, J, JBE):
         if next_is_twoway:
             F_endpoints = BS
             
-            twoway_A_endpoint, twoway_F_endpoint, twoway_path = create_bridge_twoway(TW, A_endpoints, F_endpoints)
+            #Get A, F and path AF
+            #sync AF from TW with OW
+            #sync F from BS with BE
+            twoway_A_endpoint, twoway_F_endpoint, twoway_path = create_bridge_twoway(TW, A_endpoints, F_endpoints, to_sync_G = [OW_NPT, OW_PT], to_sync_F = [BE])
             
             current_segment = PathSegment(twoway_path)
             current_A_endpoint = twoway_A_endpoint
@@ -87,7 +86,10 @@ def create_level(TW, OW_NPT, OW_PT, BS, BE, E, EBS, J, JBE):
         else: #TODO: option to use JBE
             F_endpoints = BE
             
-            branch_A_endpoint, branch_F_endpoint, branch_path_NPT, branch_path_PT = create_bridge_oneway(OW_NPT, OW_PT, A_endpoints, F_endpoints) #TODO: takes too long
+            #Get A, F and path PT and NPT
+            #sync NPT, PT from OW with TW
+            #sync F from BE with BS
+            branch_A_endpoint, branch_F_endpoint, branch_path_NPT, branch_path_PT = create_bridge_oneway(OW_NPT, OW_PT, A_endpoints, F_endpoints, to_sync_G = [TW], to_sync_BE = [BS])
             
             NPT_segment = PathSegment(branch_path_NPT)
             PT_segment = PathSegment(branch_path_PT)
@@ -102,14 +104,15 @@ def create_level(TW, OW_NPT, OW_PT, BS, BE, E, EBS, J, JBE):
         next_is_twoway = not next_is_twoway #flip
         
         level.add_segment(current_segment)
-        #prev_segment = current_segment
     
     #TODO: skip if used JBE
     A = current_F_endpoint
     A_endpoints = [A]
     F_endpoints = J
     
-    end_A_endpoint, end_F_endpoint, path_AF = create_bridge_twoway(TW, A_endpoints, F_endpoints)
+    #Get A, F and path AF
+    #sync AF from TW with OW
+    end_A_endpoint, end_F_endpoint, path_AF = create_bridge_twoway(TW, A_endpoints, F_endpoints, to_sync_G = [OW_PT, OW_NPT])
     
     end_segment = PathSegment(path_AF)
     end = RoomSegment(end_F_endpoint)
