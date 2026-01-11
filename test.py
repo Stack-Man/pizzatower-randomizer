@@ -243,13 +243,6 @@ def draw_tree(G):
     #plt.figure(figsize=(8, 6))
     #nx.draw(G, pos, with_labels=True, node_size=5000, node_color="skyblue", font_size=10, font_weight="bold")
     
-    """
-    for node in G.nodes:
-        print(f"Node {node}:")
-        
-        for k, v in node.steps.items():
-            print(f"    {k}: {v}")"""
-    
     #plt.show(block=True)
 
 from layer_traversal import create_level
@@ -310,16 +303,6 @@ def get_endpoint(G, start, type, dir):
             return N
     
     return None
-
-def print_steps(G):
-    print("Steps: ")
-    for node in G.nodes:
-        print(f"    {node}:")
-        
-        for k, v in node.steps.items():
-            print(f"        {k}: {v}")
-
-
 
 def test_graph():
     G = nx.DiGraph()

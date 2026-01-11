@@ -45,6 +45,17 @@ def create_level(TW, OW_NPT, OW_PT, BS, BE, E, EBS, J, JBE):
     #Get A, F and path AF
     #sync AF from TW with OW
     #sync F from BS with BE
+    
+    print("TW FLOW")
+    
+    for N in TW.nodes():
+        
+        print("     FLOW: ", N)
+        
+        for k, v in N.steps.items():
+            
+            print("         STEPS: ", k, ": ", v)
+    
     start_A_endpoint, start_F_endpoint, path_AF = create_bridge_twoway(TW, A_endpoints, F_endpoints, to_sync_G = [OW_NPT, OW_PT], to_sync_F = [BE])
     
     #TODO: if failed, try with F_endpoints = J or with JBE if EBS

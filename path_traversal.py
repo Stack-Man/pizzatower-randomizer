@@ -36,6 +36,16 @@ def create_bridge_twoway(G, As, Fs, to_sync_G = [], to_sync_A = [], to_sync_F = 
     
     print("Try Bridge Twoway")
     
+    print("TW FLOW bridge twoway")
+    
+    for N in G.nodes():
+        
+        print("     FLOW: ", N)
+        
+        for k, v in N.steps.items():
+            
+            print("         STEPS: ", k, ": ", v)
+    
     def twoway_endpoint_extractor(A):
         return A.get_twoway_endpoint()
 
@@ -80,14 +90,49 @@ def find_some_path_with_unhides(G, As, Fs, endpoint_extractor = default_extracto
     max_unhidden_rooms_at_once = len(G.hidden_rooms)
     room_count_to_unhide_this_round = 0
     
+    print("TW FLOW find_some_path_with_unhides")
+    
+    for N in G.nodes():
+        
+        print("     FLOW: ", N)
+        
+        for k, v in N.steps.items():
+            
+            print("         STEPS: ", k, ": ", v)
+    
     while (room_count_to_unhide_this_round <= max_unhidden_rooms_at_once):
         
         #try to find a path with every unique combination of hidden rooms unhidden
         #when successful, replace G with that created G
         for room_combination in choose(G.hidden_rooms, room_count_to_unhide_this_round):
             
-            temp_G = deepcopy(G)
+            temp_G = deepcopy(G) #TODO: for some reason deepcopy causes .steps values to become so very wrong
+            #could have to do with hash value being decided with Nones in the event that partial initialization occurs
+            #maybe i dont need a deep copy just a copy?
+            #hmm i want G to be retained with number of edges... if i modify the internal objects and theyre shared because of new flow
+            #it wont trigger a reflow before i use the old G...
+            
+            print("TW FLOW with temp_G combo BEFORE unhide")
+    
+            for N in temp_G.nodes():
+                
+                print("     FLOW: ", N)
+                
+                for k, v in N.steps.items():
+                    
+                    print("         STEPS: ", k, ": ", v)
+            
             path_graph.unhide_rooms(temp_G, room_combination)
+            
+            print("TW FLOW with temp_G combo")
+    
+            for N in temp_G.nodes():
+                
+                print("     FLOW: ", N)
+                
+                for k, v in N.steps.items():
+                    
+                    print("         STEPS: ", k, ": ", v)
 
             chosen_A, chosen_F, path_AF = find_some_path(temp_G, As, Fs, endpoint_extractor, prioritize_oneway)
             
@@ -143,7 +188,11 @@ def find_some_branch_paths_with_unhides(G_PT, G_NPT, BSs, BEs):
                 path_graph.update_other_G(temp_G_NPT, [temp_G_PT])
             
                 #try find path with unhides, uses a G, F, and A  based on the current NPT
-                #TODO: fails
+                
+                
+                #-------------------------------
+                #TODO: FAILS CURRENTLY
+                #-------------------------------
                 _, _, path_PT = find_some_path_with_unhides(temp_G_PT, [chosen_BE], [chosen_BS], endpoint_extractor = branch_extractor_PT, prioritize_oneway = True)
                 
                 if path_PT is not None: #successful, replace Gs and exit
@@ -255,9 +304,29 @@ def find_path(G, A2, F, prioritize_oneway = False):
     
     last_A = A
     
+    print("G FLOW FROM find_path")
+    
+    for N in G.nodes():
+        #print("     SELF: ", N, " TO SELF: ", N.steps[N])
+        for k, v in N.steps.items():
+            print("     KEY: ", N, " TO ", k, ": ", v)
+    
     while not A == F:
     
-        G = path_flow.flow(G) #reflow before accessing steps
+        #-------------------------------
+        #TODO: Forced to flow despite G.has_updated_since_last_flow = false
+        #Without it, values are inaccurate and also nonsensical
+        #such as steps to self being > 0
+        #The only time steps are set is in flow, right?
+        #therefore, the issue must be there
+        #maybe something like because im not resetting all steps values
+        #before doing the flow, some carry over occurs, causing a mess
+        #the values also seem strangely high sometimes but im not sure
+        #
+        #not so, we do empty steps before we begin the flow
+        #-------------------------------
+        #G = path_flow.flow(G) #reflow before accessing steps
+        G = path_flow.reflow(G) #reflow before accessing steps
     
         print("1. START AT ", str(A))
         print("2. TO ", str(F), " IN ", A.steps[F])
