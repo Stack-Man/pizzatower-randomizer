@@ -25,6 +25,13 @@ def reflow(G):
     print("did NOT reflow because it was not updated since last flow")
     return G
 
+def print_flow(G):
+    for N in G.nodes():
+        print("     ", N)
+        
+        for k, v in N.steps.items():
+            print("         ", k, ": ", v)
+
 def flow(G): 
     G.updated_since_last_flow = False
     
@@ -41,7 +48,6 @@ def flow(G):
     
     while (True):
         GR.round = GR.round + 1
-        print("     ROUND: ", GR.round)
         
         pass_values_from_all(GR) #flow backwards
         
@@ -57,15 +63,7 @@ def flow(G):
     FG = GR.reverse()
     FG.__dict__.update(G.__dict__) #keep G's attributes in FG
     
-    print("FG FLOW")
-    
-    for N in G.nodes():
-        
-        print("     FLOW: ", N)
-        
-        for k, v in N.steps.items():
-            
-            print("         STEPS: ", k, ": ", v)
+    #print_flow(FG)
     
     return FG
 
@@ -96,28 +94,11 @@ def pass_values_from_all(GR):
 def add_new(GR, N):
     curr = N.steps
     next = N.next_steps
-
-    #print("         ADD NEW FOR: ", N)
-
-    #if GR.round == 2:
-        #print("!!!!!!!ROUND 2 for ", N)
-
+    
     for key, value in next.items():
         if key not in curr:
             curr[key] = value
             GR.added_this_round = True
-            #if GR.round == 2:
-               #print("             ADD NEW: ", N, " TO ", key, ": ", value)
-            
-            #print(":", str(N), ":")
-            
-            
-            
-            #if "START HALL LEFT" in str(key):
-                #print ("            DID SET START HALL LEFT", N, " TO ", key, " : ", value)
-        #else:
-            #if str(N) == str(key):
-                #print ("            IGNORED SET SELF ", N, " TO ", key, ": ", value)
             
             
     
@@ -125,8 +106,6 @@ def add_new(GR, N):
     N.next_steps = {}
 
 def pass_values(GR, N):
-    #print("         PASS FROM: ", N, ": ",  GR.round)
-    
     for RN in GR.neighbors(N):
         to_add = N.steps
         
@@ -134,4 +113,3 @@ def pass_values(GR, N):
         #value + 1
         for K, _ in to_add.items():
             RN.next_steps[K] = GR.round
-            #print("             PASS: ", RN, " TO ", K, ": ", GR.round)

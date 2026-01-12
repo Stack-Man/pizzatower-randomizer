@@ -258,54 +258,35 @@ def find_path(G, A2, F, prioritize_oneway = False):
     
     last_A = A
     
-    print("G FLOW FROM find_path")
-    
-    for N in G.nodes():
-        #print("     SELF: ", N, " TO SELF: ", N.steps[N])
-        for k, v in N.steps.items():
-            print("     KEY: ", N, " TO ", k, ": ", v)
-    
     while not A == F:
     
-        #-------------------------------
-        #TODO: Forced to flow despite G.has_updated_since_last_flow = false
-        #Without it, values are inaccurate and also nonsensical
-        #such as steps to self being > 0
-        #The only time steps are set is in flow, right?
-        #therefore, the issue must be there
-        #maybe something like because im not resetting all steps values
-        #before doing the flow, some carry over occurs, causing a mess
-        #the values also seem strangely high sometimes but im not sure
-        #
-        #not so, we do empty steps before we begin the flow
-        #-------------------------------
-        #G = path_flow.flow(G) #reflow before accessing steps
         G = path_flow.reflow(G) #reflow before accessing steps
     
-        print("1. START AT ", str(A))
-        print("2. TO ", str(F), " IN ", A.steps[F])
+        if F not in A.steps:
+            #TODO: step back to last A
+            #find A to F without that N
+            #refund the chosen path as well
+            #or maybe we should pre-check if choosign a path would ruin our path to
+            #F before we choose it
+            raise RuntimeError("A no longer contains F! TODO: handle choose path ruining A to F")
+    
+        print("1. START AT ", str(A), " TO ", str(F), " IN ", A.steps[F])
     
         for N in G.neighbors(A):
             
-            print("     3. CHECK ", str(N), " OF ", G.out_degree(A))
-            
-            for k, v in N.steps.items():
-                print("         4. TO ", str(k), " IN ", v)
-                
-                if k == F:
-                    print("             5. WANTED F")
-                
-                    if v != A.steps[F] - 1:
-                        print("                 6. BAD STEPS")
-            
             if F in N.steps and N.steps[F] == A.steps[F] - 1:
+                
+                print("2. THROUGH ", str(N), " IN ", N.steps[F])
                 
                 chosen_path = None
                 
                 if A.start_exit_type == StartExitType.START:
-                    chosen_path = choose_path(G, A, N, prioritize_oneway)
-                    print("Chose path " + chosen_path + "should reflow before next check")
-                    
+                    chosen_path = choose_path(G, A, N, prioritize_oneway) #TODO can choose a path that hides the path we're currently traveling
+                    #TODO: handle if choose path fails (no A to N that breaks A to F)
+                    #TODO: have to go back and try different N path from A to F that doesnt break A to F
+                    #could use chosen_endpoints to backtrack
+                    #since we know this edge A to N is bad, we could temp remove it?
+                    #and reflow so we never try to use it again?
                      
                 chosen_endpoints.append((A, chosen_path))
                 
@@ -313,6 +294,8 @@ def find_path(G, A2, F, prioritize_oneway = False):
                 A = N
                 
                 break #to next while loop
+        
+        print("A == last_A", str(A), " ==? ", str(last_A))
         
         if A == last_A:
             
@@ -337,8 +320,19 @@ def find_path(G, A2, F, prioritize_oneway = False):
     return chosen_endpoints
 
 
-def choose_path(G, A, F, prioritize_oneway):
-    paths_of_types = G.all_paths[(A, F)]
+def choose_path(G, A, N, F, prioritize_oneway):
+    paths_of_types = G.all_paths[(A, N)]
+    
+    if len(paths_of_types) == 0:
+        raise RuntimeError("Tried to choose path of ", str(A), " to ", str(F), " but there are none left!")
+    
+    #TODO: choose path without breaking current A to F steps
+    #pick one path
+    #if removing said path disrupts A to F, drop it and try the next one #todo: oneways?
+    #repeat until no paths left
+    #if no paths left, return None
+    #TODO: handle if no path left
+    
     path = paths_of_types[0]
     
     if prioritize_oneway:

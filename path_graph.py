@@ -5,9 +5,14 @@ GRAPH INIT
 """
 from path_mapping import categorize_paths
 import path_flow
+import threading
 
 def layer_to_endpoints(G):
-    paths = categorize_paths(G)
+    #creates new Endpoint nodes for the graph G, 
+    #therefore  there is no conflict between different Gs with
+    #Endpoints of the same ID
+    paths = categorize_paths(G) 
+    
     ep_graph = construct_endpoint_graph(paths, None)
     
     G_init_attributes(ep_graph, paths)
@@ -157,11 +162,11 @@ def remove_paths_of_room(G, room_name):
 MIN_ROOMS_TO_HIDE = 1 #TODO: parameterize, set to -1 to disable
 
 def remove_paths_of_room_by_endpoint(G, room_name, endpoint_key):
+    paths = G.all_paths[endpoint_key]
+
     #no paths to remove
     if len(paths) == 0:
         return
-    
-    paths = G.all_paths[endpoint_key]
     
     kept_paths = []
     removed_paths = []
@@ -178,7 +183,7 @@ def remove_paths_of_room_by_endpoint(G, room_name, endpoint_key):
     
     if len(kept_paths) == 0:
         #remove edge and mark updated
-        G.remove_edges(endpoint_key[0], endpoint_key[1])
+        G.remove_edge(endpoint_key[0], endpoint_key[1])
         G.updated_since_last_flow = True #TODO: use this val to reflow before accessing STEPS
     elif len(kept_paths) <= MIN_ROOMS_TO_HIDE:
         #hide edge
@@ -295,7 +300,7 @@ def update_other_G(G, others):
         for room in to_remove:
 
             if room not in O.removed_rooms and room not in O.hidden_rooms:
-                remove_all_room_paths_by_room(room, O)
+                remove_room_by_room(O, room)
     
     G.readded_rooms = [] #clear because we dont need to know which were readded anymore
 
@@ -317,6 +322,11 @@ def unhide_rooms(G, rooms):
         if room_name in G.hidden_rooms:
             G.hidden_rooms.remove(room_name)
             add_room_by_room(G, room_name)
+
+def hide_rooms_by_paths(G, paths):
+    
+    for p in paths:
+        hide_room_by_path(G, p)
 
 def hide_room_by_path(G, path):
     room_name = path.room_name
@@ -372,6 +382,7 @@ from path_objects import Endpoint
 
 def copy_graph(G):
     
+    """
     new_G = nx.DiGraph()
     
     #copy every node (ENDPOINT) in the graph
@@ -395,6 +406,31 @@ def copy_graph(G):
     #new_G.__dict__.update(G.__dict__)
     copy_graph_attributes(G, new_G)
 
+    return new_G"""
+    
+    new_G = nx.DiGraph()
+
+    node_map = {} #used because we want the edges to use the new node objects not the old ones
+
+    # Copy nodes
+    for old_N in G.nodes():
+        fakenode = FakeNode(
+            old_N.door_type,
+            old_N.door_dir,
+            old_N.start_exit_type
+        )
+
+        new_N = Endpoint(fakenode)
+        new_N.steps = old_N.steps.copy()
+
+        node_map[old_N] = new_N
+        new_G.add_node(new_N)
+
+    # Copy edges using mapped nodes
+    for u, v in G.edges():
+        new_G.add_edge(node_map[u], node_map[v])
+
+    copy_graph_attributes(G, new_G)
     return new_G
 
 def copy_graph_attributes(G, new_G):
