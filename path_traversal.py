@@ -36,16 +36,6 @@ def create_bridge_twoway(G, As, Fs, to_sync_G = [], to_sync_A = [], to_sync_F = 
     
     print("Try Bridge Twoway")
     
-    print("TW FLOW bridge twoway")
-    
-    for N in G.nodes():
-        
-        print("     FLOW: ", N)
-        
-        for k, v in N.steps.items():
-            
-            print("         STEPS: ", k, ": ", v)
-    
     def twoway_endpoint_extractor(A):
         return A.get_twoway_endpoint()
 
@@ -90,49 +80,13 @@ def find_some_path_with_unhides(G, As, Fs, endpoint_extractor = default_extracto
     max_unhidden_rooms_at_once = len(G.hidden_rooms)
     room_count_to_unhide_this_round = 0
     
-    print("TW FLOW find_some_path_with_unhides")
-    
-    for N in G.nodes():
-        
-        print("     FLOW: ", N)
-        
-        for k, v in N.steps.items():
-            
-            print("         STEPS: ", k, ": ", v)
-    
     while (room_count_to_unhide_this_round <= max_unhidden_rooms_at_once):
         
         #try to find a path with every unique combination of hidden rooms unhidden
         #when successful, replace G with that created G
         for room_combination in choose(G.hidden_rooms, room_count_to_unhide_this_round):
             
-            temp_G = deepcopy(G) #TODO: for some reason deepcopy causes .steps values to become so very wrong
-            #could have to do with hash value being decided with Nones in the event that partial initialization occurs
-            #maybe i dont need a deep copy just a copy?
-            #hmm i want G to be retained with number of edges... if i modify the internal objects and theyre shared because of new flow
-            #it wont trigger a reflow before i use the old G...
-            
-            print("TW FLOW with temp_G combo BEFORE unhide")
-    
-            for N in temp_G.nodes():
-                
-                print("     FLOW: ", N)
-                
-                for k, v in N.steps.items():
-                    
-                    print("         STEPS: ", k, ": ", v)
-            
-            path_graph.unhide_rooms(temp_G, room_combination)
-            
-            print("TW FLOW with temp_G combo")
-    
-            for N in temp_G.nodes():
-                
-                print("     FLOW: ", N)
-                
-                for k, v in N.steps.items():
-                    
-                    print("         STEPS: ", k, ": ", v)
+            temp_G = path_graph.temp_unhide_rooms(G, room_combination)
 
             chosen_A, chosen_F, path_AF = find_some_path(temp_G, As, Fs, endpoint_extractor, prioritize_oneway)
             
@@ -156,7 +110,7 @@ ALGORITHM - FIND SOME BRANCH PATH WITH UNHIDES
 3.          IF sucessful, use chosen A, F and curernt unhidden rooms to find PT path
 4.  If failed, K += 1 and repeat
 """
-def find_some_branch_paths_with_unhides(G_PT, G_NPT, BSs, BEs):
+def find_some_branch_paths_with_unhides(G_PT, G_NPT, BSs, BEs): #TODO: stuck in an infinite loop checking for "1. START AT START DOOR NONE", or maybe just too many prints to go quickly?
     #Assum As and Fs are lists of BranchRoom
     
     max_unhidden_rooms_at_once = len(G_NPT.hidden_rooms)
@@ -191,7 +145,7 @@ def find_some_branch_paths_with_unhides(G_PT, G_NPT, BSs, BEs):
                 
                 
                 #-------------------------------
-                #TODO: FAILS CURRENTLY
+                #TODO: FAILS CURRENTLY, might not fail anymore after fixing deepcopy, except the fact it loops forever
                 #-------------------------------
                 _, _, path_PT = find_some_path_with_unhides(temp_G_PT, [chosen_BE], [chosen_BS], endpoint_extractor = branch_extractor_PT, prioritize_oneway = True)
                 

@@ -304,10 +304,11 @@ def update_other_G(G, others):
 HIDE ROOMS
 ----------
 """
-from copy import deepcopy
+#from copy import deepcopy
 
 def temp_unhide_rooms(G, rooms):
-    temp_G = deepcopy(G)
+    #temp_G = deepcopy(G)
+    temp_G = copy_graph(G)
     unhide_rooms(temp_G, rooms)
     return temp_G
 
@@ -352,3 +353,68 @@ def unhide_rooms_by_endpoint(G, endpoint_key):
                 to_unhide.append(room_name)
     
     unhide_rooms(G, to_unhide)
+
+class FakeInnerNode():
+    def __init__(self):
+        self.door_type = None
+        self.door_dir = None
+        self.start_exit_type = None
+
+class FakeNode():
+    def __init__(self, type, dir, start_exit_type):
+        self.inner_id = FakeInnerNode()
+        self.inner_id.door_type = type
+        self.inner_id.door_dir = dir
+        self.inner_id.start_exit_type = start_exit_type
+
+#TODO: test
+from path_objects import Endpoint
+
+def copy_graph(G):
+    
+    new_G = nx.DiGraph()
+    
+    #copy every node (ENDPOINT) in the graph
+    for N in G.nodes():
+        
+        fakenode = FakeNode(N.door_type, N.door_dir, N.start_exit_type)
+        new_N = Endpoint(fakenode)
+        
+        #copy all attributes in N (just steps?) to new N
+        steps = N.steps.copy()
+        new_N.steps = steps
+        
+        new_G.add_node(new_N)
+        
+    #copy every edge in the graph
+    for u, v in G.edges:
+        
+        new_G.add_edge(u, v) #as long as hashes are the same the objects will refer to the correct node
+    
+    #copy every attrobite in G to new G except graph related attributes!
+    #new_G.__dict__.update(G.__dict__)
+    copy_graph_attributes(G, new_G)
+
+    return new_G
+
+def copy_graph_attributes(G, new_G):
+    new_G.all_paths = G.all_paths.copy()
+    
+    new_G.readded_rooms = G.readded_rooms.copy()
+    new_G.removed_rooms = G.removed_rooms.copy()
+    
+    new_G.removed_paths_by_room_and_endpoints = G.removed_paths_by_room_and_endpoints.copy()
+    
+    new_G.updated_since_last_flow = G.updated_since_last_flow
+    
+    new_G.hidden_rooms = G.hidden_rooms.copy()
+
+def print_graph_attributes(G):
+    print(f"all paths: {len(G.all_paths)}")
+    print(f"readded_rooms: {len(G.readded_rooms)}")
+    print(f"removed_rooms: {len(G.removed_rooms)}")
+    print(f"removed_paths_by_room_and_endpoints: {len(G.removed_paths_by_room_and_endpoints)}")
+    print(f"updated_since_last_flow: {str(G.updated_since_last_flow)}")
+    print(f"hidden_rooms: {len(G.hidden_rooms)}")
+
+        

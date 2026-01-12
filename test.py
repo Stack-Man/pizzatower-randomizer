@@ -388,7 +388,8 @@ def print_Gs(G, others):
                 
                 print("     O: ", len(O.all_paths[key]))
         
-        
+
+from path_graph import copy_graph, print_graph_attributes
 
 def test_path_grow():
     G = nx.DiGraph()
@@ -449,38 +450,52 @@ def test_path_grow():
     
     G_init_attributes(G, all_paths)
     
-    #G = test_graph()
-    G2 = test_graph()
-    G3 = test_graph()
+    G.removed_rooms.append("FAKE ENTRY")
+    G.removed_paths_by_room_and_endpoints["FAKE ID"] = "FAKE ENTRY"
     
-    others = [G2, G3]
-    #print_Gs(G, others)
+    new_G = copy_graph(G)
     
-    print("======================== INITIAL")
-    path = find_path(G, A, E, True)
-    print_path(path)
-    #print_steps(G)
+    print("Original G:")
+    print_G(G)
     
-    update_other_G(G, others)
-    print_Gs(G, others)
+    print("Copy G:")
+    print_G(new_G)
     
-    print("======================== GROW 1")
-    new_path, inc = grow_path(G, path, True)
-    print_path(new_path)
-    #print_steps(G)
+    #modify copy
+    for N in new_G.nodes():
+        N.steps = {}
+        N.steps["FAKE ATTRIBUTE"] = "FAKE TEST"
     
-    update_other_G(G, others)
-    print_Gs(G, others)
+    HN = nio.create_transition_node_id(StartExitType.EXIT, "H", 2)
+    H = Endpoint(HN)
     
-    print("======================== GROW 2")
-    new_path2, inc2 = grow_path(G, new_path, True)
-    print_path(new_path2)
-    #print_steps(G)
+    new_G.add_node(H)
     
-    update_other_G(G, others)
-    print_Gs(G, others)
+    new_G.readded_rooms.append("FAKE COPY ENTRY")
+    new_G.removed_rooms.clear()
+    new_G.removed_paths_by_room_and_endpoints.clear()
+    new_G.all_paths.clear()
     
-
+    print("Original G after modify copy:")
+    print_G(G)
+    
+    print("Copy G after modify copy:")
+    print_G(new_G)
+    
+def print_G(G):
+    print("     NODES:")
+    
+    for N in G.nodes():
+        print("         ", N)
+        
+        for k, v in N.steps.items():
+            print("             TO ", k, ": ", v)
+    
+    print("     ATTRIBUTES:")
+    
+    print_graph_attributes(G)
+    
+#test_path_grow()
 level = test_parse_all()
 print_level(level)
 #plt.show()

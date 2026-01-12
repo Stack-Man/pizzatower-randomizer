@@ -24,19 +24,26 @@ class Endpoint():
     def __eq__(self, other):
         if not isinstance(other, Endpoint):
             return NotImplemented
+        
+        return self.door_type == other.door_type and self.door_dir == other.door_dir and self.start_exit_type == other.start_exit_type
+        """if not isinstance(other, Endpoint):
+            return NotImplemented
 
         return (
             getattr(self, "door_type", None) == getattr(other, "door_type", None)
             and getattr(self, "door_dir", None) == getattr(other, "door_dir", None)
             and getattr(self, "start_exit_type", None) == getattr(other, "start_exit_type", None)
-        )
+        )"""
     
     def __hash__(self):
+        return hash((self.door_type, self.door_dir, self.start_exit_type))
+        
+        """
         return hash((
             getattr(self, "door_type", None),
             getattr(self, "door_dir", None),
             getattr(self, "start_exit_type", None),
-        ))
+        ))"""
 
 from node_id_objects import StartExitType
 from enums import DoorType, DoorDir
