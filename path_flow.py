@@ -13,6 +13,35 @@ In any round R, N[N] = R
 therefore no node N can write any value other than R to RN[N]
 therefore, there can be no conflict if no thread starts round R + 1
 before all threads finish round R
+
+
+The idea behind this algorithm is that, in each round,
+each node N alerts its parents P of all Fs that N can reach
+and the number of total steps and hidden steps required to get
+there.
+
+Then each parent sees all of the step counts to F from its children
+and stores the shortest one it was given (or already has)
+
+
+TODO: implement
+Additionally, the parent also prioritizes a step count with fewer hidden
+steps, even if the total step count is higher. This ensures that the fewest
+hidden steps are used when using any path A to F
+
+#reflow_with_hidden_steps(G, max_hidden_steps) (flow up)
+#       for each node N: (flow N to P)
+#           for each parent P of N:
+#               store N.hidden_steps[F][steps] + 1 in P.next_hidden_steps[F][N][steps]
+#               store N.hidden_steps[F][hidden steps] + (1 or 0 depending on edge) to P.next_hidden_steps[F][N][hidden steps]
+#       
+#       for each node P: (add new for P)
+#           for each value in P.next_hidden_steps[F]
+#               get the nhs[F][N]'s with the smallest hidden steps values 
+#               IMPORTANT: include CURRENT steps and hidden steps, since that might be the samllest number of hidden steps/steps combo arleady
+#               of those, get the nhs[F][N] with the smallest steps
+#               set P.hidden_steps[F][steps] to smallest steps
+#               set P.hidden_steps[F][hidden steps] to smallest hidedn steps value
 """
 
 import threading

@@ -84,7 +84,21 @@ def find_some_path_with_unhides(G, As, Fs, endpoint_extractor = default_extracto
         
         #try to find a path with every unique combination of hidden rooms unhidden
         #when successful, replace G with that created G
-        for room_combination in choose(G.hidden_rooms, room_count_to_unhide_this_round):
+        
+        #TODO TODO:
+        #Refactor flow and find to always account for hidden steps
+        #node A should store the step count to F that is firstly, the fewest hidden steps
+        #and amongst all with fewest hidden steps, then the fewest total steps
+        #
+        #1. redo hiding, still need to hide rooms because we want to remove all paths of that room so they arent chosen by chose_path for a DIFFERENT edge
+        #   than the edge that room is being hidden for, but the current hiding does too much i thnk
+        #2. make new algo with flow, count hidden edges and use fewest hidden steps prioritized then fewest total steps
+        #2. make new algo for find that follows the number of hidden edges in addition to following the number of steps
+        #3. remove room combo choose algo, instead just unhide and go
+        
+        
+        
+        for room_combination in choose(G.hidden_rooms, room_count_to_unhide_this_round): #TODO: RUNS EXPONENTIALLY
             
             temp_G = path_graph.temp_unhide_rooms(G, room_combination)
 
@@ -97,7 +111,6 @@ def find_some_path_with_unhides(G, As, Fs, endpoint_extractor = default_extracto
         room_count_to_unhide_this_round = room_count_to_unhide_this_round + 1 #try next round with more unhidden rooms
     
     #failed
-    print("failed to find some path")
     return None, None, None
 
 """
@@ -126,9 +139,11 @@ def find_some_branch_paths_with_unhides(G_PT, G_NPT, BSs, BEs): #TODO: stuck in 
         
         #try to find a path with every unique combination of hidden rooms unhidden
         #when successful, replace G with that created G
-        for room_combination in choose(G_NPT.hidden_rooms, room_count_to_unhide_this_round):
+
+        for room_combination in choose(G_NPT.hidden_rooms, room_count_to_unhide_this_round): #TODO: RUNS EXPONENTIALLY
             
             #First try to find NPT
+            #print("temp unhide NPT from some path branch with unhides")
             temp_G_NPT = path_graph.temp_unhide_rooms(G_NPT, room_combination)
             chosen_BS, chosen_BE, path_NPT = find_some_path(temp_G_NPT, BSs, BEs, endpoint_extractor = branch_extractor_NPT, prioritize_oneway = True)
             
@@ -142,11 +157,6 @@ def find_some_branch_paths_with_unhides(G_PT, G_NPT, BSs, BEs): #TODO: stuck in 
                 path_graph.update_other_G(temp_G_NPT, [temp_G_PT])
             
                 #try find path with unhides, uses a G, F, and A  based on the current NPT
-                
-                
-                #-------------------------------
-                #TODO: FAILS CURRENTLY, might not fail anymore after fixing deepcopy, except the fact it loops forever
-                #-------------------------------
                 _, _, path_PT = find_some_path_with_unhides(temp_G_PT, [chosen_BE], [chosen_BS], endpoint_extractor = branch_extractor_PT, prioritize_oneway = True)
                 
                 if path_PT is not None: #successful, replace Gs and exit
@@ -154,10 +164,6 @@ def find_some_branch_paths_with_unhides(G_PT, G_NPT, BSs, BEs): #TODO: stuck in 
                     G_NPT = temp_G_NPT
                     
                     return chosen_BS, chosen_BE, path_NPT, path_PT
-                else:
-                    print("Failed to bridge oneway PT with this NPT")
-            else:
-                print("Failed to bridge oneway NPT with this combo")
     
         room_count_to_unhide_this_round = room_count_to_unhide_this_round + 1 #try next round with more unhidden rooms
     
@@ -178,7 +184,11 @@ def choose(items, k):
             items_after_i = items[x+1:]
             
             for rest in choose(items_after_i, k - 1):
-                yield rest.append(i)
+                
+                rest_with_i = rest.copy()
+                rest_with_i.append(i)
+                
+                yield rest_with_i
 
 """
 ---------------------
@@ -236,6 +246,16 @@ The number of steps to reach node F from A is written as A[F]
 3b. Choose path P of room R, then remove all paths of room R from graph and reflow if any edges become disconnected
 4. Else If N[F] = 0, end
 """
+
+#TODO: implement considering number of hidden steps required
+#find_path_with_hidden_steps (flow down)
+#    A = start
+#   for each neighbor N to A
+#       if N.hidden_steps[F][steps] = A.hidden_steps[F][steps] - 1
+#       AND if N.hidden_steps[F][hidden steps] = A.hidden_steps[F][hidden steps] - (1 or 0 depending on edge):
+#       A = N
+#   repeat
+
 #RETURN: List of (Endpoint, Path) for every chosen Endpoint and their 
 #related path EXIT endpoints have Path set as None
 def find_path(G, A2, F, prioritize_oneway = False):
@@ -243,12 +263,16 @@ def find_path(G, A2, F, prioritize_oneway = False):
     
     A = None
     
-    if A2 not in G.nodes():
-        return None
+    #used to allow temp removal of bad endpoints (ones that cannot reach F without breaking the path)
+    #while preserving the original graph if necessary
+    temp_G = path_graph.copy_graph(G) 
+    
+    if A2 not in temp_G.nodes():
+        raise RuntimeError("A not found in G")
     
     #A2 starts as an Endpoint with same ID but no steps
     #Get the actual endpoint in G to access its steps
-    for g in G.nodes():
+    for g in temp_G.nodes():
         if A2 == g:
             A = g
             break
@@ -256,66 +280,72 @@ def find_path(G, A2, F, prioritize_oneway = False):
     if F not in A.steps:
         return None
     
-    last_A = A
-    
     while not A == F:
     
-        G = path_flow.reflow(G) #reflow before accessing steps
+        temp_G = path_flow.reflow(temp_G) #reflow before accessing steps
     
         if F not in A.steps:
-            #TODO: step back to last A
-            #find A to F without that N
-            #refund the chosen path as well
-            #or maybe we should pre-check if choosign a path would ruin our path to
-            #F before we choose it
-            raise RuntimeError("A no longer contains F! TODO: handle choose path ruining A to F")
+            raise RuntimeError("A no longer contains F!")
     
         print("1. START AT ", str(A), " TO ", str(F), " IN ", A.steps[F])
+        
+        last_A = A
     
-        for N in G.neighbors(A):
+        for N in temp_G.neighbors(A):
+            
+            print("     1a. Try N ", str(N))
             
             if F in N.steps and N.steps[F] == A.steps[F] - 1:
                 
-                print("2. THROUGH ", str(N), " IN ", N.steps[F])
+                print("     2. THROUGH ", str(N), " IN ", N.steps[F])
                 
                 chosen_path = None
                 
                 if A.start_exit_type == StartExitType.START:
-                    chosen_path = choose_path(G, A, N, prioritize_oneway) #TODO can choose a path that hides the path we're currently traveling
-                    #TODO: handle if choose path fails (no A to N that breaks A to F)
-                    #TODO: have to go back and try different N path from A to F that doesnt break A to F
-                    #could use chosen_endpoints to backtrack
-                    #since we know this edge A to N is bad, we could temp remove it?
-                    #and reflow so we never try to use it again?
+                    chosen_path = choose_path(temp_G, A, N, F, prioritize_oneway) 
+                    if chosen_path is None:
+                        print("             3. Failed to find path AN that doesnt disrupt NF")
+
+                        continue
                      
                 chosen_endpoints.append((A, chosen_path))
                 
-                last_A = A
+                print("         2a. MADE IT THROUGH ", str(N), " IN ", N.steps[F])
                 A = N
                 
-                break #to next while loop
+                break #exit neighbor loop
         
-        print("A == last_A", str(A), " ==? ", str(last_A))
+        if not last_A == A: #A advanced to N
+            continue #skip to next while loop
         
-        if A == last_A:
-            
-            """
-            print("G's FLOW RIGHT BEFORE ERROR:")
-    
-            for N in G.nodes():
-                
-                print("     ", N,"'s STEPS:")
-                
-                for k, v in N.steps.items():
-                    print("         ", k, ": ", v)"""
-            
-            raise RuntimeError(f"Tried to reach F: {str(F)} from A: {str(A)} that had no neighbors A[F] - 1: {A.steps[F] - 1} steps away from F")
-            
-            
-            
-            break
+        #else exhausted all N
+        #This means that A is a bad node in the graph
+        
+        #1. set bad_A to A
+        #2. set A to prev_A #if empty, we failed to find AF
+        #3. refund prev_A to A if not None
+        #4. temp remove bad A from G
+        
+        if len(chosen_endpoints) == 0:
+            print("Failed find_path, No good A to F")
+            return None
+        
+        print("         4. No good N from A, backtrack")
+        
+        prev_A, to_refund = chosen_endpoints.pop() 
+
+        if to_refund is not None:
+            path_graph.add_rooms_by_endpoint_path(temp_G, [(prev_A, to_refund)])
+        
+        bad_A = A
+        path_graph.remove_endpoint(temp_G, bad_A)
+        
+        A = prev_A #continue from previous A
     
     chosen_endpoints.append((F, None)) #If F is START, assume it is being appended to some already existing path choice
+    
+    #TODO: take chosen paths and remove them from G
+    path_graph.remove_rooms_by_endpoint_path(G, chosen_endpoints)
 
     return chosen_endpoints
 
@@ -326,25 +356,51 @@ def choose_path(G, A, N, F, prioritize_oneway):
     if len(paths_of_types) == 0:
         raise RuntimeError("Tried to choose path of ", str(A), " to ", str(F), " but there are none left!")
     
-    #TODO: choose path without breaking current A to F steps
-    #pick one path
-    #if removing said path disrupts A to F, drop it and try the next one #todo: oneways?
-    #repeat until no paths left
-    #if no paths left, return None
-    #TODO: handle if no path left
+    #TODO TODO: check room of chosen path
+    #see if room is supposed to be hidden
+    #prioritize non-hidden room paths if possible
+    #basically, set path as the hidden path
+    #and keep going and if we dont find any non-hidden path well use it
+    #how to interact with oneway?
+    #prefer unhidden over hidden oneway i think
+    chosen_path = None
     
-    path = paths_of_types[0]
-    
-    if prioritize_oneway:
-        for p in paths_of_types:
-            if p.is_oneway:
-                path = p
+    for p in paths_of_types:
+        
+        temp_G = path_graph.temp_remove_room_by_path(G, p)
+        temp_N = None
+        
+        for t in temp_G.nodes():
+            if t == N:
+                temp_N = t
+                break
+        
+        temp_G = path_flow.reflow(temp_G) #must reflow before we access steps
+        
+        removal_disrupts_path = F not in temp_N.steps 
+        
+        print("Try path p of ", len(paths_of_types),  "removal bad? ", removal_disrupts_path)
+        
+        #N to F should be intact ,the path we should was A to N
+        #but removal of the room of p might disrupt N to F
+        #and therefore p cannot be used
+        
+        if not removal_disrupts_path:
+            
+            if prioritize_oneway and p.is_oneway: #break if want and found oneway
+                chosen_path = p
+                break
+            else: #continue until oneway is found or exhaused all p
+                chosen_path = p
+            
+            if not prioritize_oneway: #break if not want oneway and found path
+                chosen_path = p
                 break
     
-    room_name = path.room_name
-    path_graph.remove_room_by_path(G, path)
+    if chosen_path is not None:
+        path_graph.remove_room_by_path(G, chosen_path)
     
-    return path
+    return chosen_path
 
 def find_longer_path_first_step(G, X, Y, Z, current_steps_X_to_Z):
     #reflow before accessing .steps
