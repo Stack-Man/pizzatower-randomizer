@@ -45,6 +45,11 @@ class Endpoint():
             getattr(self, "start_exit_type", None),
         ))"""
 
+class Steps():
+    def __init__(self, steps, hidden_steps):
+        self.steps = steps
+        self.hidden_steps = hidden_steps
+
 from node_id_objects import StartExitType
 from enums import DoorType, DoorDir
 

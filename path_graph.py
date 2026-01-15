@@ -334,6 +334,8 @@ HIDE ROOMS
 #mayeb we  can mark rooms as hidden without actually removign them
 #then in choose_path, we need to check a room and see if its hidden and DE-prioritize it
 
+#TODO: mark edges as hidden instead of removing them store them in G.hidden_edges list as (P, C) parent to child
+
 def temp_unhide_rooms(G, rooms):
     #temp_G = deepcopy(G)
     if rooms is None:
