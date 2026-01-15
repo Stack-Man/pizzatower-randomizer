@@ -1,0 +1,8 @@
+#TODO:
+
+path flow with hidden steps X
+path graph hide edges by marking them 
+path graph hide rooms by marking them
+path find with hidden steps considered
+path choose prioritize paths from rooms that arent hidden
+path traversal remove room combination unhiding
