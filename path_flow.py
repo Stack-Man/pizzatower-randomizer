@@ -23,68 +23,9 @@ there.
 Then each parent sees all of the step counts to F from its children
 and stores the shortest one it was given (or already has)
 
-
-TODO: implement
-Additionally, the parent also prioritizes a step count with fewer hidden
-steps, even if the total step count is higher. This ensures that the fewest
-hidden steps are used when using any path A to F
-
-#reflow_with_hidden_steps(G, max_hidden_steps) (flow up)
-#       for each node N: (flow N to P)
-#           for each parent P of N:
-#               store N.hidden_steps[F][steps] + 1 in P.next_hidden_steps[F][N][steps]
-#               store N.hidden_steps[F][hidden steps] + (1 or 0 depending on edge) to P.next_hidden_steps[F][N][hidden steps]
-#       
-#       for each node P: (add new for P)
-#           for each value in P.next_hidden_steps[F]
-#               get the nhs[F][N]'s with the smallest hidden steps values 
-#               IMPORTANT: include CURRENT steps and hidden steps, since that might be the samllest number of hidden steps/steps combo arleady
-#               of those, get the nhs[F][N] with the smallest steps
-#               set P.hidden_steps[F][steps] to smallest steps
-#               set P.hidden_steps[F][hidden steps] to smallest hidedn steps value
-
-
-We have to ask two things:
-Can this algo loop paths?
-Can this algo destroy assumed paths?
-
-Assumptions:
-1. In any round R, the number of total steps ebing passed back is R
-2. In any round R, the number of hidden steps being passed back is <= R
-
-Can loop?
-
-Any loop is the same as some unlooped path excluding the repeated segment except longer
-This means total steps is larger and hidden steps is either larger or same
-
-If hidden same, no, because steps is larger
-If hidden not same, its larger, no because hidden is larger
-therefore, cannot loop
-
-Can destroy paths?
-
-Assume A has some path to F from B
-for B's path to F to change, the number of hidden or total steps must be less
-the number of total steps can NOT be less
-
-therefoer, the number of hidden steps must be less
-the number of hidden steps COULD be less if some path of length R reaches B and has less hidden steps to F then the n current B[F]
-this path to F would then be passed back from B to A in the next round and replace its old path because the nubmer of hidden steps is less than what 
-B passed to A before
-
-What is the stopping point?
-before we would stop if no node got a shorter path
-now we stop if no node gets a shorter path and no node gets a path with less hidden steps
-
-if no node receives a new path, then no node needs to alert any of its parents of new nodes
-therefore, we can stop
-
-we also stop after N rounds where N is number of nodes
-because the longest path is through N nodes
-if its longer than N nodes, it must have gone through every node once
-and at least one node more than once
-if we repeated a visit to a node, we could have gone from that node to the shorter path earlier than we did
-because that path necessairly has less total steps and possibly less hidden steps
+backtracking then is a node N looking at each child C for one that
+has one less step to F than N does, and either 1 less or same hidden steps,
+depending on whether edge NC is hidden or not
 """
 
 import threading
@@ -121,6 +62,8 @@ def flow_fewest_hidden_steps(G):
     GR = G.reverse()
     GR.round = 0
     GR.added_this_round = False
+    
+    GR.__dict__.update(G.__dict__) #Add G's attributes to GR to know hidden edges
     
     while (True):
         GR.round = GR.round + 1
@@ -208,7 +151,7 @@ def pass_values_from_all(GR):
 #               store N.hidden_steps[F][hidden steps] + (1 or 0 depending on edge) to P.next_hidden_steps[F][N][hidden steps]
 
 def pass_steps_and_hidden_from_all(GR):
-    threasd = []
+    threads = []
     
     for N in GR.nodes():
         t = threading.Thread(target = pass_steps_and_hidden, args=(GR, N))
@@ -223,7 +166,7 @@ def pass_steps_and_hidden(GR, N):
     
     for P in GR.neighbors(N):
         
-        edge_is_hidden = (P, N) in GR.hidden_edges #TODO: mark edges as hidden instead of removing them
+        edge_is_hidden = (P, N) in GR.hidden_edges
         
         for F, steps in to_pass.items():
             
@@ -235,7 +178,10 @@ def pass_steps_and_hidden(GR, N):
             
             steps_passed_to_P_from_N = Steps(new_steps, new_hidden_steps)
             
-            RN.next_steps[F][N] = steps_passed_to_P_from_N
+            if F not in P.next_steps:
+                P.next_steps[F] = {}
+            
+            P.next_steps[F][N] = steps_passed_to_P_from_N
 
 #       for each node P: (add new for P)
 #           for each value in P.next_hidden_steps[F]
@@ -275,11 +221,11 @@ def add_shortest_fewest_hidden_path(GR, P):
             
             #if this N has less hidden steps, use it
             #if None, initialize with this N instead of P
-            if fewest_hidden = None or current_hidden < fewest_hidden:
+            if fewest_hidden == None or current_hidden < fewest_hidden:
                 fewest_hidden = current_hidden
                 fewest_total_steps = current_total_steps
             #if this N has same hidden steps but less total steps, use it
-            elif current_hidden = fewest_hidden and current_total_steps < fewest_total_steps: 
+            elif current_hidden == fewest_hidden and current_total_steps < fewest_total_steps: 
                 fewest_total_steps = current_total-steps
     
         #finalize the steps to F in P

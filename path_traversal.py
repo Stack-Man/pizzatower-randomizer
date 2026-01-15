@@ -39,7 +39,7 @@ def create_bridge_twoway(G, As, Fs, to_sync_G = [], to_sync_A = [], to_sync_F = 
     def twoway_endpoint_extractor(A):
         return A.get_twoway_endpoint()
 
-    chosen_A, chosen_F, twoway_path_AF = find_some_path_with_unhides(G, As, Fs, endpoint_extractor = twoway_endpoint_extractor, prioritize_oneway = False)
+    chosen_A, chosen_F, twoway_path_AF = find_some_path(G, As, Fs, endpoint_extractor = twoway_endpoint_extractor, prioritize_oneway = False)
     
     path_graph.update_other_G(G, to_sync_G)
     
@@ -52,10 +52,10 @@ def create_bridge_oneway(G_NPT, G_PT, BSs, BEs, to_sync_G = [], to_sync_BS = [],
     
     print("Try Bridge Oneway")
     
-    chosen_BS, chosen_BE, oneway_path_NPT, oneway_path_PT = find_some_branch_paths_with_unhides(G_PT, G_NPT, BSs, BEs)
+    chosen_BS, chosen_BE, oneway_path_NPT, oneway_path_PT = find_some_branch_paths(G_PT, G_NPT, BSs, BEs)
     
     path_graph.update_other_G(G_NPT, to_sync_G)
-    path_graph.update_other_G(G_PT, to_sync_G) #TODO: unnecessary because PT is updated by NPT?
+    path_graph.update_other_G(G_PT, to_sync_G) #necessary because PT needs to update others with its chosen PT path
 
     sync_base_room_lists(chosen_BS, to_sync_BS)
     sync_base_room_lists(chosen_BE, to_sync_BE)
@@ -65,69 +65,8 @@ def create_bridge_oneway(G_NPT, G_PT, BSs, BEs, to_sync_G = [], to_sync_BS = [],
 def default_extractor(A):
     return A
 
-"""
-=======================================
-ALGORITHM - FIND SOME PATH WITH UNHIDES
-=======================================
-1a. K = 0
-1b. For every unordered combination of K hidden rooms in G (N choose K)
-2.      Find some path with those rooms unhidden
-3. If failed, K +=1 and repeat
-"""
-
-def find_some_path_with_unhides(G, As, Fs, endpoint_extractor = default_extractor, prioritize_oneway = False):
-    
-    max_unhidden_rooms_at_once = len(G.hidden_rooms)
-    room_count_to_unhide_this_round = 0
-    
-    while (room_count_to_unhide_this_round <= max_unhidden_rooms_at_once):
-        
-        #try to find a path with every unique combination of hidden rooms unhidden
-        #when successful, replace G with that created G
-        
-        #TODO TODO:
-        #Refactor flow and find to always account for hidden steps
-        #node A should store the step count to F that is firstly, the fewest hidden steps
-        #and amongst all with fewest hidden steps, then the fewest total steps
-        #
-        #1. redo hiding, still need to hide rooms because we want to remove all paths of that room so they arent chosen by chose_path for a DIFFERENT edge
-        #   than the edge that room is being hidden for, but the current hiding does too much i thnk
-        #2. make new algo with flow, count hidden edges and use fewest hidden steps prioritized then fewest total steps
-        #2. make new algo for find that follows the number of hidden edges in addition to following the number of steps
-        #3. remove room combo choose algo, instead just unhide and go
-        
-        
-        
-        for room_combination in choose(G.hidden_rooms, room_count_to_unhide_this_round): #TODO: RUNS EXPONENTIALLY
-            
-            temp_G = path_graph.temp_unhide_rooms(G, room_combination)
-
-            chosen_A, chosen_F, path_AF = find_some_path(temp_G, As, Fs, endpoint_extractor, prioritize_oneway)
-            
-            if path_AF is not None:
-                G = temp_G
-                return chosen_A, chosen_F, path_AF
-        
-        room_count_to_unhide_this_round = room_count_to_unhide_this_round + 1 #try next round with more unhidden rooms
-    
-    #failed
-    return None, None, None
-
-"""
-===============================================
-ALGORITHM - FIND SOME BRANCH PATH WITH UNHIDES
-===============================================
-1a. K = 0
-1b. For every unordered combination of K hidden rooms in G (N choose K)
-2.      Find some NPT path with those rooms unhidden
-3.          IF sucessful, use chosen A, F and curernt unhidden rooms to find PT path
-4.  If failed, K += 1 and repeat
-"""
-def find_some_branch_paths_with_unhides(G_PT, G_NPT, BSs, BEs): #TODO: stuck in an infinite loop checking for "1. START AT START DOOR NONE", or maybe just too many prints to go quickly?
+def find_some_branch_paths(G_PT, G_NPT, BSs, BEs):
     #Assum As and Fs are lists of BranchRoom
-    
-    max_unhidden_rooms_at_once = len(G_NPT.hidden_rooms)
-    room_count_to_unhide_this_round = 0
     
     def branch_extractor_NPT(A):
         return A.NPT_endpoint
@@ -135,37 +74,28 @@ def find_some_branch_paths_with_unhides(G_PT, G_NPT, BSs, BEs): #TODO: stuck in 
     def branch_extractor_PT(A):
         return A.PT_endpoint
     
-    while (room_count_to_unhide_this_round <= max_unhidden_rooms_at_once):
-        
-        #try to find a path with every unique combination of hidden rooms unhidden
-        #when successful, replace G with that created G
-
-        for room_combination in choose(G_NPT.hidden_rooms, room_count_to_unhide_this_round): #TODO: RUNS EXPONENTIALLY
-            
-            #First try to find NPT
-            #print("temp unhide NPT from some path branch with unhides")
-            temp_G_NPT = path_graph.temp_unhide_rooms(G_NPT, room_combination)
-            chosen_BS, chosen_BE, path_NPT = find_some_path(temp_G_NPT, BSs, BEs, endpoint_extractor = branch_extractor_NPT, prioritize_oneway = True)
-            
-            #Then try to find PT with this NPT
-            if path_NPT is not None:
-                
-                #unhide the rooms unhidden by this successful NPT
-                temp_G_PT = path_graph.temp_unhide_rooms(G_PT, room_combination) 
-                
-                #update removed/readded from successful NPT
-                path_graph.update_other_G(temp_G_NPT, [temp_G_PT])
-            
-                #try find path with unhides, uses a G, F, and A  based on the current NPT
-                _, _, path_PT = find_some_path_with_unhides(temp_G_PT, [chosen_BE], [chosen_BS], endpoint_extractor = branch_extractor_PT, prioritize_oneway = True)
-                
-                if path_PT is not None: #successful, replace Gs and exit
-                    G_PT = temp_G_PT
-                    G_NPT = temp_G_NPT
-                    
-                    return chosen_BS, chosen_BE, path_NPT, path_PT
+    #try to find a path with every unique combination of hidden rooms unhidden
+    #when successful, replace G with that created G
     
-        room_count_to_unhide_this_round = room_count_to_unhide_this_round + 1 #try next round with more unhidden rooms
+    temp_G_NPT = path_graph.copy_graph(G_NPT) #copy in case we want to ditch found path
+    chosen_BS, chosen_BE, path_NPT = find_some_path(temp_G_NPT, BSs, BEs, endpoint_extractor = branch_extractor_NPT, prioritize_oneway = True)
+    
+    #Then try to find PT with this NPT
+    if path_NPT is not None:
+        
+        temp_G_PT = path_graph.copy_graph(G_PT) #copy in case we want to ditch found path
+        
+        #update removed/readded from successful NPT
+        path_graph.update_other_G(temp_G_NPT, [temp_G_PT])
+    
+        #try find path with unhides, uses a G, F, and A  based on the current NPT
+        _, _, path_PT = find_some_path(temp_G_PT, [chosen_BE], [chosen_BS], endpoint_extractor = branch_extractor_PT, prioritize_oneway = True)
+        
+        if path_PT is not None: #successful, replace Gs and exit
+            G_PT = temp_G_PT
+            G_NPT = temp_G_NPT
+            
+            return chosen_BS, chosen_BE, path_NPT, path_PT
     
     print("Failed to bridge oneway")
     return None, None, None, None
@@ -247,7 +177,6 @@ The number of steps to reach node F from A is written as A[F]
 4. Else If N[F] = 0, end
 """
 
-#TODO: implement considering number of hidden steps required
 #find_path_with_hidden_steps (flow down)
 #    A = start
 #   for each neighbor N to A
@@ -287,7 +216,7 @@ def find_path(G, A2, F, prioritize_oneway = False):
         if F not in A.steps:
             raise RuntimeError("A no longer contains F!")
     
-        print("1. START AT ", str(A), " TO ", str(F), " IN ", A.steps[F])
+        print("1. START AT ", str(A), " TO ", str(F), " IN ", A.steps[F].steps, " HID ", A.steps[F].hidden_steps)
         
         last_A = A
     
@@ -295,25 +224,42 @@ def find_path(G, A2, F, prioritize_oneway = False):
             
             print("     1a. Try N ", str(N))
             
-            if F in N.steps and N.steps[F] == A.steps[F] - 1:
+            #N steps should be one less if the correct path
+            if F in N.steps and N.steps[F].steps == A.steps[F].steps - 1:
                 
-                print("     2. THROUGH ", str(N), " IN ", N.steps[F])
+                print("     2a. MAYBE ", str(N), " IN ", N.steps[F].steps)
                 
-                chosen_path = None
+                desired_hidden_steps = A.steps[F].hidden_steps
+                edge_AN_is_hidden = (A, N) in G.hidden_edges
                 
-                if A.start_exit_type == StartExitType.START:
-                    chosen_path = choose_path(temp_G, A, N, F, prioritize_oneway) 
-                    if chosen_path is None:
-                        print("             3. Failed to find path AN that doesnt disrupt NF")
+                #if the edge from A to N is hidden, then N.hidden should be one less if the correct path
+                if edge_AN_is_hidden: 
+                    desired_hidden_steps = desired_hidden_steps - 1
+                
+                #N hidden steps should be same or one less if the correct path
+                if N.steps[F].hidden_steps == desired_hidden_steps: 
+                
+                    print("     2b. THROUGH ", str(N), " HID ", N.steps[F].hidden_steps)
+                
+                    chosen_path = None
+                    
+                    if A.start_exit_type == StartExitType.START:
+                        chosen_path = choose_path(temp_G, A, N, F, prioritize_oneway) 
+                        if chosen_path is None:
+                            print("             3. Failed to find path AN that doesnt disrupt NF")
 
-                        continue
-                     
-                chosen_endpoints.append((A, chosen_path))
+                            continue
+                         
+                    chosen_endpoints.append((A, chosen_path))
+                    
+                    print("         2a. MADE IT THROUGH ", str(N), " IN ", N.steps[F].steps, " HID ", N.steps[F].hidden_steps)
+                    A = N
                 
-                print("         2a. MADE IT THROUGH ", str(N), " IN ", N.steps[F])
-                A = N
+                    break #exit neighbor loop
                 
-                break #exit neighbor loop
+                #wrong hidden steps, try next N
+            
+            #wrong steps, try next N
         
         if not last_A == A: #A advanced to N
             continue #skip to next while loop
@@ -344,7 +290,6 @@ def find_path(G, A2, F, prioritize_oneway = False):
     
     chosen_endpoints.append((F, None)) #If F is START, assume it is being appended to some already existing path choice
     
-    #TODO: take chosen paths and remove them from G
     path_graph.remove_rooms_by_endpoint_path(G, chosen_endpoints)
 
     return chosen_endpoints
@@ -356,14 +301,10 @@ def choose_path(G, A, N, F, prioritize_oneway):
     if len(paths_of_types) == 0:
         raise RuntimeError("Tried to choose path of ", str(A), " to ", str(F), " but there are none left!")
     
-    #TODO TODO: check room of chosen path
-    #see if room is supposed to be hidden
-    #prioritize non-hidden room paths if possible
-    #basically, set path as the hidden path
-    #and keep going and if we dont find any non-hidden path well use it
-    #how to interact with oneway?
-    #prefer unhidden over hidden oneway i think
     chosen_path = None
+    chosen_hidden_path = None
+    chosen_hidden_oneway_path = None
+    want_hidden = (A, N) in G.hidden_edges
     
     for p in paths_of_types:
         
@@ -379,23 +320,69 @@ def choose_path(G, A, N, F, prioritize_oneway):
         
         removal_disrupts_path = F not in temp_N.steps 
         
-        print("Try path p of ", len(paths_of_types),  "removal bad? ", removal_disrupts_path)
-        
         #N to F should be intact ,the path we should was A to N
         #but removal of the room of p might disrupt N to F
         #and therefore p cannot be used
         
         if not removal_disrupts_path:
             
-            if prioritize_oneway and p.is_oneway: #break if want and found oneway
-                chosen_path = p
-                break
-            else: #continue until oneway is found or exhaused all p
-                chosen_path = p
+            #four combinations:
+            #want oneway, dont hidden
+            #dont oneway, want hidden
+            #want oneway, want hidden
+            #dont oneway, dont hidden
+            #hidden prioritize over oneway
+            #disruption priotizied over all
+            want_oneway = prioritize_oneway
             
-            if not prioritize_oneway: #break if not want oneway and found path
+            is_hidden = p.room_name in G.hidden_rooms
+            is_oneway = p.is_oneway
+            
+            
+            if is_hidden and not want_hidden:
+                chosen_hidden_path = p
+                
+                if is_oneway and want_oneway:
+                    chosen_hidden_oneway_path = p
+                
+                continue #check for other non hidden paths
+            
+            if is_hidden and want_hidden:
                 chosen_path = p
-                break
+                
+                if is_oneway and want_oneway:
+                    break #p matches both requirements
+                
+                if not is_oneway and want_oneway:
+                    continue #check for other paths that are hidden AND oneway
+                
+                if not want_oneway:
+                    break #p matches only requirement (hidden)
+            
+            if not is_hidden and want_hidden: #in no case should be not hidden and want hidden
+                raise RuntimeError("Found unhidden path in hidden edge")
+            
+            if not is_hidden and not want_hidden:
+                chosen_path = p
+                
+                if is_oneway and want_oneway:
+                    break #p matches both requirements
+                
+                if not is_oneway and want_oneway:
+                    continue #check for other paths that are oneway
+                
+                if not want_oneway:
+                    break #p matches only requirement
+        
+    #finished choose
+    
+    #use hidden path only if required, may happen if all other paths disrupt AF
+    if chosen_path is None:
+        
+        if chosen_hidden_oneway_path is not None: #not none if want_oneway
+            chosen_path = chosen_hidden_oneway_path 
+        else:
+            chosen_path = chosen_hidden_path 
     
     if chosen_path is not None:
         path_graph.remove_room_by_path(G, chosen_path)

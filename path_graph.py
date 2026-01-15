@@ -32,6 +32,10 @@ def G_init_attributes(G, all_paths):
     G.updated_since_last_flow = True
     
     G.hidden_rooms = []
+    G.unhidden_rooms = []
+    
+    G.hidden_edges = []
+    G.unhidden_edges = []
 
 """
 ------------------
@@ -190,10 +194,11 @@ def remove_paths_of_room_by_endpoint(G, room_name, endpoint_key):
     if len(kept_paths) == 0:
         #remove edge and mark updated
         G.remove_edge(endpoint_key[0], endpoint_key[1])
-        G.updated_since_last_flow = True #TODO: use this val to reflow before accessing STEPS
+        G.updated_since_last_flow = True
+        
     elif len(kept_paths) <= MIN_ROOMS_TO_HIDE:
-        #hide edge
-        #hide calls remove so edges will be removed then
+        #hide edge and hide rooms in this edge
+        G.hidden_edges.append(endpoint_key)
         hide_rooms_by_paths(G, kept_paths)
 
 def remove_rooms_by_endpoint_path(G, endpoint_path):
@@ -244,7 +249,7 @@ def add_rooms_by_endpoint_path(G, endpoint_path):
     print("add by endpoint path")
     by_endpoint_path(G, endpoint_path, add_room_by_room)
 
-def add_room_by_room(G, room_name, dont_hide = []):
+def add_room_by_room(G, room_name):
     #stop if already readded
     if room_name in G.readded_rooms:
         return
@@ -269,7 +274,7 @@ def add_room_by_room(G, room_name, dont_hide = []):
             G.updated_since_last_flow = True
             
         #check if readding these paths disqualifies any other room from being hidden
-        unhide_rooms_by_endpoint(G, endpoint_key, dont_hide) 
+        unhide_rooms_by_endpoint(G, endpoint_key) 
         
         #if length is still under the hide threshold
         #after the previous unhide check, hide it
@@ -284,57 +289,46 @@ UPDATE OTHER G
 --------------
 """
 
-#Update all other G to remove/readd/hide rooms removed/readded/hidden in G
+#Update all other G to remove/readd/hide/unhide rooms removed/readded/hidden/unhidden in G
 def update_other_G(G, others):
-    
-    to_readd = G.readded_rooms
-    to_remove = G.removed_rooms 
-    to_hide = G.hidden_rooms
-    
-    
-    #readd all to readd that's in O.removed
+
     for O in others:
         
-        for room in to_readd:
-
-            if room in O.hidden_rooms:
-                print("unhide by update other")
-                unhide_rooms(O, [room])
-            elif room in O.removed:
-                print("add by update other")
-                add_room_by_room(O, room)
-    
-    #hide all in to hide
-    for O in others:
-    
-        for room in to_hide:
-
-            if room not in O.hidden_rooms:
-                hide_room_by_room(O, room)
-    
-    #remove all in to remove
-    for O in others:
+        #readd first then remove
+        for room in G.readded_rooms:
+            add_room_by_room(O, room)
         
-        for room in to_remove:
-
-            if room not in O.removed_rooms and room not in O.hidden_rooms:
-                remove_room_by_room(O, room)
+        for room in G.removed_rooms:
+            remove_room_by_room(O, room)
     
-    G.readded_rooms = [] #clear because we dont need to know which were readded anymore
+        #unhide first then rehide
+        for room in G.unhidden_rooms:
+            O.hidden_rooms.remove(room)
+        
+        for edge in G.unhidden_edges:
+            O.hidden_edges.remove(edge)
+        
+        for room in G.hidden_rooms:
+            O.hidden_rooms.append(room)
+        
+        for edge in G.hidden_edges:
+            O.hidden_edges.append(edge)
+
+    #clear because these lists were only used to update other Gs
+    G.readded_rooms = []
+    G.unhidden_rooms = []
+    G.unhidden_edges = []
 
 """
 ----------
 HIDE ROOMS
 ----------
-"""
-#from copy import deepcopy
-#TODO TODO: 
-#redo hiding, still need to hide rooms because we want to remove all paths of that room so they arent chosen by chose_path for a DIFFERENT edge
-#   than the edge that room is being hidden for, but the current hiding does too much i thnk
-#mayeb we  can mark rooms as hidden without actually removign them
-#then in choose_path, we need to check a room and see if its hidden and DE-prioritize it
 
-#TODO: mark edges as hidden instead of removing them store them in G.hidden_edges list as (P, C) parent to child
+Hide edges with less paths than MIN_ROOMS_TO_HIDE by marking them as hidden in G.hidden_edges as (endpoint, endpoint)
+Hide rooms with paths in those hidden edges by appending them to G.hidden_rooms
+Paths from hidden rooms are deprioritized in path_traversal.choose_path
+The only time a hidden path should be REQUIRED is if the path is in a hidden edge
+"""
 
 def temp_unhide_rooms(G, rooms):
     #temp_G = deepcopy(G)
@@ -346,20 +340,17 @@ def temp_unhide_rooms(G, rooms):
     unhide_rooms(temp_G, rooms)
     return temp_G
 
-def unhide_rooms(G, rooms, dont_rehide = []):
+def unhide_rooms(G, rooms):
     to_readd = []
     
     #remove all marked rooms from hidden first
     for room_name in rooms:
         if room_name in G.hidden_rooms:
             G.hidden_rooms.remove(room_name)
-            to_readd.append(room_name)
+            G.unhidden_rooms.append(room_name)
 
-    for room_name in to_readd:
-        add_room_by_room(G, room_name, dont_rehide)
 
 def hide_rooms_by_paths(G, paths):
-    
     for p in paths:
         hide_room_by_path(G, p)
 
@@ -368,52 +359,35 @@ def hide_room_by_path(G, path):
     hide_room_by_room(G, room_name)
     
 
+#Edges are hidden in remove room
 def hide_room_by_room(G, room_name):
-    if room_name is None:
-        raise RuntimeError("Tried to hide None room")
-    
     if room_name not in G.hidden_rooms:
         G.hidden_rooms.append(room_name)
-        remove_room_by_room(G, room_name)
 
-endpoint_keys_currently_unhiding = []
+#called by add room
+def unhide_rooms_by_endpoint(G, endpoint_key):
 
-def unhide_rooms_by_endpoint(G, endpoint_key, dont_rehide = [] ):
-    #print("Unhiding by endpoint: ", str(endpoint_key[0]), ", ", str(endpoint_key[1]))
-
-    if endpoint_key in dont_rehide: #skip unhides already being processed
+    #if we still meet the hide requirement
+    #then we dont need to unhide anything
+    if len(G.all_paths[endpoint_key]) <= MIN_ROOMS_TO_HIDE:
         return
-    
-    dont_rehide.append(endpoint_key)
-    
 
-    to_unhide = []
+    G.hidden_edges.remove(endpoint_key)
+    G.unhidden_edges.append(endpoint_key)
     
-    for room_name in G.removed_paths_by_room_and_endpoints:
+    rooms_to_unhide = []
+
+    #paths of hidden rooms were not actually removed
+    for path in G.all_paths[endpoint_key]:
         
-        if room_name in G.hidden_rooms: #dont unhide already unhidden
+        p_room_name = path.room_name
+        
+        if p_room_name not in rooms_to_unhide:
             
-            removed_paths_by_endpoints = G.removed_paths_by_room_and_endpoints[room_name]
-            
-            if endpoint_key in removed_paths_by_endpoints:
-                
-                should_unhide = True
-                
-                for other_key in removed_paths_by_endpoints:
-                    
-                    future_length = len(removed_paths_by_endpoints[other_key]) + len(G.all_paths[other_key])
-                    
-                    #if any endpoint type readded would not end up with more than one path, do not unhide the room at all
-                    if not future_length > MIN_ROOMS_TO_HIDE:
-                        should_unhide = False
-                        break
-                
-                if should_unhide:
-                    to_unhide.append(room_name)
+            if p_room_name in G.hidden_rooms: #unhide rooms that were hidden
+                rooms_to_unhide.append(p_room_name)
     
-    #print("unhide by endpoint")
-    if len(to_unhide) > 0:
-        unhide_rooms(G, to_unhide, dont_rehide = dont_rehide)
+    unhide_rooms(G, to_unhide)
 
 class FakeInnerNode():
     def __init__(self):
@@ -428,36 +402,9 @@ class FakeNode():
         self.inner_id.door_dir = dir
         self.inner_id.start_exit_type = start_exit_type
 
-#TODO: test
 from path_objects import Endpoint
 
 def copy_graph(G):
-    
-    """
-    new_G = nx.DiGraph()
-    
-    #copy every node (ENDPOINT) in the graph
-    for N in G.nodes():
-        
-        fakenode = FakeNode(N.door_type, N.door_dir, N.start_exit_type)
-        new_N = Endpoint(fakenode)
-        
-        #copy all attributes in N (just steps?) to new N
-        steps = N.steps.copy()
-        new_N.steps = steps
-        
-        new_G.add_node(new_N)
-        
-    #copy every edge in the graph
-    for u, v in G.edges:
-        
-        new_G.add_edge(u, v) #as long as hashes are the same the objects will refer to the correct node
-    
-    #copy every attrobite in G to new G except graph related attributes!
-    #new_G.__dict__.update(G.__dict__)
-    copy_graph_attributes(G, new_G)
-
-    return new_G"""
     
     new_G = nx.DiGraph()
 

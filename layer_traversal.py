@@ -64,6 +64,7 @@ def create_level(TW, OW_NPT, OW_PT, BS, BE, E, EBS, J, JBE):
     current_A_endpoint = start_A_endpoint
     current_F_endpoint = start_F_endpoint
     
+    #TODO TODO: failing branch find, maybe because path before has bad endpoint?
     while (level.branch_count < max_branches): #TODO: maybe make john segment first to increase success rate since john segment is more important
         
         #A = prev_segment.get_last_endpoint()
