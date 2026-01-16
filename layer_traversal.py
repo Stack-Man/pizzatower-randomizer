@@ -23,110 +23,203 @@ Two Way > Branch Start > One Way  > Branch End > ...
 ALGORITHM - CONSTRUCT A LEVEL
 -----------------------------
 
-1. Choose a Start Segment
-2. Choose zero or more Branch Segments
-3. Choose an End Segment
+The most recently added segment to Level
+is a RoomSegment that contains a list of
+A. Viable rooms (start matches prev seg end)
+B. Viable john rooms (same but john)
 
-For any One Way, find two paths connecting both ends of the branch paths.
-For any Two Way, find a path of any length connecting the two end layers.
+1. Get last RoomSegment
+2. Choose viable room V
+3. Create segment from V
+4. If none Choose viable john J
+5. If none, StepBack()
 
-For any other layer, determine the path being used through it.
-Branch path should choose a specific path.
+StepBack():
+Remove last RoomSegment and Path/BranchSegment
+as no viable room was found
+
+Continue from prev last RoomSegment, which
+continues to contain its 
 """
 
+def create_level(TW, OW_NPT, OW_PT, BS, BE, E, EBS, J, JBE)
 
-
-def create_level(TW, OW_NPT, OW_PT, BS, BE, E, EBS, J, JBE):
     level = Level()
     
-    A_endpoints = E #TODO: option for EBS
-    F_endpoints = BS 
-    
-    #Get A, F and path AF
-    #sync AF from TW with OW
-    #sync F from BS with BE
-    
-    print("Create Start Segment")
-    
-    start_A_endpoint, start_F_endpoint, path_AF = create_bridge_twoway(TW, A_endpoints, F_endpoints, to_sync_G = [OW_NPT, OW_PT], to_sync_F = [BE])
-    
-    #TODO: if failed, try with F_endpoints = J or with JBE if EBS
-    
-    start = RoomSegment(start_A_endpoint) 
-    start_segment = PathSegment(path_AF)
-    
-    level.add_segment(start)
-    level.add_segment(start_segment)
-    
     max_branches = 1 #TODO: parameterize
+    
+    available_entrances = []
+    available_entrances.extend(E)
+    available_entrances.extend(EBS)
+    
+    available_start_rooms = RoomSegment(available_entrances, [], False)
+    
+    level.add_segment(available_start_rooms)
+    
+    while (True):
+        
+        last_room_seg = level.get_last_room_seg()
+        successful = False
+        john_end = False
+       
+        #Create start segment
+        if level.segment_count() == 1:
+            #cant do john end bc no john in last room seg, 
+            #immediate john end would come from other add segments
+            successful = add_entrance_segments(level, TW, OW_NPT, OW_PT, BS, BE, last_room_seg)
+            
+            #If Failed, level is fail!
+            if not successful:
+                return None
 
-    #prev_segment = start_segment
-    next_is_twoway = False #TODO: switch if we started with EBS
-    
-    current_A_endpoint = start_A_endpoint
-    current_F_endpoint = start_F_endpoint
-    
-    #TODO TODO: failing branch find, maybe because path before has bad endpoint?
-    while (level.branch_count < max_branches): #TODO: maybe make john segment first to increase success rate since john segment is more important
+        elif last_room_seg.is_branch_end:
+            #Bridge Twoway from last branch to new branch or J if none
+            successful, john_end = add_twoway_segments(level, TW, OW_NPT, OW_PT, BS, BE, last_room_seg)
+        else:
+            #Create branch segment to BE or JBE if none
+            successful, john_end = add_branch_segments(level, TW, OW_NPT, OW_PT, BE, BE, last_room_seg)
         
-        print("Create Branch Segment")
-        
-        #A = prev_segment.get_last_endpoint()
-        A = current_F_endpoint
-        A_endpoints = [A]
-        
-        current_segment = None
-        
-        if next_is_twoway:
-            F_endpoints = BS
-            
-            #Get A, F and path AF
-            #sync AF from TW with OW
-            #sync F from BS with BE
-            twoway_A_endpoint, twoway_F_endpoint, twoway_path = create_bridge_twoway(TW, A_endpoints, F_endpoints, to_sync_G = [OW_NPT, OW_PT], to_sync_F = [BE])
-            
-            current_segment = PathSegment(twoway_path)
-            current_A_endpoint = twoway_A_endpoint
-            current_F_endpoint = twoway_F_endpoint
-            
-        else: #TODO: option to use JBE
-            F_endpoints = BE
-            
-            #Get A, F and path PT and NPT
-            #sync NPT, PT from OW with TW
-            #sync F from BE with BS
-            branch_A_endpoint, branch_F_endpoint, branch_path_NPT, branch_path_PT = create_bridge_oneway(OW_NPT, OW_PT, A_endpoints, F_endpoints, to_sync_G = [TW], to_sync_BE = [BS])
-            
-            NPT_segment = PathSegment(branch_path_NPT)
-            PT_segment = PathSegment(branch_path_PT)
-            
-            current_segment = BranchSegment(branch_A_endpoint, NPT_segment, PT_segment, branch_F_endpoint)
-            current_A_endpoint = branch_A_endpoint
-            current_F_endpoint = branch_F_endpoint
-        
-        if current_segment == None:
-            return level #TODO: back track and try prev segment without the used F, current_F_endpoint
-        
-        next_is_twoway = not next_is_twoway #flip
-        
-        level.add_segment(current_segment)
-    
-    #TODO: skip if used JBE
-    A = current_F_endpoint
-    A_endpoints = [A]
-    F_endpoints = J
-    
-    #Get A, F and path AF
-    #sync AF from TW with OW
-    end_A_endpoint, end_F_endpoint, path_AF = create_bridge_twoway(TW, A_endpoints, F_endpoints, to_sync_G = [OW_PT, OW_NPT])
-    
-    end_segment = PathSegment(path_AF)
-    end = RoomSegment(end_F_endpoint)
-    
-    level.add_segment(end_segment)
-    level.add_segment(end)
+        if not successful: #if none, step back
+            step_back(level)
+            continue
+        elif john_end:
+            return level
+        elif level.branch_count >= max_branches:
+            step_back(level)
+            continue
+        else:
+            continue
 
     return level
+
+def step_back(level):
+    #No viable room from last room segment
+    #and path to those last rooms must be bad too
+    room_seg = level.remove_last_segment()
+    path_seg = level.remove_last_segment()
+    
+    #TODO TODO: refund removed segments
+
+#TODO: could have john be forbidden if below certain branch, then do another run with john if cant find any
+#TODO: let john/entrance room choose any door instead of specific one
+
+#TODO: turn repeated code into smaller funcs
+
+def add_entrance_segments(level, TW, OW_NPT, OW_PT, BS, BE, last_room_seg):
+    #create twoway bridge: E > TW > BS/J
+    #OR
+    #create oneway bridge: EBS > OW > BE/JBE
+    
+    while True:
+        
+        start = last_room_seg.get_viable_room()
+    
+        if start is None:
+            return False #Failed! (no viable john bc start)
+    
+        #differentiate E from EBS in last_room_seg using class type: EntranceJohnRoom vs BranchRomo
+        if isinstance(start, EntranceRoom):
+            #dont sync F bc it has not been finalized
+            #dont sync A, nothing to sync to (E)
+            chosen_A, chosen_F, path_AF = create_twoway_bridge(G = TW, As = [start], Fs = BS, to_sync_G = [OW_NPT, OW_PT], to_sync_A = [], to_sync_F = []) 
+            
+            if chosen_F is None:
+                continue
+            
+            #TODO: find alternative Js and BSs that can fit
+            
+            #TODO: convert to segments and add to level
+            #TODO: mark is_branch_end if so
+            
+            return True
+            
+        else:
+            #dont sync BE to BS bc it has not been finalized
+            #dont sync BS to BE bc BS is an EBS
+            chosen_BS, chosen_BE, path_NPT, path_PT = create_bridge_oneway(G_NPT = OW_NPT, G_PT = OW_PT, BSs = [start], BEs = BE, to_sync_G = [TW], to_sync_BS = [], to_sync_BE = [])
+            
+            if chosen_BE is None:
+                continue
+            
+            #TODO: find alternative JBEs and BEs that can fit
+            
+            #TODO: convert to segments and add to level
+            
+            return True
+
+def add_branch_segments(level, TW, OW_NPT, OW_PT, BS, BE, last_room_seg):
+    
+    #create oneway bridge: last_room_seg (viable BSs) > OW > BE/JBE
+    #or
+    #choose J from last_room_seg
+    
+    while True:
+        
+        start = last_room_seg.get_viable_room():
+            
+        if start is None:
+            break #try john
+        
+        #dont sync BE bc it has not been finalized
+        #DO sync BS to BS, BE bc we just chose it
+        chosen_BS, chosen_BE, path_NPT, path_PT = create_bridge_oneway(G_NPT = OW_NPT, G_PT = OW_PT, BSs = [start], BEs = BE, to_sync_G = [TW], to_sync_BS = [BS, BE], to_sync_BE = []) 
+        
+        if chosen_BE is None:
+                continue
+            
+        #TODO: find alternative JBEs and BEs that can fit
+        #TODO: mark is_branch_end if so
+        
+        #TODO: convert to segments and add to level
+        
+        return True, False #success but not john
+    
+    while True:
+        start = last_room_seg.get_viable_john_room():
+            
+        if start is None:
+            return False, False #Failed!
+            
+        #TODO: convert to segments and add to level
+        
+        return True, True #success and john
+
+
+def add_twoway_segments(level, TW, OW_NPT, OW_PT, BS, BE, last_room_seg):
+    #create oneway bridge: last_room_seg (viable BSs) > OW > BE/JBE
+    #or
+    #choose J from last_room_seg
+    
+    while True:
+        
+        start = last_room_seg.get_viable_room():
+            
+        if start is None:
+            break #try john
+        
+        #dont sync F bc it has not been finalized
+        #DO sync A to BS, BE bc we just chose it
+        chosen_A, chosen_F, path_AF = create_bridge_twoway(G = TW, As = [start], Fs = BS, to_sync_G = [OW_NPT, OW_PT], to_sync_A = [BS, BE], to_sync_F = [])
+        
+        if chosen_F is None:
+                continue
+            
+        #TODO: find alternative JBEs and BEs that can fit
+        #TODO: mark is_branch_end if so
+            
+        #TODO: convert to segments and add to level
+        
+        return True, False #success but not john
+    
+    while True:
+        start = last_room_seg.get_viable_john_room():
+            
+        if start is None:
+            return False, False #Failed!
+            
+        #TODO: convert to segments and add to level
+        
+        return True, True #success and john
 
 
 

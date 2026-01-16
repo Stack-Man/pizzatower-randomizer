@@ -62,8 +62,12 @@ def rooms_to_base_room_layer(rooms, se_type):
         
         door = get_non_loop_door(room)
         
-        ejr = EntranceJohnRoom(room.name, door, se_type)
-        base_rooms.append(ejr)
+        if se_type == StartExitType.START:
+            er = EntranceRoom(room.name, door)
+            base_rooms.append(er)
+        else:
+            jr = JohnRoom(room.name, door)
+            base_rooms.append(jr)
     
     return base_rooms
 
@@ -75,7 +79,6 @@ def get_non_loop_door(room):
         if door.door_type is not DoorType.LEVELDOOR and not door.is_loop:
             return door
 
-#TODO: test
 def rooms_to_branch_layer(rooms, se_type):
     branch_rooms = []
 

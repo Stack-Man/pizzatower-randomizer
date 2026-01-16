@@ -53,8 +53,25 @@ class BranchRoom(BaseRoom):
     def __str__(self):
         return self.room_name + ": B: " + str(self.branch_door) + ", NPT: " + str(self.NPT_door) + ", PT: " + str(self.PT_door)
 
-class EntranceJohnRoom(BaseRoom):
-    def __init__(self, room_name, door, se_type): #start for John and exit for entrance
+class EntranceRoom(BaseRoom):
+    def __init__(self, room_name, door):
+        self.room_name = room_name
+        self.door = door
+        
+        self.door_endpoint = self.set_endpoint(door, se_type)
+    
+    def set_endpoint(self, door, se_type):
+        n = FakeNode(door.door_type, door.door_dir, se_type)
+        return Endpoint(n)
+    
+    def get_twoway_endpoint(self):
+        return self.door_endpoint
+    
+    def __str__(self):
+        return self.room_name + ": " + str(self.door)
+
+class JohnRoom(BaseRoom):
+    def __init__(self, room_name, door):
         self.room_name = room_name
         self.door = door
         
@@ -84,27 +101,39 @@ class Level():
         
         if isinstance(seg, BranchSegment):
             self.branch_count = self.branch_count + 1
+    
+    def remove_last_segment(self):
         
-class BranchPath(): #Unused?
-    def __init__(self, branch_room):
-        self.branch = branch_room.branch_endpoint
-        self.NPT = branch_room.NPT_endpoint
-        self.PT = branch_room.PT_endpoint
-        self.start_exit_type = branch_room.start_exit_type
+        if self.segment_count() > 0:
+            seg = self.segments.pop()
+            
+            if isinstance(seg, BranchSegment):
+                self.branch_count = self.branch_count - 1
+        
+            return seg
+        
+        return None
+    
+    def segment_count(self):
+        return len(self.segments)
+    
+    def get_last_room_seg(self):
+        
+        last_room_seg = self.segments[len(self.segments) - 1]
+        
+        if not isinstance(last_room_seg, RoomSegment):
+            raise RuntimeError("last segment added was not a room segment!")
+        else:
+            return last_room_seg
 
 class BaseSegment():
      def get_last_endpoint(self):
         return None
 
-class BranchSegment(BaseSegment):
-    def __init__(self, start_branch, OW_NPT, OW_PT, end_branch):
-        self.start_branch = start_branch #BranchRoom
+class BranchPathSegment(BaseSegment):
+    def __init__(self, OW_NPT, OW_PT):
         self.OW_NPT = OW_NPT #PathSegment
         self.OW_PT = OW_PT #PathSegment
-        self.end_branch = end_branch #BranchRoom
-    
-    def get_last_endpoint(self):
-        return self.end_path.branch_endpoint
     
     def __str__(self):
         if self.start_branch == None or self.end_branch == None:
@@ -115,9 +144,6 @@ class BranchSegment(BaseSegment):
 class PathSegment(BaseSegment):
     def __init__(self, paths):
         self.paths = paths #List of (endpoint, RoomPath) AKA result of find_path
-    
-    def get_last_endpoint(self):
-        return self.paths[len(self.paths) - 1][0] #endpoint of last entry
     
     def __str__(self):
         
@@ -133,14 +159,36 @@ class PathSegment(BaseSegment):
         return msg
 
 class RoomSegment(BaseSegment):
-    def __init__(self, room):
-        self.room = room #BaseRoom
-    
-    def get_last_endpoint(self):
-        return self.room.get_twoway_endpoint
+    def __init__(self, others, johns, is_branch_end):
+        self.chosen_room = None #BaseRoom
+        self.other_viable_rooms = others
+        self.john_viable_rooms = johns
+        self.is_branch_end = is_branch_end
     
     def __str__(self):
         if (self.room is None):
             return "None Room"
         
         return "Room: " + self.room.room_name
+    
+    def get_viable_room(self):
+        if len(self.other_viable_rooms) == 0:
+            return None
+        else:
+            r = self.other_viable_rooms.pop()
+            self.chosen_room = r
+            return r
+
+    def get_viable_john(self):
+        if len(self.other_viable_rooms) == 0:
+            return None
+        else:
+            r = self.other_viable_rooms.pop()
+            self.chosen_room = r
+            return r
+    
+    
+    def set_chosen_john_room(self, room):
+        self.chosen_room = room
+        self.john_viable_rooms.remove(room)
+    

@@ -32,6 +32,7 @@ def sync_base_room_lists(to_remove, others):
         if to_remove in O:
             O.remove(to_remove)
 
+#TODO: does any use sync A, F, BS, or BE? yes, but only A/BS ?
 def create_bridge_twoway(G, As, Fs, to_sync_G = [], to_sync_A = [], to_sync_F = []): #As and Fs should be lists of types inheriting BaseRoom
     
     print(" Bridge Twoway")
