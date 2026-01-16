@@ -46,6 +46,8 @@ def create_level(TW, OW_NPT, OW_PT, BS, BE, E, EBS, J, JBE):
     #sync AF from TW with OW
     #sync F from BS with BE
     
+    print("Create Start Segment")
+    
     start_A_endpoint, start_F_endpoint, path_AF = create_bridge_twoway(TW, A_endpoints, F_endpoints, to_sync_G = [OW_NPT, OW_PT], to_sync_F = [BE])
     
     #TODO: if failed, try with F_endpoints = J or with JBE if EBS
@@ -66,6 +68,8 @@ def create_level(TW, OW_NPT, OW_PT, BS, BE, E, EBS, J, JBE):
     
     #TODO TODO: failing branch find, maybe because path before has bad endpoint?
     while (level.branch_count < max_branches): #TODO: maybe make john segment first to increase success rate since john segment is more important
+        
+        print("Create Branch Segment")
         
         #A = prev_segment.get_last_endpoint()
         A = current_F_endpoint

@@ -32,10 +32,8 @@ import threading
 
 def reflow(G):
     if G.updated_since_last_flow:
-        print("Did reflow")
         return flow(G)
-    
-    print("did NOT reflow because it was not updated since last flow")
+
     return G
 
 
@@ -63,10 +61,17 @@ def flow_fewest_hidden_steps(G):
     GR.round = 0
     GR.added_this_round = False
     
-    GR.__dict__.update(G.__dict__) #Add G's attributes to GR to know hidden edges
+    
+    #Add G's attributes to GR to know hidden edges
+    GR.__dict__.update(G.__dict__) 
+    
+    print_flow(GR)
+
     
     while (True):
         GR.round = GR.round + 1
+        
+        print("     ROUND ", GR.round)
         
         pass_steps_and_hidden_from_all(GR) #flow backwards
         
@@ -74,76 +79,36 @@ def flow_fewest_hidden_steps(G):
         
         add_shortest_fewest_hidden_path_to_all(GR) #confirm which passed are kept
         
+        #DEBUG: print current flow state
+        print_flow(GR)
+        
         if not GR.added_this_round: #all shortest paths finished
             break
     
     FG = GR.reverse()
-    FG.__dict__.update(G.__dict__) #keep G's attributes in FG
+    #keep G's attributes in FG
+    FG.__dict__.update(G.__dict__) 
     
     return FG
+
+from node_id_objects import StartExitType
+
+def print_flow(GR):
+    print("     ROUND ", GR.round, " FLOW STATE:")
+    for N in GR.nodes():
+        if N.start_exit_type == StartExitType.START:
+            continue
+        
+        print("         N: ", str(N))
+        
+            
+        for F, steps in N.steps.items():
+            
+            print("             F: ", str(F), " step: ", steps.steps, " hid: ", steps.hidden_steps)
 
 def flow(G): 
-    return flow_fewest_hidden_steps(G) #TODO: override with new method, test if works
-    
-    G.updated_since_last_flow = False
-    
-    #initial seed
-    #empty the dicts and set 0 steps to self
-    for N in G.nodes():
-        N.steps = {}
-        N.steps[N] = 0
-        N.next_steps = {}
-    
-    GR = G.reverse()
-    GR.round = 0
-    GR.added_this_round = False
-    
-    GR.__dict__.update(G.__dict__) #Add G's attributes to GR to know hidden edges
-    
-    while (True):
-        GR.round = GR.round + 1
-        
-        pass_values_from_all(GR) #flow backwards
-        
-        GR.added_this_round = False
-        
-        #finalize all new steps only after
-        #all threads in round finished
-        add_new_to_all(GR)
+    return flow_fewest_hidden_steps(G)
 
-        if not GR.added_this_round:
-            break #end when no new steps flowed back
-    
-    FG = GR.reverse()
-    FG.__dict__.update(G.__dict__) #keep G's attributes in FG
-    
-    #print_flow(FG)
-    
-    return FG
-
-def add_new_to_all(GR):
-    threads = []
-        
-    #move next steps to steps
-    for N in GR.nodes():
-        t = threading.Thread(target=add_new, args=(GR, N))
-        threads.append(t)
-        t.start()
-    
-    for t in threads:
-        t.join()
-
-def pass_values_from_all(GR):
-    threads = []
-        
-    #flow all steps in N to all of its reverse neighbors
-    for N in GR.nodes():
-        t = threading.Thread(target=pass_values, args=(GR, N))
-        threads.append(t)
-        t.start()
-    
-    for t in threads:
-        t.join()
 
 #       for each node N: (flow N to P)
 #           for each parent P of N:
@@ -152,6 +117,8 @@ def pass_values_from_all(GR):
 
 def pass_steps_and_hidden_from_all(GR):
     threads = []
+    
+    print("         PASS FROM ALL")
     
     for N in GR.nodes():
         t = threading.Thread(target = pass_steps_and_hidden, args=(GR, N))
@@ -162,13 +129,14 @@ def pass_steps_and_hidden_from_all(GR):
         t.join()
 
 def pass_steps_and_hidden(GR, N):
-    to_pass = N.steps
-    
+
+    #print("            PASS FROM N: ", str(N))
+
     for P in GR.neighbors(N):
         
         edge_is_hidden = (P, N) in GR.hidden_edges
         
-        for F, steps in to_pass.items():
+        for F, steps in N.steps.items():
             
             new_steps = steps.steps + 1
             new_hidden_steps = steps.hidden_steps
@@ -182,6 +150,7 @@ def pass_steps_and_hidden(GR, N):
                 P.next_steps[F] = {}
             
             P.next_steps[F][N] = steps_passed_to_P_from_N
+            #print("                 PASS [F]: TO ", str(F), " steps: ", steps_passed_to_P_from_N.steps, " hid: ", steps_passed_to_P_from_N.hidden_steps)
 
 #       for each node P: (add new for P)
 #           for each value in P.next_hidden_steps[F]
@@ -192,7 +161,9 @@ def pass_steps_and_hidden(GR, N):
 #               set P.hidden_steps[F][hidden steps] to smallest hidedn steps value
 def add_shortest_fewest_hidden_path_to_all(GR):
     threads = []
-        
+    
+    print("         ADD TO ALL")
+    
     #move next steps to steps
     for N in GR.nodes():
         t = threading.Thread(target=add_shortest_fewest_hidden_path, args=(GR, N))
@@ -203,13 +174,16 @@ def add_shortest_fewest_hidden_path_to_all(GR):
         t.join()
 
 def add_shortest_fewest_hidden_path(GR, P):
-    curr = P.steps
-    next = P.next_steps
-
-    for F, candidate_Ns in next.items(): #for every F sent to P this round
+    
+    #print("             ADD TO P:", str(P))
+    
+    for F, candidate_Ns in P.next_steps.items(): #for every F sent to P this round
+        
+        added_this_F = False
         
         if F not in P.steps:
             P.steps[F] = Steps(None, None)
+            
         
         fewest_hidden = P.steps[F].hidden_steps
         fewest_total_steps = P.steps[F].steps
@@ -224,33 +198,18 @@ def add_shortest_fewest_hidden_path(GR, P):
             if fewest_hidden == None or current_hidden < fewest_hidden:
                 fewest_hidden = current_hidden
                 fewest_total_steps = current_total_steps
+                added_this_F = True
             #if this N has same hidden steps but less total steps, use it
             elif current_hidden == fewest_hidden and current_total_steps < fewest_total_steps: 
-                fewest_total_steps = current_total-steps
+                fewest_total_steps = current_total_steps
+                added_this_F = True
     
         #finalize the steps to F in P
         P.steps[F].hidden_steps = fewest_hidden
         P.steps[F].steps = fewest_total_steps
-
-def add_new(GR, N):
-    curr = N.steps
-    next = N.next_steps
     
-    for key, value in next.items():
-        if key not in curr:
-            curr[key] = value
-            GR.added_this_round = True
-            
-            
+        if P.steps[F].steps == None: #no replacement for a None, that cant happen or wed never try this F in the first place
+            raise RuntimeError("Tried to add F to P.steps that had no valid replacement?")
     
-    N.steps = curr
-    N.next_steps = {}
-
-def pass_values(GR, N):
-    for RN in GR.neighbors(N):
-        to_add = N.steps
-        
-        #current round should always match
-        #value + 1
-        for K, _ in to_add.items():
-            RN.next_steps[K] = GR.round
+        if added_this_F: #if any F was modified
+            GR.added_this_round = True #let outer func know to continue flow

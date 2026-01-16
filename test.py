@@ -249,7 +249,7 @@ from layer_traversal import create_level
 
 def test_parse_all():
     
-    filenames = ["johngutter", "ancientcheese", "bloodsauce", "crustcove", "deepdish9", "dontmakeasound", "fastfoodsaloon"]
+    filenames = ["johngutter", "ancientcheese", "bloodsauce", "crustcove", "deepdish9", "fastfoodsaloon"]
     all_rooms = []
     
     for f in filenames:

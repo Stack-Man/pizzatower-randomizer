@@ -4,7 +4,7 @@ GRAPH INIT
 ------------
 """
 from path_mapping import categorize_paths
-import path_flow
+from path_flow import flow
 import threading
 
 def layer_to_endpoints(G):
@@ -17,7 +17,7 @@ def layer_to_endpoints(G):
     
     G_init_attributes(ep_graph, paths)
     
-    flowed = path_flow.flow(ep_graph) #initialize flow
+    flowed = flow(ep_graph) #initialize flow
     
     return flowed
 
@@ -61,10 +61,15 @@ def construct_endpoint_graph(paths, traversal_mode):
         start_point = endpoint_pair[0]
         exit_point = endpoint_pair[1]
         
-        start_points.append(start_point)
-        exit_points.append(exit_point)
+        if start_point not in start_points:
+            start_points.append(start_point)
+        
+        if exit_point not in exit_points:
+            exit_points.append(exit_point)
         
         endpoint_graph.add_edge(start_point, exit_point)
+    
+    print("CONNECTING ENDPOINTS")
     
     #TODO: traversal mode
     #current basic traversal mode, connect directly to matching type, dir ignored
@@ -79,6 +84,42 @@ def construct_endpoint_graph(paths, traversal_mode):
             
             if same_type and good_dir:
                 endpoint_graph.add_edge(ep, sp)
+                
+                print("     CONNECT ", str(ep), " TO ", str(sp))
+    
+    """
+     N:  EXIT HALL LEFT
+             F:  EXIT HALL LEFT  step:  0  hid:  0
+             F:  START HALL RIGHT  step:  1  hid:  0
+     N:  EXIT BOX DOWN
+         F:  EXIT BOX DOWN  step:  0  hid:  0
+         F:  START HALL RIGHT  step:  1  hid:  0
+     N:  EXIT FALL UP
+         F:  EXIT FALL UP  step:  0  hid:  0
+         F:  START HALL RIGHT  step:  1  hid:  0
+     N:  EXIT HALL RIGHT
+         F:  EXIT HALL RIGHT  step:  0  hid:  0
+         F:  START HALL LEFT  step:  1  hid:  0
+     N:  EXIT BOX UP
+         F:  EXIT BOX UP  step:  0  hid:  0
+         F:  START HALL LEFT  step:  1  hid:  0
+     N:  EXIT DOOR NONE
+         F:  EXIT DOOR NONE  step:  0  hid:  0
+         F:  START HALL LEFT  step:  1  hid:  0
+     N:  EXIT FALL DOWN
+         F:  EXIT FALL DOWN  step:  0  hid:  0
+         F:  START FALL UP  step:  1  hid:  0
+"""
+    
+    #TODO: for some reason the flow looks like this, is the graph reverse not correct?
+    
+    #exit hall left > start hall right
+    #exit box down  > start hall right
+    #exit fall up  > start hall right
+    #exit hall right  > start hall left
+    #exit box up  > start hall left
+    #exit door none  > start hall left
+    #exit fall down  > start fall up <--- only this one is correct
     
     
     #MODE: matching directional
@@ -169,7 +210,7 @@ def remove_paths_of_room(G, room_name):
     #Update with paths removed during threaded section
     G.removed_paths_by_room_and_endpoints[room_name].update(G.removed_paths_by_endpoints)
 
-MIN_ROOMS_TO_HIDE = 1 #TODO: parameterize, set to -1 to disable
+MIN_ROOMS_TO_HIDE = -1 #TODO: parameterize, set to -1 to disable
 
 def remove_paths_of_room_by_endpoint(G, room_name, endpoint_key):
     paths = G.all_paths[endpoint_key]
@@ -442,6 +483,12 @@ def copy_graph_attributes(G, new_G):
     new_G.updated_since_last_flow = G.updated_since_last_flow
     
     new_G.hidden_rooms = G.hidden_rooms.copy()
+    
+    new_G.hidden_edges = G.hidden_edges.copy()
+    
+    new_G.unhidden_rooms = G.unhidden_rooms.copy()
+    new_G.unhidden_edges = G.unhidden_edges.copy()
+
 
 def print_graph_attributes(G):
     print(f"all paths: {len(G.all_paths)}")
