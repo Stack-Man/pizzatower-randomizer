@@ -45,6 +45,7 @@ def print_flow(G):
             print("         ", k, ": ", v)
 
 from path_objects import Steps
+from graph_copy import copy_graph_attributes
 
 #This flow prioritizes paths with fewer hidden steps over shorter paths
 def flow_fewest_hidden_steps(G):
@@ -57,15 +58,21 @@ def flow_fewest_hidden_steps(G):
         N.steps[N] = Steps(0, 0)
         N.next_steps = {}
     
+    print("INITIAL G:")
+    print_G(G)
+    
     GR = G.reverse()
     GR.round = 0
     GR.added_this_round = False
     
+    print("INITIAL GR:")
+    print_G(GR)
     
     #Add G's attributes to GR to know hidden edges
-    GR.__dict__.update(G.__dict__) 
+    #GR.__dict__.update(G.__dict__) #i think this is causing the node and edge attributes to get overwrriten
+    copy_graph_attributes(G, GR) #copy attributes except nodes, edges
     
-    print_flow(GR)
+    #print_flow(GR)
 
     
     while (True):
@@ -80,16 +87,26 @@ def flow_fewest_hidden_steps(G):
         add_shortest_fewest_hidden_path_to_all(GR) #confirm which passed are kept
         
         #DEBUG: print current flow state
-        print_flow(GR)
+        #print_flow(GR)
         
         if not GR.added_this_round: #all shortest paths finished
             break
     
     FG = GR.reverse()
     #keep G's attributes in FG
-    FG.__dict__.update(G.__dict__) 
+    #FG.__dict__.update(G.__dict__) 
+    copy_graph_attributes(G, FG) #copy attributes except nodes, edges
+    
     
     return FG
+
+def print_G(G):
+    for N in G.nodes():
+        print("     ", str(N))
+        
+        for c in G.neighbors(N):
+            
+            print("         TO ", str(c))
 
 from node_id_objects import StartExitType
 
@@ -124,13 +141,24 @@ def pass_steps_and_hidden_from_all(GR):
         t = threading.Thread(target = pass_steps_and_hidden, args=(GR, N))
         threads.append(t)
         t.start()
-    
-    for t in threads:
         t.join()
+    
+    #for t in threads:
+        #t.join()
 
 def pass_steps_and_hidden(GR, N):
 
-    #print("            PASS FROM N: ", str(N))
+    print("            PASS FROM: ", str(N))
+
+    print("                 TO PASS:")
+    for F, steps in N.steps.items():
+        print("                     F: ", str(F), " step: ", steps.steps, " hid: ", steps.hidden_steps)
+    
+    print("                 PASS TO:")
+    
+    for P in GR.neighbors(N):
+        print("                     P:", str(P))
+        
 
     for P in GR.neighbors(N):
         
