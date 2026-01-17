@@ -2,6 +2,9 @@
 
 level creation for all levels
 level growth
-step back if failed branch <-- in progress
-ruin_11 is marked as normal john
+
+ruin_11 is marked as normal john ? (might be fixed with branch to EJBranchRoom)
+
+finish syncing with refund syncing
+
 some branch rooms fail parsing
