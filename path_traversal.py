@@ -26,14 +26,8 @@ resolve this is hard to code and probably computationally expensive)
 
 """
 
-def sync_base_room_lists(to_remove, others):
-    
-    for O in others:
-        if to_remove in O:
-            O.remove(to_remove)
 
-#TODO: does any use sync A, F, BS, or BE? yes, but only A/BS ?
-def create_bridge_twoway(G, As, Fs, to_sync_G = [], to_sync_A = [], to_sync_F = []): #As and Fs should be lists of types inheriting BaseRoom
+def create_bridge_twoway(G, As, Fs): #As and Fs should be lists of types inheriting BaseRoom
     
     print(" Bridge Twoway")
     
@@ -42,24 +36,14 @@ def create_bridge_twoway(G, As, Fs, to_sync_G = [], to_sync_A = [], to_sync_F = 
 
     chosen_A, chosen_F, twoway_path_AF = find_some_path(G, As, Fs, endpoint_extractor = twoway_endpoint_extractor, prioritize_oneway = False)
     
-    path_graph.update_other_G(G, to_sync_G)
-    
-    sync_base_room_lists(chosen_A, to_sync_A)
-    sync_base_room_lists(chosen_F, to_sync_F)
-    
+
     return chosen_A, chosen_F, twoway_path_AF
 
-def create_bridge_oneway(G_NPT, G_PT, BSs, BEs, to_sync_G = [], to_sync_BS = [], to_sync_BE = []): #BSs and #BEs should be lists of type BranchRoom
+def create_bridge_oneway(G_NPT, G_PT, BSs, BEs): #BSs and #BEs should be lists of type BranchRoom
     
     print(" Bridge Oneway")
     
     chosen_BS, chosen_BE, oneway_path_NPT, oneway_path_PT = find_some_branch_paths(G_PT, G_NPT, BSs, BEs)
-    
-    path_graph.update_other_G(G_NPT, to_sync_G)
-    path_graph.update_other_G(G_PT, to_sync_G) #necessary because PT needs to update others with its chosen PT path
-
-    sync_base_room_lists(chosen_BS, to_sync_BS)
-    sync_base_room_lists(chosen_BE, to_sync_BE)
     
     return chosen_BS, chosen_BE, oneway_path_NPT, oneway_path_PT 
 
@@ -184,14 +168,6 @@ The number of steps to reach node F from A is written as A[F]
 3b. Choose path P of room R, then remove all paths of room R from graph and reflow if any edges become disconnected
 4. Else If N[F] = 0, end
 """
-
-#find_path_with_hidden_steps (flow down)
-#    A = start
-#   for each neighbor N to A
-#       if N.hidden_steps[F][steps] = A.hidden_steps[F][steps] - 1
-#       AND if N.hidden_steps[F][hidden steps] = A.hidden_steps[F][hidden steps] - (1 or 0 depending on edge):
-#       A = N
-#   repeat
 
 #RETURN: List of (Endpoint, Path) for every chosen Endpoint and their 
 #related path EXIT endpoints have Path set as None

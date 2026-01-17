@@ -53,6 +53,29 @@ class BranchRoom(BaseRoom):
     def __str__(self):
         return self.room_name + ": B: " + str(self.branch_door) + ", NPT: " + str(self.NPT_door) + ", PT: " + str(self.PT_door)
 
+class EJBranchRoom(BaseRoom):
+    def __init__(self, room_name, start_exit_type, branch_door, NPT_door, PT_door):
+        self.room_name = room_name
+        self.NPT_door = NPT_door
+        self.PT_door = PT_door
+        
+        self.start_exit_type = start_exit_type
+
+        pt_se_type = start_exit_type
+        npt_se_type = StartExitType.START if start_exit_type == StartExitType.EXIT else StartExitType.EXIT #opposite of branch
+        
+        #if branch is enter, we exit via NPT and enter PT
+        #if branch is exit, we enter via NPT and exit PT
+
+        self.NPT_endpoint = self.set_endpoint(NPT_door, npt_se_type)
+        self.PT_endpoint  = self.set_endpoint(PT_door, pt_se_type)
+    
+    def get_twoway_endpoint(self):
+        raise RuntimeError("EJ Branch does not have a twoway endpoint!")
+    
+    def __str__(self):
+        return self.room_name + ": B: " + str(self.branch_door) + ", NPT: " + str(self.NPT_door) + ", PT: " + str(self.PT_door)
+
 class EntranceRoom(BaseRoom):
     def __init__(self, room_name, door):
         self.room_name = room_name
@@ -186,9 +209,3 @@ class RoomSegment(BaseSegment):
             r = self.other_viable_rooms.pop()
             self.chosen_room = r
             return r
-    
-    
-    def set_chosen_john_room(self, room):
-        self.chosen_room = room
-        self.john_viable_rooms.remove(room)
-    

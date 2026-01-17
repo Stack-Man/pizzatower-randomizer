@@ -118,6 +118,36 @@ def rooms_to_branch_layer(rooms, se_type):
     
     return branch_rooms
 
+def rooms_to_ej_branch_layer(rooms, se_type):
+    branch_rooms = []
+
+    for room in rooms:
+        NPT_door = None
+        PT_door = None
+
+        #add paths between layers
+        for path in room.paths:
+            #print("Trying path " + str(path) )
+            
+            if path.exit_door.exit_path_time == PathTime.PIZZATIME:
+                PT_door = path.exit_door
+            elif path.exit_door.exit_path_time == PathTime.NOTPIZZATIME:
+                NPT_door = path.exit_door
+                
+            if path.start_door.start_path_time == PathTime.PIZZATIME:
+                PT_door = path.start_door
+            elif path.start_door.start_path_time == PathTime.NOTPIZZATIME:
+                NPT_door = path.start_door
+    
+        #create branch room
+        if NPT_door is not None and PT_door is not None:
+            branch_room = EJBranchRoom(room.name, se_type, branch_door, NPT_door, PT_door)
+            branch_rooms.append(branch_room)
+        else:
+            print("=====ROOM ", room.name, " NOT VALID BRANCH (MISSING DOOR)")
+    
+    return branch_rooms
+
 #start/exit layers are virtual layers within a single greater layer
 #each door exists twice in the layer, once in start and once in exit
 #providing a way to create distinct directionality as you move through the
@@ -322,7 +352,7 @@ def type_and_branch_to_layers(all_rooms, room_type, branch_type, branch_se_type,
     type_branch_rooms = filter_rooms_by_branch(type_rooms, branch_type)
     type_rooms = filter_rooms_by_branch(type_rooms, BranchType.NONE)
     
-    TBT_layer = rooms_to_branch_layer(type_branch_rooms, branch_se_type)
+    TBT_layer = rooms_to_ej_branch_layer(type_branch_rooms, branch_se_type)
     T_layer = rooms_to_base_room_layer(type_rooms, base_se_type)
     
     return TBT_layer, T_layer
