@@ -2,7 +2,7 @@ from enums import *
 import networkx as nx
 import node_id_objects as nio
 from node_id_objects import StartExitType, NodeType
-from layer_objects import BranchRoom, EntranceJohnRoom
+from layer_objects import BranchRoom, EntranceRoom, JohnRoom, EJBranchRoom
 from path_graph import layer_to_endpoints
 
 """
@@ -62,10 +62,10 @@ def rooms_to_base_room_layer(rooms, se_type):
         
         door = get_non_loop_door(room)
         
-        if se_type == StartExitType.START:
+        if se_type == StartExitType.EXIT: #EXIT is entrance
             er = EntranceRoom(room.name, door)
             base_rooms.append(er)
-        else:
+        else: #START is john
             jr = JohnRoom(room.name, door)
             base_rooms.append(jr)
     
@@ -141,7 +141,7 @@ def rooms_to_ej_branch_layer(rooms, se_type):
     
         #create branch room
         if NPT_door is not None and PT_door is not None:
-            branch_room = EJBranchRoom(room.name, se_type, branch_door, NPT_door, PT_door)
+            branch_room = EJBranchRoom(room.name, se_type, NPT_door, PT_door)
             branch_rooms.append(branch_room)
         else:
             print("=====ROOM ", room.name, " NOT VALID BRANCH (MISSING DOOR)")

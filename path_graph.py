@@ -87,42 +87,7 @@ def construct_endpoint_graph(paths, traversal_mode):
                 endpoint_graph.add_edge(ep, sp)
                 
                 print("     CONNECT ", str(ep), " TO ", str(sp))
-    
-    """
-     N:  EXIT HALL LEFT
-             F:  EXIT HALL LEFT  step:  0  hid:  0
-             F:  START HALL RIGHT  step:  1  hid:  0
-     N:  EXIT BOX DOWN
-         F:  EXIT BOX DOWN  step:  0  hid:  0
-         F:  START HALL RIGHT  step:  1  hid:  0
-     N:  EXIT FALL UP
-         F:  EXIT FALL UP  step:  0  hid:  0
-         F:  START HALL RIGHT  step:  1  hid:  0
-     N:  EXIT HALL RIGHT
-         F:  EXIT HALL RIGHT  step:  0  hid:  0
-         F:  START HALL LEFT  step:  1  hid:  0
-     N:  EXIT BOX UP
-         F:  EXIT BOX UP  step:  0  hid:  0
-         F:  START HALL LEFT  step:  1  hid:  0
-     N:  EXIT DOOR NONE
-         F:  EXIT DOOR NONE  step:  0  hid:  0
-         F:  START HALL LEFT  step:  1  hid:  0
-     N:  EXIT FALL DOWN
-         F:  EXIT FALL DOWN  step:  0  hid:  0
-         F:  START FALL UP  step:  1  hid:  0
-"""
-    
-    #TODO: for some reason the flow looks like this, is the graph reverse not correct?
-    
-    #exit hall left > start hall right
-    #exit box down  > start hall right
-    #exit fall up  > start hall right
-    #exit hall right  > start hall left
-    #exit box up  > start hall left
-    #exit door none  > start hall left
-    #exit fall down  > start fall up <--- only this one is correct
-    
-    
+                
     #MODE: matching directional
     #Match transitions that have consistent directions, but possibly different types
     #TODO:

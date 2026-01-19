@@ -58,15 +58,15 @@ def flow_fewest_hidden_steps(G):
         N.steps[N] = Steps(0, 0)
         N.next_steps = {}
     
-    print("INITIAL G:")
-    print_G(G)
+   # print("INITIAL G:")
+    #print_G(G)
     
     GR = G.reverse()
     GR.round = 0
     GR.added_this_round = False
     
-    print("INITIAL GR:")
-    print_G(GR)
+    #print("INITIAL GR:")
+    #print_G(GR)
     
     #Add G's attributes to GR to know hidden edges
     #GR.__dict__.update(G.__dict__) #i think this is causing the node and edge attributes to get overwrriten
@@ -78,7 +78,7 @@ def flow_fewest_hidden_steps(G):
     while (True):
         GR.round = GR.round + 1
         
-        print("     ROUND ", GR.round)
+        #print("     ROUND ", GR.round)
         
         pass_steps_and_hidden_from_all(GR) #flow backwards
         
@@ -135,7 +135,7 @@ def flow(G):
 def pass_steps_and_hidden_from_all(GR):
     threads = []
     
-    print("         PASS FROM ALL")
+    #print("         PASS FROM ALL")
     
     for N in GR.nodes():
         t = threading.Thread(target = pass_steps_and_hidden, args=(GR, N))
@@ -148,16 +148,16 @@ def pass_steps_and_hidden_from_all(GR):
 
 def pass_steps_and_hidden(GR, N):
 
-    print("            PASS FROM: ", str(N))
+    #print("            PASS FROM: ", str(N))
 
-    print("                 TO PASS:")
-    for F, steps in N.steps.items():
-        print("                     F: ", str(F), " step: ", steps.steps, " hid: ", steps.hidden_steps)
+    #print("                 TO PASS:")
+    #for F, steps in N.steps.items():
+        #print("                     F: ", str(F), " step: ", steps.steps, " hid: ", steps.hidden_steps)
     
-    print("                 PASS TO:")
+    #print("                 PASS TO:")
     
-    for P in GR.neighbors(N):
-        print("                     P:", str(P))
+    #for P in GR.neighbors(N):
+        #print("                     P:", str(P))
         
 
     for P in GR.neighbors(N):
@@ -190,7 +190,7 @@ def pass_steps_and_hidden(GR, N):
 def add_shortest_fewest_hidden_path_to_all(GR):
     threads = []
     
-    print("         ADD TO ALL")
+    #print("         ADD TO ALL")
     
     #move next steps to steps
     for N in GR.nodes():

@@ -54,7 +54,7 @@ class BranchRoom(BaseRoom):
         return self.room_name + ": B: " + str(self.branch_door) + ", NPT: " + str(self.NPT_door) + ", PT: " + str(self.PT_door)
 
 class EJBranchRoom(BaseRoom):
-    def __init__(self, room_name, start_exit_type, branch_door, NPT_door, PT_door):
+    def __init__(self, room_name, start_exit_type, NPT_door, PT_door):
         self.room_name = room_name
         self.NPT_door = NPT_door
         self.PT_door = PT_door
@@ -74,14 +74,14 @@ class EJBranchRoom(BaseRoom):
         raise RuntimeError("EJ Branch does not have a twoway endpoint!")
     
     def __str__(self):
-        return self.room_name + ": B: " + str(self.branch_door) + ", NPT: " + str(self.NPT_door) + ", PT: " + str(self.PT_door)
+        return self.room_name + ", NPT: " + str(self.NPT_door) + ", PT: " + str(self.PT_door)
 
 class EntranceRoom(BaseRoom):
     def __init__(self, room_name, door):
         self.room_name = room_name
         self.door = door
         
-        self.door_endpoint = self.set_endpoint(door, se_type)
+        self.door_endpoint = self.set_endpoint(door, StartExitType.EXIT) #exit bc we leaving the entrance oom
     
     def set_endpoint(self, door, se_type):
         n = FakeNode(door.door_type, door.door_dir, se_type)
@@ -98,7 +98,7 @@ class JohnRoom(BaseRoom):
         self.room_name = room_name
         self.door = door
         
-        self.door_endpoint = self.set_endpoint(door, se_type)
+        self.door_endpoint = self.set_endpoint(door, StartExitType.START) #start bc we entering the john room
     
     def set_endpoint(self, door, se_type):
         n = FakeNode(door.door_type, door.door_dir, se_type)
@@ -122,7 +122,7 @@ class Level():
         
         self.segments.append(seg)
         
-        if isinstance(seg, BranchSegment):
+        if isinstance(seg, BranchPathSegment):
             self.branch_count = self.branch_count + 1
     
     def remove_last_segment(self):
@@ -130,7 +130,7 @@ class Level():
         if self.segment_count() > 0:
             seg = self.segments.pop()
             
-            if isinstance(seg, BranchSegment):
+            if isinstance(seg, BranchPathSegment):
                 self.branch_count = self.branch_count - 1
         
             return seg
