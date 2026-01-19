@@ -29,7 +29,7 @@ resolve this is hard to code and probably computationally expensive)
 
 def create_bridge_twoway(G, As, Fs): #As and Fs should be lists of types inheriting BaseRoom
     
-    print(" Bridge Twoway")
+    #print(" Bridge Twoway")
     
     def twoway_endpoint_extractor(A):
         return A.get_twoway_endpoint()
@@ -41,7 +41,7 @@ def create_bridge_twoway(G, As, Fs): #As and Fs should be lists of types inherit
 
 def create_bridge_oneway(G_NPT, G_PT, BSs, BEs): #BSs and #BEs should be lists of type BranchRoom
     
-    print(" Bridge Oneway")
+    #print(" Bridge Oneway")
     
     chosen_BS, chosen_BE, oneway_path_NPT, oneway_path_PT = find_some_branch_paths(G_PT, G_NPT, BSs, BEs)
     
@@ -62,7 +62,7 @@ def find_some_branch_paths(G_PT, G_NPT, BSs, BEs):
     #try to find a path with every unique combination of hidden rooms unhidden
     #when successful, replace G with that created G
     
-    print("  FIND NPT")
+    #print("  FIND NPT")
     temp_G_NPT = path_graph.copy_graph(G_NPT) #copy in case we want to ditch found path
     chosen_BS, chosen_BE, path_NPT = find_some_path(temp_G_NPT, BSs, BEs, endpoint_extractor = branch_extractor_NPT, prioritize_oneway = True)
     
@@ -74,7 +74,7 @@ def find_some_branch_paths(G_PT, G_NPT, BSs, BEs):
         #update removed/readded from successful NPT
         path_graph.update_other_G(temp_G_NPT, [temp_G_PT])
     
-        print("  FIND PT")
+        #print("  FIND PT")
         #try find path with unhides, uses a G, F, and A  based on the current NPT
         _, _, path_PT = find_some_path(temp_G_PT, [chosen_BE], [chosen_BS], endpoint_extractor = branch_extractor_PT, prioritize_oneway = True)
         
@@ -118,11 +118,11 @@ return the combination selected Au, Fu and the path path_AF found between them.
 """
 def find_some_path(G, As, Fs, endpoint_extractor = default_extractor, prioritize_oneway = False):
 
-    print("     Find Some Path")
+    #print("     Find Some Path")
 
     for Au in As:
         
-        print("         Find Some Au: ", str(Au))
+        #print("         Find Some Au: ", str(Au))
         
         if Au is None:
             continue
@@ -131,7 +131,7 @@ def find_some_path(G, As, Fs, endpoint_extractor = default_extractor, prioritize
          
         for Fu in Fs:
             
-            print("             Find Some Fu: ", str(Fu))
+            #print("             Find Some Fu: ", str(Fu))
         
             F = endpoint_extractor(Fu)
             path_AF = find_path(G, A, F, prioritize_oneway)
@@ -140,7 +140,7 @@ def find_some_path(G, As, Fs, endpoint_extractor = default_extractor, prioritize
                 return Au, Fu, path_AF
     
     #Exhausted all AF combos in G
-    print("     FAILED Find Some Path")
+    #print("     FAILED Find Some Path")
     return None, None, None
     
 """
@@ -192,17 +192,17 @@ def find_path(G, A2, F, prioritize_oneway = False):
     
     temp_G = path_flow.reflow(temp_G) #reflow before accessing steps
     
-    print("             A Steps: ", str(A))
-    for N, steps in A.steps.items():
-        print("                 ", str(N), ": ", steps.steps, " HID: ", steps.hidden_steps)
+    #print("             A Steps: ", str(A))
+    #for N, steps in A.steps.items():
+        #print("                 ", str(N), ": ", steps.steps, " HID: ", steps.hidden_steps)
     
     if F not in A.steps:
-        print("             FAILED Find Path: ", str(A), " TO ", str(F), ": F not in A")
+        #print("             FAILED Find Path: ", str(A), " TO ", str(F), ": F not in A")
         
         return None
     
-    print("             Find Path: ", str(A), " TO ", str(F))
-    print("                 START >", str(A)) 
+    #print("             Find Path: ", str(A), " TO ", str(F))
+    #print("                 START >", str(A)) 
     
     while not A == F:
     
@@ -215,12 +215,12 @@ def find_path(G, A2, F, prioritize_oneway = False):
     
         for N in temp_G.neighbors(A):
 
-            print("                    >", str(N), "?") 
+            #print("                    >", str(N), "?") 
 
             #N steps should be one less if the correct path
             if F in N.steps and N.steps[F].steps == A.steps[F].steps - 1:
                 
-                print("                         >", str(N), " Good Steps") 
+                #print("                         >", str(N), " Good Steps") 
                 
                 desired_hidden_steps = A.steps[F].hidden_steps
                 edge_AN_is_hidden = (A, N) in G.hidden_edges
@@ -231,7 +231,7 @@ def find_path(G, A2, F, prioritize_oneway = False):
                 
                 #N hidden steps should be same or one less if the correct path
                 if N.steps[F].hidden_steps == desired_hidden_steps: 
-                    print("                         >", str(N), " Good Hidden") 
+                    #print("                         >", str(N), " Good Hidden") 
                 
                     
                 
@@ -240,11 +240,11 @@ def find_path(G, A2, F, prioritize_oneway = False):
                     if A.start_exit_type == StartExitType.START:
                         chosen_path = choose_path(temp_G, A, N, F, prioritize_oneway) 
                         if chosen_path is None:
-                            print("                         >", str(N), " No Path!") 
+                            #print("                         >", str(N), " No Path!") 
                             
                             continue
                     
-                    print("                 >", str(N)) 
+                    #print("                 >", str(N)) 
                     
                     chosen_endpoints.append((A, chosen_path))
                     
@@ -270,7 +270,7 @@ def find_path(G, A2, F, prioritize_oneway = False):
         if len(chosen_endpoints) == 0:
             return None
         
-        print("                 >", str(A), " IS BAD ") 
+        #print("                 >", str(A), " IS BAD ") 
         prev_A, to_refund = chosen_endpoints.pop() 
 
         if to_refund is not None:
@@ -281,7 +281,7 @@ def find_path(G, A2, F, prioritize_oneway = False):
         
         A = prev_A #continue from previous A
     
-    print("                 >", str(F), " FINISHED") 
+    #print("                 >", str(F), " FINISHED") 
     chosen_endpoints.append((F, None)) #If F is START, assume it is being appended to some already existing path choice
     
     path_graph.remove_rooms_by_endpoint_path(G, chosen_endpoints)
@@ -300,7 +300,7 @@ def choose_path(G, A, N, F, prioritize_oneway):
     chosen_hidden_oneway_path = None
     want_hidden = (A, N) in G.hidden_edges
     
-    print("                         >", str(N), " Try Path:") 
+    #print("                         >", str(N), " Try Path:") 
     
     for p in paths_of_types:
         
@@ -314,15 +314,15 @@ def choose_path(G, A, N, F, prioritize_oneway):
         
         temp_G = path_flow.reflow(temp_G) #must reflow before we access steps
         
-        print("                             TRY ", str(p)) 
+        #print("                             TRY ", str(p)) 
         
         removal_disrupts_path = F not in temp_N.steps 
         
         #N to F should be intact ,the path we should was A to N
         #but removal of the room of p might disrupt N to F
         #and therefore p cannot be used
-        if removal_disrupts_path:
-            print("                                 DISRUPTS") 
+        #if removal_disrupts_path:
+            #print("                                 DISRUPTS") 
         
         if not removal_disrupts_path:
             
@@ -386,8 +386,8 @@ def choose_path(G, A, N, F, prioritize_oneway):
     
     if chosen_path is not None:
         path_graph.remove_room_by_path(G, chosen_path)
-    else:
-        print("                                 NONE PATH5.300") 
+    #else:
+        #print("                                 NONE PATH") 
     
     return chosen_path
 

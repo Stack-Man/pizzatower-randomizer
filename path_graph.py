@@ -253,7 +253,7 @@ ALGORITHM - ADD PATHS OF ROOM FROM G
 5. If at least one edge was added, Flow(G)
 """
 def add_rooms_by_endpoint_path(G, endpoint_path):
-    print("add by endpoint path")
+    #print("add by endpoint path")
     by_endpoint_path(G, endpoint_path, add_room_by_room)
 
 def add_room_by_room(G, room_name):
@@ -378,6 +378,9 @@ def unhide_rooms_by_endpoint(G, endpoint_key):
     #then we dont need to unhide anything
     if len(G.all_paths[endpoint_key]) <= MIN_ROOMS_TO_HIDE:
         return
+
+    if not endpoint_key in G.hidden_edges:
+        return #already removed
 
     G.hidden_edges.remove(endpoint_key)
     G.unhidden_edges.append(endpoint_key)

@@ -208,16 +208,17 @@ class RoomSegment(BaseSegment):
         if len(self.other_viable_rooms) == 0:
             return None
         else:
+
             r = self.other_viable_rooms.pop()
             self.chosen_room = r
-            print("Set chosen room as ", r.room_name)
+            #print("Set chosen room as ", r.room_name)
             
             return r
 
     def get_viable_john(self):
-        if len(self.other_viable_rooms) == 0:
+        if len(self.john_viable_rooms) == 0:
             return None
         else:
-            r = self.other_viable_rooms.pop()
+            r = self.john_viable_rooms.pop()
             self.chosen_room = r
             return r

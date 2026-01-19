@@ -67,10 +67,11 @@ def create_level(TW, OW_NPT, OW_PT, BS, BE, E, EBS, J, JBE):
         last_room_seg = level.get_last_room_seg()
         successful = False
         john_end = False
+        want_john_end = level.branch_count >= max_branches
        
         #Create start segment
         if level.segment_count() == 1:
-            print("Try Entrance")
+            print("Add Entrance")
             
             #cant do john end bc no john in last room seg, 
             #immediate john end would come from other add segments
@@ -82,23 +83,23 @@ def create_level(TW, OW_NPT, OW_PT, BS, BE, E, EBS, J, JBE):
                 return None
 
         elif last_room_seg.is_branch_end:
-            print("Try Twoway")
+            print("Add Twoway")
             
             #Bridge Twoway from last branch to new branch or J if none
-            successful, john_end = add_twoway_segments(level, TW, OW_NPT, OW_PT, BS, BE, last_room_seg)
+            successful, john_end = add_twoway_segments(level, layers, last_room_seg, want_john_end)
         else:
-            print("Try Branch")
+            print("Add Branch")
             
             #Create branch segment to BE or JBE if none
-            successful, john_end = add_branch_segments(level, layers, last_room_seg)
+            successful, john_end = add_branch_segments(level, layers, last_room_seg, want_john_end)
         
         if not successful: #if none, step back
-            print("Step Back not successful")
+            print("Step Back. Not successful.")
             step_back(level, layers)
             continue
         elif john_end:
             return level
-        elif level.branch_count >= max_branches:
+        elif level.branch_count > max_branches: #TODO: doesnt really force a john endad any point
             print("Step Back too many branches")
             step_back(level, layers)
             continue
@@ -113,8 +114,13 @@ def step_back(level, layers):
     room_seg = level.remove_last_segment()
     path_seg = level.remove_last_segment()
     
-    layers.refund_seg(room_seg)
+    layers.refund_seg(room_seg) #ultimately refunds nothing bc there is no chosen room
     layers.refund_seg(path_seg)
+    
+    #normally a chosen room is refunded when it first fails
+    #but in the case of a step back, we need to refund it ourselves
+    prev_room_seg = level.get_last_room_seg()
+    layers.refund_room(prev_room_seg.chosen_room)
     
     
 #TODO: could have john be forbidden if below certain branch, then do another run with john if cant find any
@@ -180,12 +186,15 @@ def add_entrance_segments(level, layers, last_room_seg):
             
             return True
 
-def add_branch_segments(level, layers, last_room_seg):
+def add_branch_segments(level, layers, last_room_seg, want_john_end):
     #create oneway bridge: last_room_seg (viable BSs) > OW > BE/JBE
     #or
     #choose J from last_room_seg
     
     while True:
+        if want_john_end: #force john so we dont add another branch
+            print("Force John")
+            break
         
         chosen_room = layers.get_viable_branch_start(last_room_seg) #also sets
         
@@ -193,7 +202,7 @@ def add_branch_segments(level, layers, last_room_seg):
             print("Branch fail try john")
             break #try john
         
-        print("Try branch ", chosen_room.room_name)
+        print("Try branch with", chosen_room.room_name)
         
         chosen_BS, chosen_BE, path_NPT, path_PT = layers.bridge_oneway(chosen_room)
         
@@ -210,6 +219,7 @@ def add_branch_segments(level, layers, last_room_seg):
         chosen_room = layers.get_viable_john(last_room_seg) #also sets
             
         if chosen_room is None:
+            print("No john")
             return False, False #Failed!
             
         #dont add to level because last_room_seg.get already set chosen room
@@ -217,12 +227,15 @@ def add_branch_segments(level, layers, last_room_seg):
         return True, True #success and john
 
 
-def add_twoway_segments(level, layers, last_room_seg):
+def add_twoway_segments(level, layers, last_room_seg, want_john_end):
     #create oneway bridge: last_room_seg (viable BSs) > OW > BE/JBE
     #or
     #choose J from last_room_seg
     
     while True:
+        #if want_john_end: #dont force john so we can try for a twoway john if possible
+            #print("Force John")
+            #break
         
         #get room and sync
         chosen_room = layers.get_viable_branch_end(last_room_seg) #also sets
@@ -245,6 +258,7 @@ def add_twoway_segments(level, layers, last_room_seg):
         chosen_room = layers.get_viable_john(last_room_seg) #also sets
         
         if chosen_room is None:
+            print("No John")
             return False, False #Failed!
             
         #dont add to level because last room seg.get already set

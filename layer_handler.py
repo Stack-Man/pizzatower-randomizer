@@ -60,40 +60,40 @@ class LayerHandler():
         #find J whose only and BS whose branch match that door type and dir
         #include initial room in the lists
         
-        print("FIND MATCH FOR: ", initial_room.room_name) #TODO: its finding match for entrance and not entrance end
+        #print("FIND MATCH FOR: ", initial_room.room_name) #TODO: its finding match for entrance and not entrance end
         
         door_to_match = None
         valid_rooms = []
         valid_johns = []
         
         if isinstance(initial_room, BranchRoom):
-            print("TRY MATCH FOR BRANCH DOOR")
+           # print("TRY MATCH FOR BRANCH DOOR")
             door_to_match = initial_room.branch_door
-            valid_rooms.append(initial_room)
+            #valid_rooms.append(initial_room) #should match self bc self is not yet removed
         else:
-            print("TRY MATCH FOR JOHN DOOR")
+            #print("TRY MATCH FOR JOHN DOOR")
             door_to_match = initial_room.door
-            valid_johns.append(initial_room)
+            #valid_johns.append(initial_room)
         
         for potential_room in self.BS:
-            print("     TRY MATCH BS: ", potential_room.room_name)
+           # print("     TRY MATCH BS: ", potential_room.room_name)
             
             if match_door(door_to_match, potential_room.branch_door):
-                print("         DOES MATCH")
+                #print("         DOES MATCH")
                 valid_rooms.append(potential_room)
         
         for potential_room in self.J:
-            print("     TRY MATCH J: ", potential_room.room_name)
+            #print("     TRY MATCH J: ", potential_room.room_name)
             
             if match_door(door_to_match, potential_room.door):
-                print("         DOES MATCH")
+                #print("         DOES MATCH")
                 valid_johns.append(potential_room)
         
-        print("FIND MATCH J, BS: rooms: ", len(valid_rooms), " johns: ", len(valid_johns) )
+        #print("FIND MATCH J, BS: rooms: ", len(valid_rooms), " johns: ", len(valid_johns) )
         
         return valid_rooms, valid_johns
     
-    def get_matching_JBE_BE(self, initial_room):
+    def get_matching_JBE_BE(self, initial_room): #TODO: adds entrance_6 twice?
         
         #get branch door or only door from initial_room
         #find J whose only and BS whose branch match that door type and dir
@@ -105,10 +105,13 @@ class LayerHandler():
         PT_match = initial_room.PT_door
         NPT_match = initial_room.NPT_door
         
-        if isinstance(initial_room, BranchRoom):
-            valid_rooms.append(initial_room)
-        else:
-            valid_johns.append(initial_room)
+        #should match self too
+        #if isinstance(initial_room, BranchRoom):
+            #valid_rooms.append(initial_room)
+        #else:
+            #valid_johns.append(initial_room)
+        
+        #print("FIND MATCHING FOR ", initial_room.room_name)
         
         for potential_room in self.BE:
             
@@ -120,7 +123,18 @@ class LayerHandler():
             if match_door(PT_match, potential_room.PT_door) and match_door(NPT_match, potential_room.NPT_door):
                 valid_johns.append(pot)
         
-        print("FIND MATCH JBE, BE: rooms: ", len(valid_rooms), " johns: ", len(valid_johns) )
+        """
+        print("     MATCH ROOMS:")
+        
+        for r in valid_rooms:
+            print("         ", r.room_name, " ", str(type(r)))
+        
+        print("     MATCH JOHNS:")
+        
+        for r in valid_johns:
+            print("         ", r.room_name, " ", str(type(r)))
+        
+        print("FIND MATCH JBE, BE: rooms: ", len(valid_rooms), " johns: ", len(valid_johns) )"""
         
         return valid_rooms, valid_johns
 
@@ -158,9 +172,9 @@ class LayerHandler():
         
         if isinstance(chosen_room, BranchRoom):
             
-            self.BS.remove(chosen_room) #TODO room is being picked from BS and not readded to it when refund and then crash when try next time bc its not in BS
+            self.BS.remove(chosen_room) #TODO room is being picked from BS and not readded to it when refund and then crash when try next time bc its not in BS? (cant recreate that now cause i changed an if)
             
-            print("REMOVED FROM BS ", chosen_room.room_name)
+            print("     REMOVED FROM BS ", chosen_room.room_name)
             
             self.BS_removed.append(chosen_room)
             
@@ -172,10 +186,10 @@ class LayerHandler():
             raise RuntimeError("got room that wasnt in BS")
     
     def refund_branch_start(self, room):
-        print("REFUND BS ", chosen_room.room_name)
+        print("REFUND BS ", room.room_name)
         
         if isinstance(room, BranchRoom):
-            print("READDED TO BS ", chosen_room.room_name)
+            print("     READDED TO BS ", room.room_name)
             
             self.BS.append(room)
             self.BS_removed.remove(room)
@@ -204,7 +218,7 @@ class LayerHandler():
         print("CHOSE BE", chosen_room.room_name)
         
         if isinstance(chosen_room, BranchRoom):
-            print("REMOVED FROM BE ", chosen_room.room_name)
+            print("     REMOVED FROM BE ", chosen_room.room_name)
             
             self.BE.remove(chosen_room)
             self.BE_removed.append(chosen_room)
@@ -217,10 +231,10 @@ class LayerHandler():
             raise RuntimeError("got room that wasnt in BE")
     
     def refund_branch_end(self, room):
-        print("REFUND BE ", chosen_room.room_name)
+        print("REFUND BE ", room.room_name)
         
         if isinstance(room, BranchRoom):
-            print("REMOVED FROM BE ", chosen_room.room_name)
+            print("     REMOVED FROM BE ", room.room_name)
             
             self.BE.append(room)
             self.BE_removed.remove(room)
@@ -232,7 +246,6 @@ class LayerHandler():
             raise RuntimeError("refund room that wasnt in BE")
     
     def get_viable_john(self, seg):
-        
         chosen_room = seg.get_viable_john()
         
         if chosen_room is None:
@@ -252,7 +265,7 @@ class LayerHandler():
         if isinstance(seg, RoomSegment):
             print("try refund room seg")
 
-            if not seg.chosen_room == None: #TODO: room is none?, no that is good bc the most reecnt room has no chosen sometimes
+            if not seg.chosen_room == None: #TODO: room is none?, no that is good bc the most recent room has no chosen sometimes
                 print("try refund room ", seg.chosen_room.room_name)
 
                 self.refund_room(seg.chosen_room)
