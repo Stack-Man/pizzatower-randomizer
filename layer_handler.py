@@ -1,6 +1,6 @@
 from path_traversal import create_bridge_twoway, create_bridge_oneway
-from path_graph import update_other_G
-from layer_objects import EntranceRoom, JohnRoom, EJBranchRoom, BranchRoom
+from path_graph import update_other_G, add_rooms_by_endpoint_path
+from layer_objects import EntranceRoom, JohnRoom, EJBranchRoom, BranchRoom, RoomSegment, BranchPathSegment, PathSegment
 
 #store and manage synchronization of layers
 #all requests for paths from layers should be
@@ -46,8 +46,8 @@ class LayerHandler():
         chosen_BS, chosen_BE, path_NPT, path_PT = create_bridge_oneway(G_NPT = self.OW_NPT, G_PT = self.OW_PT, BSs = [A], BEs = BEs) 
         
         if chosen_BE is not None:
-            update_other_G(self.OW_NPT, [TW])
-            update_other_G(self.OW_PT, [TW])
+            update_other_G(self.OW_NPT, [self.TW])
+            update_other_G(self.OW_PT, [self.TW])
         
         return chosen_BS, chosen_BE, path_NPT, path_PT
     
@@ -60,25 +60,36 @@ class LayerHandler():
         #find J whose only and BS whose branch match that door type and dir
         #include initial room in the lists
         
+        print("FIND MATCH FOR: ", initial_room.room_name) #TODO: its finding match for entrance and not entrance end
+        
         door_to_match = None
         valid_rooms = []
         valid_johns = []
         
         if isinstance(initial_room, BranchRoom):
+            print("TRY MATCH FOR BRANCH DOOR")
             door_to_match = initial_room.branch_door
             valid_rooms.append(initial_room)
         else:
+            print("TRY MATCH FOR JOHN DOOR")
             door_to_match = initial_room.door
             valid_johns.append(initial_room)
         
         for potential_room in self.BS:
+            print("     TRY MATCH BS: ", potential_room.room_name)
             
             if match_door(door_to_match, potential_room.branch_door):
+                print("         DOES MATCH")
                 valid_rooms.append(potential_room)
         
         for potential_room in self.J:
+            print("     TRY MATCH J: ", potential_room.room_name)
+            
             if match_door(door_to_match, potential_room.door):
+                print("         DOES MATCH")
                 valid_johns.append(potential_room)
+        
+        print("FIND MATCH J, BS: rooms: ", len(valid_rooms), " johns: ", len(valid_johns) )
         
         return valid_rooms, valid_johns
     
@@ -109,20 +120,15 @@ class LayerHandler():
             if match_door(PT_match, potential_room.PT_door) and match_door(NPT_match, potential_room.NPT_door):
                 valid_johns.append(pot)
         
+        print("FIND MATCH JBE, BE: rooms: ", len(valid_rooms), " johns: ", len(valid_johns) )
+        
         return valid_rooms, valid_johns
 
     def get_viable_entrance(self, seg):
-        chosen_room = seg.get_viable_room() #TODO: for some reason its putting in johns in here
+        chosen_room = seg.get_viable_room()
         
         if chosen_room is None:
             return None
-        
-        print("Try get type of ", str(type(chosen_room)))
-        print(chosen_room.__class__, id(chosen_room.__class__))
-        print(EJBranchRoom, id(EJBranchRoom))
-        
-        print("is ER: ", isinstance(chosen_room, EntranceRoom))
-        print("is EBR: ", isinstance(chosen_room, EJBranchRoom))
         
         if isinstance(chosen_room, EntranceRoom):
             self.E.remove(chosen_room)
@@ -147,9 +153,15 @@ class LayerHandler():
         
         if chosen_room is None:
             return None
+            
+        print("CHOSE BS", chosen_room.room_name)
         
         if isinstance(chosen_room, BranchRoom):
-            self.BS.remove(chosen_room)
+            
+            self.BS.remove(chosen_room) #TODO room is being picked from BS and not readded to it when refund and then crash when try next time bc its not in BS
+            
+            print("REMOVED FROM BS ", chosen_room.room_name)
+            
             self.BS_removed.append(chosen_room)
             
             #sync with BE
@@ -160,7 +172,11 @@ class LayerHandler():
             raise RuntimeError("got room that wasnt in BS")
     
     def refund_branch_start(self, room):
+        print("REFUND BS ", chosen_room.room_name)
+        
         if isinstance(room, BranchRoom):
+            print("READDED TO BS ", chosen_room.room_name)
+            
             self.BS.append(room)
             self.BS_removed.remove(room)
             
@@ -185,7 +201,11 @@ class LayerHandler():
         if chosen_room is None:
             return None
         
+        print("CHOSE BE", chosen_room.room_name)
+        
         if isinstance(chosen_room, BranchRoom):
+            print("REMOVED FROM BE ", chosen_room.room_name)
+            
             self.BE.remove(chosen_room)
             self.BE_removed.append(chosen_room)
             
@@ -197,7 +217,11 @@ class LayerHandler():
             raise RuntimeError("got room that wasnt in BE")
     
     def refund_branch_end(self, room):
+        print("REFUND BE ", chosen_room.room_name)
+        
         if isinstance(room, BranchRoom):
+            print("REMOVED FROM BE ", chosen_room.room_name)
+            
             self.BE.append(room)
             self.BE_removed.remove(room)
             
@@ -220,3 +244,70 @@ class LayerHandler():
             self.JBE.remove(chosen_room)
         else:
             raise RuntimeError("get john that wasnt in J or JBE")
+    
+    def refund_seg(self, seg):
+        
+        print("REFUND SEG ", str(type(seg)))
+        
+        if isinstance(seg, RoomSegment):
+            print("try refund room seg")
+
+            if not seg.chosen_room == None: #TODO: room is none?, no that is good bc the most reecnt room has no chosen sometimes
+                print("try refund room ", seg.chosen_room.room_name)
+
+                self.refund_room(seg.chosen_room)
+        elif isinstance(seg, BranchPathSegment):
+            self.refund_path_OW(seg.OW_NPT)
+            self.refund_path_OW(seg.OW_PT)
+        elif isinstance(seg, PathSegment):
+            self.refund_path_TW(seg.paths)
+        else:
+            raise RuntimeError("Try refund seg that wasn't R P or BP")
+    
+    def refund_room(self, room):
+        print("REFUND ROOM ", str(type(room)))
+        
+        if isinstance(room, EJBranchRoom):
+            
+            if room.start_exit_type == StartExitType.START: #john
+                self.JBE.append(room)
+                
+            else: #entrance
+                self.EBS.append(room)
+        
+        elif isinstance(room, EntranceRoom):
+            self.E.append(room)
+        elif isinstance(room, JohnRoom):
+            self.J.append(room)
+        elif isinstance(room, BranchRoom):
+            if room in self.BE_removed:
+                self.BE_removed.remove(room)
+                self.BE.append(room)
+        
+            if room in self.BS_removed:
+                self.BS_removed.remove(room)
+                self.BS.append(room)
+        else:
+            raise RuntimeError("Tried refund room that wasnt EJB, E, J, or B")
+   
+    def refund_path_OW(self, path):
+        self.refund_path_TW(path)
+        
+        add_rooms_by_endpoint_path(self.OW_NPT, path)
+        add_rooms_by_endpoint_path(self.OW_PT, path)
+    
+    def refund_path_TW(self, path):
+        add_rooms_by_endpoint_path(self.TW, path)
+
+
+
+
+
+
+
+
+
+
+
+
+        

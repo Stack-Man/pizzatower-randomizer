@@ -5,6 +5,6 @@ level growth
 
 ruin_11 is marked as normal john ? (might be fixed with branch to EJBranchRoom)
 
-finish syncing with refund syncing
+fix error A no longer in F appearing
 
 some branch rooms fail parsing

@@ -190,6 +190,8 @@ def find_path(G, A2, F, prioritize_oneway = False):
             A = g
             break
     
+    temp_G = path_flow.reflow(temp_G) #reflow before accessing steps
+    
     print("             A Steps: ", str(A))
     for N, steps in A.steps.items():
         print("                 ", str(N), ": ", steps.steps, " HID: ", steps.hidden_steps)
@@ -200,7 +202,7 @@ def find_path(G, A2, F, prioritize_oneway = False):
         return None
     
     print("             Find Path: ", str(A), " TO ", str(F))
-    print("                 >", str(A)) 
+    print("                 START >", str(A)) 
     
     while not A == F:
     

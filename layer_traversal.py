@@ -70,39 +70,52 @@ def create_level(TW, OW_NPT, OW_PT, BS, BE, E, EBS, J, JBE):
        
         #Create start segment
         if level.segment_count() == 1:
+            print("Try Entrance")
+            
             #cant do john end bc no john in last room seg, 
             #immediate john end would come from other add segments
             successful = add_entrance_segments(level, layers, last_room_seg)
             
             #If Failed, level is fail!
             if not successful:
+                print("Failed Level")
                 return None
 
         elif last_room_seg.is_branch_end:
+            print("Try Twoway")
+            
             #Bridge Twoway from last branch to new branch or J if none
             successful, john_end = add_twoway_segments(level, TW, OW_NPT, OW_PT, BS, BE, last_room_seg)
         else:
+            print("Try Branch")
+            
             #Create branch segment to BE or JBE if none
             successful, john_end = add_branch_segments(level, layers, last_room_seg)
         
         if not successful: #if none, step back
-            step_back(level)
+            print("Step Back not successful")
+            step_back(level, layers)
             continue
         elif john_end:
             return level
         elif level.branch_count >= max_branches:
-            step_back(level)
+            print("Step Back too many branches")
+            step_back(level, layers)
             continue
         else:
             continue
 
     return level
 
-def step_back(level):
+def step_back(level, layers):
     #No viable room from last room segment
     #and path to those last rooms must be bad too
     room_seg = level.remove_last_segment()
     path_seg = level.remove_last_segment()
+    
+    layers.refund_seg(room_seg)
+    layers.refund_seg(path_seg)
+    
     
 #TODO: could have john be forbidden if below certain branch, then do another run with john if cant find any
 #TODO: let john/entrance room choose any door instead of specific one
@@ -128,6 +141,7 @@ def add_branch_to_level(level, path_NPT, path_PT, valid_rooms, valid_johns):
     #add room seg with viable rooms
     #end of branch = JBE/BE
     room_seg = RoomSegment(valid_rooms, valid_johns, is_branch_end = True)
+    level.add_segment(room_seg)
 
 def add_entrance_segments(level, layers, last_room_seg):
     #create twoway bridge: E > TW > BS/J
@@ -149,7 +163,7 @@ def add_entrance_segments(level, layers, last_room_seg):
                 layers.refund_entrance(chosen_room)
                 continue
             
-            valid_rooms, valid_johns = layers.get_matching_J_BS(chosen_A)
+            valid_rooms, valid_johns = layers.get_matching_J_BS(chosen_F)
             add_path_to_level(level, path_AF, valid_rooms, valid_johns)
             
             return True
@@ -161,7 +175,7 @@ def add_entrance_segments(level, layers, last_room_seg):
                 layers.refund_entrance(chosen_room)
                 continue
             
-            valid_rooms, valid_johns = layers.get_matching_JBE_BE(chosen_BS)
+            valid_rooms, valid_johns = layers.get_matching_JBE_BE(chosen_BE)
             add_branch_to_level(level, path_NPT, path_PT, valid_rooms, valid_johns)
             
             return True
@@ -174,9 +188,12 @@ def add_branch_segments(level, layers, last_room_seg):
     while True:
         
         chosen_room = layers.get_viable_branch_start(last_room_seg) #also sets
-            
+        
         if chosen_room is None:
+            print("Branch fail try john")
             break #try john
+        
+        print("Try branch ", chosen_room.room_name)
         
         chosen_BS, chosen_BE, path_NPT, path_PT = layers.bridge_oneway(chosen_room)
         
@@ -184,7 +201,7 @@ def add_branch_segments(level, layers, last_room_seg):
             layers.refund_branch_start(chosen_room)
             continue
         
-        valid_rooms, valid_johns = layers.get_matching_JBE_BE(chosen_BS)
+        valid_rooms, valid_johns = layers.get_matching_JBE_BE(chosen_BE)
         add_branch_to_level(level, path_NPT, path_PT, valid_rooms, valid_johns)
         
         return True, False #success but not john
@@ -219,7 +236,7 @@ def add_twoway_segments(level, layers, last_room_seg):
             layers.refund_branch_end(chosen_room)
             continue
         
-        valid_rooms, valid_johns = layers.get_matching_J_BS(chosen_A)
+        valid_rooms, valid_johns = layers.get_matching_J_BS(chosen_F)
         add_path_to_level(level, path_AF, valid_rooms, valid_johns)
         
         return True, False #success but not john
