@@ -200,7 +200,7 @@ def remove_paths_of_room_by_endpoint(G, room_name, endpoint_key):
     
     if len(kept_paths) == 0:
         #remove edge and mark updated
-        print("     FROM G: ", G.name , "REMOVED EDGE: ", str(endpoint_key[0]), " TO ", str(endpoint_key[1]))
+        #print("     FROM G: ", G.name , "REMOVED EDGE: ", str(endpoint_key[0]), " TO ", str(endpoint_key[1]))
         G.remove_edge(endpoint_key[0], endpoint_key[1])
         G.updated_since_last_flow = True
         
@@ -282,7 +282,7 @@ def add_room_by_room(G, room_name):
         #add edge if none (original len 0)
         #and if there should be one (current len > 0)
         if original_length == 0 and current_length > 0:
-            print("     FROM G: ", G.name , "ADDED EDGE: ", str(endpoint_key[0]), " TO ", str(endpoint_key[1]))
+            #print("     FROM G: ", G.name , "ADDED EDGE: ", str(endpoint_key[0]), " TO ", str(endpoint_key[1]))
             G.add_edge(endpoint_key[0], endpoint_key[1])
             G.updated_since_last_flow = True
             
@@ -307,7 +307,7 @@ def update_other_G(G, others):
 
     for O in others:
         
-        print("SYNCING ", G.name, " TO ", O.name)
+        #print("SYNCING ", G.name, " TO ", O.name)
         
         #readd first then remove
         for room in G.readded_rooms:

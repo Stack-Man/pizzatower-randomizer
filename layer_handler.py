@@ -168,25 +168,30 @@ class LayerHandler():
         if chosen_room is None:
             return None
             
-        print("CHOSE BS", chosen_room.room_name)
+        print("CHOSE BS", chosen_room.room_name, ": ", str(type(chosen_room)))
+        
+        if chosen_room.room_name == "plage_shipmain":
+            print("==================")
         
         if isinstance(chosen_room, BranchRoom):
-            
-            self.BS.remove(chosen_room) #TODO room is being picked from BS and not readded to it when refund and then crash when try next time bc its not in BS? (cant recreate that now cause i changed an if)
+            self.BS.remove(chosen_room) 
             
             print("     REMOVED FROM BS ", chosen_room.room_name)
             
             self.BS_removed.append(chosen_room)
             
             #sync with BE
-            self.sync(chosen_room, self.BE, self.BE_removed)
+            self.BE, self.BE_removed = self.sync(chosen_room, self.BE, self.BE_removed)
             
             return chosen_room
         else:
             raise RuntimeError("got room that wasnt in BS")
     
-    def refund_branch_start(self, room):
+    def refund_branch_start(self, room): 
         print("REFUND BS ", room.room_name)
+        
+        if room.room_name == "plage_shipmain":
+            print("==================")
         
         if isinstance(room, BranchRoom):
             print("     READDED TO BS ", room.room_name)
@@ -195,19 +200,29 @@ class LayerHandler():
             self.BS_removed.remove(room)
             
             #sync with BE
-            self.sync(room, self.BE_removed, self.BE)
-            
+            self.BE_removed, self.BE = self.sync(room, self.BE_removed, self.BE)
+
         else:
             raise RuntimeError("refund room that wasnt in BS")
     
     #if room is in list that should have it
     #remove it and add it to the other
     def sync(self, sync_room, other_remove_from, other_append_to):
+        
+        if sync_room.room_name == "plage_shipmain":
+            print("==================SYNC")
+        
         for other_room in other_remove_from:
             if other_room.room_name == sync_room.room_name:
+                
+                if sync_room.room_name == "plage_shipmain":
+                    print("==================DID SYNC")
+                
                 other_remove_from.remove(other_room)
                 other_append_to.append(other_room)
                 break
+        
+        return other_remove_from, other_append_to
     
     def get_viable_branch_end(self, seg):
         chosen_room = seg.get_viable_room()
@@ -217,21 +232,36 @@ class LayerHandler():
         
         print("CHOSE BE", chosen_room.room_name)
         
+        if chosen_room.room_name == "plage_shipmain":
+            print("==================")
+        
         if isinstance(chosen_room, BranchRoom):
             print("     REMOVED FROM BE ", chosen_room.room_name)
             
             self.BE.remove(chosen_room)
             self.BE_removed.append(chosen_room)
             
-            #sync with BS
-            self.sync(chosen_room, self.BS, self.BS_removed)
+            #sync with BE
+            if chosen_room.room_name == "plage_shipmain":
+                print("==================BEFORE SYNC:", len(self.BS), "rem: ", len(self.BS_removed))
+            
+            self.BS, self.BS_removed = self.sync(chosen_room, self.BS, self.BS_removed)
+            
+            if chosen_room.room_name == "plage_shipmain":
+                print("==================AFTER SYNC:", len(self.BS), "rem: ", len(self.BS_removed))
             
             return chosen_room
         else:
             raise RuntimeError("got room that wasnt in BE")
     
-    def refund_branch_end(self, room):
+    def refund_branch_end(self, room): 
+        #TODO: chose plage_shipmain, removed from BE, synced with BS, never refunded before next choose which chooses BS plage_shipmain
+        #i do see "try refund room seg > try refudn room plage_shipmain" but no "REFUND BRANCH END" shows up... oh is it because i call refund room dierctly? does this not sync
+        #should sync... something with sync function is fucked up i think
         print("REFUND BE ", room.room_name)
+        
+        if room.room_name == "plage_shipmain":
+            print("==================")
         
         if isinstance(room, BranchRoom):
             print("     REMOVED FROM BE ", room.room_name)
@@ -240,7 +270,7 @@ class LayerHandler():
             self.BE_removed.remove(room)
             
             #sync with BS
-            self.sync(room, self.BS_removed, self.BS)
+            self.BS_removed, self.BS = self.sync(room, self.BS_removed, self.BS)
             
         else:
             raise RuntimeError("refund room that wasnt in BE")
@@ -279,7 +309,7 @@ class LayerHandler():
     
     def refund_room(self, room):
         print("REFUND ROOM ", str(type(room)))
-        
+
         if isinstance(room, EJBranchRoom):
             
             if room.start_exit_type == StartExitType.START: #john
@@ -293,13 +323,19 @@ class LayerHandler():
         elif isinstance(room, JohnRoom):
             self.J.append(room)
         elif isinstance(room, BranchRoom):
-            if room in self.BE_removed:
-                self.BE_removed.remove(room)
-                self.BE.append(room)
-        
-            if room in self.BS_removed:
-                self.BS_removed.remove(room)
-                self.BS.append(room)
+            
+            for r in self.BE_removed:
+                if room.room_name == r.room_name:
+                    self.BE_removed.remove(r)
+                    self.BE.append(r)
+                    break
+            
+            for r in self.BS_removed:
+                if room.room_name == r.room_name:
+                    self.BS_removed.remove(r)
+                    self.BS.append(r)
+                    break
+
         else:
             raise RuntimeError("Tried refund room that wasnt EJB, E, J, or B")
    
