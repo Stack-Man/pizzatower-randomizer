@@ -122,8 +122,6 @@ class Level():
         
         self.segments.append(seg)
         
-        print("LEVEL ADD SEG: ", str(type(seg)))
-        
         if isinstance(seg, BranchPathSegment):
             self.branch_count = self.branch_count + 1
     
@@ -131,8 +129,6 @@ class Level():
         
         if self.segment_count() > 0:
             seg = self.segments.pop()
-            
-            print("LEVEL REMOVE SEG: ", str(type(seg)))
             
             if isinstance(seg, BranchPathSegment):
                 self.branch_count = self.branch_count - 1
@@ -149,12 +145,6 @@ class Level():
         last_room_seg = self.segments[len(self.segments) - 1]
         
         if not isinstance(last_room_seg, RoomSegment):
-            
-            print("FAILED GET LAST ROOM SEG:")
-            
-            for seg in self.segments:
-                print("SEG: ", str(type(seg)))
-            
             raise RuntimeError("last segment added was not a room segment!")
         else:
             return last_room_seg

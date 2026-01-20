@@ -58,3 +58,5 @@ def copy_graph_attributes(G, new_G):
     
     new_G.unhidden_rooms = G.unhidden_rooms.copy()
     new_G.unhidden_edges = G.unhidden_edges.copy()
+    
+    new_G.name = G.name

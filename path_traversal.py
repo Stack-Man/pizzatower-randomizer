@@ -240,11 +240,7 @@ def find_path(G, A2, F, prioritize_oneway = False):
                     if A.start_exit_type == StartExitType.START:
                         chosen_path = choose_path(temp_G, A, N, F, prioritize_oneway) 
                         if chosen_path is None:
-                            #print("                         >", str(N), " No Path!") 
-                            
-                            continue
-                    
-                    #print("                 >", str(N)) 
+                            continue #try next N
                     
                     chosen_endpoints.append((A, chosen_path))
                     
@@ -292,6 +288,8 @@ def find_path(G, A2, F, prioritize_oneway = False):
 def choose_path(G, A, N, F, prioritize_oneway):
     paths_of_types = G.all_paths[(A, N)] 
     
+    print("WILL CHOOSE PATH FROM G: ", G.name, " EDGE: ", str(A), " TO ", str(N), " HAS ", len(paths_of_types))
+    
     if len(paths_of_types) == 0:
         raise RuntimeError("Tried to choose path of ", str(A), " to ", str(F), " but there are none left!")
     
@@ -299,8 +297,6 @@ def choose_path(G, A, N, F, prioritize_oneway):
     chosen_hidden_path = None
     chosen_hidden_oneway_path = None
     want_hidden = (A, N) in G.hidden_edges
-    
-    #print("                         >", str(N), " Try Path:") 
     
     for p in paths_of_types:
         

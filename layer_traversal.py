@@ -189,7 +189,7 @@ def add_entrance_segments(level, layers, last_room_seg):
 def add_branch_segments(level, layers, last_room_seg, want_john_end):
     #create oneway bridge: last_room_seg (viable BSs) > OW > BE/JBE
     #or
-    #choose J from last_room_seg
+    #choose J from REMOVE SEG
     
     while True:
         if want_john_end: #force john so we dont add another branch

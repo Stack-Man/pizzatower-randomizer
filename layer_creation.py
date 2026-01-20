@@ -49,6 +49,10 @@ def rooms_to_layers(rooms, use_loops = False):
     print("OW PT:")
     OW_PT = layer_to_endpoints(OW_PT)
     
+    TW.name = "TW"
+    OW_NPT.name = "OW_NPT"
+    OW_PT.name= "OW_PT"
+    
     return TW, OW_NPT, OW_PT, BS, BE, E, EBS, J, JBE
 
 def rooms_to_layer(rooms, path_selector = lambda e: True):
