@@ -249,15 +249,13 @@ from layer_traversal import create_level
 
 def test_parse_all():
     
-    filenames = ["johngutter", "ancientcheese", "bloodsauce", "crustcove", "deepdish9", "fastfoodsaloon"]
+    filenames = ["johngutter"]#, "ancientcheese", "bloodsauce", "crustcove", "deepdish9", "fastfoodsaloon"]
     all_rooms = []
     
     for f in filenames:
         
 
         full = "datafiles/json/" + f + ".json"
-        
-        print("===DECODING ", full)
         
         new_rooms = test_parse(full)
         all_rooms.extend(new_rooms)
@@ -274,8 +272,7 @@ def test_parse(filename):
 
     with open(filename, "r") as f:
         file = json.load(f)
-        print("JSON data loaded successfully:")
-
+        
         rooms = json_to_rooms(file)
 
         return rooms

@@ -70,8 +70,6 @@ def construct_endpoint_graph(paths, traversal_mode):
         
         endpoint_graph.add_edge(start_point, exit_point)
     
-    print("CONNECTING ENDPOINTS")
-    
     #TODO: traversal mode
     #current basic traversal mode, connect directly to matching type, dir ignored
     
@@ -85,8 +83,6 @@ def construct_endpoint_graph(paths, traversal_mode):
             
             if same_type and good_dir:
                 endpoint_graph.add_edge(ep, sp)
-                
-                print("     CONNECT ", str(ep), " TO ", str(sp))
                 
     #MODE: matching directional
     #Match transitions that have consistent directions, but possibly different types

@@ -42,11 +42,8 @@ def rooms_to_layers(rooms, use_loops = False):
     E, EBS = rooms_to_entrance_layer(rooms)
     
     #TW and OW should be endpoint graphs, rest are lists of BaseRoom
-    print("TW:")
     TW = layer_to_endpoints(TW)
-    print("OW NPT:")
     OW_NPT = layer_to_endpoints(OW_NPT)
-    print("OW PT:")
     OW_PT = layer_to_endpoints(OW_PT)
     
     TW.name = "TW"
@@ -262,10 +259,13 @@ def rooms_to_TW_and_OW_layers(all_rooms):
     #and have to be traversible both ways in different times
     def valid_path_for_two_way_layer(path):
         a = not path.oneway
-        b = path.start_door.start_path_time == PathTime.BOTH
-        c = path.start_door.exit_path_time == PathTime.BOTH
-        d = path.exit_door.start_path_time == PathTime.BOTH
-        e = path.exit_door.exit_path_time == PathTime.BOTH
+        
+        #TODO: doesnt cover ratblocked doors
+        
+        b = path.start_door.start_path_time == PathTime.BOTH or path.start_door.initially_blocked
+        c = path.start_door.exit_path_time == PathTime.BOTH or path.start_door.initially_blocked
+        d = path.exit_door.start_path_time == PathTime.BOTH or path.exit_door.initially_blocked
+        e = path.exit_door.exit_path_time == PathTime.BOTH or path.exit_door.initially_blocked
         
         valid = a and b and c and d and e
         

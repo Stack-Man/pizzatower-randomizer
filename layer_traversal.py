@@ -46,6 +46,23 @@ def create_level(TW, OW_NPT, OW_PT, BS, BE, E, EBS, J, JBE):
     level = Level()
     layers = LayerHandler(TW, OW_NPT, OW_PT, BS, BE, E, EBS, J, JBE)
     
+    print("TW all paths")
+    
+    Gs = [TW, OW_NPT, OW_PT]
+    
+    for G in Gs:
+        print("G all paths: ", G.name)
+    
+        for k, ps in G.all_paths.items():
+            print("     ", k[0], ", ", k[1])
+            
+            for p in ps:
+                
+                print("         ", p)
+    
+    #return
+        
+    
     max_branches = 1 #TODO: parameterize
     
     #init first RoomSegment with a list of available entrances
@@ -53,16 +70,12 @@ def create_level(TW, OW_NPT, OW_PT, BS, BE, E, EBS, J, JBE):
     available_entrances.extend(E)
     available_entrances.extend(EBS)
     
-    print("Available Entrances: ")
-    
-    for ae in available_entrances:
-        print("     ", ae.room_name, ": ", str(type(ae)))
-    
     available_start_rooms = RoomSegment(available_entrances, [], False)
     
     level.add_segment(available_start_rooms)
     
     while (True):
+        print("Add Segment")
         
         last_room_seg = level.get_last_room_seg()
         successful = False
@@ -71,39 +84,39 @@ def create_level(TW, OW_NPT, OW_PT, BS, BE, E, EBS, J, JBE):
        
         #Create start segment
         if level.segment_count() == 1:
-            print("Add Entrance")
+            print("     Add Entrance Segment")
             
             #cant do john end bc no john in last room seg, 
             #immediate john end would come from other add segments
+            
             successful = add_entrance_segments(level, layers, last_room_seg)
             
             #If Failed, level is fail!
             if not successful:
-                print("Failed Level")
-                return None
+                raise RuntimeError("Failed to create any level")
 
         elif last_room_seg.is_branch_end:
-            print("Add Twoway")
-            
             #Bridge Twoway from last branch to new branch or J if none
+            print("     Add twoway Segment")
             successful, john_end = add_twoway_segments(level, layers, last_room_seg, want_john_end)
         else:
-            print("Add Branch")
-            
             #Create branch segment to BE or JBE if none
+            print("     Add branch Segment")
             successful, john_end = add_branch_segments(level, layers, last_room_seg, want_john_end)
         
         if not successful: #if none, step back
-            print("Step Back. Not successful.")
+            print("     not successful. step back")
             step_back(level, layers)
             continue
         elif john_end:
+            print("     john end. return level")
             return level
-        elif level.branch_count > max_branches: #TODO: doesnt really force a john endad any point
-            print("Step Back too many branches")
+        elif level.branch_count > max_branches:
+            print("     too many branch. step back")
             step_back(level, layers)
             continue
         else:
+            print("     no end. continue")
             continue
 
     return level
@@ -155,14 +168,16 @@ def add_entrance_segments(level, layers, last_room_seg):
     #create oneway bridge: EBS > OW > BE/JBE
     
     while True:
-        
         chosen_room = layers.get_viable_entrance(last_room_seg) #also sets
     
         if chosen_room is None:
-            return False #Failed! (no viable john bc start)
+            print("         No viable entrance")
+            return False
     
         #differentiate E from EBS in last_room_seg using class type: EntranceRoom vs BranchRoom
         if isinstance(chosen_room, EntranceRoom):
+            print("         Try twoway with entrance: ", chosen_room)
+            
             chosen_A, chosen_F, path_AF = layers.bridge_twoway(chosen_room)
             
             if chosen_F is None:
@@ -175,6 +190,8 @@ def add_entrance_segments(level, layers, last_room_seg):
             return True
         
         else:
+            print("         Try branch with entrance: ", chosen_room)
+            
             chosen_BS, chosen_BE, path_NPT, path_PT = layers.bridge_oneway(chosen_room)
             
             if chosen_BE is None:
@@ -193,17 +210,14 @@ def add_branch_segments(level, layers, last_room_seg, want_john_end):
     
     while True:
         if want_john_end: #force john so we dont add another branch
-            print("Force John")
             break
         
         chosen_room = layers.get_viable_branch_start(last_room_seg) #also sets
         
         if chosen_room is None:
-            print("Branch fail try john")
             break #try john
         
-        print("Try branch with", chosen_room.room_name)
-        
+        print("         try oneway with branch ", chosen_room)
         chosen_BS, chosen_BE, path_NPT, path_PT = layers.bridge_oneway(chosen_room)
         
         if chosen_BE is None:
@@ -216,16 +230,23 @@ def add_branch_segments(level, layers, last_room_seg, want_john_end):
         return True, False #success but not john
     
     while True:
+
+        print("branch last room seg johns: ")
+        
+        for r in last_room_seg.john_viable_rooms:
+            print("     ", r)
+        
         chosen_room = layers.get_viable_john(last_room_seg) #also sets
-            
+        
+        print("Got john returned: ", chosen_room)
+        
         if chosen_room is None:
-            print("No john")
-            return False, False #Failed!
+            print("         No viable john from branch")
+            return False, False
             
         #dont add to level because last_room_seg.get already set chosen room
         
         return True, True #success and john
-
 
 def add_twoway_segments(level, layers, last_room_seg, want_john_end):
     #create oneway bridge: last_room_seg (viable BSs) > OW > BE/JBE
@@ -233,16 +254,13 @@ def add_twoway_segments(level, layers, last_room_seg, want_john_end):
     #choose J from last_room_seg
     
     while True:
-        #if want_john_end: #dont force john so we can try for a twoway john if possible
-            #print("Force John")
-            #break
-        
         #get room and sync
         chosen_room = layers.get_viable_branch_end(last_room_seg) #also sets
             
         if chosen_room is None:
             break #try john
         
+        print("         try twoway with twoway ", chosen_room) 
         chosen_A, chosen_F, path_AF = layers.bridge_twoway(chosen_room)
         
         if chosen_F is None:
@@ -257,8 +275,10 @@ def add_twoway_segments(level, layers, last_room_seg, want_john_end):
     while True:
         chosen_room = layers.get_viable_john(last_room_seg) #also sets
         
+        print("         end john with twoway ", chosen_room)
+        
         if chosen_room is None:
-            print("No John")
+            print("         No viable john from twoway")
             return False, False #Failed!
             
         #dont add to level because last room seg.get already set

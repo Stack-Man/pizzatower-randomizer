@@ -21,8 +21,6 @@ def json_to_rooms(json):
         room = json_to_room(json_room)
         rooms.append(room)
         
-        print(str(room.name) + " " + str(room.room_type) + " " + str(room.branch_type))
-    
     return rooms
 
 def json_to_room(json_room):
@@ -30,9 +28,9 @@ def json_to_room(json_room):
     is_entrance_room = JSON_ENTRANCE in json_room
     room_name = json_room[JSON_ROOM_NAME]
     
-    print("room: " + str(room_name))
-    
     doors = json_to_doors(json_room)
+    
+    print("Making paths of ", str(room_name))
     paths = doors_to_paths(doors, is_john_room)
     
     room = Room(room_name, doors, paths, is_john_room, is_entrance_room)
@@ -107,8 +105,6 @@ def json_to_door(json_door):
                 if_notpizzatime_exit_only,
                 is_loop)
     
-    print("     door " + str(letter) + " start time: " + str(door.start_path_time) + " exit time: " + str(door.exit_path_time))
-    
     return door
 
 #--------------------
@@ -147,6 +143,7 @@ def doors_to_path(start_door, exit_door, is_john_room):
 
     #start is exitonly or exit is startonly
     if start_door.access_type == AccessType.EXITONLY or exit_door.access_type == AccessType.STARTONLY:
+        print("     PATH: ", start_door.letter, " TO ", exit_door.letter, " NOT VALID. BAD ACCESSTYPE")
         return None
 
     #path time mismatch, unless it is in a john room
@@ -156,6 +153,7 @@ def doors_to_path(start_door, exit_door, is_john_room):
     times_match = start_door.start_path_time is exit_door.exit_path_time
     
     if not is_john_room and not times_match and not one_is_both:
+        print("     PATH: ", start_door.letter, " TO ", exit_door.letter, " NOT VALID. BAD TIME MATCH AND NOT JOHN")
         return None
     
     #oneway = start or exit only but not initially blocked
@@ -164,6 +162,8 @@ def doors_to_path(start_door, exit_door, is_john_room):
     is_loop = start_door.is_loop or exit_door.is_loop
 
     path = Path(start_door, exit_door, is_oneway, is_loop)
+
+    print("     PATH: ", path, ": oneway? ", is_oneway)
 
     return path
 
@@ -225,14 +225,10 @@ def PT_branch(path):
     return TIME_branch(path, PathTime.PIZZATIME, PathTime.NOTPIZZATIME)
 
 def branch_TIME(path, time):
-    print("             branch-" + str(time) + " real: " + str(path.start_door.branch) + "-" + str(path.exit_door.exit_path_time))
-
     #return path.start_door.branch and path.path_time == time
     return path.start_door.branch and path.exit_door.exit_path_time == time
 
 def TIME_branch(path, time, wrong_time):
-    print("             " + str(time) + "-branch real: " + str(path.start_door.start_path_time) + "-" + str(path.exit_door.branch) + "   one way? " + str(path.oneway))
-
     return path.exit_door.branch and (path.start_door.start_path_time == time or path.oneway) and path.start_door.start_path_time is not wrong_time
 
 def get_room_type(room):

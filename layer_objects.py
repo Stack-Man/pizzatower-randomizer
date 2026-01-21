@@ -155,14 +155,11 @@ class BaseSegment():
 
 class BranchPathSegment(BaseSegment):
     def __init__(self, OW_NPT, OW_PT):
-        self.OW_NPT = OW_NPT #PathSegment
+        self.OW_NPT = OW_NPT #PathSegment, okay not actually its just an endpoint path
         self.OW_PT = OW_PT #PathSegment
     
     def __str__(self):
-        if self.start_branch == None or self.end_branch == None:
-            return "None branch"
-        
-        return "Branch: \n      NPT: " + self.start_branch.room_name + " > " + str(self.OW_NPT) + " > " + self.end_branch.room_name + "\n" + "      PT: " + self.end_branch.room_name + " > " + str(self.OW_PT) + " > " + self.start_branch.room_name
+        return "Branch: \n      NPT: " + str(PathSegment(self.OW_NPT)) + "\n      PT: " + str(PathSegment(self.OW_PT))
 
 class PathSegment(BaseSegment):
     def __init__(self, paths):
@@ -173,11 +170,17 @@ class PathSegment(BaseSegment):
         if self.paths == None:
             return "None Path"
         
-        msg = "Path:    "
+        msg = ""
         
         for p in self.paths:
             
-            msg += ">" + str(p[0]) + ", " + str(p[1])
+            if p[1] is not None:
+                msg += "> " + str(p[1])
+        
+        if msg == "":
+            msg = "DIRECT"
+        
+        msg = "Path:    " + msg
         
         return msg
 
@@ -189,10 +192,10 @@ class RoomSegment(BaseSegment):
         self.is_branch_end = is_branch_end
     
     def __str__(self):
-        if (self.room is None):
+        if (self.chosen_room is None):
             return "None Room"
         
-        return "Room: " + self.room.room_name
+        return "Room: " + self.chosen_room.room_name
     
     def get_viable_room(self):
         if len(self.other_viable_rooms) == 0:
@@ -206,9 +209,16 @@ class RoomSegment(BaseSegment):
             return r
 
     def get_viable_john(self):
+        print("My room seg johns: ")
+        
+        for r in self.john_viable_rooms:
+            print("     ", r)
+        
         if len(self.john_viable_rooms) == 0:
+            print("no john")
             return None
         else:
             r = self.john_viable_rooms.pop()
+            print("got my john ", r)
             self.chosen_room = r
             return r

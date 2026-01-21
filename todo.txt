@@ -7,6 +7,6 @@ ruin_11 is marked as normal john ? (might be fixed with branch to EJBranchRoom)
 
 some branch rooms fail parsing
 
-Fix tried to choose path that has none left (problem with hiding?)
-wouldnt be a problem wiht hiding tho bc its supposed to pick a hidden path if no other option exists
+Level fails to construct
 
+entrance_7 is marked as OW_PT when it should be TW ratblocked
