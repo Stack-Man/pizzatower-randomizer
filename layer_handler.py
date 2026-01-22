@@ -109,7 +109,7 @@ class LayerHandler():
         for potential_room in self.JBE:
             
             if match_door(PT_match, potential_room.PT_door) and match_door(NPT_match, potential_room.NPT_door):
-                valid_johns.append(pot)
+                valid_johns.append(potential_room)
         
         return valid_rooms, valid_johns
 

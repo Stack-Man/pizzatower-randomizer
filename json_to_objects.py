@@ -35,8 +35,17 @@ def json_to_room(json_room):
     
     room = Room(room_name, doors, paths, is_john_room, is_entrance_room)
     
+    print("Room Stats: ", room)
+    
+    print("     is john:", is_john_room)
+    
     room.branch_type = get_branch_type(room)
+    
+    print("     branch type:", room.branch_type)
+    
     room.room_type =  get_room_type(room)
+    
+    print("     room type:", room.room_type)
     
     #TODO: check for CTOP Entrance, CTOP Exit, War EXIT
     
@@ -164,6 +173,8 @@ def doors_to_path(start_door, exit_door, is_john_room):
     path = Path(start_door, exit_door, is_oneway, is_loop)
 
     print("     PATH: ", path, ": oneway? ", is_oneway)
+    print("         start: ", start_door, " time: ", start_door.start_path_time)
+    print("         exit: ", exit_door, " time: ", exit_door.start_path_time)
 
     return path
 
@@ -172,6 +183,10 @@ def doors_to_path(start_door, exit_door, is_john_room):
 #-------------------
 def get_branch_type(room):
     #branchstart and branchend values mean the door is a branchmid?
+
+
+    if room.has_john and has_PT_NPT_path(room):
+        return BranchType.END
 
     has_branch_NPT = False
     has_NPT_branch = False
@@ -211,6 +226,13 @@ def get_branch_type(room):
 
 #paths start at branch must be the correct time (IE not only oneway)
 #otherwise nothing stops the player from doubling back the wrong way
+
+def has_PT_NPT_path(room):
+    for path in room.paths:
+        if path.start_door.start_path_time == PathTime.NOTPIZZATIME and path.exit_door.exit_path_time == PathTime.PIZZATIME:
+            return True
+    
+    return False
 
 def branch_NPT(path):
     return branch_TIME(path, PathTime.NOTPIZZATIME)

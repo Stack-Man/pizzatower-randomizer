@@ -7,6 +7,57 @@ from path_mapping import categorize_paths
 from path_flow import flow
 import threading
 from graph_copy import copy_graph
+from enums import *
+from node_id_objects import StartExitType
+from path_objects import Endpoint
+
+class FakeInnerNode():
+    def __init__(self):
+        self.door_type = None
+        self.door_dir = None
+        self.start_exit_type = None
+
+class FakeNode():
+    def __init__(self, type, dir, start_exit_type):
+        self.inner_id = FakeInnerNode()
+        self.inner_id.door_type = type
+        self.inner_id.door_dir = dir
+        self.inner_id.start_exit_type = start_exit_type
+
+def make_all_sps():
+    sps = []
+    updown = [DoorDir.UP, DoorDir.DOWN]
+    leftright = [DoorDir.LEFT, DoorDir.RIGHT]
+    
+    for ud in updown:
+        
+        fn_box = FakeNode(DoorType.BOX, ud, StartExitType.START)
+        sp_box = Endpoint(fn_box)
+        
+        sps.append(sp_box)
+        
+        
+        fn_fall = FakeNode(DoorType.VERTICAL, ud, StartExitType.START)
+        sp_fall = Endpoint(fn_fall)
+        
+        sps.append(sp_fall)
+    
+    for lr in leftright:
+        
+        fn_hall = FakeNode(DoorType.HORIZONTAL, lr, StartExitType.START)
+        sp_hall = Endpoint(fn_hall)
+        
+        sps.append(sp_hall)
+    
+    sp_door = Endpoint(FakeNode(DoorType.DOOR, DoorDir.NONE, StartExitType.START))
+    sp_rocket = Endpoint(FakeNode(DoorType.ROCKET, DoorDir.NONE, StartExitType.START))
+    sp_taxi = Endpoint(FakeNode(DoorType.TAXI, DoorDir.NONE, StartExitType.START))
+    
+    sps.append(sp_door)
+    sps.append(sp_rocket)
+    sps.append(sp_taxi)
+    
+    return sps
 
 def layer_to_endpoints(G):
     #creates new Endpoint nodes for the graph G, 
@@ -14,7 +65,19 @@ def layer_to_endpoints(G):
     #Endpoints of the same ID
     paths = categorize_paths(G) 
     
-    ep_graph = construct_endpoint_graph(paths, None)
+    ep_graph = construct_endpoint_graph_without_traversal(paths)
+    
+    #add all start points to ep_graph
+    #so that all exits can path to starts
+    #not in the graph (such as one only in a branch)
+    #works sinec tehres no path assocaited with exit to start edges
+    sps = make_all_sps()
+    
+    for sp in sps:
+        if sp not in ep_graph.start_points:
+            ep_graph.start_points.append(sp)
+    
+    add_traversal_to_endpoint_graph(ep_graph, traversal_mode = None)
     
     G_init_attributes(ep_graph, paths)
     
@@ -52,8 +115,7 @@ is allowed to lead to in the next room
 import networkx as nx
 from json_to_objects import flip_dir
 
-def construct_endpoint_graph(paths, traversal_mode):
-
+def construct_endpoint_graph_without_traversal(paths):
     endpoint_graph = nx.DiGraph()
     start_points = []
     exit_points = []
@@ -70,19 +132,25 @@ def construct_endpoint_graph(paths, traversal_mode):
         
         endpoint_graph.add_edge(start_point, exit_point)
     
+    endpoint_graph.start_points = start_points
+    endpoint_graph.exit_points = exit_points
+    
+    return endpoint_graph
+
+def add_traversal_to_endpoint_graph(ep_graph, traversal_mode):
     #TODO: traversal mode
     #current basic traversal mode, connect directly to matching type, dir ignored
     
     #MODE: matching perfect
     #Match transitions with the same type and consistent directions
-    for ep in exit_points:
-        for sp in start_points:
+    for ep in ep_graph.exit_points:
+        for sp in  ep_graph.start_points:
             
             same_type = ep.door_type == sp.door_type
             good_dir = flip_dir(ep.door_dir) == sp.door_dir #flipped matches or no flip for type
             
             if same_type and good_dir:
-                endpoint_graph.add_edge(ep, sp)
+                ep_graph.add_edge(ep, sp)
                 
     #MODE: matching directional
     #Match transitions that have consistent directions, but possibly different types
@@ -95,16 +163,6 @@ def construct_endpoint_graph(paths, traversal_mode):
     #MODE: arbitrary no restrictions
     #Match transitions in any way
     #TODO:
-    
-   
-    """
-    for ep in exit_points:
-        for sp in start_points:
-            if ep.door_type == sp.door_type and ep.start_exit_type != sp.start_exit_type:
-                endpoint_graph.add_edge(ep, sp)"""
-    
-    return endpoint_graph
-
 
 """
 --------------------------

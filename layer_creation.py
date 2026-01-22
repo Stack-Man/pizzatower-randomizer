@@ -92,23 +92,34 @@ def rooms_to_branch_layer(rooms, se_type):
         for path in room.paths:
             #print("Trying path " + str(path) )
             
-            if se_type == StartExitType.START:
-                if path.start_door.is_branch:
+            if se_type == StartExitType.START: #branch start
+                
+                if path.start_door.is_branch: #branch to NPT
+                    branch_door = path.start_door
+                    
+                    if path.exit_door.exit_path_time == PathTime.NOTPIZZATIME:
+                        NPT_door = path.exit_door
+                    
+                elif path.exit_door.is_branch: #PT to branch
+                    branch_door = path.exit_door
+                    
+                    if path.start_door.start_path_time == PathTime.PIZZATIME or path.start_door.access_type == AccessType.STARTONLY:
+                        PT_door = path.start_door
+                
+                
+            else: #branch end
+                
+                if path.exit_door.is_branch: #NPT to branch
+                    branch_door = path.exit_door
+                    
+                    if path.start_door.start_path_time == PathTime.NOTPIZZATIME or path.start_door.access_type == AccessType.STARTONLY:
+                        NPT_door = path.start_door
+                    
+                elif path.start_door.is_branch: #branch to PT
                     branch_door = path.start_door
                     
                     if path.exit_door.exit_path_time == PathTime.PIZZATIME:
                         PT_door = path.exit_door
-                    elif path.exit_door.exit_path_time == PathTime.NOTPIZZATIME:
-                        NPT_door = path.exit_door
-                
-            else: #exit
-                if path.exit_door.is_branch:
-                    branch_door = path.exit_door
-                    
-                    if path.start_door.start_path_time == PathTime.PIZZATIME:
-                        PT_door = path.start_door
-                    elif path.start_door.start_path_time == PathTime.NOTPIZZATIME:
-                        NPT_door = path.start_door
         
         #create branch room
         if branch_door is not None and NPT_door is not None and PT_door is not None:
@@ -310,6 +321,11 @@ def rooms_to_TW_and_OW_layers(all_rooms):
 def rooms_to_branch_layers(all_rooms):
     branch_rooms = filter_rooms(all_rooms, RoomType.BRANCH)
     
+    print("Filtered branch rooms:   ")
+    
+    for room in branch_rooms:
+        print("     ", room)
+    
     B_any_rooms = filter_rooms_by_branch(branch_rooms, BranchType.ANY)
     B_start_rooms = filter_rooms_by_branch(branch_rooms, BranchType.START)
     B_end_rooms = filter_rooms_by_branch(branch_rooms, BranchType.END)
@@ -320,7 +336,21 @@ def rooms_to_branch_layers(all_rooms):
     B_start_rooms.extend(B_any_rooms)
     B_end_rooms.extend(B_any_rooms)
     
-
+    print("Filtered any rooms:   ")
+    
+    for room in B_any_rooms:
+        print("     ", room)
+    
+    print("Filtered start rooms:   ")
+    
+    for room in B_start_rooms:
+        print("     ", room)
+    
+    print("Filtered end rooms:   ")
+    
+    for room in B_end_rooms:
+        print("     ", room)
+    
     BS_layer = rooms_to_branch_layer(B_start_rooms, StartExitType.START)
     BE_layer = rooms_to_branch_layer(B_end_rooms, StartExitType.EXIT)
     

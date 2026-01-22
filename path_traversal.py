@@ -44,6 +44,8 @@ def create_bridge_oneway(G_NPT, G_PT, BSs, BEs): #BSs and #BEs should be lists o
 def default_extractor(A):
     return A
 
+import draw_test
+
 def find_some_branch_paths(G_PT, G_NPT, BSs, BEs):
     #Assum As and Fs are lists of BranchRoom
     
@@ -62,6 +64,9 @@ def find_some_branch_paths(G_PT, G_NPT, BSs, BEs):
     #Then try to find PT with this NPT
     if path_NPT is not None:
         
+        print ("                    Found NPT to ", chosen_BE)
+        print("                         ", path_NPT)
+        
         temp_G_PT = path_graph.copy_graph(G_PT) #copy in case we want to ditch found path
         
         #update removed/readded from successful NPT
@@ -75,6 +80,8 @@ def find_some_branch_paths(G_PT, G_NPT, BSs, BEs):
             G_NPT = temp_G_NPT
             
             return chosen_BS, chosen_BE, path_NPT, path_PT
+        else:
+            draw_test.draw_tree(temp_G_PT)
     
     return None, None, None, None
 

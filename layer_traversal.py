@@ -61,7 +61,36 @@ def create_level(TW, OW_NPT, OW_PT, BS, BE, E, EBS, J, JBE):
                 print("         ", p)
     
     #return
-        
+    
+    print ("BS rooms:")
+    
+    for r in BS:
+        print("     ", r)
+    
+    print ("BE rooms:")
+    
+    for r in BS:
+        print("     ", r)
+    
+    print ("E rooms:")
+    
+    for r in E:
+        print("     ", r)
+    
+    print ("EBS rooms:")
+    
+    for r in EBS:
+        print("     ", r)
+    
+    print ("J rooms:")
+    
+    for r in J:
+        print("     ", r)
+    
+    print ("JBE rooms:")
+    
+    for r in JBE:
+        print("     ", r)
     
     max_branches = 1 #TODO: parameterize
     
@@ -176,7 +205,7 @@ def add_entrance_segments(level, layers, last_room_seg):
     
         #differentiate E from EBS in last_room_seg using class type: EntranceRoom vs BranchRoom
         if isinstance(chosen_room, EntranceRoom):
-            print("         Try twoway with entrance: ", chosen_room)
+            print("         Try twoway from entrance: ", chosen_room)
             
             chosen_A, chosen_F, path_AF = layers.bridge_twoway(chosen_room)
             
@@ -190,7 +219,7 @@ def add_entrance_segments(level, layers, last_room_seg):
             return True
         
         else:
-            print("         Try branch with entrance: ", chosen_room)
+            print("         Try branch from entrance: ", chosen_room)
             
             chosen_BS, chosen_BE, path_NPT, path_PT = layers.bridge_oneway(chosen_room)
             
@@ -217,7 +246,7 @@ def add_branch_segments(level, layers, last_room_seg, want_john_end):
         if chosen_room is None:
             break #try john
         
-        print("         try oneway with branch ", chosen_room)
+        print("         try oneway from branch start", chosen_room)
         chosen_BS, chosen_BE, path_NPT, path_PT = layers.bridge_oneway(chosen_room)
         
         if chosen_BE is None:
@@ -260,7 +289,7 @@ def add_twoway_segments(level, layers, last_room_seg, want_john_end):
         if chosen_room is None:
             break #try john
         
-        print("         try twoway with twoway ", chosen_room) 
+        print("         try twoway from branch end/entrance ", chosen_room) 
         chosen_A, chosen_F, path_AF = layers.bridge_twoway(chosen_room)
         
         if chosen_F is None:

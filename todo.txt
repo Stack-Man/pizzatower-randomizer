@@ -3,10 +3,15 @@
 level creation for all levels
 level growth
 
-ruin_11 is marked as normal john ? (might be fixed with branch to EJBranchRoom)
+ruin_11 is marked as normal john 
+
 
 some branch rooms fail parsing
 
-Level fails to construct
 
-entrance_7 is marked as OW_PT when it should be TW ratblocked
+handle ruin_11_2
+and the one room in oregano
+
+add entrance branch case for get_branch_type in json to objects
+
+test with min hide at 1 instead of -1
