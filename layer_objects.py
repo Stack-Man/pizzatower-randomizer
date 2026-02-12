@@ -204,21 +204,13 @@ class RoomSegment(BaseSegment):
 
             r = self.other_viable_rooms.pop()
             self.chosen_room = r
-            #print("Set chosen room as ", r.room_name)
             
             return r
 
     def get_viable_john(self):
-        print("My room seg johns: ")
-        
-        for r in self.john_viable_rooms:
-            print("     ", r)
-        
         if len(self.john_viable_rooms) == 0:
-            print("no john")
             return None
         else:
             r = self.john_viable_rooms.pop()
-            print("got my john ", r)
             self.chosen_room = r
             return r

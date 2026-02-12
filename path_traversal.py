@@ -64,9 +64,6 @@ def find_some_branch_paths(G_PT, G_NPT, BSs, BEs):
     #Then try to find PT with this NPT
     if path_NPT is not None:
         
-        print ("                    Found NPT to ", chosen_BE)
-        print("                         ", path_NPT)
-        
         temp_G_PT = path_graph.copy_graph(G_PT) #copy in case we want to ditch found path
         
         #update removed/readded from successful NPT
@@ -80,8 +77,6 @@ def find_some_branch_paths(G_PT, G_NPT, BSs, BEs):
             G_NPT = temp_G_NPT
             
             return chosen_BS, chosen_BE, path_NPT, path_PT
-        else:
-            draw_test.draw_tree(temp_G_PT)
     
     return None, None, None, None
 
@@ -125,8 +120,7 @@ def find_some_path(G, As, Fs, endpoint_extractor = default_extractor, prioritize
          
         for Fu in Fs:
             F = endpoint_extractor(Fu)
-            print("                 Find some path A to F: ", A, " TO ", F)
-            
+
             path_AF = find_path(G, A, F, prioritize_oneway)
             
             if path_AF is not None:
@@ -189,24 +183,13 @@ def find_path(G, A2, F, prioritize_oneway = False):
     
     
     if F not in A.steps:
-        print("                     F not in A from beginning")
-        
-        for k, v in A.steps.items():
-            
-            print("                         K: ", k)
-        
-        #draw_test.draw_tree(temp_G)
-        
         return None
-    #else:
-        #draw_test.draw_tree(temp_G)
 
     while not A == F:
     
         temp_G = path_flow.reflow(temp_G) #reflow before accessing steps
     
         if F not in A.steps:
-            print("                     F not in A during while loop")
             return None #may have removed the last valid endpoint in the prev step due to no good path
     
         last_A = A

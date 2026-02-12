@@ -321,11 +321,6 @@ def rooms_to_TW_and_OW_layers(all_rooms):
 def rooms_to_branch_layers(all_rooms):
     branch_rooms = filter_rooms(all_rooms, RoomType.BRANCH)
     
-    print("Filtered branch rooms:   ")
-    
-    for room in branch_rooms:
-        print("     ", room)
-    
     B_any_rooms = filter_rooms_by_branch(branch_rooms, BranchType.ANY)
     B_start_rooms = filter_rooms_by_branch(branch_rooms, BranchType.START)
     B_end_rooms = filter_rooms_by_branch(branch_rooms, BranchType.END)
@@ -335,21 +330,6 @@ def rooms_to_branch_layers(all_rooms):
     
     B_start_rooms.extend(B_any_rooms)
     B_end_rooms.extend(B_any_rooms)
-    
-    print("Filtered any rooms:   ")
-    
-    for room in B_any_rooms:
-        print("     ", room)
-    
-    print("Filtered start rooms:   ")
-    
-    for room in B_start_rooms:
-        print("     ", room)
-    
-    print("Filtered end rooms:   ")
-    
-    for room in B_end_rooms:
-        print("     ", room)
     
     BS_layer = rooms_to_branch_layer(B_start_rooms, StartExitType.START)
     BE_layer = rooms_to_branch_layer(B_end_rooms, StartExitType.EXIT)

@@ -1,6 +1,7 @@
 from path_traversal import create_bridge_twoway, create_bridge_oneway
 from path_graph import update_other_G, add_rooms_by_endpoint_path
 from layer_objects import EntranceRoom, JohnRoom, EJBranchRoom, BranchRoom, RoomSegment, BranchPathSegment, PathSegment
+from node_id_objects import StartExitType
 
 #store and manage synchronization of layers
 #all requests for paths from layers should be
@@ -8,6 +9,11 @@ from layer_objects import EntranceRoom, JohnRoom, EJBranchRoom, BranchRoom, Room
 def match_door(door, other):
     return door.door_type == other.door_type and door.door_dir == other.door_dir
 
+LOG_ENABLED = True
+
+def log(message):
+    if LOG_ENABLED:
+        print(message)
 
 class LayerHandler():
     
@@ -30,15 +36,6 @@ class LayerHandler():
         Fs.extend(self.BS)
         Fs.extend(self.J)
         
-        print("             Bridging A to F")
-        
-        print("                 A: ", A)
-        
-        print("                 F: ")
-        
-        for f in Fs:
-            print("                     f: ", f)          
-        
         chosen_A, chosen_F, path_AF = create_bridge_twoway(G = self.TW, As = [A], Fs = Fs)
         
         if chosen_F is not None:
@@ -51,6 +48,16 @@ class LayerHandler():
         BEs = []
         BEs.extend(self.BE)
         BEs.extend(self.JBE)
+        
+        log("       Allowed BE normal:")
+        
+        for be in self.BE:
+            log("           " + str(be.room_name))
+        
+        log("       Allowed BE john:")
+        
+        for be in self.JBE:
+            log("           " + str(be.room_name))
         
         chosen_BS, chosen_BE, path_NPT, path_PT = create_bridge_oneway(G_NPT = self.OW_NPT, G_PT = self.OW_PT, BSs = [A], BEs = BEs) 
         
@@ -210,8 +217,6 @@ class LayerHandler():
     
     def get_viable_john(self, seg):
         chosen_room = seg.get_viable_john()
-        
-        print("got viable john from seg: ", chosen_room)
         
         if chosen_room is None:
             return None

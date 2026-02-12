@@ -6,17 +6,20 @@ Add grow level size algorithm
 Create CTOP level
 Create WAR level
 
---JSON seed--
-room to room map
-powerup map
+--JSON seed creation--
+output levels as room and door map
+output powerup map
 
 --Room Parsing--
 
 handle CTOP/WAR entrance/exit
 some branch rooms fail parsing
+ruin_11 is marked as normal john (still?)
 
 multi-part rooms, ruin_11_2, that one oregano room
 
 branch-mid rooms (branchstarta nd branch end values)
 
-entrance branch case in get_branch_type (Test) in json_to_objects.py
+TODO NEXT:
+level_creation fails if johngutter and ancientcheese are parsed together, regardless of other levels
+parse crustcove leads to A not in G error
