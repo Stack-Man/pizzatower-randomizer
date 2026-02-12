@@ -183,10 +183,11 @@ def doors_to_path(start_door, exit_door, is_john_room):
 #-------------------
 def get_branch_type(room):
     #branchstart and branchend values mean the door is a branchmid?
-
-
     if room.has_john and has_PT_NPT_path(room):
         return BranchType.END
+    
+    if room.has_entrance and has_entrance_branch_paths(room):
+        return BranchType.START
 
     has_branch_NPT = False
     has_NPT_branch = False
@@ -226,6 +227,17 @@ def get_branch_type(room):
 
 #paths start at branch must be the correct time (IE not only oneway)
 #otherwise nothing stops the player from doubling back the wrong way
+def has_entrance_branch_paths(room):
+    has_entrance_NPT = False
+    has_PT_entrance = False
+    
+    for path in room.paths:
+        if path.start_door.door_type == DoorType.LEVELDOOR and path.exit_door.path_time == PathTime.NOTPIZZATIME:
+            has_entrance_NPT = True
+        elif path.start_door.path_time == PathTime.PIZZATIME and path.exit_door.door_type == DoorType.LEVELDOOR:
+            has_PT_entrance = True
+    
+    return has_entrance_NPT and has_PT_entrance
 
 def has_PT_NPT_path(room):
     for path in room.paths:

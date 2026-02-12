@@ -1,17 +1,20 @@
-#TODO:
+TODO:
 
-level creation for all levels
-level growth
+--Level Craetion--
+Iterate over all levels
+Grow level size
+Create CTOP level
+Create WAR level
 
-ruin_11 is marked as normal john 
 
+--Room Parsing--
 
+handle CTOP/WAR entrance/exit
 some branch rooms fail parsing
+ruin_11 is marked as normal john (still?)
 
+multi-part rooms, ruin_11_2, that one oregano room
 
-handle ruin_11_2
-and the one room in oregano
+branch-mid rooms (branchstarta nd branch end values)
 
-add entrance branch case for get_branch_type in json to objects
-
-test with min hide at 1 instead of -1
+entrance branch case in get_branch_type (Test) in json_to_objects.py
