@@ -44,9 +44,15 @@ class Room():
         self.has_john = john
         self.has_entrance = entrance
         
-        
     def __str__(self):
         return f"{self.name}"
+        
+    def print_stats(self):
+        print(f"Name: {self.name}")
+        print(f"   Room: {self.room_type}")
+        print(f"   Branch: {self.branch_type}")
+        print(f"   John: {self.has_john}")
+        print(f"   Entr: {self.has_entrance}")
 
 
 """A door is an entrance or exit in a room.

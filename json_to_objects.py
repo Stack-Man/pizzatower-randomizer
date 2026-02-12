@@ -30,22 +30,13 @@ def json_to_room(json_room):
     
     doors = json_to_doors(json_room)
     
-    print("Making paths of ", str(room_name))
     paths = doors_to_paths(doors, is_john_room)
     
     room = Room(room_name, doors, paths, is_john_room, is_entrance_room)
     
-    print("Room Stats: ", room)
-    
-    print("     is john:", is_john_room)
-    
     room.branch_type = get_branch_type(room)
     
-    print("     branch type:", room.branch_type)
-    
     room.room_type =  get_room_type(room)
-    
-    print("     room type:", room.room_type)
     
     #TODO: check for CTOP Entrance, CTOP Exit, War EXIT
     
@@ -152,7 +143,6 @@ def doors_to_path(start_door, exit_door, is_john_room):
 
     #start is exitonly or exit is startonly
     if start_door.access_type == AccessType.EXITONLY or exit_door.access_type == AccessType.STARTONLY:
-        print("     PATH: ", start_door.letter, " TO ", exit_door.letter, " NOT VALID. BAD ACCESSTYPE")
         return None
 
     #path time mismatch, unless it is in a john room
@@ -162,7 +152,6 @@ def doors_to_path(start_door, exit_door, is_john_room):
     times_match = start_door.start_path_time is exit_door.exit_path_time
     
     if not is_john_room and not times_match and not one_is_both:
-        print("     PATH: ", start_door.letter, " TO ", exit_door.letter, " NOT VALID. BAD TIME MATCH AND NOT JOHN")
         return None
     
     #oneway = start or exit only but not initially blocked
@@ -172,9 +161,6 @@ def doors_to_path(start_door, exit_door, is_john_room):
 
     path = Path(start_door, exit_door, is_oneway, is_loop)
 
-    print("     PATH: ", path, ": oneway? ", is_oneway)
-    print("         start: ", start_door, " time: ", start_door.start_path_time)
-    print("         exit: ", exit_door, " time: ", exit_door.start_path_time)
 
     return path
 
@@ -232,9 +218,9 @@ def has_entrance_branch_paths(room):
     has_PT_entrance = False
     
     for path in room.paths:
-        if path.start_door.door_type == DoorType.LEVELDOOR and path.exit_door.path_time == PathTime.NOTPIZZATIME:
+        if path.start_door.door_type == DoorType.LEVELDOOR and path.exit_door.exit_path_time == PathTime.NOTPIZZATIME:
             has_entrance_NPT = True
-        elif path.start_door.path_time == PathTime.PIZZATIME and path.exit_door.door_type == DoorType.LEVELDOOR:
+        elif path.start_door.start_path_time == PathTime.PIZZATIME and path.exit_door.door_type == DoorType.LEVELDOOR:
             has_PT_entrance = True
     
     return has_entrance_NPT and has_PT_entrance
@@ -275,8 +261,13 @@ def get_room_type(room):
     if (room.branch_type is not BranchType.NONE):
         return RoomType.BRANCH
     
+    #has 1 path AND that path is to the same door
     if (len(room.paths) == 1):
-        return RoomType.LOOP
+        
+        path = room.paths[0]
+        
+        if (path.start_door.letter == path.exit_door.letter):
+            return RoomType.LOOP
     
     return RoomType.NORMAL
 

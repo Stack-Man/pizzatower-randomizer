@@ -2,16 +2,18 @@ TODO:
 
 --Level Craetion--
 Iterate over all levels
-Grow level size
+Add grow level size algorithm
 Create CTOP level
 Create WAR level
 
+--JSON seed--
+room to room map
+powerup map
 
 --Room Parsing--
 
 handle CTOP/WAR entrance/exit
 some branch rooms fail parsing
-ruin_11 is marked as normal john (still?)
 
 multi-part rooms, ruin_11_2, that one oregano room
 
