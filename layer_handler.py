@@ -49,16 +49,6 @@ class LayerHandler():
         BEs.extend(self.BE)
         BEs.extend(self.JBE)
         
-        log("       Allowed BE normal:")
-        
-        for be in self.BE:
-            log("           " + str(be.room_name))
-        
-        log("       Allowed BE john:")
-        
-        for be in self.JBE:
-            log("           " + str(be.room_name))
-        
         chosen_BS, chosen_BE, path_NPT, path_PT = create_bridge_oneway(G_NPT = self.OW_NPT, G_PT = self.OW_PT, BSs = [A], BEs = BEs) 
         
         if chosen_BE is not None:

@@ -22,4 +22,39 @@ branch-mid rooms (branchstarta nd branch end values)
 
 TODO NEXT:
 level_creation fails if johngutter and ancientcheese are parsed together, regardless of other levels
+^ added force john on add twoway segment, kind of fixed but finding a john still kind of fails,
+^ has trouble connecting to ruin 11 john, why?
+
+^ entrance_6 BE creates twoway to ONLY ruins_8 when it should allow twoway to entrance john
+^ the logic of removing segments in step_back() might not be removing the right one or enough of them
+^ and the type of segment it tries to add afterwards might not match
+
+
 parse crustcove leads to A not in G error
+
+add entrance seg
+ruin_1 >  [ ruin_8, entrance_5,  John:  ]
+     more seg
+     add branch seg
+ruin_1 > entrance_5 >  [ entrance_6,  John:  ]
+     more seg
+     add twoway seg
+ruin_1 > entrance_5 > entrance_6 >  [ ruin_8,  John:  ] //Line A
+     more seg
+     add branch seg
+ruin_1 > entrance_5 > entrance_6 >  [ ruin_8,  John:  ] //Line B
+     remove seg (fail)
+ruin_1 > entrance_5 >  [  John:  ] //Line C
+     add twoway seg
+ruin_1 > entrance_5 >  [  John:  ]
+     remove seg (fail)
+
+SOLUTION:
+The problem is this. When we fail to find any new path from a potential room in [], we step back,
+For example, in Line A, we choose ruin_8, in B we have failed to find something from ruin_8 !!TODO: why not ruin_11? (maybe necessary room used already?)
+In Line C, we step back, erasing the chosen entrance_6
+BUT!
+the only failure was from entrance_6 to ruin_8 (and any other similar rooms that can match)
+entrance_6 might be able to link to a different kind of room with a different type of entrance with a different path to that
+
+SO what we need to do is try entance_6 with dfferent paths until we have consumed all possible entrance types for the next segment

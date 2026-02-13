@@ -26,6 +26,11 @@ resolve this is hard to code and probably computationally expensive)
 
 """
 
+LOG_ENABLED = False
+
+def log(msg):
+    if LOG_ENABLED:
+        print(msg)
 
 def create_bridge_twoway(G, As, Fs): #As and Fs should be lists of types inheriting BaseRoom
     def twoway_endpoint_extractor(A):
@@ -64,6 +69,8 @@ def find_some_branch_paths(G_PT, G_NPT, BSs, BEs):
     #Then try to find PT with this NPT
     if path_NPT is not None:
         
+        log("           found NPT to " + chosen_BE.room_name)
+        
         temp_G_PT = path_graph.copy_graph(G_PT) #copy in case we want to ditch found path
         
         #update removed/readded from successful NPT
@@ -73,10 +80,15 @@ def find_some_branch_paths(G_PT, G_NPT, BSs, BEs):
         _, _, path_PT = find_some_path(temp_G_PT, [chosen_BE], [chosen_BS], endpoint_extractor = branch_extractor_PT, prioritize_oneway = True)
         
         if path_PT is not None: #successful, replace Gs and exit
+        
+            log("           found PT from " + chosen_BE.room_name)
+        
             G_PT = temp_G_PT
             G_NPT = temp_G_NPT
             
             return chosen_BS, chosen_BE, path_NPT, path_PT
+    
+    log("           failed any branch paths")
     
     return None, None, None, None
 
@@ -120,6 +132,8 @@ def find_some_path(G, As, Fs, endpoint_extractor = default_extractor, prioritize
          
         for Fu in Fs:
             F = endpoint_extractor(Fu)
+
+            log("Try (A) " + str(Au.room_name) + " > " + " (F) " + str(Fu.room_name))
 
             path_AF = find_path(G, A, F, prioritize_oneway)
             

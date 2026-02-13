@@ -54,7 +54,7 @@ print("")
 print("")
 print("ANCIENTCHEESE")
 print("==========")
-test_parse_all(["ancientcheese"])
+#test_parse_all(["ancientcheese"])
 
 #this combination's inclusion causes level creation to fail
 #maybe less about these two specifically and more
@@ -68,7 +68,7 @@ print("")
 print("")
 print("JOHNGUTTER & ANCIENTCHEESE")
 print("==========")
-#test_parse_all(["johngutter", "ancientcheese"]) 
+test_parse_all(["johngutter", "ancientcheese"]) 
 
 #these two are fine though
 #test_parse_all(["bloodsauce", "ancientcheese"])

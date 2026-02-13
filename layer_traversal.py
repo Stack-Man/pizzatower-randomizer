@@ -41,11 +41,45 @@ continues to contain its
 """
 from layer_handler import LayerHandler #mangage layer requests and synchronization
 
-LOG_ENABLED = True
+LOG_ENABLED = False
 
 def log(message):
     if LOG_ENABLED:
         print(message)
+
+LEVEL_LOG_ENABLED = True
+
+def log_level(level):
+    if LEVEL_LOG_ENABLED:
+        msg = ""
+        
+        room_segs = []
+        
+        for seg in level.segments:
+            if isinstance(seg, RoomSegment):
+                room_segs.append(seg)
+        
+        #all but last
+        for seg in room_segs[:len(room_segs)-1]:
+            msg += str(seg.chosen_room.room_name) + " > "
+        
+        last_seg = room_segs[len(room_segs) - 1]
+        
+        oth = ""
+        
+        if ( isinstance(last_seg, RoomSegment)):
+            for potential in last_seg.other_viable_rooms:
+                oth += str(potential.room_name) + ", "
+            
+            oth += " John: "
+            
+            for potential in last_seg.john_viable_rooms:
+                oth += str(potential.room_name) + ", "
+        
+            msg += " [ " + oth + " ]"
+            
+        print(msg)
+    
 
 def create_level(TW, OW_NPT, OW_PT, BS, BE, E, EBS, J, JBE):
 
@@ -68,6 +102,7 @@ def create_level(TW, OW_NPT, OW_PT, BS, BE, E, EBS, J, JBE):
     level.add_segment(available_start_rooms)
     
     while (True):
+        #log_level(level)
 
         last_room_seg = level.get_last_room_seg()
         successful = False
@@ -76,7 +111,7 @@ def create_level(TW, OW_NPT, OW_PT, BS, BE, E, EBS, J, JBE):
        
         #Create start segment
         if level.segment_count() == 1:
-            log("1 segment. Create entrance.")
+            print("     add entrance seg")
             #cant do john end bc no john in last room seg, 
             #immediate john end would come from other add segments
             
@@ -88,34 +123,48 @@ def create_level(TW, OW_NPT, OW_PT, BS, BE, E, EBS, J, JBE):
                 raise RuntimeError("Failed to create a level")
 
         elif last_room_seg.is_branch_end:
-            log("Last is branch end. Create twoway segment")
+            print("     add twoway seg")
             if (want_john_end):
                 log("   Also want John End")
                 
             #Bridge Twoway from last branch to new branch or J if none
             successful, john_end = add_twoway_segments(level, layers, last_room_seg, want_john_end)
+            
+            log("       Was successful? john end? " + str(successful) + ", " + str(john_end))
         else:
             #Create branch segment to BE or JBE if none
-            log("Last is branch start. Create branch segment")
+            print("     add branch seg")
             if (want_john_end):
                 log("   Also want John End")
                 
             successful, john_end = add_branch_segments(level, layers, last_room_seg, want_john_end)
+            
+            log("       Was successful? john end? " + str(successful) + ", " + str(john_end))
         
         #log("Level branch count: " + str(level.branch_count))
-        
+        log_level(level)
+        #TODO: what seg os beomg removed?
+        #it appears as though the step back for bad seg is alled twice
+        #with no change to the level on the first call
         if not successful: #if none, step back
+            print("     remove seg (fail)")
             step_back(level, layers)
+            log_level(level)
             log("Not successful. Step Back.")
             continue
         elif john_end:
+            print("     end seg")
             log("John End. End")
+            log_level(level)
             return level
         elif level.branch_count > max_branches:
+            print("     remove seg (max)")
             log("Too many branches. Step Back.")
             step_back(level, layers)
+            log_level(level)
             continue
         else:
+            print("     more seg")
             log("Not enough or just enough branches. Continue.")
             continue
 
@@ -216,14 +265,14 @@ def add_branch_segments(level, layers, last_room_seg, want_john_end):
             log("   Branch Seg: no chosen room. Try John")
             break #try john
         
-        log("   Branch Seg chosen room: " + chosen_room.room_name)
-        
         chosen_BS, chosen_BE, path_NPT, path_PT = layers.bridge_oneway(chosen_room)
         
         if chosen_BE is None:
             log("   Branch Seg: Failed bridge oneway with chosen room")
             layers.refund_branch_start(chosen_room)
             continue
+        
+        log(chosen_BS.room_name + " > try branch > " + chosen_BE.room_name)
         
         valid_rooms, valid_johns = layers.get_matching_JBE_BE(chosen_BE)
         
@@ -252,17 +301,29 @@ def add_twoway_segments(level, layers, last_room_seg, want_john_end):
     #choose J from last_room_seg
     
     while True:
+        #we dont want to force a john end because
+        #the next john may be at the end of a twoway segment
+        #but we DO want to tell bridge_twoway to try to john it up
+        #rather than try to connect to a random BS/J
+        
+        #if want_john_end: #force john so we dont add another branch
+            #log("   twoway seg: Force John.")
+            #break
+    
         #get room and sync
         chosen_room = layers.get_viable_branch_end(last_room_seg) #also sets
-            
+        
         if chosen_room is None:
             break #try john
 
         chosen_A, chosen_F, path_AF = layers.bridge_twoway(chosen_room)
         
         if chosen_F is None:
+            log("twoway failed with chosen A")
             layers.refund_branch_end(chosen_room)
             continue
+        
+        log(chosen_A.room_name + " > try twoway > " + chosen_F.room_name)
         
         valid_rooms, valid_johns = layers.get_matching_J_BS(chosen_F)
         add_path_to_level(level, path_AF, valid_rooms, valid_johns)
