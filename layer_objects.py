@@ -190,6 +190,7 @@ class RoomSegment(BaseSegment):
         self.other_viable_rooms = others
         self.john_viable_rooms = johns
         self.is_branch_end = is_branch_end
+        self.used_entrances = []
     
     def __str__(self):
         if (self.chosen_room is None):

@@ -181,8 +181,10 @@ def step_back(level, layers):
     
     #normally a chosen room is refunded when it first fails
     #but in the case of a step back, we need to refund it ourselves
-    prev_room_seg = level.get_last_room_seg()
-    layers.refund_room(prev_room_seg.chosen_room)
+    #prev_room_seg = level.get_last_room_seg()
+    #layers.refund_room(prev_room_seg.chosen_room)
+    #TODO: we are not refunding this room because it might have potential to connect to a different type of entrance
+    #it will eventually be removed if it cant find any kind of endpoint to connect to (because all prev valid ones were filtered by used_entrances)
     
     
 #TODO: could have john be forbidden if below certain branch, then do another run with john if cant find any
@@ -225,7 +227,7 @@ def add_entrance_segments(level, layers, last_room_seg):
         #differentiate E from EBS in last_room_seg using class type: EntranceRoom vs BranchRoom
         if isinstance(chosen_room, EntranceRoom):
             
-            chosen_A, chosen_F, path_AF = layers.bridge_twoway(chosen_room)
+            chosen_A, chosen_F, path_AF = layers.bridge_twoway(chosen_room, last_room_seg.used_entrances)
             
             if chosen_F is None:
                 layers.refund_entrance(chosen_room)
@@ -265,7 +267,7 @@ def add_branch_segments(level, layers, last_room_seg, want_john_end):
             log("   Branch Seg: no chosen room. Try John")
             break #try john
         
-        chosen_BS, chosen_BE, path_NPT, path_PT = layers.bridge_oneway(chosen_room)
+        chosen_BS, chosen_BE, path_NPT, path_PT = layers.bridge_oneway(chosen_room, last_room_seg.used_entrances)
         
         if chosen_BE is None:
             log("   Branch Seg: Failed bridge oneway with chosen room")
@@ -316,7 +318,7 @@ def add_twoway_segments(level, layers, last_room_seg, want_john_end):
         if chosen_room is None:
             break #try john
 
-        chosen_A, chosen_F, path_AF = layers.bridge_twoway(chosen_room)
+        chosen_A, chosen_F, path_AF = layers.bridge_twoway(chosen_room, last_room_seg.used_entrances)
         
         if chosen_F is None:
             log("twoway failed with chosen A")

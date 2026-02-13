@@ -15,6 +15,15 @@ def log(message):
     if LOG_ENABLED:
         print(message)
 
+class EntrancePair():
+    
+    def __init__(self, door):
+        self.door_type = door.door_type
+        self.door_dir = door.door_dir
+    
+    def __eq__(self, other):
+        return self.door_type == other.door_type and self.door_dir == other.door_dir
+
 class LayerHandler():
     
     def __init__(self, TW, OW_NPT, OW_PT, BS, BE, E, EBS, J, JBE):
@@ -29,25 +38,66 @@ class LayerHandler():
         self.JBE = JBE
         self.BS_removed = []
         self.BE_removed = []
+    
+    #TODO: have to check all doors on the room if it has no good one
+    #have to account for the branch door or the NPT or PT door depending...
+    def filter_out_by_entrances(self, rooms, used_entrances):
+        filtered = []
+    
+        for room in rooms:
+            ep = EntrancePair(room.start_door)
+            
+            #only add unique eps
+            if ep not in unique_entrances:
+                filtered.append(room)
+        
+        return filtered
 
-    def bridge_twoway(self, A):
+    def get_unique_entrance_pairs(self, rooms, stop):
+        if stop == None:
+            return []
+        
+        unique_entrances = []
+        
+        for room in rooms:
+            
+            ep = EntrancePair(room.start_door)
+            
+            #only add unique eps
+            if ep not in unique_entrances:
+                unique_entrances.append(ep)
+            
+            #end point
+            if room.room_name == stop.room_name:
+                break
+        
+        return unique_entrances
+
+    def bridge_twoway(self, A, used_entrances):
         #Allow BS or J to be chosen for F
         Fs = []
         Fs.extend(self.BS)
         Fs.extend(self.J)
         
+        Fs = self.filter_out_by_entrances(Fs, used_entrances)
+        
         chosen_A, chosen_F, path_AF = create_bridge_twoway(G = self.TW, As = [A], Fs = Fs)
         
         if chosen_F is not None:
             update_other_G(self.TW, [self.OW_NPT, self.OW_PT])
+            
+        new_used_entrances = self.get_unique_entrance_pairs(Fs, chosen_F)
+        used_entrances.extend(new_used_entrances) #modify outside list
         
         return chosen_A, chosen_F, path_AF
     
-    def bridge_oneway(self, A):
+    def bridge_oneway(self, A, used_entrances):
         #Allow BE or JBE to be chosen for BE
         BEs = []
         BEs.extend(self.BE)
         BEs.extend(self.JBE)
+        
+        BEs = self.filter_out_by_entrances(BEs, used_entrances)
         
         chosen_BS, chosen_BE, path_NPT, path_PT = create_bridge_oneway(G_NPT = self.OW_NPT, G_PT = self.OW_PT, BSs = [A], BEs = BEs) 
         
@@ -55,7 +105,8 @@ class LayerHandler():
             update_other_G(self.OW_NPT, [self.TW])
             update_other_G(self.OW_PT, [self.TW])
         
-        return chosen_BS, chosen_BE, path_NPT, path_PT
+        new_used_entrances = self.get_unique_entrance_pairs(BEs, chosen_BE)
+        used_entrances.extend(new_used_entrances) #modify outside list
     
 
         return chosen_BS, chosen_BE, path_NPT, path_PT

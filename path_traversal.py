@@ -32,6 +32,7 @@ def log(msg):
     if LOG_ENABLED:
         print(msg)
 
+#TODO: add filtering to Fs for invalid entrance types
 def create_bridge_twoway(G, As, Fs): #As and Fs should be lists of types inheriting BaseRoom
     def twoway_endpoint_extractor(A):
         return A.get_twoway_endpoint()
@@ -41,6 +42,7 @@ def create_bridge_twoway(G, As, Fs): #As and Fs should be lists of types inherit
 
     return chosen_A, chosen_F, twoway_path_AF
 
+#TODO: add filtering to BEs for invalid entrance types
 def create_bridge_oneway(G_NPT, G_PT, BSs, BEs): #BSs and #BEs should be lists of type BranchRoom
     chosen_BS, chosen_BE, oneway_path_NPT, oneway_path_PT = find_some_branch_paths(G_PT, G_NPT, BSs, BEs)
     
@@ -121,6 +123,13 @@ For every combination of them, try to find a path AF
 Extract from room Au and Fu the endpoints A and F to use, depending on AF_extractor
 
 return the combination selected Au, Fu and the path path_AF found between them.
+
+#TODO: add consumed entrance type for Fus
+#Every failed Fu marks that Fu's entrances as invalid
+#future Fu's should not use it
+
+#additionally, we should be able to pass a type of entrances that are not allowed
+#maybe we could pre-filter Fs?
 """
 def find_some_path(G, As, Fs, endpoint_extractor = default_extractor, prioritize_oneway = False):
 
