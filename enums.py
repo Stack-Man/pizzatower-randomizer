@@ -7,12 +7,13 @@ class BranchType(Enum):
     END = 2
     ANY = 3
     MID = 4
+    FORCED_ANY = 5
+    FORCED_START = 6
  
 class PathTime(Enum):
     BOTH = 0
     PIZZATIME = 1
     NOTPIZZATIME = 2
-    ANY = 3 #Allows selecting any PathTime
     
 class DoorType(Enum):
     NONE = 0
@@ -47,10 +48,5 @@ class RoomType(Enum):
     JOHN = 4
     LOOP = 5
 
-class TraversalMode(Enum):
-    NONE = 0
-    MATCHING_PERFECT = 1
-    MATCHING_DIRECTIONAL = 2
-    ARBITRARY_NO_TURNAROUNDS = 3
-    ARBITRARY_NO_RESTRICTIONS = 4
+
     

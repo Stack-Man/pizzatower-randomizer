@@ -1,38 +1,51 @@
+from objects import *
 from enums import *
 from json_keys import *
-from objects import *
+from settings import *
+from colors import WARNING, CAUTION, RESET
+
 
 #-------------------
 #   JSON to Object
 #-------------------
 
-JSON_ROOMS = "rooms"
-JSON_DOORS = "doors"
-JSON_JOHN = "pillar"
-JSON_ENTRANCE = "entrance"
-JSON_ROOM_NAME = "title"
+
 
 def json_to_rooms(json):
-    
     json_rooms = json[JSON_ROOMS]
     rooms = []
 
     for json_room in json_rooms:
         room = json_to_room(json_room)
+
+        #skip rooms with one or less transitions if disallowed
+        if (not JSON_ROOMS_ALLOW_LOOP_ROOMS and room.room_type == RoomType.LOOP):
+            continue
+
+        if (not JSON_ROOMS_ALLOW_NO_TRANSITION_ROOMS and len(room.doors) <= 0):
+            continue
+
+        if (not JSON_ROOMS_ALLOW_BRANCH_ROOMS and (room.room_type == RoomType.BRANCH or room.branch_type is not BranchType.NONE)):
+            continue
+
         rooms.append(room)
         
     return rooms
 
+
 def json_to_room(json_room):
+
     is_john_room = JSON_JOHN in json_room
     is_entrance_room = JSON_ENTRANCE in json_room
     room_name = json_room[JSON_ROOM_NAME]
+    is_forced_branch_any = JSON_FORCED_BRANCH_ANY in json_room
+    is_forced_branch_start = JSON_FORCED_BRANCH_START in json_room
     
     doors = json_to_doors(json_room)
     
     paths = doors_to_paths(doors, is_john_room)
     
-    room = Room(room_name, doors, paths, is_john_room, is_entrance_room)
+    room = Room(room_name, doors, paths, is_john_room, is_entrance_room, is_forced_branch_any, is_forced_branch_start)
     
     room.branch_type = get_branch_type(room)
     
@@ -41,8 +54,7 @@ def json_to_room(json_room):
     #TODO: check for CTOP Entrance, CTOP Exit, War EXIT
     
     return room
-    
-    
+
 def json_to_doors(json_room):
     if JSON_DOORS not in json_room:
         return []
@@ -52,6 +64,14 @@ def json_to_doors(json_room):
     
     for json_door in json_doors:
         door = json_to_door(json_door)
+
+        #skip loop doors if loop doors is disallowed
+        if (not JSON_DOORS_ALLOW_LOOP_DOORS and door.is_loop):
+            continue
+
+        if (not JSON_DOORS_ALLOW_TAXI_OR_ROCKET_DOORS and (door.door_type == DoorType.ROCKET or door.door_type == DoorType.TAXI)):
+                    continue
+
         doors.append(door)
 
     return doors
@@ -174,6 +194,13 @@ def get_branch_type(room):
     
     if room.has_entrance and has_entrance_branch_paths(room):
         return BranchType.START
+
+    if room.is_forced_branch_any:
+        return BranchType.FORCED_ANY
+
+    if room.is_forced_branch_start:
+        return BranchType.FORCED_START
+
 
     has_branch_NPT = False
     has_NPT_branch = False
