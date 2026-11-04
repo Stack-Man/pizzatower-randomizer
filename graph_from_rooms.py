@@ -8,7 +8,7 @@ from objects import Room, Path
 from graph_objects import DoorNode, PathEdge, StartExitType, TransitionEdge
 from settings import GRAPH_TRAVERSAL_MODE, TraversalMode
 from colors import ERROR, RESET
-from enums import DoorDir, PathTime
+from enums import DoorDir, PathTime, RoomType
 import networkx as nx
 
 def rooms_to_graph(rooms: list[Room]):
@@ -19,6 +19,11 @@ def rooms_to_graph(rooms: list[Room]):
 
     return graph
 
+def get_existing_node(node: DoorNode, door_nodes: list[DoorNode]) -> DoorNode:
+    return next(
+        (existing for existing in door_nodes if existing == node),
+        node
+    )
 
 def rooms_to_edges_and_nodes(rooms: list[Room]):
 
@@ -28,9 +33,17 @@ def rooms_to_edges_and_nodes(rooms: list[Room]):
     #categorize every path by edge type
     for room in rooms:
 
+        #Exclude non normal rooms from the flow graph
+        if room.room_type is not RoomType.NORMAL:
+            continue
+
         for path in room.paths:
 
             edge : PathEdge = path_to_edge(path)
+
+            #replace the recreated node objects with ones already in the graph, if it exists
+            edge.start_node = get_existing_node(edge.start_node, door_nodes)
+            edge.end_node = get_existing_node(edge.end_node, door_nodes)
 
             if (edge not in paths_by_path_edge):
                 paths_by_path_edge[edge] = []
@@ -116,6 +129,8 @@ def transition_edges_from_nodes(nodes: list[DoorNode]):
     match GRAPH_TRAVERSAL_MODE:
         case TraversalMode.MATCHING_PERFECT:
             return transition_edges_from_nodes_matching_perfect(nodes)
+        case TraversalMode.DEBUG:
+            return transition_edges_from_nodes_debug(nodes)
         case _ :
             print(f"{ERROR} ERROR: Traversal Mode {GRAPH_TRAVERSAL_MODE} not implemented in transition_edges_from_nodes_and_matrix() in rooms_to_graphs.py{RESET}")
             return []
@@ -136,6 +151,9 @@ def transition_edges_from_nodes_matching_perfect(nodes: list[DoorNode]):
             edges.append(edge)
 
     return edges
+
+def transition_edges_from_nodes_debug(nodes: list[DoorNode]):
+    return []
 
 def flip_dir(dir: DoorDir):
     match dir:

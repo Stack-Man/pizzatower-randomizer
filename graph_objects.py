@@ -12,8 +12,9 @@ from colors import ERROR, RESET
 
 
 class StartExitType(Enum):
-    START = 0
-    EXIT = 1
+    START = "START"
+    EXIT = "EXIT"
+    X = ""
 
 class DoorNode():
     def __init__(self, door_type: DoorType, door_dir: DoorDir, se_type: StartExitType):
@@ -35,7 +36,8 @@ class DoorNode():
         return hash((self.door_type, self.door_dir, self.se_type))
 
     def __str__(self):
-        return "Node: (" + str(self.door_type) + ", " + str(self.door_dir) + ")"
+        return str(self.door_type.value)
+        #return "(" + str(self.door_type.value) + ", " + str(self.door_dir.value) + ", " + str(self.se_type.value) + ")"
 
 class Edge():
     def __init__(self, start_node: DoorNode, end_node: DoorNode):
@@ -47,6 +49,9 @@ class Edge():
     
     def __hash__(self):
         return hash((self.start_node, self.end_node))
+
+    def __str__(self):
+        return str(self.start_node) + "--" + str(self.end_node)
 
 class EdgeTraversal():
     def __init__(self, edges: list[Edge], rarity : float, is_npt: bool, is_pt: bool, is_owany: bool):
@@ -75,6 +80,18 @@ class EdgeTraversal():
                 return False
 
         return True
+    
+
+    def __str__(self):
+        msg = ""
+
+        for edge in self.edges:
+
+            msg = msg + str(edge) + " > "
+
+        return msg
+
+
 
 
 class PathEdge(Edge):

@@ -1,0 +1,44 @@
+{
+	"version" : "0.5",
+            "rooms": [
+				{
+					"title" : "test_1",
+                    "doors": [
+					
+						{
+							"letter" : "A",
+                            "type": "horizontal",
+                            "dir": "left",
+                            "startonly" : "true"
+						},
+
+						{
+							"letter" : "B",
+                            "type": "horizontal",
+                            "dir": "right",
+                            "exitonly" : "true"
+						}
+                    ]
+				},
+
+                {
+					"title" : "test_2",
+                    "doors": [
+					
+						{
+							"letter" : "A",
+                            "type": "horizontal",
+                            "dir": "left",
+                            "startonly" : "true"
+						},
+
+						{
+							"letter" : "B",
+                            "type": "door",
+                            "exitonly" : "true"
+						}
+                    ]
+				}
+				
+            ]
+}

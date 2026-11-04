@@ -9,6 +9,7 @@
 #Mark traversals that can only be completed via paths in an NPT, PT, or OWANY path category.
 #Exclude traversals that can only be completed utilizing paths in both an NPT and PT path category.
 #Give every traversal a rarity score based on the frequency and rarity of the path types used to complete it.
+#Exclude traversals taht can only be completed by double-booking a set of rooms
 
 #Pseudo Code:
 #For N in Nodes:
@@ -22,9 +23,16 @@
 #                       P.Steps_Round_R[Destination] = steps + 1, {path + N}
 
 import networkx as nx
-from graph_objects import EdgeTraversal, DoorNode
+from graph_objects import EdgeTraversal, DoorNode, StartExitType
 import threading
 
+from enums import DoorType, DoorDir
+
+from colors import WARNING, RESET, CAUTION
+
+import time
+
+LOGGING = True
 
 #can an additional optimization be made considering steps with START vs EXIT nodes?
 #a START node doesnt need to know how to reach other START nodes
@@ -32,12 +40,17 @@ import threading
 #though they may be necessary for the flow process even if the end result is unneeded.
 def flow(G):
 
+    log(f"Flow of G with {len(G.nodes())} nodes and {len(G.edges())} Edges begin")
+
     #initialize nodes with traversal to self
     for N in G.nodes():
         N.last_steps[N] = [EdgeTraversal([], 0, False, False, False)]
 
     R = 1
+    total_time = 0
     G.changed_last_round = True #store value in shared G so any thread can modify it
+    G.all_total_crs = 0
+    G.all_total_crs_time = 0  
 
     while (G.changed_last_round and R < len(G.nodes())):
 
@@ -45,11 +58,15 @@ def flow(G):
 
         threads = []
 
+        start_time = time.perf_counter()
+
+
+
         #pass all valid edge traversal from N to its parents P
         for N in G.nodes():
             t = threading.Thread(target = pass_steps_to_parents, args=(G, N))
             threads.append(t)
-            t.start()
+            t.start()      
 
         for t in threads:
             t.join()
@@ -60,13 +77,45 @@ def flow(G):
         #ensures all nodes complete before modifying N.steps and tracks this round's steps
         
         for N in G.nodes():
-            t = threading.Thread(target = store_steps, args=(N))
+            t = threading.Thread(target = store_steps, args=(N,))
             threads.append(t)
             t.start()
+            
                
         for t in threads:
             t.join() 
-           
+
+        end_time = time.perf_counter()
+
+        process_time = end_time - start_time
+        total_time += process_time
+
+        log(f"Round {R}: ({process_time})")
+
+        R = R + 1
+
+    log(f"Total Time: ({total_time})")
+    log(f"Total CRS skipped {G.all_total_crs} which took {G.all_total_crs_time}")
+
+    #clean up node steps, remove traversals stored in START nodes
+    #generations only occur from an EXIT to a START
+    for N in G.nodes():
+        N: DoorNode
+        
+        if (N.se_type == StartExitType.START):
+            N.steps = {}
+        else:
+            #cleanup remove destinations that are EXIT from steps
+            
+            to_remove = []
+
+            for destination, traversals in N.steps.items():
+                if (destination.se_type == StartExitType.EXIT):
+                    to_remove.append(destination)
+
+            for d in to_remove:
+                N.steps.pop(d, None)
+
     return G
 
 def contains_repeat_subset(subset_traversals: dict[DoorNode, list[EdgeTraversal]], superset_traversal : EdgeTraversal):
@@ -78,7 +127,13 @@ def contains_repeat_subset(subset_traversals: dict[DoorNode, list[EdgeTraversal]
 
     return False
 
+
+
 def pass_steps_to_parents(G, N: DoorNode):
+
+    start_time = time.perf_counter()
+    total_contains_repeat_subset_time = 0
+    total_crs_skipped_traversals = 0
 
     for P in G.predecessors(N):
         P : DoorNode
@@ -86,21 +141,37 @@ def pass_steps_to_parents(G, N: DoorNode):
         #pass all valid traversals in N to parent P
         for destination, traversals in N.last_steps.items():
 
+            size = len(P.next_steps)
+
             if (destination not in P.next_steps):
                 P.next_steps[destination] = []
+
+            
 
             for traversal in traversals:
                 if (destination == P or traversal.contains(P)): #skip traversals that contain self
                     continue
 
-                if (contains_repeat_subset(P.steps, traversal)): #skip traversals that contain a subset in P.steps
-                    continue
+                start_crs_time = time.perf_counter()
+
+                #TODO: don't skip traversals that lead to unqiue destinations
+                #if (contains_repeat_subset(P.steps, traversal)): #skip traversals that contain a subset in P.steps
+                    #total_crs_skipped_traversals += 1
+                    #continue
+
+                end_crs_time = time.perf_counter()
+                total_contains_repeat_subset_time += end_crs_time - start_crs_time
 
                 #TODO: exclude traversals that require both NPT and PT exclusive paths
                 #aka, exclude traversals marked as NPT or PT if this edge is exclusive to the opposite
+                #TODO: exclude traversals that require double booking rooms
+                #aka, necessairly consumes some double booked room and the next edge can only be completed via double-bookable rooms
+                #there would need to be some separation for TW NPT and PT since some may hit that while others dont
+                #TODO: these exclusions only needto be performed on PathEdges, not TrasnitionEdges
                 
                 #get the edge set and prepend the current edge to the front
-                new_edge_list = traversal.edges
+                #use a copy() to avoid mutating the same list later
+                new_edge_list = traversal.edges.copy()
                 new_edge_list.insert(0, (G.get_edge_data(P, N)["object"]))
 
                 #create new traversal including this edge
@@ -108,16 +179,37 @@ def pass_steps_to_parents(G, N: DoorNode):
                 new_traversal = EdgeTraversal(new_edge_list, 0, False, False, False)
 
                 P.next_steps[destination].append(new_traversal)
-                P.steps[destination].append(new_traversal)
 
                 G.changed_last_round = True
 
+            #remove entry if no valid traversal was stored
+            #if (len(P.next_steps[destination]) <= 0):
+                #P.next_steps.pop(destination, None)
+
+    end_time = time.perf_counter()
+
+    log(f"   Process of {N} took {end_time - start_time}")
+    log(f"      Found {total_crs_skipped_traversals} repeat subsets which took {total_contains_repeat_subset_time}")
+
+    G.all_total_crs += total_crs_skipped_traversals
+    G.all_total_crs_time += total_contains_repeat_subset_time
+    
 def store_steps(N: DoorNode):
+
+    #don't store traversals with 0 traversals
+    #must do this outside the pass step to avoid multiple access from different threads
     for destination, traversals in N.next_steps.items():
-        if (destination not in N.steps):
-            N.steps[destination] = traversals
-        else:
+        traversal_count = len(traversals)
+
+        if (destination not in N.steps and traversal_count > 0):
+            N.steps[destination] = []
+
+        if (traversal_count > 0):
             N.steps[destination].extend(traversals)
 
-        N.last_steps = N.next_steps
-        N.next_steps = {}
+    N.last_steps = N.next_steps.copy()
+    N.next_steps = {}
+
+def log(msg: str):
+    if (LOGGING):
+        print(msg, flush=True)
