@@ -3,7 +3,7 @@
 
 #Class structure to use as nodes pr edges in an nx graph to store information about the node or edge
 
-from enums import DoorType, DoorDir
+from enums import DoorType, DoorDir, StartExitType
 from objects import Path
 
 from enum import Enum
@@ -11,23 +11,31 @@ from enum import Enum
 from colors import ERROR, RESET
 
 
-class StartExitType(Enum):
-    START = "S"
-    EXIT = "E"
-    X = ""
+class Node():
+    def __init__(self, se_type: StartExitType):
 
-class DoorNode():
-    def __init__(self, door_type: DoorType, door_dir: DoorDir, se_type: StartExitType):
-        self.door_type = door_type
-        self.door_dir = door_dir
         self.se_type = se_type #helps enforce a movement direction from path edge to transition edge
 
         #Dictionary of lists, for each destination DoorNode, hold a list of EdgeTraversals
         self.steps : dict[DoorNode, list[EdgeTraversal]] = {}
-
+        
         #helper dicts for Flow algorithm
         self.next_steps : dict[DoorNode, list[EdgeTraversal]] = {}
         self.last_steps : dict[DoorNode, list[EdgeTraversal]] = {}
+
+        #helper bool for graph_collapse.py
+        self.combined = False
+
+        #helpers for graph_collapse.py
+        self.parents = []
+        self.children = []
+
+class DoorNode(Node):
+    def __init__(self, door_type: DoorType, door_dir: DoorDir, se_type: StartExitType):
+        super().__init__(se_type)
+
+        self.door_type = door_type
+        self.door_dir = door_dir
 
     def __eq__(self, other):
         return self.door_type == other.door_type and self.door_dir == other.door_dir and self.se_type == other.se_type
@@ -38,11 +46,50 @@ class DoorNode():
     def __str__(self):
         return str(self.door_type.value) + " " + str(self.door_dir.value)
         #return "(" + str(self.door_type.value) + ", " + str(self.door_dir.value) + ", " + str(self.se_type.value) + ")"
+    
+    def __contains__(self, item):
+        return item == self
+
+class CombinedDoorNode(Node):
+    def __init__(self, nodes: list[DoorNode], se_type: StartExitType):
+        super().__init__(se_type)
+
+        self.nodes = nodes
+
+    def __eq__(self, other):
+        #all nodes in self in other
+        for n in self.nodes:
+            if n not in other.nodes:
+                return False
+
+        #other does not contain nodes not in self
+        if len(self.nodes) != len(other.nodes):
+            return False
+
+        #final sanity check
+        if self.se_type == other.se_type:
+            return True
+
+    #combine the hash results of the list into a single tuple and hash that
+    def __hash__(self):
+        return hash(tuple(hash(node) for node in self.nodes))
+
+    def __str__(self):
+        msg = ""
+
+        for node in self.nodes:
+            msg += " " + str(node)
+
+        return msg
+
+    def __contains__(self, item):
+        return item in self.nodes
 
 class Edge():
-    def __init__(self, start_node: DoorNode, end_node: DoorNode):
+    def __init__(self, start_node: DoorNode | CombinedDoorNode, end_node: DoorNode | CombinedDoorNode):
         self.start_node = start_node
         self.end_node = end_node
+        self.combined = False
 
     def __eq__(self, other):
             return self.start_node == other.start_node and self.end_node == other.end_node
@@ -95,7 +142,7 @@ class EdgeTraversal():
 
 
 class PathEdge(Edge):
-    def __init__(self, start_node: DoorNode, end_node: DoorNode):
+    def __init__(self, start_node: DoorNode | CombinedDoorNode, end_node:  DoorNode | CombinedDoorNode):
         super().__init__(start_node, end_node)
 
         if (start_node.se_type is not StartExitType.START or end_node.se_type is not StartExitType.EXIT):
@@ -121,7 +168,7 @@ class PathEdge(Edge):
         return hash((self.start_node, self.end_node))
 
 class TransitionEdge(Edge):
-    def __init__(self, start_node: DoorNode, end_node: DoorNode):
+    def __init__(self, start_node: DoorNode | CombinedDoorNode, end_node:  DoorNode | CombinedDoorNode):
         super().__init__(start_node, end_node)
 
         if (start_node.se_type is not StartExitType.EXIT or end_node.se_type is not StartExitType.START):

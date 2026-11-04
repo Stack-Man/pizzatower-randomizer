@@ -23,7 +23,7 @@
 #                       P.Steps_Round_R[Destination] = steps + 1, {path + N}
 
 import networkx as nx
-from graph_objects import EdgeTraversal, DoorNode, StartExitType
+from graph_objects import EdgeTraversal, DoorNode, CombinedDoorNode, StartExitType
 import threading
 
 from enums import DoorType, DoorDir
@@ -97,8 +97,7 @@ def flow(G):
     #clean up node steps, remove traversals stored in START nodes
     #generations only occur from an EXIT to a START
     for N in G.nodes():
-        N: DoorNode
-        
+
         if (N.se_type == StartExitType.START):
             N.steps = {}
         else:
@@ -115,7 +114,7 @@ def flow(G):
 
     return G
 
-def contains_repeat_subset(subset_traversals: dict[DoorNode, list[EdgeTraversal]], superset_traversal : EdgeTraversal):
+def contains_repeat_subset(subset_traversals: dict[DoorNode | CombinedDoorNode, list[EdgeTraversal]], superset_traversal : EdgeTraversal):
 
     for _, traversals in subset_traversals.items():
         for subset in traversals:
@@ -124,7 +123,7 @@ def contains_repeat_subset(subset_traversals: dict[DoorNode, list[EdgeTraversal]
 
     return False
 
-def pass_steps_to_parents(G, N: DoorNode):
+def pass_steps_to_parents(G, N: DoorNode | CombinedDoorNode):
 
     start_time = time.perf_counter()
 

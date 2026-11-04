@@ -54,5 +54,10 @@ class RoomType(Enum):
     JOHN = 4
     LOOP = 5
 
+class StartExitType(Enum):
+    START = "S"
+    EXIT = "E"
+    X = ""
+
 
     

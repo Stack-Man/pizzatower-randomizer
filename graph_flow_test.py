@@ -1,7 +1,7 @@
 from json_parse import parse_json_to_rooms_all, FILENAMES
 from graph_from_rooms import rooms_to_graph
 from graph_flow import flow
-from graph_objects import DoorNode, EdgeTraversal, StartExitType, Edge
+from graph_objects import DoorNode, EdgeTraversal, StartExitType, Edge, Node
 import networkx as nx
 from colors import WARNING, CAUTION, RESET
 from enums import DoorType, DoorDir
@@ -62,7 +62,7 @@ def print_steps(G: nx.DiGraph, print_traversals: bool):
     print(f"")
 
     for N in G.nodes():
-        N : DoorNode
+        N : Node
 
         for destination, traversals in N.steps.items():
             print(f"{N} > {destination}: {len(traversals)}")
@@ -73,7 +73,7 @@ def print_steps(G: nx.DiGraph, print_traversals: bool):
     print(f"")
 
     for N in G.nodes():
-            N : DoorNode
+            N : Node
     
             for destination, traversals in N.steps.items():
                 print(f"{N} > {destination}: {len(traversals)}")
