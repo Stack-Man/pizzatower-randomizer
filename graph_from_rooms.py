@@ -7,7 +7,7 @@
 from objects import Room, Path
 from graph_objects import DoorNode, PathEdge, StartExitType, TransitionEdge
 from settings import GRAPH_TRAVERSAL_MODE, TraversalMode
-from colors import ERROR, RESET
+from colors import ERROR, RESET, CAUTION
 from enums import DoorDir, PathTime, RoomType
 import networkx as nx
 
@@ -124,11 +124,14 @@ def graph_from_nodes_and_edges(nodes: list[DoorNode], path_edges: list[PathEdge]
 
 def transition_edges_from_nodes(nodes: list[DoorNode]):
     #for every EXIT node, look at the transition matrix and create a TransitionEdge to the corresponding START nodes
+    print(f"{CAUTION} Using Traversal Mode {RESET}{GRAPH_TRAVERSAL_MODE}{CAUTION} to create the graph!{RESET}")
 
     #TODO: implement other modes as specified in settings.py
     match GRAPH_TRAVERSAL_MODE:
         case TraversalMode.MATCHING_PERFECT:
             return transition_edges_from_nodes_matching_perfect(nodes)
+        case TraversalMode.ARBITRARY_NO_RESTRICTIONS:
+            return transition_edges_from_arbitrary_no_restrictions(nodes)
         case TraversalMode.DEBUG:
             return transition_edges_from_nodes_debug(nodes)
         case _ :
@@ -145,10 +148,28 @@ def transition_edges_from_nodes_matching_perfect(nodes: list[DoorNode]):
         if (node.se_type == StartExitType.EXIT):
             other_type = node.door_type
             other_dir = flip_dir(node.door_dir)
+
+            #recreate the matching node then get the actual node object from nodes
             other_node = DoorNode(other_type, other_dir, StartExitType.START)
+            other_node = get_existing_node(other_node, nodes) 
 
             edge = TransitionEdge(node, other_node)
             edges.append(edge)
+
+    return edges
+
+def transition_edges_from_arbitrary_no_restrictions(nodes: list[DoorNode]):
+
+    edges = []
+
+    for A in nodes:
+
+        for B in nodes:
+
+            #match all exits to all starts
+            if (A.se_type == StartExitType.EXIT and B.se_type == StartExitType.START):
+                edge = TransitionEdge(A, B)
+                edges.append(edge)
 
     return edges
 
@@ -157,10 +178,6 @@ def transition_edges_from_nodes_debug(nodes: list[DoorNode]):
 
 def flip_dir(dir: DoorDir):
     match dir:
-        case DoorDir.ANY:
-            return DoorDir.ANY
-        case DoorDir.NONE:
-            return DoorDir.NONE
         case DoorDir.LEFT:
             return DoorDir.RIGHT
         case DoorDir.RIGHT:
@@ -169,3 +186,5 @@ def flip_dir(dir: DoorDir):
             return DoorDir.DOWN
         case DoorDir.DOWN:
             return DoorDir.UP
+        case _:
+            return dir

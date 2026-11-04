@@ -12,8 +12,8 @@ from colors import ERROR, RESET
 
 
 class StartExitType(Enum):
-    START = "START"
-    EXIT = "EXIT"
+    START = "S"
+    EXIT = "E"
     X = ""
 
 class DoorNode():
@@ -36,7 +36,7 @@ class DoorNode():
         return hash((self.door_type, self.door_dir, self.se_type))
 
     def __str__(self):
-        return str(self.door_type.value)
+        return str(self.door_type.value) + " " + str(self.door_dir.value)
         #return "(" + str(self.door_type.value) + ", " + str(self.door_dir.value) + ", " + str(self.se_type.value) + ")"
 
 class Edge():

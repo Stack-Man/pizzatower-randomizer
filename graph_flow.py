@@ -49,8 +49,6 @@ def flow(G):
     R = 1
     total_time = 0
     G.changed_last_round = True #store value in shared G so any thread can modify it
-    G.all_total_crs = 0
-    G.all_total_crs_time = 0  
 
     while (G.changed_last_round and R < len(G.nodes())):
 
@@ -95,7 +93,6 @@ def flow(G):
         R = R + 1
 
     log(f"Total Time: ({total_time})")
-    log(f"Total CRS skipped {G.all_total_crs} which took {G.all_total_crs_time}")
 
     #clean up node steps, remove traversals stored in START nodes
     #generations only occur from an EXIT to a START
@@ -127,13 +124,9 @@ def contains_repeat_subset(subset_traversals: dict[DoorNode, list[EdgeTraversal]
 
     return False
 
-
-
 def pass_steps_to_parents(G, N: DoorNode):
 
     start_time = time.perf_counter()
-    total_contains_repeat_subset_time = 0
-    total_crs_skipped_traversals = 0
 
     for P in G.predecessors(N):
         P : DoorNode
@@ -151,16 +144,6 @@ def pass_steps_to_parents(G, N: DoorNode):
             for traversal in traversals:
                 if (destination == P or traversal.contains(P)): #skip traversals that contain self
                     continue
-
-                start_crs_time = time.perf_counter()
-
-                #TODO: don't skip traversals that lead to unqiue destinations
-                #if (contains_repeat_subset(P.steps, traversal)): #skip traversals that contain a subset in P.steps
-                    #total_crs_skipped_traversals += 1
-                    #continue
-
-                end_crs_time = time.perf_counter()
-                total_contains_repeat_subset_time += end_crs_time - start_crs_time
 
                 #TODO: exclude traversals that require both NPT and PT exclusive paths
                 #aka, exclude traversals marked as NPT or PT if this edge is exclusive to the opposite
@@ -182,18 +165,8 @@ def pass_steps_to_parents(G, N: DoorNode):
 
                 G.changed_last_round = True
 
-            #remove entry if no valid traversal was stored
-            #if (len(P.next_steps[destination]) <= 0):
-                #P.next_steps.pop(destination, None)
-
     end_time = time.perf_counter()
 
-    log(f"   Process of {N} took {end_time - start_time}")
-    log(f"      Found {total_crs_skipped_traversals} repeat subsets which took {total_contains_repeat_subset_time}")
-
-    G.all_total_crs += total_crs_skipped_traversals
-    G.all_total_crs_time += total_contains_repeat_subset_time
-    
 def store_steps(N: DoorNode):
 
     #don't store traversals with 0 traversals
