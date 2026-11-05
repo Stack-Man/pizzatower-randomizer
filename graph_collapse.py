@@ -51,6 +51,7 @@ from colors import ERROR, RESET
 
 def collapse_all_nodes_and_edges(G: nx.DiGraph):
     old_nodes = list(G.nodes())
+    old_count = len(old_nodes)
     
     #Store list of parents/children in each node for easy access 
     #without reconstructing the graph each loop
@@ -68,20 +69,29 @@ def collapse_all_nodes_and_edges(G: nx.DiGraph):
     new_nodes = collapse_nodes_repeat(old_nodes)
 
     old_edges = get_edges_from_graph(G)
+    old_edge_count = len(old_edges)
     updated_edges = update_edge_nodes(old_edges, new_nodes)
     new_edges = collapse_edges_repeat(updated_edges)
 
     new_G = graph_from_nodes_and_edges(new_nodes, new_edges)
+
+    print(f"G {old_count} nodes and {old_edge_count} edges collapse to {len(new_nodes)} nodes and {len(new_edges)} edges")
+
     return new_G
 
 def collapse_nodes_repeat(old_nodes: list[DoorNode|CombinedDoorNode]):
-    new_nodes = []
+    new_nodes = old_nodes
 
-    #repeat until new_nodes stops shrinking
-    while (len(new_nodes) < len(old_nodes)):
+    while (True):
         last_nodes = new_nodes
-        new_nodes = collapse_nodes(old_nodes)
+        new_nodes = collapse_nodes(new_nodes)
         old_nodes = last_nodes
+
+        print(f"collapsed {len(old_nodes)} nodes to {len(new_nodes)}", flush = True)
+
+        #repeat until new_nodes stops shrinking
+        if (len(new_nodes) >= len(old_nodes)):
+            break
 
     return new_nodes
 
@@ -96,16 +106,25 @@ def collapse_nodes(nodes: list[DoorNode|CombinedDoorNode]):
 
         if not a.combined and not b.combined:
             #same se_type and either start with same parents or exit with same children
-            if (a.se_type == b.se_type and (
-                (a.se_type == StartExitType.START and same_lists(a.parents, b.parents)) or
-                (a.se_type == StartExitType.EXIT and same_lists(a.children, b.children))
-                )
-            ):
+
+            #must be same type
+            if (a.se_type != b.se_type):
+                #print(f"    {a} and {b} are not the same se_type {a.se_type} vs {b.se_type}")
+                continue
+
+            #lists of parents or children are the same
+            if ((a.se_type == StartExitType.START and same_lists(a.parents, b.parents)) or
+                (a.se_type == StartExitType.EXIT and same_lists(a.children, b.children))):
+                #print(f"    {a} and {b} are collapsed")
                 new_node = create_combined_node(a, b)
                 new_nodes.append(new_node)
                 a.combined = True
                 b.combined = True
+            #else:
+                #print(f"    {a} and {b} do not have the same lists of parents {a.parents} vs {b.parents}")
+                #print(f"    OR {a} and {b} do not have the same lists of children {a.children} vs {b.children}")
 
+                
     #add every node that wasn't combined
     #nodes that weren't combined this round may be combined
     #next round with a combined node,
@@ -165,6 +184,10 @@ def pairs(items):
 
             yield items[i], items[k]
 
+            k += 1
+
+        i += 1
+
 def get_edges_from_graph(G: nx.DiGraph):
     edges = []
 
@@ -200,13 +223,18 @@ def node_containing_node(node: DoorNode | CombinedDoorNode, nodes: list[DoorNode
     return node
 
 def collapse_edges_repeat(old_edges: list[PathEdge|TransitionEdge]):
-    new_edges = []
+    new_edges = old_edges
 
     #repeat until new_edges stops shrinking
-    while (len(new_edges) < len(old_edges)):
+    while (True):
         last_edges = new_edges
-        new_edges = collapse_edges(old_edges)
+        new_edges = collapse_edges(new_edges)
         old_edges = last_edges
+
+        print(f"collapsed {len(old_edges)} edges to {len(new_edges)}", flush = True)
+
+        if (len(new_edges) >= len(old_edges)):
+            break
 
     return new_edges
 
@@ -222,6 +250,8 @@ def collapse_edges(old_edges: list[PathEdge|TransitionEdge]):
                 if (U.start_node == V.start_node and U.end_node == V.end_node):
                     UV = create_combined_edge(U, V)
                     new_edges.append(UV)
+                    U.combined = True
+                    V.combined = True
 
     for E in old_edges:
         if not E.combined:

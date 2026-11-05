@@ -38,13 +38,16 @@ class DoorNode(Node):
         self.door_dir = door_dir
 
     def __eq__(self, other):
+        if (type(other) != DoorNode):
+            return False
+
         return self.door_type == other.door_type and self.door_dir == other.door_dir and self.se_type == other.se_type
 
     def __hash__(self):
         return hash((self.door_type, self.door_dir, self.se_type))
 
     def __str__(self):
-        return str(self.door_type.value) + " " + str(self.door_dir.value)
+        return str(self.door_type.value) + " " + str(self.door_dir.value) + " " + str(self.se_type.value)
         #return "(" + str(self.door_type.value) + ", " + str(self.door_dir.value) + ", " + str(self.se_type.value) + ")"
     
     def __contains__(self, item):
@@ -57,6 +60,10 @@ class CombinedDoorNode(Node):
         self.nodes = nodes
 
     def __eq__(self, other):
+
+        if (type(other) != CombinedDoorNode):
+            return False
+
         #all nodes in self in other
         for n in self.nodes:
             if n not in other.nodes:
@@ -75,12 +82,12 @@ class CombinedDoorNode(Node):
         return hash(tuple(hash(node) for node in self.nodes))
 
     def __str__(self):
-        msg = ""
+        msg = "("
 
         for node in self.nodes:
-            msg += " " + str(node)
+            msg += ", " + str(node)
 
-        return msg
+        return msg + ")"
 
     def __contains__(self, item):
         return item in self.nodes

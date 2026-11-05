@@ -6,15 +6,15 @@
 
 from objects import Room, Path
 from graph_objects import DoorNode, PathEdge, TransitionEdge, CombinedDoorNode, Node
-from settings import GRAPH_TRAVERSAL_MODE, TraversalMode
+from settings import TraversalMode
 from colors import ERROR, RESET, CAUTION
 from enums import DoorDir, PathTime, RoomType, StartExitType
 from graph_transition_edge import transition_edges_from_nodes
 import networkx as nx
 
-def rooms_to_graph(rooms: list[Room]):
+def rooms_to_graph(rooms: list[Room], traversal_mode : TraversalMode = TraversalMode.MATCHING_PERFECT ):
     path_edges, nodes = rooms_to_edges_and_nodes(rooms)
-    transition_edges = transition_edges_from_nodes(nodes)
+    transition_edges = transition_edges_from_nodes(nodes, traversal_mode)
 
     path_edges.extend(transition_edges)
     edges = path_edges

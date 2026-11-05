@@ -5,6 +5,7 @@ from graph_objects import DoorNode, EdgeTraversal, StartExitType, Edge, Node
 import networkx as nx
 from colors import WARNING, CAUTION, RESET
 from enums import DoorType, DoorDir
+from settings import TraversalMode
 
 def test_flow():
 
@@ -20,7 +21,7 @@ def test_flow():
 
     #TODO: implement redundant node collapse, combinging ndoes with the same parentsa nd children into one node,
     #and combining their edges to the same parents/children into one edge
-    graph = rooms_to_graph(all_rooms) 
+    graph = rooms_to_graph(all_rooms, traversal_mode = TraversalMode.MATCHING_PERFECT) 
 
     
 

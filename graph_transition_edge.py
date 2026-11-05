@@ -1,16 +1,14 @@
 from graph_objects import DoorNode, TransitionEdge, CombinedDoorNode
 from colors import CAUTION, RESET, ERROR
-from settings import GRAPH_TRAVERSAL_MODE, TraversalMode
+from settings import TraversalMode
 from enums import StartExitType, DoorDir
-from graph_from_rooms import get_existing_node
-from typing import cast
 
-def transition_edges_from_nodes(nodes: list[DoorNode]):
+def transition_edges_from_nodes(nodes: list[DoorNode], traversal_mode: TraversalMode):
     #for every EXIT node, look at the transition matrix and create a TransitionEdge to the corresponding START nodes
-    print(f"{CAUTION} Using Traversal Mode {RESET}{GRAPH_TRAVERSAL_MODE}{CAUTION} to create the graph!{RESET}")
+    print(f"{CAUTION} Using Traversal Mode {RESET}{traversal_mode}{CAUTION} to create the graph!{RESET}")
 
     #TODO: implement other modes as specified in settings.py
-    match GRAPH_TRAVERSAL_MODE:
+    match traversal_mode:
         case TraversalMode.MATCHING_PERFECT:
             return transition_edges_from_nodes_matching_perfect(nodes)
         case TraversalMode.ARBITRARY_NO_RESTRICTIONS:
@@ -18,8 +16,11 @@ def transition_edges_from_nodes(nodes: list[DoorNode]):
         case TraversalMode.DEBUG:
             return transition_edges_from_nodes_debug(nodes)
         case _ :
-            print(f"{ERROR} ERROR: Traversal Mode {GRAPH_TRAVERSAL_MODE} not implemented in transition_edges_from_nodes_and_matrix() in rooms_to_graphs.py{RESET}")
+            print(f"{ERROR} ERROR: Traversal Mode {traversal_mode} not implemented in transition_edges_from_nodes_and_matrix() in rooms_to_graphs.py{RESET}")
             return []
+
+def get_existing_node(node: DoorNode, door_nodes: list[DoorNode]):
+    return next((N for N in door_nodes if N == node), node )
 
 #Match transitions with the same type and consistent directions
 def transition_edges_from_nodes_matching_perfect(nodes: list[DoorNode]):
@@ -35,7 +36,7 @@ def transition_edges_from_nodes_matching_perfect(nodes: list[DoorNode]):
             #recreate the matching node then get the actual node object from nodes
             other_node = DoorNode(other_type, other_dir, StartExitType.START)
             #cast to match the expected type while mainting DoorNode for this func
-            other_node = get_existing_node(other_node, cast(list[DoorNode | CombinedDoorNode], nodes))
+            other_node = get_existing_node(other_node, nodes)
 
             edge = TransitionEdge(node, other_node)
             edges.append(edge)
