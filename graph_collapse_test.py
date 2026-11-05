@@ -10,10 +10,10 @@ from graph_flow import flow
 def test_collapse():
 
     all_rooms = parse_json_to_rooms_all(FILENAMES)
-    graph = rooms_to_graph(all_rooms, traversal_mode=TraversalMode.ARBITRARY_NO_RESTRICTIONS)
+    graph = rooms_to_graph(all_rooms, traversal_mode=TraversalMode.ARBITRARY_NO_TURNAROUNDS)
     collapsed_graph = collapse_all_nodes_and_edges(graph)
 
-    print_graph(collapsed_graph)
+    #print_graph(collapsed_graph)
 
     #flow(graph)
     flow(collapsed_graph)

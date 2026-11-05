@@ -85,12 +85,11 @@ def collapse_nodes_repeat(old_nodes: list[DoorNode|CombinedDoorNode]):
     while (True):
         last_nodes = new_nodes
         new_nodes = collapse_nodes(new_nodes)
-        old_nodes = last_nodes
 
-        print(f"collapsed {len(old_nodes)} nodes to {len(new_nodes)}", flush = True)
+        print(f"collapsed {len(last_nodes)} nodes to {len(new_nodes)}", flush = True)
 
         #repeat until new_nodes stops shrinking
-        if (len(new_nodes) >= len(old_nodes)):
+        if (len(new_nodes) >= len(last_nodes)):
             break
 
     return new_nodes
@@ -229,11 +228,10 @@ def collapse_edges_repeat(old_edges: list[PathEdge|TransitionEdge]):
     while (True):
         last_edges = new_edges
         new_edges = collapse_edges(new_edges)
-        old_edges = last_edges
 
-        print(f"collapsed {len(old_edges)} edges to {len(new_edges)}", flush = True)
+        print(f"collapsed {len(last_edges)} edges to {len(new_edges)}", flush = True)
 
-        if (len(new_edges) >= len(old_edges)):
+        if (len(new_edges) >= len(last_edges)):
             break
 
     return new_edges

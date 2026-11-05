@@ -15,6 +15,8 @@ def transition_edges_from_nodes(nodes: list[DoorNode], traversal_mode: Traversal
             return transition_edges_from_arbitrary_no_restrictions(nodes)
         case TraversalMode.DEBUG:
             return transition_edges_from_nodes_debug(nodes)
+        case TraversalMode.ARBITRARY_NO_TURNAROUNDS:
+            return transition_edges_from_arbitrary_no_turnarounds(nodes)
         case _ :
             print(f"{ERROR} ERROR: Traversal Mode {traversal_mode} not implemented in transition_edges_from_nodes_and_matrix() in rooms_to_graphs.py{RESET}")
             return []
@@ -44,7 +46,6 @@ def transition_edges_from_nodes_matching_perfect(nodes: list[DoorNode]):
     return edges
 
 def transition_edges_from_arbitrary_no_restrictions(nodes: list[DoorNode]):
-
     edges = []
 
     for A in nodes:
@@ -56,6 +57,23 @@ def transition_edges_from_arbitrary_no_restrictions(nodes: list[DoorNode]):
                 edge = TransitionEdge(A, B)
                 edges.append(edge)
 
+    return edges
+
+def transition_edges_from_arbitrary_no_turnarounds(nodes: list[DoorNode]):
+    edges = []
+
+    for A in nodes:
+    
+            for B in nodes:
+    
+                #match all exits to all starts
+                if (A.se_type == StartExitType.EXIT and B.se_type == StartExitType.START):
+
+                    #but not if the direction is the same and not none
+                    if (A.door_dir == B.door_dir and A.door_dir != DoorDir.NONE):
+                        edge = TransitionEdge(A, B)
+                        edges.append(edge)
+    
     return edges
 
 def transition_edges_from_nodes_debug(nodes: list[DoorNode]):
