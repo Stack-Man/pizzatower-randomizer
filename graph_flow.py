@@ -23,10 +23,10 @@
 #                       P.Steps_Round_R[Destination] = steps + 1, {path + N}
 
 import networkx as nx
-from graph_objects import EdgeTraversal, DoorNode, CombinedDoorNode, StartExitType
+from graph_objects import EdgeTraversal, DoorNode, CombinedDoorNode, StartExitType, PathEdge, TransitionEdge
 import threading
 
-from enums import DoorType, DoorDir
+from enums import DoorType, DoorDir, TraversalType
 
 from colors import WARNING, RESET, CAUTION
 
@@ -39,12 +39,11 @@ LOGGING = True
 #an EXIT node will never have its steps list read
 #though they may be necessary for the flow process even if the end result is unneeded.
 def flow(G):
-
     log(f"Flow of G with {len(G.nodes())} nodes and {len(G.edges())} Edges begin")
 
     #initialize nodes with traversal to self
     for N in G.nodes():
-        N.last_steps[N] = [EdgeTraversal([], 0, False, False, False)]
+        N.last_steps[N] = [EdgeTraversal([], rarity=0)]
 
     R = 1
     total_time = 0
@@ -138,33 +137,98 @@ def pass_steps_to_parents(G, N: DoorNode | CombinedDoorNode):
             if (destination not in P.next_steps):
                 P.next_steps[destination] = []
 
-            
-
             for traversal in traversals:
                 if (destination == P or traversal.contains(P)): #skip traversals that contain self
                     continue
 
-                #TODO: exclude traversals that require both NPT and PT exclusive paths
-                #aka, exclude traversals marked as NPT or PT if this edge is exclusive to the opposite
+               
+                #TODO: these exclusions only needto be performed on PathEdges, not TrasnitionEdges
+                
+                new_edge : PathEdge | TransitionEdge = (G.get_edge_data(P, N)["object"])
+
+                #Get traversal type of this edge
+                #based on available path types           
+                edge_traversal_type = get_edge_traversal_type(new_edge)
+                old_traversal_type = traversal.traversal_type
+
+                #skip traversals where NPT only crosses into PT only
+                if (   (edge_traversal_type == TraversalType.PIZZATIME and old_traversal_type == TraversalType.NOTPIZZATIME)
+                    or (edge_traversal_type == TraversalType.NOTPIZZATIME and old_traversal_type == TraversalType.PIZZATIME)):
+                    continue
+                
+                #Traversal type priority: TW < OW < NPT/PT
+                new_traversal_type = get_priority_traversal_type(edge_traversal_type, old_traversal_type)
+
                 #TODO: exclude traversals that require double booking rooms
                 #aka, necessairly consumes some double booked room and the next edge can only be completed via double-bookable rooms
                 #there would need to be some separation for TW NPT and PT since some may hit that while others dont
-                #TODO: these exclusions only needto be performed on PathEdges, not TrasnitionEdges
+
+                #Identifying impossible-bookings:
+                #1. mark every edge that consists of only double-bookable rooms X (done in PathEdge creation/updated in path selection)
+                #2. create a bipartite graph with rooms and edges as nodes of those edges
+                #3. create an edge on the graph from every edge to every room it can consume
+                #4. for any connected component in the graph, if R < E, there is an impossible booking, terminate
+                #5. else, during path construction, for every edge E, assign the edge with the fewest assignable rooms R (avoids impossible bookings)
+                
+
+
                 
                 #get the edge set and prepend the current edge to the front
                 #use a copy() to avoid mutating the same list later
                 new_edge_list = traversal.edges.copy()
-                new_edge_list.insert(0, (G.get_edge_data(P, N)["object"]))
+                new_edge_list.insert(0, new_edge)
 
                 #create new traversal including this edge
-                #TODO: determine rarity and path types
-                new_traversal = EdgeTraversal(new_edge_list, 0, False, False, False)
+                #TODO: determine rarity
+                new_traversal = EdgeTraversal(new_edge_list, rarity=0, traversal_type=new_traversal_type)
 
                 P.next_steps[destination].append(new_traversal)
 
                 G.changed_last_round = True
 
     end_time = time.perf_counter()
+
+def get_edge_traversal_type(edge : PathEdge | TransitionEdge):
+
+    traversal_type = TraversalType.ANY
+
+    if (type(edge) is PathEdge):
+        has_npt = len(edge.NPT) > 0
+        has_pt  = len(edge.PT) > 0
+        has_owany = len(edge.OW) > 0
+        has_twany = len(edge.TW) > 0
+
+        #has_twany = valid for any
+        #not = NPT PT or OW
+
+        if (not has_twany):
+
+            #has OW or has both PT and NPT
+            if (has_owany or (has_pt and has_npt)):
+                traversal_type = TraversalType.OW
+
+            #no OW and exclusive to one or the other
+            elif (has_pt and not has_npt):
+                traversal_type = TraversalType.PIZZATIME
+            elif (has_npt and not has_pt):
+                traversal_type = TraversalType.NOTPIZZATIME
+
+    return traversal_type
+
+def get_priority_traversal_type(edge_type: TraversalType, old_type: TraversalType):
+    #Traversal type priority: TW < OW < NPT/PT
+
+    if (old_type == TraversalType.PIZZATIME or old_type == TraversalType.NOTPIZZATIME):
+        return old_type
+
+    if (edge_type == TraversalType.PIZZATIME or edge_type == TraversalType.NOTPIZZATIME):
+        return edge_type
+
+    if (old_type == TraversalType.OW or edge_type == TraversalType.OW):
+        return TraversalType.OW
+
+    return TraversalType.ANY
+
 
 def store_steps(N: DoorNode):
 

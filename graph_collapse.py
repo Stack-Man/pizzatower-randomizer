@@ -269,25 +269,22 @@ def create_combined_edge(U: PathEdge | TransitionEdge, V: PathEdge | TransitionE
     if (type(U) == PathEdge and type(V) == PathEdge): #Check to enforce type
 
         TW = []
+        OW = []
         PT = []
         NPT = []
-        OW = []
 
-        TW.extend(U.pathsTWANY)
-        PT.extend(U.pathsPT)
-        NPT.extend(U.pathsNPT)
-        OW.extend(U.pathsOWANY)
-
-        TW.extend(V.pathsTWANY)
-        PT.extend(V.pathsPT)
-        NPT.extend(V.pathsNPT)
-        OW.extend(V.pathsOWANY)
-
+        TW.extend(U.TW)
+        OW.extend(U.OW)
+        PT.extend(U.PT)
+        NPT.extend(U.NPT)
+        
+        TW.extend(V.TW)
+        OW.extend(V.OW)
+        PT.extend(V.PT)
+        NPT.extend(V.NPT)
+        
         new_edge = PathEdge(U.start_node, U.end_node)
-        new_edge.pathsTWANY = TW
-        new_edge.pathsPT = PT
-        new_edge.pathsNPT = NPT
-        new_edge.pathsOWANY = OW
+        new_edge.set_paths(TW, OW, PT, NPT)
 
         return new_edge
 

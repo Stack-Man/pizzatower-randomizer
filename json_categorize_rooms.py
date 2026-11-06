@@ -6,7 +6,7 @@
 from objects import Room, Path
 from enums import RoomType, BranchType
 from colors import ERROR, RESET
-from double_booking import identify_double_bookable_rooms
+from json_double_booking import identify_double_bookable_rooms
 
 
 def categorize_rooms(rooms: list[Room]):

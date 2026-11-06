@@ -7,16 +7,15 @@ def transition_edges_from_nodes(nodes: list[DoorNode], traversal_mode: Traversal
     #for every EXIT node, look at the transition matrix and create a TransitionEdge to the corresponding START nodes
     print(f"{CAUTION} Using Traversal Mode {RESET}{traversal_mode}{CAUTION} to create the graph!{RESET}")
 
-    #TODO: implement other modes as specified in settings.py
     match traversal_mode:
         case TraversalMode.MATCHING_PERFECT:
             return transition_edges_from_nodes_matching_perfect(nodes)
+        case TraversalMode.MATCHING_DIRECTIONAL:
+            return transition_edges_from_nodes_matching_directional(nodes)
         case TraversalMode.ARBITRARY_NO_RESTRICTIONS:
-            return transition_edges_from_arbitrary_no_restrictions(nodes)
-        case TraversalMode.DEBUG:
-            return transition_edges_from_nodes_debug(nodes)
+            return transition_edges_from_nodes_arbitrary_no_restrictions(nodes)
         case TraversalMode.ARBITRARY_NO_TURNAROUNDS:
-            return transition_edges_from_arbitrary_no_turnarounds(nodes)
+            return transition_edges_from_nodes_arbitrary_no_turnarounds(nodes)
         case _ :
             print(f"{ERROR} ERROR: Traversal Mode {traversal_mode} not implemented in transition_edges_from_nodes_and_matrix() in rooms_to_graphs.py{RESET}")
             return []
@@ -45,7 +44,7 @@ def transition_edges_from_nodes_matching_perfect(nodes: list[DoorNode]):
 
     return edges
 
-def transition_edges_from_arbitrary_no_restrictions(nodes: list[DoorNode]):
+def transition_edges_from_nodes_arbitrary_no_restrictions(nodes: list[DoorNode]):
     edges = []
 
     for A in nodes:
@@ -59,7 +58,7 @@ def transition_edges_from_arbitrary_no_restrictions(nodes: list[DoorNode]):
 
     return edges
 
-def transition_edges_from_arbitrary_no_turnarounds(nodes: list[DoorNode]):
+def transition_edges_from_nodes_arbitrary_no_turnarounds(nodes: list[DoorNode]):
     edges = []
 
     for A in nodes:
@@ -76,8 +75,24 @@ def transition_edges_from_arbitrary_no_turnarounds(nodes: list[DoorNode]):
     
     return edges
 
-def transition_edges_from_nodes_debug(nodes: list[DoorNode]):
-    return []
+def transition_edges_from_nodes_matching_directional(nodes: list[DoorNode]):
+    edges = []
+
+    for A in nodes:
+        for B in nodes:
+            #match all exits to all starts
+            if (A.se_type == StartExitType.EXIT and B.se_type == StartExitType.START):
+
+                #but not if both have a direction and the direction is not consistent
+                check_for_dir = A.door_dir != DoorDir.NONE and B.door_dir != DoorDir.NONE
+
+                #either at least one is None or
+                if (not check_for_dir or A.door_dir == flip_dir(B.door_dir)):
+                    edge = TransitionEdge(A, B)
+                    edges.append(edge)
+
+    
+    return edges
 
 def flip_dir(dir: DoorDir):
     match dir:

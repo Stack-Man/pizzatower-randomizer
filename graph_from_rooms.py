@@ -67,10 +67,7 @@ def rooms_to_edges_and_nodes(rooms: list[Room]):
 
         pathsTWANY, pathsOWANY, pathsPT, pathsNPT = categorize_paths_by_traversal_time(paths)
 
-        path_edge.pathsTWANY = pathsTWANY
-        path_edge.pathsOWANY = pathsOWANY
-        path_edge.pathsPT = pathsPT
-        path_edge.pathsNPT = pathsNPT
+        path_edge.set_paths(pathsTWANY, pathsOWANY, pathsPT, pathsNPT)
 
         path_edges.append(path_edge)
 

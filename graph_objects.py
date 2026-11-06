@@ -3,12 +3,14 @@
 
 #Class structure to use as nodes pr edges in an nx graph to store information about the node or edge
 
-from enums import DoorType, DoorDir, StartExitType
+from enums import DoorType, DoorDir, StartExitType, TraversalType
 from objects import Path
 
 from enum import Enum
 
-from colors import ERROR, RESET
+from colors import ERROR, RESET, WARNING
+
+import networkx as nx
 
 
 class Node():
@@ -108,12 +110,15 @@ class Edge():
         return str(self.start_node) + "--" + str(self.end_node)
 
 class EdgeTraversal():
-    def __init__(self, edges: list[Edge], rarity : float, is_npt: bool, is_pt: bool, is_owany: bool):
+    def __init__(self, edges: list[Edge], rarity : float, traversal_type: TraversalType = TraversalType.ANY):
         self.edges = edges
         self.rarity = rarity
-        self.is_npt = is_npt
-        self.is_pt = is_pt
-        self.is_owany = is_owany
+        self.traversal_type = traversal_type
+
+        #initialize bipartite graphs for use later during impossible-booking exclusion and path selection
+        self.bipartiteTW = nx.Graph()
+        self.bipartitePT = nx.Graph()
+        self.bipartiteNPT = nx.Graph()
 
     def __len__(self):
         return len(self.edges)
@@ -145,8 +150,39 @@ class EdgeTraversal():
 
         return msg
 
+#Manage DB and non DB lists of a traversal type in a single structure
+class PathList():
+    def __init__(self, P: list[Path]):
+        self.NDB = []
+        self.DB = []
+
+        for p in P:
+            if (p.is_double_bookable):
+                self.NDB.append(p)
+            else:
+                self.DB.append(p)
+
+    def __iter__(self):
+        for p in self.NDB:
+            yield p
+
+        for p in self.DB:
+            yield p
 
 
+    def __len__(self):
+        return len(self.NDB) + len(self.DB)
+
+    def pick_path(self):
+        print(f"{WARNING}WARNING: pick_path in PathList in graph_objects.py is not implemented!")
+
+        path = self.get_random_path(self.NDB)
+
+        return path
+
+    def get_random_path(self, paths: list[Path]):
+        return paths.pop()
+        
 
 class PathEdge(Edge):
     def __init__(self, start_node: DoorNode | CombinedDoorNode, end_node:  DoorNode | CombinedDoorNode):
@@ -161,12 +197,52 @@ class PathEdge(Edge):
         #NPT: NPT or OWANY
         #PT : PT or OWANY
 
-        self.pathsTWANY : list[Path] = []
-        self.pathsOWANY : list[Path] = []
-        self.pathsPT : list[Path] = []
-        self.pathsNPT : list[Path] = []
+        #Maintain two separate lists for DB and non DB paths so we can
+        #quickly access and check the count of each. Use PathList to maintain those lists
 
-        
+        self.TW = PathList([])
+        self.OW = PathList([])
+        self.NPT = PathList([])
+        self.PT = PathList([])
+
+
+    def count_DB(self, paths: list[Path]):
+        db = 0
+        notDB = 0
+
+        for p in paths:
+            if not p.is_double_bookable:
+                notDB += 1
+            else:
+                db += 1
+
+        return db, notDB
+    
+    def set_paths(self, TW: list[Path], OW: list[Path], PT: list[Path], NPT: list[Path]):
+        self.TW = PathList(TW)
+        self.OW = PathList(OW)
+        self.NPT = PathList(PT)
+        self.PT = PathList(NPT)
+
+    def get_DB_paths(self, P: list[Path]):
+        p_NDB = []
+        p_DB = []
+
+        for p in P:
+            if (p.is_double_bookable):
+                p_DB.append(p)
+            else:
+                p_NDB.append(p)
+
+        return p_NDB, p_DB
+    
+    def pick_path(self, type: TraversalType):
+        print(f"{WARNING}WARNING: pick_path in PathEdge in graph_objects.py is not implemented!")
+        return self.TW.pick_path()
+    
+    def get_random_path(self, paths: list[Path]):
+        return paths.pop()
+
 
     def __eq__(self, other):
         return self.start_node == other.start_node and self.end_node == other.end_node

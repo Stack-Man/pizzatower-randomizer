@@ -26,11 +26,6 @@ class DoorType(Enum):
     TAXI = "TAXI"
     LEVELDOOR = "LEVELDOOR"
     ANY = "ANY"
-    A = "A"
-    B = "B"
-    C = "C"
-    D = "D"
-    E = "E"
     
 class DoorDir(Enum):
     NONE = "NONE"
@@ -39,7 +34,6 @@ class DoorDir(Enum):
     LEFT = "LEFT"
     RIGHT = "RIGHT"
     ANY = "ANY"
-    X = ""
 
 class AccessType(Enum):
     ANY = 0
@@ -57,7 +51,11 @@ class RoomType(Enum):
 class StartExitType(Enum):
     START = "S"
     EXIT = "E"
-    X = ""
 
+class TraversalType(Enum):
+    PIZZATIME = 0
+    NOTPIZZATIME = 1
+    OW = 2
+    ANY = 3
 
     
