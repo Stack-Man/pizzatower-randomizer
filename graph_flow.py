@@ -44,7 +44,17 @@ def flow(G):
 
     #initialize nodes with traversal to self
     for N in G.nodes():
-        N.last_steps[N] = [EdgeTraversal([], rarity=0)]
+        #base has no paths and rarity 0
+        base_traversal = EdgeTraversal([], rarity=0)
+
+        #initialize with empty bipartite graphs, 
+        # to be copied and modified when this traversal
+        # is extended
+        base_traversal.bipartiteTW = nx.Graph()
+        base_traversal.bipartitePT = nx.Graph()
+        base_traversal.bipartiteNPT = nx.Graph()
+
+        N.last_steps[N] = [base_traversal]
 
     R = 1
     total_time = 0
@@ -145,6 +155,13 @@ def pass_steps_to_parents(G, N: DoorNode | CombinedDoorNode):
                 new_edge : PathEdge | TransitionEdge = (G.get_edge_data(P, N)["object"])
                 new_traversal_type = TraversalType.ANY #default for TransitionEdge
 
+                #Create shallow copies of the bipartite graph for the new edge traversal
+                #to avoid modifying the graphs of the original traversal
+                #(the graphs will be re-used during path selection)
+                new_bipartite_TW = traversal.bipartiteTW.copy()
+                new_bipartite_PT = traversal.bipartitePT.copy()
+                new_bipartite_NPT = traversal.bipartiteTW.copy()
+
                 #exclusions only need to be performed on PathEdges, not TrasnitionEdges
                 if (type(new_edge) == PathEdge):
                     #Get traversal type of this edge
@@ -166,14 +183,6 @@ def pass_steps_to_parents(G, N: DoorNode | CombinedDoorNode):
                     priority_traversal_type = get_priority_traversal_type(edge_traversal_type, old_traversal_type)
 
                     #exclude traversals that require double booking rooms
-
-                    #Create shallow copies of the bipartite graph for the new edge traversal
-                    #to avoid modifying the graphs of the original traversal
-                    #(the graphs will be re-used during path selection)
-                    new_bipartite_TW = traversal.bipartiteTW.copy()
-                    new_bipartite_PT = traversal.bipartitePT.copy()
-                    new_bipartite_NPT = traversal.bipartiteTW.copy()
-
                     #create bipartite graphs to determine connected components where R < E
                     new_traversal_type = add_to_bipartite_graph(new_bipartite_TW, new_bipartite_PT, new_bipartite_NPT, priority_traversal_type, new_edge)
 
@@ -189,6 +198,11 @@ def pass_steps_to_parents(G, N: DoorNode | CombinedDoorNode):
                 #create new traversal including this edge
                 #TODO: determine rarity
                 new_traversal = EdgeTraversal(new_edge_list, rarity=0, traversal_type=new_traversal_type)
+
+                #edge receives bipartite from last edge, so pass bipartite to both types of edges
+                new_traversal.bipartiteTW = new_bipartite_TW
+                new_traversal.bipartitePT = new_bipartite_PT
+                new_traversal.bipartiteNPT = new_bipartite_NPT
 
                 P.next_steps[destination].append(new_traversal)
 

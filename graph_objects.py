@@ -158,9 +158,11 @@ class PathList():
 
         for p in P:
             if (p.is_double_bookable):
-                self.NDB.append(p)
-            else:
+                #print(f"add {p} to DB")
                 self.DB.append(p)
+            else:
+                #print(f"add {p} to NDB")
+                self.NDB.append(p)
 
     def __iter__(self):
         for p in self.NDB:
@@ -176,7 +178,7 @@ class PathList():
         return len(self.NDB) + len(self.DB)
 
     def pick_path(self):
-        print(f"{WARNING}WARNING: pick_path in PathList in graph_objects.py is not implemented!")
+        print(f"{WARNING}WARNING: pick_path in PathList in graph_objects.py is not implemente   d!")
 
         path = self.get_random_path(self.NDB)
 

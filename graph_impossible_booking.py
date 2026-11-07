@@ -14,12 +14,17 @@
 #NPT: for NPT/OW/TW
 
 #If all path lists for a type contain only DB rooms, add that edge to the bipartite graph for that type
+LOGGING = False
 
 from graph_objects import PathEdge, EdgeTraversal, PathList
 from objects import Path
 from enums import TraversalType
 import networkx as nx
 from colors import ERROR, RESET, CAUTION
+
+def log(msg: str):
+    if LOGGING:
+        print(msg)
 
 #bipartite_TW/PT/NPT: A bipartite graph constructed from the edge traversal up to this point
 #traversal_type: priority traversal type accounting for a pathlist in edge being empty
@@ -28,32 +33,46 @@ def add_to_bipartite_graph(bipartite_TW: nx.Graph, bipartite_PT: nx.Graph, bipar
 
     #check if type is already impossible or meets impossible booking reqs
     #TW = not OW, PT or NPT
+    log(f"add edge {edge} to bipartite")
+
+    log(f"Add to bipartite TW")
     impossibleTW = (traversal_type != TraversalType.ANY or 
         add_to_bipartite_graph_by_type(bipartite_TW, edge, [edge.TW]))
 
     #PT = ANY PT or OW, but not NPT
+    log(f"Add to bipartite PT")
     impossiblePT = (traversal_type == TraversalType.NOTPIZZATIME or 
                     add_to_bipartite_graph_by_type(bipartite_PT, edge, [edge.TW, edge.OW, edge.PT]))
 
     #NPT = AnNY NPT or OW but not PT
+    log(f"Add to bipartite NPT")
     impossibleNPT = (traversal_type == TraversalType.PIZZATIME or 
                      add_to_bipartite_graph_by_type(bipartite_NPT, edge, [edge.TW, edge.OW, edge.NPT]))
 
     new_traversal_type = get_traversal_type_from_impossible_bookings(impossibleTW, impossiblePT, impossibleNPT)
 
-    print(f"add edge {edge} to traversal")
-    print(f"    {traversal_type} to {new_traversal_type} - Impossible TW: {impossibleTW}; PT: {impossiblePT}; NPT: {impossibleNPT}") 
+    log(f"add edge {edge} to traversal")
+    log(f"    {traversal_type} to {new_traversal_type} - Impossible TW: {impossibleTW}; PT: {impossiblePT}; NPT: {impossibleNPT}") 
 
 
-    return new_traversal_type
+    return new_traversal_type, impossibleTW, impossiblePT, impossibleNPT
 
 #path_lists: tuple pairs of NDB and DB rooms, all pairs must be DB only to add
+#return TRUE: impossible, FALSE: not impossible
 def add_to_bipartite_graph_by_type(BG: nx.Graph, edge: PathEdge, path_lists: list[PathList]):
 
     #1. Confirm edge is DB (all PathLists contain only DB)
+    i = 1
+
     for pl in path_lists:
+        if len(pl) == 0: #dont check empty lists
+            continue
+
         if not pl.is_double_bookable():
-            return False #not valid edge to check
+            log(f"  {pl} in list is not DB. DB: {len(pl.DB)} NDB: {len(pl.NDB)}")
+            return True #not valid edge to check
+
+        
 
     #2. Create node E with edge
     E = PathEdgeNode(edge)
@@ -71,12 +90,21 @@ def add_to_bipartite_graph_by_type(BG: nx.Graph, edge: PathEdge, path_lists: lis
     
     #6. for each connected component, check if R < E and if so, return False
 
-    for connected_component in nx.connected_components(BG):
-        if more_nodes_in_group_zero(BG, connected_component):
-            print(f"{CAUTION}{RESET}")
-            return False #Impossible Booking discovered
+    i = 1
 
-    return True
+    for connected_component in nx.connected_components(BG):
+
+        #TODO: 
+        log(f"Checking cc {i} of {len(list(nx.connected_components(BG)))}")
+        
+
+        if more_nodes_in_group_zero(BG, connected_component):
+            log(f"{CAUTION}E > R in CC {i}{RESET}")
+            return True #Impossible Booking discovered
+
+        i += 1
+
+    return False
 
 def more_nodes_in_group_zero(BG, group):
 
@@ -136,7 +164,10 @@ class PathEdgeNode():
         self.path_edge = path_edge
 
     def __eq__(self, other):
-        return self == other
+        if (type(other) != PathEdgeNode):
+            return False
+
+        return self.path_edge == other.path_edge
 
     def __hash__(self):
         return hash(self.path_edge)
@@ -146,7 +177,10 @@ class RoomNode():
         self.room_name = room_name
 
     def __eq__(self, other):
-        return self == other
+        if (type(other) != RoomNode):
+            return False
+
+        return self.room_name == other.room_name
 
     def __hash__(self):
         return hash(self.room_name)

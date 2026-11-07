@@ -19,6 +19,8 @@ def rooms_to_graph(rooms: list[Room], traversal_mode : TraversalMode = Traversal
     path_edges.extend(transition_edges)
     edges = path_edges
 
+    print(f"{len(rooms)} rooms to {len(nodes)} nodes and {len(edges)} edges")
+
     graph = graph_from_nodes_and_edges(nodes, edges)
 
     return graph

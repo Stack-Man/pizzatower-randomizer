@@ -26,6 +26,14 @@ class DoorType(Enum):
     TAXI = "TAXI"
     LEVELDOOR = "LEVELDOOR"
     ANY = "ANY"
+    A = "A"
+    B = "B"
+    C = "C"
+    D = "D"
+    A2 = "A2"
+    B2 = "B2"
+    C2 = "C2"
+    D2 = "D2"
     
 class DoorDir(Enum):
     NONE = "NONE"
