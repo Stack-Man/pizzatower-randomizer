@@ -153,8 +153,8 @@ class EdgeTraversal():
 #Manage DB and non DB lists of a traversal type in a single structure
 class PathList():
     def __init__(self, P: list[Path]):
-        self.NDB = []
-        self.DB = []
+        self.NDB : list[Path] = []
+        self.DB : list[Path] = []
 
         for p in P:
             if (p.is_double_bookable):
@@ -169,6 +169,8 @@ class PathList():
         for p in self.DB:
             yield p
 
+    def is_double_bookable(self):
+        return len(self.DB) > 0 and len(self.NDB) == 0
 
     def __len__(self):
         return len(self.NDB) + len(self.DB)

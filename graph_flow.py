@@ -24,6 +24,7 @@
 
 import networkx as nx
 from graph_objects import EdgeTraversal, DoorNode, CombinedDoorNode, StartExitType, PathEdge, TransitionEdge
+from graph_impossible_booking import add_to_bipartite_graph
 import threading
 
 from enums import DoorType, DoorDir, TraversalType
@@ -141,38 +142,45 @@ def pass_steps_to_parents(G, N: DoorNode | CombinedDoorNode):
                 if (destination == P or traversal.contains(P)): #skip traversals that contain self
                     continue
 
-               
-                #TODO: these exclusions only needto be performed on PathEdges, not TrasnitionEdges
-                
                 new_edge : PathEdge | TransitionEdge = (G.get_edge_data(P, N)["object"])
+                new_traversal_type = TraversalType.ANY #default for TransitionEdge
 
-                #Get traversal type of this edge
-                #based on available path types           
-                edge_traversal_type = get_edge_traversal_type(new_edge)
-                old_traversal_type = traversal.traversal_type
+                #exclusions only need to be performed on PathEdges, not TrasnitionEdges
+                if (type(new_edge) == PathEdge):
+                    #Get traversal type of this edge
+                    #based on available path types    
+                    edge_traversal_type = get_edge_traversal_type(new_edge)
 
-                #skip traversals where NPT only crosses into PT only
-                if (   (edge_traversal_type == TraversalType.PIZZATIME and old_traversal_type == TraversalType.NOTPIZZATIME)
-                    or (edge_traversal_type == TraversalType.NOTPIZZATIME and old_traversal_type == TraversalType.PIZZATIME)):
-                    continue
-                
-                #Traversal type priority: TW < OW < NPT/PT
-                new_traversal_type = get_priority_traversal_type(edge_traversal_type, old_traversal_type)
+                    #no paths in the edge
+                    if (edge_traversal_type == TraversalType.INVALID):
+                        continue
 
-                #TODO: exclude traversals that require double booking rooms
-                #aka, necessairly consumes some double booked room and the next edge can only be completed via double-bookable rooms
-                #there would need to be some separation for TW NPT and PT since some may hit that while others dont
+                    old_traversal_type = traversal.traversal_type
 
-                #Identifying impossible-bookings:
-                #1. mark every edge that consists of only double-bookable rooms X (done in PathEdge creation/updated in path selection)
-                #2. create a bipartite graph with rooms and edges as nodes of those edges
-                #3. create an edge on the graph from every edge to every room it can consume
-                #4. for any connected component in the graph, if R < E, there is an impossible booking, terminate
-                #5. else, during path construction, for every edge E, assign the edge with the fewest assignable rooms R (avoids impossible bookings)
-                
+                    #skip traversals where NPT only crosses into PT only
+                    if (   (edge_traversal_type == TraversalType.PIZZATIME and old_traversal_type == TraversalType.NOTPIZZATIME)
+                        or (edge_traversal_type == TraversalType.NOTPIZZATIME and old_traversal_type == TraversalType.PIZZATIME)):
+                        continue
 
+                    #Traversal type priority: TW < OW < NPT/PT
+                    priority_traversal_type = get_priority_traversal_type(edge_traversal_type, old_traversal_type)
 
-                
+                    #exclude traversals that require double booking rooms
+
+                    #Create shallow copies of the bipartite graph for the new edge traversal
+                    #to avoid modifying the graphs of the original traversal
+                    #(the graphs will be re-used during path selection)
+                    new_bipartite_TW = traversal.bipartiteTW.copy()
+                    new_bipartite_PT = traversal.bipartitePT.copy()
+                    new_bipartite_NPT = traversal.bipartiteTW.copy()
+
+                    #create bipartite graphs to determine connected components where R < E
+                    new_traversal_type = add_to_bipartite_graph(new_bipartite_TW, new_bipartite_PT, new_bipartite_NPT, priority_traversal_type, new_edge)
+
+                    #no valid path exists
+                    if (new_traversal_type == TraversalType.INVALID):
+                        continue
+
                 #get the edge set and prepend the current edge to the front
                 #use a copy() to avoid mutating the same list later
                 new_edge_list = traversal.edges.copy()
@@ -212,6 +220,8 @@ def get_edge_traversal_type(edge : PathEdge | TransitionEdge):
                 traversal_type = TraversalType.PIZZATIME
             elif (has_npt and not has_pt):
                 traversal_type = TraversalType.NOTPIZZATIME
+            elif (not has_pt and not has_owany and not has_npt):
+                traversal_type = TraversalType.INVALID #no available paths
 
     return traversal_type
 

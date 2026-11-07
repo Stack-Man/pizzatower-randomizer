@@ -57,5 +57,6 @@ class TraversalType(Enum):
     NOTPIZZATIME = 1
     OW = 2
     ANY = 3
+    INVALID = 4
 
     
