@@ -34,7 +34,8 @@ def test_parse_all():
         
         all_rooms.extend(new_rooms)
 
-    print_unique_path_types(all_rooms)
+
+    #print_unique_path_types(all_rooms)
     
     
 

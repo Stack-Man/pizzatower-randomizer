@@ -184,7 +184,7 @@ def pass_steps_to_parents(G, N: DoorNode | CombinedDoorNode):
 
                     #exclude traversals that require double booking rooms
                     #create bipartite graphs to determine connected components where R < E
-                    new_traversal_type = add_to_bipartite_graph(new_bipartite_TW, new_bipartite_PT, new_bipartite_NPT, priority_traversal_type, new_edge)
+                    new_traversal_type, _, _, _= add_to_bipartite_graph(new_bipartite_TW, new_bipartite_PT, new_bipartite_NPT, priority_traversal_type, new_edge)
 
                     #no valid path exists
                     if (new_traversal_type == TraversalType.INVALID):
