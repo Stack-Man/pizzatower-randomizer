@@ -7,6 +7,8 @@ from colors import ERROR, RESET
     Enum    door_dir            : Direction this door faces. (UP DOWN LEFT RIGHT NONE)
     
     Bool    branch              : Whether this door is re-used in two paths as part of a branch room.
+    Bool    is_branch_start     : specifically for branchmid rooms where a branch starts
+    Bool    is_branch_end       : specifically for branchmid rooms where a branch starts
     Bool    initially_blocked   : Whether this door must be used first before back-tracking is possible. (IE rat obstacle).
     Enum    start_path_time     : When this door is accessible as a start (BOTH, PIZZATIME, NOTPIZZATIME)
     Enum    exit_path_time      : When this door is accessible as an exit (BOTH, PIZZATIME, NOTPIZZATIME)
