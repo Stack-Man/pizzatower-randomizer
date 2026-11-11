@@ -30,7 +30,7 @@ def bridge_twoway(start_rp: BaseRoomPath, end_rp: BaseRoomPath, FG):
 
     return TwowaySegment(start_rp, end_rp, RoomSelection([]))
 
-def bridge_branch(start_rp: BranchRoomPath, end_rp: BranchRoomPath, FG, MS: MemorySet):
+def bridge_branch(start_rp: BranchRoomPath, end_rp: BranchRoomPath, FG):
     #raise NotImplementedError(f"{ERROR}bridge_branch() not implemented in level_bridge.py{RESET}")
 
     NPT = None
@@ -40,13 +40,11 @@ def bridge_branch(start_rp: BranchRoomPath, end_rp: BranchRoomPath, FG, MS: Memo
     try:
         NPT = bridge_oneway_branch(start_rp, end_rp, PathTime.NOTPIZZATIME, FG)
     except Exception as e:
-        MS.add(start_rp, end_rp, PathTime.NOTPIZZATIME) 
         raise(e) #pass the exception to the calling function
 
     try:
         PT = bridge_oneway_branch(end_rp, start_rp, PathTime.PIZZATIME, FG)
     except Exception as e:
-        MS.add(end_rp, end_rp, PathTime.PIZZATIME)
         raise(e)
 
     return BranchSegment(start_rp, end_rp, PT, NPT)
@@ -60,67 +58,45 @@ def bridge_oneway_branch(start_room: BranchRoomPath, end_room: BranchRoomPath, p
 #catch errors on bridge failure
 #utilize recursion to maintain position within iterator in case of step-back
 
-def bridge_twoway_room_room(start_room: Room, end_room: Room, FG, MS: MemorySet):
+def bridge_twoway_room_room(start_room: Room, end_room: Room, FG):
     match start_room.room_type:
         case RoomType.ENTRANCE:
-            return bridge_twoway_from_entrance(start_room, end_room, FG, MS)
+            return bridge_twoway_from_entrance(start_room, end_room, FG)
         case _:
             raise NotImplementedError(f"{ERROR}ERROR: bridge_twoway_room_room() not implemented for start_room of type {start_room.room_type}{RESET}")
     
 
-def bridge_branch_room_room(start_room: Room, end_room: Room, FG, MS: MemorySet):
+def bridge_branch_room_room(start_room: Room, end_room: Room, FG):
     for start_rp in branch_room_path(start_room):
         for end_rp in branch_room_path(end_room):
-
-            #branch will connect NPT and PT together, so check both
-            if MS.contains(start_rp, end_rp, PathTime.PIZZATIME):
-                continue
-
-            if MS.contains(start_rp, end_rp, PathTime.NOTPIZZATIME):
-                continue
-
             try:
-                yield bridge_branch(start_rp, end_rp, FG, MS)
+                yield bridge_branch(start_rp, end_rp, FG)
             except Exception as e:
                 #failure is added within bridge_branch so that only the failed  PT/NPT pair isa dded
                 log_rp(e)
 
 
-def bridge_twoway_from_entrance(start_room: Room, end_room: Room, FG, MS: MemorySet):
+def bridge_twoway_from_entrance(start_room: Room, end_room: Room, FG):
     for start_rp in entrance_room_path(start_room):
         for end_rp in room_path(end_room):
-            if MS.contains(start_rp, end_rp, PathTime.BOTH): #skip already failed SD pairs
-                continue
-
             try:
                 yield bridge_twoway(start_rp, end_rp, FG)
             except Exception as e:
-                MS.add(start_rp, end_rp, PathTime.BOTH) #remember failed SD pairs
                 log_rp(e)
 
 #make bridges from start room with already selected paths
-def bridge_twoway_rp_room(start_rp: BaseRoomPath, end_room: Room, FG, MS: MemorySet):
+def bridge_twoway_rp_room(start_rp: BaseRoomPath, end_room: Room, FG):
     for end_rp in room_path(end_room):
-        if MS.contains(start_rp, end_rp, PathTime.BOTH): #skip already failed SD pairs
-            continue
-
         try:
             yield bridge_twoway(start_rp, end_rp, FG)
         except Exception as e:
-            MS.add(start_rp, end_rp, PathTime.BOTH) #remember failed SD pairs
             log_rp(e)
 
-def bridge_branch_rp_room(start_rp: BranchRoomPath, end_room: Room, FG, MS: MemorySet):
+def bridge_branch_rp_room(start_rp: BranchRoomPath, end_room: Room, FG):
     for end_rp in branch_room_path(end_room):
         #branch will connect NPT and PT together, so check both
-        if MS.contains(start_rp, end_rp, PathTime.PIZZATIME):
-                        continue
-        
-        if MS.contains(start_rp, end_rp, PathTime.NOTPIZZATIME):
-            continue
-
         try:
-            yield bridge_branch(start_rp, end_rp, FG, MS)
+            yield bridge_branch(start_rp, end_rp, FG)
         except Exception as e:
             #failure is added within bridge_branch so that only the failed  PT/NPT pair isa dded
             log_rp(e)

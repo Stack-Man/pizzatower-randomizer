@@ -26,18 +26,6 @@ class SourceDestinationHandler():
     def entrance_count(self):
         return len(self.E) + len(self.EB)
 
-    def get_entrance(self):
-        return self.get_one_from_two(self.E, self.EB)
-
-    def get_john_no_branch(self):
-        return self.get_one_from_two(self.J, [])
-    
-    def get_branch_start(self):
-        return self.get_one_from_two(self.BS, self.BA)
-
-    def get_branch_end(self):
-        return self.get_one_from_two(self.BE, self.BA)
-
     def entrances(self):
         return self.iterate_over([self.E, self.EB])
 
