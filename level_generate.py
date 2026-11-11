@@ -31,6 +31,8 @@ def generate_level(SD: SourceDestinationHandler, FG):
 
     #TODO: implement step back for total failure, with SD memory to avoid re-treading each step back
     #TODO: each failed start_rp, end_rp combo shuold be remembered, by path exit and start type, to avoid re-treads
+    #TODO: use a recursive pattern to improve mid-generation step-back context, recursive depth would be at max 1 + number of branches
+    #assume that generation of a single level ends the recursion
 
     #Pick either E or EB
     #if E, create a TwowaySegment with E and some BS
@@ -67,6 +69,8 @@ def generate_level(SD: SourceDestinationHandler, FG):
 
     return Level(segments)
 
+
+
 def generate_entrance_or_entrance_branch_segment(SD: SourceDestinationHandler, FG):
 
     #Pick either E or EB
@@ -81,7 +85,6 @@ def generate_entrance_or_entrance_branch_segment(SD: SourceDestinationHandler, F
     else:
         BE_or_BA_room = SD.get_branch_end()
         return bridge_branch_room_room(E_or_EB_room, BE_or_BA_room, FG)
-
 
 def generate_branch_segment(SD: SourceDestinationHandler, FG, start_room: BranchRoomPath, force_john_end: bool):
     #create a BranchSegment with BS and some BE or JB

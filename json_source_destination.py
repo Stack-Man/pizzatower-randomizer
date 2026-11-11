@@ -41,6 +41,29 @@ class SourceDestinationHandler():
         else:
             return self.get_branch_end()
 
+    def entrances(self):
+        return self.iterate_over([self.E, self.EB])
+
+    def branch_starts(self):
+        return self.iterate_over([self.BS, self.BA])
+
+    def branch_ends(self):
+        return self.iterate_over([self.BE, self.BA])
+
+    def branch_ends_or_john_branch_ends(self, force_john):
+        if (force_john):
+            return self.iterate_over([self.JB])
+        else:
+            return self.iterate_over([self.BE, self.BA, self.JB])
+
+    def johns(self):
+        return self.iterate_over([self.J])
+
+    def iterate_over(self, lists):
+        for L in lists:
+            for l in L:
+                yield l
+
     def get_one_from_two(self, A, B):
         a_count = len(A)
 
@@ -54,6 +77,10 @@ class SourceDestinationHandler():
             return A[i]
 
         return B[i]
+
+    def copy(self):
+        return SourceDestinationHandler(self.E.copy(), self.EB.copy(), self.J.copy(), self.JB.copy(), self.BA.copy(), self.BS.copy(), self.BE.copy())
+
 
 def get_source_destination_rooms(rooms: list[Room]):
 

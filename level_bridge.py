@@ -11,8 +11,28 @@ from enums import PathTime, RoomType, DoorType
 
 from graph_collapse import pairs
 
+LOG_FAILED_RP_PAIRS = True
+
+def log_rp(msg: str|Exception):
+    if (LOG_FAILED_RP_PAIRS):
+        print(msg)
+
+#TODO: in case of starvation, should we step-back and use iterators to select a different set of traversals to bridge each SD?
+#The recursion depth might be too high if we do, and the growth would be incredibly high, given how many traversal combinations there potentially are
+#as well as accounting for different double-booking room consumption
+#though if we use some logic, when we reach the starved traversal, we can look in our path, see which consumed the edge and try to select replacements, if possible?
+
+#should we do room selection before or after? with double-booked rooms, doinga fter could be dangerous
+#but doing after would also save us the trouble of undoing room selection
+
+#we could first look at our "edges consumed by double booked rooms" in our traversal, and see if they have replacements
+
+#yes rather than do step-backs with iterators, we should look at our current segment selection and make replacements if possible
+#this means we'd also need to maintain a consistent level view that persists across recursions
+
 def bridge_twoway(start_rp: BaseRoomPath, end_rp: BaseRoomPath, FG):
-    print(f"{WARNING} bridge_twoway() not implemented in level_bridge.py")
+
+    #raise NotImplementedError(f"{ERROR}bridge_twoway() not implemented in level_bridge.py{RESET}")
 
     #1. take end type of start rp and start type of end rp
     #2. take any TR traversal from FG that matches and whose edges are > 0
@@ -22,7 +42,7 @@ def bridge_twoway(start_rp: BaseRoomPath, end_rp: BaseRoomPath, FG):
     return TwowaySegment(start_rp, end_rp, RoomSelection([]))
 
 def bridge_branch(start_rp: BranchRoomPath, end_rp: BranchRoomPath, FG):
-    print(f"{WARNING} bridge_branch() not fully implemented in level_bridge.py")
+    #raise NotImplementedError(f"{ERROR}bridge_branch() not implemented in level_bridge.py{RESET}")
 
     NPT = bridge_oneway_branch(start_rp, end_rp, PathTime.NOTPIZZATIME, FG)
     PT = bridge_oneway_branch(end_rp, start_rp, PathTime.PIZZATIME, FG)
@@ -30,43 +50,61 @@ def bridge_branch(start_rp: BranchRoomPath, end_rp: BranchRoomPath, FG):
     return BranchSegment(start_rp, end_rp, PT, NPT)
 
 def bridge_oneway_branch(start_room: BranchRoomPath, end_room: BranchRoomPath, path_time: PathTime, FG):
-    print(f"{WARNING}bridge_oneway_from_branch() in level_generate.py not implemented{RESET}")
+    #raise NotImplementedError(f"{ERROR}bridge_oneway_branch() not implemented in level_bridge.py{RESET}")
+    
     return RoomSelection([])
 
+#Iterators that yield every potential combination of start path and end path for the selected SD
+#catch errors on bridge failure
+#utilize recursion to maintain position within iterator in case of step-back
+
 def bridge_twoway_room_room(start_room: Room, end_room: Room, FG):
-    match start_room.room_type:
-        case RoomType.ENTRANCE:
-            return bridge_twoway_from_entrance(start_room, end_room, FG)
-        case _:
-            raise ValueError(f"{ERROR}ERROR: bridge_twoway_room_room() not implemented for start_room of type {start_room.room_type}{RESET}")
-
-def bridge_branch_room_room(start_room: Room, end_room: Room, FG):
-    print(f"{WARNING}bridge_branch() in level_generate.py not implemented{RESET}")
-
-    #TODO: try and catch instead of return first
-    for start_rp in branch_room_path(start_room):
-        for end_rp in branch_room_path(end_room):
-            return bridge_branch(start_rp, end_rp, FG)
-
-def bridge_twoway_from_entrance(start_room: Room, end_room: Room, FG):
-    #TODO: catch fails
 
     for start_rp in entrance_room_path(start_room):
         for end_rp in room_path(end_room):
-            return bridge_twoway(start_rp, end_rp, FG)
+            try:
+                yield bridge_twoway(start_rp, end_rp, FG)
+            except Exception as e:
+                log_rp(e)
+
+    #match start_room.room_type:
+        #case RoomType.ENTRANCE:
+            #return bridge_twoway_from_entrance(start_room, end_room, FG)
+        #case _:
+            #raise NotImplementedError(f"{ERROR}ERROR: bridge_twoway_room_room() not implemented for start_room of type {start_room.room_type}{RESET}")
+    
+
+def bridge_branch_room_room(start_room: Room, end_room: Room, FG):
+    for start_rp in branch_room_path(start_room):
+        for end_rp in branch_room_path(end_room):
+            try:
+                yield bridge_branch(start_rp, end_rp, FG)
+            except Exception as e:
+                log_rp(e)
+
+
+def bridge_twoway_from_entrance(start_room: Room, end_room: Room, FG):
+    for start_rp in entrance_room_path(start_room):
+        for end_rp in room_path(end_room):
+            try:
+                yield bridge_twoway(start_rp, end_rp, FG)
+            except Exception as e:
+                log_rp(e)
 
 #make bridges from start room with already selected paths
 def bridge_twoway_rp_room(start_rp: BaseRoomPath, end_room: Room, FG):
     for end_rp in room_path(end_room):
-        return bridge_twoway(start_rp, end_rp, FG)
+        try:
+            yield bridge_twoway(start_rp, end_rp, FG)
+        except Exception as e:
+            log_rp(e)
 
 def bridge_branch_rp_room(start_rp: BranchRoomPath, end_room: Room, FG):
-    print(f"{WARNING}bridge_branch_from_room_path() in level_generate.py not implemented{RESET}")
-
-    #TODO: catch fails
-
     for end_rp in branch_room_path(end_room):
-        return bridge_branch(start_rp, end_rp, FG)
+        try:
+            yield bridge_branch(start_rp, end_rp, FG)
+        except Exception as e:
+            log_rp(e)
 
 
 #iterate over potential RoomPath candidates for a room type
