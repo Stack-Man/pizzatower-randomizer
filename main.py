@@ -20,6 +20,8 @@ def generate_levels():
     FG = rooms_to_graph(all_rooms, traversal_mode=TraversalMode.MATCHING_PERFECT)
     FG = flow(FG)
 
+    #TODO: seeded randomize order of SD and FG lists
+
     levels = generate_levels_all(SD, FG)
 
     #TODO: export levels to json

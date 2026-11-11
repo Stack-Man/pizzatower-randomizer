@@ -12,6 +12,9 @@ import random
 
 class SourceDestinationHandler():
     def __init__ (self, E: list[Room], EB: list[Room], J: list[Room], JB: list[Room], BA: list[Room], BS: list[Room], BE: list[Room]):
+
+        #TODO: use seeded randomization to randomize the order of rooms. This will be part of our randomization.
+
         self.E = E
         self.EB = EB
         self.J = J
@@ -35,12 +38,6 @@ class SourceDestinationHandler():
     def get_branch_end(self):
         return self.get_one_from_two(self.BE, self.BA)
 
-    def get_john_branch_or_branch_end(self, force_john):
-        if (force_john):
-            return self.get_one_from_two(self.JB, [])
-        else:
-            return self.get_branch_end()
-
     def entrances(self):
         return self.iterate_over([self.E, self.EB])
 
@@ -50,14 +47,11 @@ class SourceDestinationHandler():
     def branch_ends(self):
         return self.iterate_over([self.BE, self.BA])
 
-    def branch_ends_or_john_branch_ends(self, force_john):
-        if (force_john):
-            return self.iterate_over([self.JB])
-        else:
-            return self.iterate_over([self.BE, self.BA, self.JB])
-
-    def johns(self):
+    def just_johns(self):
         return self.iterate_over([self.J])
+
+    def john_branches(self):
+        return self.iterate_over([self.JB])
 
     def iterate_over(self, lists):
         for L in lists:
