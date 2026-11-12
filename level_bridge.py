@@ -3,34 +3,39 @@
 
 #Bridge two rooms using the Flow Graph and select their rooms
 
-from objects import Room, Door, Path
-from colors import WARNING, RESET, ERROR
+from objects import Room
+from colors import RESET, ERROR
 from level_objects import TwowaySegment, BranchSegment, RoomSelection, RoomPath, BranchRoomPath, BaseRoomPath
+from enums import PathTime, RoomType, DoorType, TraversalType
+from pairs import pairs
 
-from enums import PathTime, RoomType, DoorType
+import networkx as nx
 
-from graph_collapse import pairs
-
-from level_sd_memory_set import *
+from level_get_traversal import get_traversal
+from level_select_rooms import select_rooms
 
 LOG_FAILED_RP_PAIRS = True
+LOG_FAILED_BRIDGE = True
 
 def log_rp(msg: str|Exception):
     if (LOG_FAILED_RP_PAIRS):
         print(msg)
 
-def bridge_twoway(start_rp: BaseRoomPath, end_rp: BaseRoomPath, FG):
+def log_bridge(msg: str|Exception):
+    if (LOG_FAILED_BRIDGE):
+        print(msg)
+
+
+
+def bridge_twoway(start_rp: BaseRoomPath, end_rp: BaseRoomPath, FG: nx.DiGraph):
 
     #raise NotImplementedError(f"{ERROR}bridge_twoway() not implemented in level_bridge.py{RESET}")
+    traversal = get_traversal(start_rp, end_rp, FG, TraversalType.ANY)
+    room_selection = select_rooms(FG, traversal)
 
-    #1. take end type of start rp and start type of end rp
-    #2. take any TR traversal from FG that matches and whose edges are > 0
-    #3. select the rooms to fill the edges (avoiding an impossible booking using the bipartite graphs, if applicable)
-    #4. decrease count of edges based on rooms selected
+    return TwowaySegment(start_rp, end_rp, room_selection)
 
-    return TwowaySegment(start_rp, end_rp, RoomSelection([]))
-
-def bridge_branch(start_rp: BranchRoomPath, end_rp: BranchRoomPath, FG):
+def bridge_branch(start_rp: BranchRoomPath, end_rp: BranchRoomPath, FG: nx.DiGraph):
     #raise NotImplementedError(f"{ERROR}bridge_branch() not implemented in level_bridge.py{RESET}")
 
     NPT = None
@@ -49,7 +54,7 @@ def bridge_branch(start_rp: BranchRoomPath, end_rp: BranchRoomPath, FG):
 
     return BranchSegment(start_rp, end_rp, PT, NPT)
 
-def bridge_oneway_branch(start_room: BranchRoomPath, end_room: BranchRoomPath, path_time: PathTime, FG):
+def bridge_oneway_branch(start_room: BranchRoomPath, end_room: BranchRoomPath, path_time: PathTime, FG: nx.DiGraph):
     #raise NotImplementedError(f"{ERROR}bridge_oneway_branch() not implemented in level_bridge.py{RESET}")
     
     return RoomSelection([])
@@ -58,7 +63,7 @@ def bridge_oneway_branch(start_room: BranchRoomPath, end_room: BranchRoomPath, p
 #catch errors on bridge failure
 #utilize recursion to maintain position within iterator in case of step-back
 
-def bridge_twoway_room_room(start_room: Room, end_room: Room, FG):
+def bridge_twoway_room_room(start_room: Room, end_room: Room, FG: nx.DiGraph):
     match start_room.room_type:
         case RoomType.ENTRANCE:
             return bridge_twoway_from_entrance(start_room, end_room, FG)
@@ -66,7 +71,7 @@ def bridge_twoway_room_room(start_room: Room, end_room: Room, FG):
             raise NotImplementedError(f"{ERROR}ERROR: bridge_twoway_room_room() not implemented for start_room of type {start_room.room_type}{RESET}")
     
 
-def bridge_branch_room_room(start_room: Room, end_room: Room, FG):
+def bridge_branch_room_room(start_room: Room, end_room: Room, FG: nx.DiGraph):
     for start_rp in branch_room_path(start_room):
         for end_rp in branch_room_path(end_room):
             try:
@@ -76,7 +81,7 @@ def bridge_branch_room_room(start_room: Room, end_room: Room, FG):
                 log_rp(e)
 
 
-def bridge_twoway_from_entrance(start_room: Room, end_room: Room, FG):
+def bridge_twoway_from_entrance(start_room: Room, end_room: Room, FG: nx.DiGraph):
     for start_rp in entrance_room_path(start_room):
         for end_rp in room_path(end_room):
             try:
@@ -85,14 +90,14 @@ def bridge_twoway_from_entrance(start_room: Room, end_room: Room, FG):
                 log_rp(e)
 
 #make bridges from start room with already selected paths
-def bridge_twoway_rp_room(start_rp: BaseRoomPath, end_room: Room, FG):
+def bridge_twoway_rp_room(start_rp: BaseRoomPath, end_room: Room, FG: nx.DiGraph):
     for end_rp in room_path(end_room):
         try:
             yield bridge_twoway(start_rp, end_rp, FG)
         except Exception as e:
             log_rp(e)
 
-def bridge_branch_rp_room(start_rp: BranchRoomPath, end_room: Room, FG):
+def bridge_branch_rp_room(start_rp: BranchRoomPath, end_room: Room, FG: nx.DiGraph):
     for end_rp in branch_room_path(end_room):
         #branch will connect NPT and PT together, so check both
         try:

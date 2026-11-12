@@ -8,18 +8,16 @@
 #start (E/EB) > recursive branch/between branch (BS-BE or BE-BS)
 #cap with J/JB when reached branch limit or when impossible to extend branch further
 
+#TODO: need deep copies of FG so that the paths maintained in each edge are appropriately decreased
+#use new object FlowGraphHandler to store? and put the DiGraph inside,
+#and then implement deep copy funcs for all inside objects
+
 from json_source_destination import SourceDestinationHandler
 from level_bridge import *
 from enums import BranchType
 from level_objects import LevelSegment
 
-
-#TODO: Memory Set is flawed, on step back, we release some paths so failed SD pairs may no longer be failed...
-
 MIN_BRANCH_COUNT = 1
-
-from level_sd_memory_set import *
-
 LOG_FAILED_SEGMENT_GEN = True
 
 def log_sg(msg: str|Exception):
@@ -27,7 +25,7 @@ def log_sg(msg: str|Exception):
         print(msg)
 
 
-def generate_levels_recursive_all(SD: SourceDestinationHandler, FG):
+def generate_levels_recursive_all(SD: SourceDestinationHandler, FG: nx.DiGraph):
     levels = []
     
     level_count = SD.entrance_count()
@@ -41,7 +39,7 @@ def generate_levels_recursive_all(SD: SourceDestinationHandler, FG):
 
     return levels
 
-def generate_level_recursive_start(SD: SourceDestinationHandler, FG):
+def generate_level_recursive_start(SD: SourceDestinationHandler, FG: nx.DiGraph):
 
     #1. Generate the segment
     #2. recursive call generate the rest of the segments
@@ -49,11 +47,11 @@ def generate_level_recursive_start(SD: SourceDestinationHandler, FG):
 
     for entrance_segment in entrance_or_entrance_branch_segments(SD, FG):
 
-        if (type(entrance_segment.end_room.room.branch_type) == BranchType.START): #TODO: have to account for forced start or forced end
+        if (type(entrance_segment) == TwowaySegment):
 
             #if rest of segments generate from this seg, extend and return
             try:
-                #BranchType.START, so generate branch first
+                #entrance was Twoway, so continue gen with Branch
                 next_segments = generate_level_recursive_branch(SD, FG, last_segment=entrance_segment, branch_count=0)
                 segments = [entrance_segment]
                 segments.extend(next_segments)
@@ -64,8 +62,9 @@ def generate_level_recursive_start(SD: SourceDestinationHandler, FG):
             except Exception as e:
                 log_sg(e)
 
-        else: #BranchType.END, so generate between branches first
+        else: #entrance is BranchSegment
             try:
+                #entrance was Branch so continue gen with Twoway
                 next_segments = generate_level_recursive_between_branch(SD, FG, last_segment=entrance_segment, branch_count=0)
                 segments = [entrance_segment]
                 segments.extend(next_segments)
@@ -88,8 +87,13 @@ def generate_level_recursive_start(SD: SourceDestinationHandler, FG):
 
 #alternate between branch and between branch until target branch count is reached
 #or we are forced to end with J or JB
-def generate_level_recursive_branch(SD: SourceDestinationHandler, FG, last_segment: LevelSegment, branch_count: int):
-    SD = SD.copy() #guarantee that any recursive call has its own SD
+def generate_level_recursive_branch(SD: SourceDestinationHandler, FG: nx.DiGraph, last_segment: LevelSegment, branch_count: int):
+
+    #guarantee that any recursive call has its own SD and FG
+    #we make copies so that, should this recursive call step back,
+    #we can immediately revert to the previous SD and FG
+    SD = SD.copy() 
+    FG = FG.copy()
 
     segments = []
 
@@ -127,8 +131,9 @@ def generate_level_recursive_branch(SD: SourceDestinationHandler, FG, last_segme
 
     raise RuntimeError(f"{ERROR}Failed to generate Branch Segment{RESET}")
 
-def generate_level_recursive_between_branch(SD: SourceDestinationHandler, FG, last_segment: LevelSegment, branch_count: int):
-    SD = SD.copy()
+def generate_level_recursive_between_branch(SD: SourceDestinationHandler, FG: nx.DiGraph, last_segment: LevelSegment, branch_count: int):
+    SD = SD.copy() 
+    FG = FG.copy()
 
     segments = []
 
@@ -157,7 +162,7 @@ def generate_level_recursive_between_branch(SD: SourceDestinationHandler, FG, la
     raise RuntimeError(f"{ERROR}Failed to generate Between Branch Segment{RESET}")
 
 
-def entrance_or_entrance_branch_segments(SD: SourceDestinationHandler, FG):
+def entrance_or_entrance_branch_segments(SD: SourceDestinationHandler, FG: nx.DiGraph):
     #Pick either E or EB
     for E_or_EB in SD.entrances():
         #if E, create a TwowaySegment with E and some BS
@@ -173,7 +178,7 @@ def entrance_or_entrance_branch_segments(SD: SourceDestinationHandler, FG):
 
     raise RuntimeError(f"Failed to generate any E or EB segment")
 
-def branch_segments(SD: SourceDestinationHandler, FG, BS: BranchRoomPath):
+def branch_segments(SD: SourceDestinationHandler, FG: nx.DiGraph, BS: BranchRoomPath):
     #create a BranchSegment with BS and some BE or JB
     for BA_or_BE in SD.branch_ends():
         for seg in bridge_branch_rp_room(BS, BA_or_BE, FG):
@@ -181,7 +186,7 @@ def branch_segments(SD: SourceDestinationHandler, FG, BS: BranchRoomPath):
 
     raise RuntimeError(f"Failed to generate any branch segment from {BS.room}")
 
-def john_branch_segment(SD: SourceDestinationHandler, FG, BS_or_EB: BaseRoomPath):
+def john_branch_segment(SD: SourceDestinationHandler, FG: nx.DiGraph, BS_or_EB: BaseRoomPath):
     #create TwowaySegment with BE or E and some J
     for JB in SD.john_branches():
         for seg in bridge_twoway_rp_room(BS_or_EB, JB, FG):
@@ -189,7 +194,7 @@ def john_branch_segment(SD: SourceDestinationHandler, FG, BS_or_EB: BaseRoomPath
 
     raise RuntimeError(f"Failed to generate John Branch segment from {BS_or_EB.room}")
 
-def john_segment(SD: SourceDestinationHandler, FG, BE_or_E: BaseRoomPath):
+def john_segment(SD: SourceDestinationHandler, FG: nx.DiGraph, BE_or_E: BaseRoomPath):
     #create TwowaySegment with BE or E and some J
     for J in SD.just_johns():
         for seg in bridge_twoway_rp_room(BE_or_E, J, FG):
@@ -197,7 +202,7 @@ def john_segment(SD: SourceDestinationHandler, FG, BE_or_E: BaseRoomPath):
 
     raise RuntimeError(f"Failed to generate any John segment from {BE_or_E.room}")
 
-def between_branch_segments(SD: SourceDestinationHandler, FG, BE: BaseRoomPath):
+def between_branch_segments(SD: SourceDestinationHandler, FG: nx.DiGraph, BE: BaseRoomPath):
     #create TwowaySegment with Be and some BS or BA
 
     for BA_or_BS in SD.branch_starts():
@@ -206,7 +211,7 @@ def between_branch_segments(SD: SourceDestinationHandler, FG, BE: BaseRoomPath):
 
     raise RuntimeError(f"Failed to generate any between branch segment from {BE.room}")
 
-def ej_or_ejb_segment(SD: SourceDestinationHandler, FG):
+def ej_or_ejb_segment(SD: SourceDestinationHandler, FG: nx.DiGraph):
     #Create TwowaySegemnt between E and J or BranchSegment between EB and JB
 
     #Pick either E or EB

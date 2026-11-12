@@ -120,6 +120,17 @@ class EdgeTraversal():
         self.bipartitePT = nx.Graph()
         self.bipartiteNPT = nx.Graph()
 
+    def has_no_zero_edges(self):
+        for edge in self.edges:
+            if (type(edge) == TransitionEdge):
+                continue
+
+            if (type(edge) == PathEdge):
+                if edge.has_zero(self.traversal_type):
+                    return False
+
+        return True
+    
     def __len__(self):
         return len(self.edges)
 
@@ -208,6 +219,18 @@ class PathEdge(Edge):
         self.OW = PathList([])
         self.NPT = PathList([])
         self.PT = PathList([])
+
+    #edge must have at least one path valid for the traversal type to be used
+    def has_zero(self, traversal_type: TraversalType):
+        match traversal_type:
+            case TraversalType.ANY:
+                return len(self.TW) > 0
+            case TraversalType.NOTPIZZATIME:
+                return len(self.NPT) > 0 or len(self.OW) > 0 or len(self.TW) > 0
+            case TraversalType.PIZZATIME:
+                return len(self.PT) > 0  or len(self.OW) > 0 or len(self.TW) > 0
+            case TraversalType.OW:
+                return len(self.OW) > 0 or len(self.TW) > 0
 
 
     def count_DB(self, paths: list[Path]):

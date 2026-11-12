@@ -49,6 +49,8 @@ from graph_from_rooms import graph_from_nodes_and_edges
 from enums import StartExitType
 from colors import ERROR, RESET
 
+from pairs import pairs
+
 def collapse_all_nodes_and_edges(G: nx.DiGraph):
     old_nodes = list(G.nodes())
     old_count = len(old_nodes)
@@ -171,21 +173,7 @@ def same_lists(list_a: list[DoorNode|CombinedDoorNode], list_b: list[DoorNode|Co
 
     return True
 
-def pairs(items):
-    i = 0
-    count = len(items)
 
-    while i < count:
-
-        k = i + 1
-
-        while k < count:
-
-            yield items[i], items[k]
-
-            k += 1
-
-        i += 1
 
 def get_edges_from_graph(G: nx.DiGraph):
     edges = []
