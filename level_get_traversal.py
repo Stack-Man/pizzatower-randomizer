@@ -5,12 +5,13 @@
 
 from level_objects import BaseRoomPath, RoomPath, BranchRoomPath
 from enums import TraversalType, StartExitType
+from graph_from_rooms import FlowGraphHandler
 
 from graph_objects import DoorNode, CombinedDoorNode
 
 import networkx as nx
 
-def get_traversal(srp: BaseRoomPath, erp: BaseRoomPath, FG: nx.DiGraph, traversal_type: TraversalType):
+def get_traversal(srp: BaseRoomPath, erp: BaseRoomPath, FG: FlowGraphHandler, traversal_type: TraversalType):
 
     #connect start rp's end to end rp's start
     #convert srp and erp into DoorNodes to search FG with
@@ -26,7 +27,7 @@ def get_traversal(srp: BaseRoomPath, erp: BaseRoomPath, FG: nx.DiGraph, traversa
 
     raise RuntimeError(f"No traversal of {traversal_type} between {source} and {destination}")
 
-def get_traversals_between(FG: nx.DiGraph, source: DoorNode, destination: DoorNode ):
+def get_traversals_between(FG: FlowGraphHandler, source: DoorNode, destination: DoorNode ):
     for N in FG.nodes():
         N: DoorNode | CombinedDoorNode
         if source in N:

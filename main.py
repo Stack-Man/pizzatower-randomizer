@@ -11,10 +11,10 @@ from seeded_random import set_seed
 
 from settings import TraversalMode
 
-def generate_levels():
+def get_SD_FG(fn):
     set_seed(0)
-
-    all_rooms = parse_json_to_rooms_all(FILENAMES)
+    
+    all_rooms = parse_json_to_rooms_all(fn)
     SD = get_source_destination_rooms(all_rooms)
 
     FG = rooms_to_graph(all_rooms, traversal_mode=TraversalMode.MATCHING_PERFECT)
@@ -22,6 +22,14 @@ def generate_levels():
 
     #TODO: seeded randomize order of SD and FG lists
 
+    return SD, FG
+    
+
+def generate_levels():
+    SD, FG = get_SD_FG(FILENAMES)
+
     levels = generate_levels_recursive_all(SD, FG)
+
+    #TODO: grow size of levels
 
     #TODO: export levels to json

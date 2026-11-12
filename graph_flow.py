@@ -27,19 +27,21 @@ from graph_objects import EdgeTraversal, DoorNode, CombinedDoorNode, StartExitTy
 from graph_impossible_booking import add_to_bipartite_graph
 import threading
 
-from enums import DoorType, DoorDir, TraversalType
+from enums import TraversalType
 
-from colors import WARNING, RESET, CAUTION
+from graph_from_rooms import FlowGraphHandler
 
 import time
 
 LOGGING = True
 
+
+
 #can an additional optimization be made considering steps with START vs EXIT nodes?
 #a START node doesnt need to know how to reach other START nodes
 #an EXIT node will never have its steps list read
 #though they may be necessary for the flow process even if the end result is unneeded.
-def flow(G):
+def flow(G: FlowGraphHandler):
     log(f"Flow of G with {len(G.nodes())} nodes and {len(G.edges())} Edges begin")
 
     #initialize nodes with traversal to self
@@ -133,7 +135,7 @@ def contains_repeat_subset(subset_traversals: dict[DoorNode | CombinedDoorNode, 
 
     return False
 
-def pass_steps_to_parents(G, N: DoorNode | CombinedDoorNode):
+def pass_steps_to_parents(G: FlowGraphHandler, N: DoorNode | CombinedDoorNode):
 
     start_time = time.perf_counter()
 

@@ -93,10 +93,7 @@ def add_to_bipartite_graph_by_type(BG: nx.Graph, edge: PathEdge, path_lists: lis
     i = 1
 
     for connected_component in nx.connected_components(BG):
-
-        #TODO: 
-        log(f"Checking cc {i} of {len(list(nx.connected_components(BG)))}")
-        
+        log(f"Checking cc {i} of {len(list(nx.connected_components(BG)))}") 
 
         if more_nodes_in_group_zero(BG, connected_component):
             log(f"{CAUTION}E > R in CC {i}{RESET}")

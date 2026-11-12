@@ -164,6 +164,7 @@ class EdgeTraversal():
 #Manage DB and non DB lists of a traversal type in a single structure
 class PathList():
     def __init__(self, P: list[Path]):
+        print(f"{WARNING}WARNING: PathList is_double_bookable does not consider NDB size!")
         self.NDB : list[Path] = []
         self.DB : list[Path] = []
 

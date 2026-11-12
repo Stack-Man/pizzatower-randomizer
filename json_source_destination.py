@@ -93,7 +93,7 @@ def branch_from_EJ(rooms: list[Room]):
     branch = []
 
     for room in rooms:
-        if room.branch_type != BranchType.NONE:
+        if room.branch_type == BranchType.NONE:
             normal.append(room)
         else:
             branch.append(room)

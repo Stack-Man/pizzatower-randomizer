@@ -7,10 +7,36 @@
 from objects import Room, Path
 from graph_objects import DoorNode, PathEdge, TransitionEdge, CombinedDoorNode, Node
 from settings import TraversalMode
-from colors import ERROR, RESET, CAUTION
+from colors import WARNING, ERROR, RESET, CAUTION
 from enums import DoorDir, PathTime, RoomType, StartExitType
 from graph_transition_edge import transition_edges_from_nodes
 import networkx as nx
+
+class FlowGraphHandler():
+    def __init__(self, G: nx.DiGraph):
+        self.G = G
+        self.depleted_edges = [] #store depleted edges so next time we get a traversal we can update the traversals
+        self.changed_last_round = True 
+
+    def nodes(self):
+        return self.G.nodes()
+
+    def edges(self):
+        return self.G.edges()
+
+    def predecessors(self, N):
+        return self.G.predecessors(N)
+
+    def get_edge_data(self, U, V):
+        return self.G.get_edge_data(U, V)
+
+    def copy(self):
+        copy = FlowGraphHandler(self.G.copy())
+        copy.depleted_edges = self.depleted_edges.copy()
+        copy.changed_last_round = self.changed_last_round
+
+        return copy
+    
 
 def rooms_to_graph(rooms: list[Room], traversal_mode : TraversalMode = TraversalMode.MATCHING_PERFECT ):
     path_edges, nodes = rooms_to_edges_and_nodes(rooms)
@@ -23,7 +49,7 @@ def rooms_to_graph(rooms: list[Room], traversal_mode : TraversalMode = Traversal
 
     graph = graph_from_nodes_and_edges(nodes, edges)
 
-    return graph
+    return FlowGraphHandler(graph)
 
 def get_existing_node(node: DoorNode | CombinedDoorNode, door_nodes: list[DoorNode | CombinedDoorNode]):
     return next((N for N in door_nodes if N == node), node )
