@@ -14,7 +14,8 @@
 #NPT: for NPT/OW/TW
 
 #If all path lists for a type contain only DB rooms, add that edge to the bipartite graph for that type
-LOGGING = False
+LOGGING = True
+LOG_BP_CLEANUP = True
 
 from graph_objects import PathEdge, EdgeTraversal, PathList
 from objects import Path
@@ -24,6 +25,10 @@ from colors import ERROR, RESET, CAUTION
 
 def log(msg: str):
     if LOGGING:
+        print(msg)
+
+def log_bpc(msg: str):
+    if (LOG_BP_CLEANUP):
         print(msg)
 
 #bipartite_TW/PT/NPT: A bipartite graph constructed from the edge traversal up to this point
@@ -49,13 +54,13 @@ def add_to_bipartite_graph(bipartite_TW: nx.Graph, bipartite_PT: nx.Graph, bipar
     impossibleNPT = (traversal_type == TraversalType.PIZZATIME or 
                      add_to_bipartite_graph_by_type(bipartite_NPT, edge, [edge.TW, edge.OW, edge.NPT]))
 
-    new_traversal_type = get_traversal_type_from_impossible_bookings(impossibleTW, impossiblePT, impossibleNPT)
+    new_traversal_type : TraversalType = get_traversal_type_from_impossible_bookings(impossibleTW, impossiblePT, impossibleNPT)
 
     log(f"add edge {edge} to traversal")
     log(f"    {traversal_type} to {new_traversal_type} - Impossible TW: {impossibleTW}; PT: {impossiblePT}; NPT: {impossibleNPT}") 
 
 
-    return new_traversal_type, impossibleTW, impossiblePT, impossibleNPT
+    return new_traversal_type
 
 #path_lists: tuple pairs of NDB and DB rooms, all pairs must be DB only to add
 #return TRUE: impossible, FALSE: not impossible
@@ -63,30 +68,51 @@ def add_to_bipartite_graph_by_type(BG: nx.Graph, edge: PathEdge, path_lists: lis
 
     #1. Confirm edge is DB (all PathLists contain only DB)
     i = 1
+    has_at_least_one_path = False
 
     for pl in path_lists:
         if len(pl) == 0: #dont check empty lists
             continue
 
+        has_at_least_one_path = True
+
         if not pl.is_double_bookable():
             log(f"  {pl} in list is not DB. DB: {len(pl.DB)} NDB: {len(pl.NDB)}")
-            return True #not valid edge to check
+            return False #not valid edge to check, so return as NOT impossible
 
-        
+    #if all path lists are empty, then this traversal type is impossible
+    if (not has_at_least_one_path):
+        return True
 
     #2. Create node E with edge
     E = PathEdgeNode(edge)
 
+
     #3. Create nodes Rs from DB rooms in PathLists.DBs (no object for room is needed so duplicating node is okay)
     Rs = room_nodes_from_path_lists(path_lists)
 
-    #4. add E and Rs to BG
-    #5. add edge to BG for each [E, R] 
-    BG.add_node(E, bipartite=0)
+    if (E not in BG.nodes()): #if E was not in BG, add it and its Rs
+        #4. add E and Rs to BG
+        #5. add edge to BG for each [E, R] 
+        BG.add_node(E, bipartite=0)
 
-    for R in Rs:
-        BG.add_node(R, bipartite=1)
-        BG.add_edge(E, R)
+        for R in Rs:
+            BG.add_node(R, bipartite=1)
+            BG.add_edge(E, R)
+    else: #if E was already in BG, remove edges to E not in Rs anymore (consumed)
+
+        to_remove = []
+
+        for E, R in BG.edges(E):
+
+            if (R not in Rs):
+                to_remove.append(R)
+
+        BG.remove_nodes_from(to_remove)
+
+        log_bpc(f"Cleaned {len(to_remove)} R nodes from BP")
+
+    
     
     #6. for each connected component, check if R < E and if so, return False
 
@@ -101,7 +127,7 @@ def add_to_bipartite_graph_by_type(BG: nx.Graph, edge: PathEdge, path_lists: lis
 
         i += 1
 
-    return False
+    return False #not impossible booking 
 
 def more_nodes_in_group_zero(BG, group):
 

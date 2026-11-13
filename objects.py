@@ -1,5 +1,7 @@
 from enums import *
 from colors import ERROR, RESET
+from typing import Any
+#from graph_objects import PathEdge, DoorNode
 
 """A door is an entrance or exit in a room.
     String  letter              : Game letter associated with this door. ROCKET or TAXI for those doors.
@@ -86,6 +88,18 @@ class Path():
         self.is_double_bookable = False
         self.room_name = "" #apply room name when adding paths to room
 
+        #apply room when adding paths to room 
+        #deepcopy automatically prevents circular deep copying with this ref
+        #used during room selection to flush out all paths of a consumed DB room
+        self.room : Room = Room("", [], [], False, False, False, False)
+
+        #apply edge when adding paths to edge
+        #used during room selection to quickly flush out all paths of a DB room from their respective edges
+        #don't initialize here to prevent circular import
+        #dummy_node = DoorNode(DoorType.NONE, DoorDir.NONE, StartExitType.START)
+        #self.edge : PathEdge = PathEdge(dummy_node, dummy_node)
+        self.edge : Any = None
+
     def __str__(self):
         return f"{self.start_door} to {self.exit_door}"
 
@@ -154,6 +168,7 @@ class Room():
 
         for path in self.paths:
             path.room_name = name
+            path.room = self
 
             if (path.inconsistent_path_time() and not john and not entrance):
                 print(f"{ERROR} ERROR: Path of {name} from {path.start_door} to {path.exit_door} does not have consistent path times {path.start_door.start_path_time} to {path.exit_door.exit_path_time}{RESET}")

@@ -132,6 +132,8 @@ def room_path(room: Room):
     match room.room_type:
         case RoomType.BRANCH:
             return branch_room_path(room)
+        case RoomType.JOHN:
+            return any_room_path(room)
         case _ :
             raise ValueError(f"{ERROR}ERROR: room_path() not implemented for room of type {room.room_type}")
 
@@ -139,4 +141,8 @@ def entrance_room_path(room: Room):
     for P in room.paths:
         if P.start_door.letter == "A" and P.start_door.door_type == DoorType.LEVELDOOR:
             yield RoomPath(room, P)
+
+def any_room_path(room: Room):
+    for P in room.paths:
+        yield RoomPath(room, P)
         

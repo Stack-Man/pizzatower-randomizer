@@ -24,7 +24,7 @@ class BranchRoomPath(BaseRoomPath):
         self.branch_door = branch_door
 
 class RoomSelection():
-    def __init__(self, rooms: list[BaseRoomPath]):
+    def __init__(self, rooms: list[RoomPath]):
         self.rooms = rooms
 
 class LevelSegment():
@@ -80,7 +80,7 @@ class BranchSegment(LevelSegment):
 
 class Level():
 
-    def __init__(self, segments: list[LevelSegment]):
+    def __init__(self, segments: list[BranchSegment | TwowaySegment]):
         self.segments = segments
         self.name = segments[0].start_room.room.name
 

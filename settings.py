@@ -5,7 +5,7 @@ from enum import Enum
 #JSON
 
 #a "loop" door is any transition that loops to itself in the standard loop, such as Gerome doors
-JSON_DOORS_ALLOW_LOOP_DOORS = False 
+JSON_DOORS_ALLOW_LOOP_DOORS = True 
 
 JSON_DOORS_ALLOW_TAXI_OR_ROCKET_DOORS = True
 

@@ -11,7 +11,7 @@
 from json_source_destination import SourceDestinationHandler
 from level_bridge import *
 from enums import BranchType
-from level_objects import LevelSegment
+from level_objects import LevelSegment, Level
 from graph_from_rooms import FlowGraphHandler
 
 MIN_BRANCH_COUNT = 1
@@ -31,12 +31,17 @@ def generate_levels_recursive_all(SD: SourceDestinationHandler, FG: FlowGraphHan
     level_count = SD.entrance_count()
     i = 0
 
-    while i < level_count:
+    try:
 
-        level = generate_level_recursive_start(SD, FG)
-        levels.append(level)
-        i += 1
+        while i < level_count:
+            segments = generate_level_recursive_start(SD, FG)
+            levels.append(Level(segments=segments))
+            i += 1
+            
+    except Exception as e:
+        log_sg(e)
 
+    log_sg(f"Generated {i} levels")
     return levels
 
 def generate_level_recursive_start(SD: SourceDestinationHandler, FG: FlowGraphHandler):
@@ -46,7 +51,6 @@ def generate_level_recursive_start(SD: SourceDestinationHandler, FG: FlowGraphHa
     segments = []
 
     try:
-        raise(Exception("skip"))
         for entrance_segment in entrance_or_entrance_branch_segments(SD, FG):
             if (type(entrance_segment) == TwowaySegment):
 
@@ -82,7 +86,9 @@ def generate_level_recursive_start(SD: SourceDestinationHandler, FG: FlowGraphHa
     #this is the only combination not tried
 
     try:
-        return ej_or_ejb_segment(SD, FG)
+        segments: list[TwowaySegment|BranchSegment] = []
+        segments.append(ej_or_ejb_segment(SD, FG))
+        return segments
     except Exception as e:
         log_sg(e)
 
@@ -95,10 +101,9 @@ def generate_level_recursive_branch(SD: SourceDestinationHandler, FG: FlowGraphH
     #guarantee that any recursive call has its own SD and FG
     #we make copies so that, should this recursive call step back,
     #we can immediately revert to the previous SD and FG
-    SD = SD.copy() 
 
-    #networkx copy is already a deep copy
-    #no need for custom deepcopy implementation for custom classes within either
+    #custom copy() copies only deep enough for our purposes
+    SD = SD.copy() 
     FG = FG.copy() 
 
     segments = []

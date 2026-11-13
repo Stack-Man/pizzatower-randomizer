@@ -6,8 +6,6 @@
 from enums import DoorType, DoorDir, StartExitType, TraversalType
 from objects import Path
 
-from enum import Enum
-
 from colors import ERROR, RESET, WARNING
 
 import networkx as nx
@@ -127,6 +125,7 @@ class EdgeTraversal():
 
             if (type(edge) == PathEdge):
                 if edge.has_zero(self.traversal_type):
+                    #print(f"edge {edge} has zero in {self.traversal_type}")
                     return False
 
         return True
@@ -134,7 +133,15 @@ class EdgeTraversal():
     def __len__(self):
         return len(self.edges)
 
-    def contains(self, node: DoorNode):
+    def __contains__(self, item):
+        if (type(item) != PathEdge and type(item) != TransitionEdge):
+            return False
+
+        for edge in self.edges:
+            if item == edge:
+                return True
+
+    def contains(self, node: DoorNode | CombinedDoorNode):
         for edge in self.edges:
             if (edge.start_node == node or edge.end_node == node):
                 return True
@@ -164,7 +171,6 @@ class EdgeTraversal():
 #Manage DB and non DB lists of a traversal type in a single structure
 class PathList():
     def __init__(self, P: list[Path]):
-        print(f"{WARNING}WARNING: PathList is_double_bookable does not consider NDB size!")
         self.NDB : list[Path] = []
         self.DB : list[Path] = []
 
@@ -182,6 +188,17 @@ class PathList():
 
         for p in self.DB:
             yield p
+
+    def remove(self, path: Path):
+        try:
+            self.NDB.remove(path)
+        except Exception as e:
+            pass
+
+        try:
+            self.DB.remove(path)
+        except Exception as e:
+            pass
 
     def is_double_bookable(self):
         return len(self.DB) > 0 and len(self.NDB) == 0
@@ -225,13 +242,14 @@ class PathEdge(Edge):
     def has_zero(self, traversal_type: TraversalType):
         match traversal_type:
             case TraversalType.ANY:
-                return len(self.TW) > 0
+                #print(f"TW len: {len(self.TW)}")
+                return len(self.TW) <= 0
             case TraversalType.NOTPIZZATIME:
-                return len(self.NPT) > 0 or len(self.OW) > 0 or len(self.TW) > 0
+                return len(self.NPT) <= 0 and len(self.OW) <= 0 and len(self.TW) <= 0
             case TraversalType.PIZZATIME:
-                return len(self.PT) > 0  or len(self.OW) > 0 or len(self.TW) > 0
+                return len(self.PT) <= 0 and len(self.OW) <= 0 and len(self.TW) <= 0
             case TraversalType.OW:
-                return len(self.OW) > 0 or len(self.TW) > 0
+                return len(self.OW) <=0 and len(self.TW) <= 0
 
 
     def count_DB(self, paths: list[Path]):
@@ -252,6 +270,20 @@ class PathEdge(Edge):
         self.NPT = PathList(PT)
         self.PT = PathList(NPT)
 
+        lists = [TW, OW, PT, NPT]
+
+        #store ref to edge in each path
+        #to quickly flush out DB paths when a DB room is consumed
+        for list in lists:
+            for path in list:
+                path.edge = self
+
+    def remove(self, path: Path):
+        lists = [self.TW, self.OW, self.PT, self.NPT]
+
+        for pl in lists:
+            pl.remove(path)
+
     def get_DB_paths(self, P: list[Path]):
         p_NDB = []
         p_DB = []
@@ -263,14 +295,6 @@ class PathEdge(Edge):
                 p_NDB.append(p)
 
         return p_NDB, p_DB
-    
-    def pick_path(self, type: TraversalType):
-        print(f"{WARNING}WARNING: pick_path in PathEdge in graph_objects.py is not implemented!")
-        return self.TW.pick_path()
-    
-    def get_random_path(self, paths: list[Path]):
-        return paths.pop()
-
 
     def __eq__(self, other):
         return self.start_node == other.start_node and self.end_node == other.end_node

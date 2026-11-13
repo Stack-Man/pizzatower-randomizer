@@ -6,13 +6,10 @@ from main import get_SD_FG
 from level_objects import Level
 
 def test_generate():
-    try:
-        SD, FG = get_SD_FG(["johngutter"])
-        levels = generate_levels_recursive_all(SD, FG)
+    SD, FG = get_SD_FG(["johngutter"]) #TODO: branch from entrance_1 to entrance_5 fails
+    levels = generate_levels_recursive_all(SD, FG)
 
-        print_levels(levels)
-    except Exception as e:
-        print(e)
+    print_levels(levels)
 
 def print_levels(levels: list[Level]):
 

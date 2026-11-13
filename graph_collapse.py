@@ -45,13 +45,13 @@
 
 import networkx as nx
 from graph_objects import DoorNode, CombinedDoorNode, PathEdge, TransitionEdge
-from graph_from_rooms import graph_from_nodes_and_edges
+from graph_from_rooms import graph_from_nodes_and_edges, FlowGraphHandler
 from enums import StartExitType
 from colors import ERROR, RESET
 
 from pairs import pairs
 
-def collapse_all_nodes_and_edges(G: nx.DiGraph):
+def collapse_all_nodes_and_edges(G: FlowGraphHandler):
     old_nodes = list(G.nodes())
     old_count = len(old_nodes)
     
@@ -70,7 +70,7 @@ def collapse_all_nodes_and_edges(G: nx.DiGraph):
 
     new_nodes = collapse_nodes_repeat(old_nodes)
 
-    old_edges = get_edges_from_graph(G)
+    old_edges = get_edges_from_graph(G.G)
     old_edge_count = len(old_edges)
     updated_edges = update_edge_nodes(old_edges, new_nodes)
     new_edges = collapse_edges_repeat(updated_edges)
@@ -79,7 +79,9 @@ def collapse_all_nodes_and_edges(G: nx.DiGraph):
 
     print(f"G {old_count} nodes and {old_edge_count} edges collapse to {len(new_nodes)} nodes and {len(new_edges)} edges")
 
-    return new_G
+    G.G = new_G
+
+    return G
 
 def collapse_nodes_repeat(old_nodes: list[DoorNode|CombinedDoorNode]):
     new_nodes = old_nodes

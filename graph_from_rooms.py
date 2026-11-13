@@ -5,17 +5,18 @@
 #Separate edges into three graphs: two-way paths only (TW), two-way or one-way pizza time paths (OWPT), and two way or one-way not pizza time paths (OWNPT).
 
 from objects import Room, Path
-from graph_objects import DoorNode, PathEdge, TransitionEdge, CombinedDoorNode, Node
+from graph_objects import DoorNode, PathEdge, TransitionEdge, CombinedDoorNode
 from settings import TraversalMode
-from colors import WARNING, ERROR, RESET, CAUTION
-from enums import DoorDir, PathTime, RoomType, StartExitType
+from enums import PathTime, RoomType, StartExitType, TraversalType
 from graph_transition_edge import transition_edges_from_nodes
 import networkx as nx
+from copy import deepcopy
 
 class FlowGraphHandler():
     def __init__(self, G: nx.DiGraph):
         self.G = G
-        self.depleted_edges = [] #store depleted edges so next time we get a traversal we can update the traversals
+        #store depleted edges so next time we get a traversal we can update the traversals
+        self.depleted_edges: list[PathEdge] = [] 
         self.changed_last_round = True 
 
     def nodes(self):
@@ -27,11 +28,19 @@ class FlowGraphHandler():
     def predecessors(self, N):
         return self.G.predecessors(N)
 
+    def successors(self, N):
+        return self.G.successors(N)
+
     def get_edge_data(self, U, V):
         return self.G.get_edge_data(U, V)
-
+        
     def copy(self):
-        copy = FlowGraphHandler(self.G.copy())
+        #make a deepcopy of the graph so that all nodes and edges
+        #and all the lists within are unique from previous graph
+        copy = FlowGraphHandler(deepcopy(self.G)) 
+
+        #only the list itself needs to be unique, 
+        # the edges within are just for reference
         copy.depleted_edges = self.depleted_edges.copy()
         copy.changed_last_round = self.changed_last_round
 

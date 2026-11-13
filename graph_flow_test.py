@@ -1,5 +1,5 @@
 from json_parse import parse_json_to_rooms_all, FILENAMES
-from graph_from_rooms import rooms_to_graph
+from graph_from_rooms import rooms_to_graph, FlowGraphHandler
 from graph_flow import flow
 from graph_objects import DoorNode, EdgeTraversal, StartExitType, Edge, Node
 import networkx as nx
@@ -15,15 +15,13 @@ def test_flow():
            "ohshit", "freezer", "peppibotfactory", "thepigcity",
            "dontmakeasound", "pizzascare", "war", 
             "crumblingtowerofpizza", "trickytreat", "tutorial", "tutorial_noise"]
+
+    fn = ["pizzascape"]
     
     print(f"{WARNING}PERFORMING FLOW WITH {CAUTION}{fn} {RESET}")
     all_rooms = parse_json_to_rooms_all(fn)
 
-    #TODO: implement redundant node collapse, combinging ndoes with the same parentsa nd children into one node,
-    #and combining their edges to the same parents/children into one edge
     graph = rooms_to_graph(all_rooms, traversal_mode = TraversalMode.MATCHING_PERFECT) 
-
-    
 
     #graph = test_complete_graph()
     flow(graph)
@@ -33,11 +31,7 @@ def test_flow():
 def test_complete_graph():
 
     nodes = [
-        DoorNode(DoorType.A, DoorDir.X, StartExitType.X),
-        DoorNode(DoorType.B, DoorDir.X, StartExitType.X),
-        DoorNode(DoorType.C, DoorDir.X, StartExitType.X),
-        DoorNode(DoorType.D, DoorDir.X, StartExitType.X),
-        DoorNode(DoorType.E, DoorDir.X, StartExitType.X),
+
         DoorNode(DoorType.DOOR, DoorDir.NONE, StartExitType.START),
         DoorNode(DoorType.DOOR, DoorDir.NONE, StartExitType.EXIT),
         DoorNode(DoorType.BOX, DoorDir.UP, StartExitType.START),
@@ -58,7 +52,7 @@ def test_complete_graph():
     return G
 
 
-def print_steps(G: nx.DiGraph, print_traversals: bool):
+def print_steps(G: FlowGraphHandler, print_traversals: bool):
 
     print(f"")
 

@@ -33,6 +33,8 @@ from graph_from_rooms import FlowGraphHandler
 
 import time
 
+from colors import WARNING, RESET
+
 LOGGING = True
 
 
@@ -70,8 +72,6 @@ def flow(G: FlowGraphHandler):
 
         start_time = time.perf_counter()
 
-
-
         #pass all valid edge traversal from N to its parents P
         for N in G.nodes():
             t = threading.Thread(target = pass_steps_to_parents, args=(G, N))
@@ -105,6 +105,9 @@ def flow(G: FlowGraphHandler):
         R = R + 1
 
     log(f"Total Time: ({total_time})")
+
+    log(f"{WARNING}WARNING: flow skips cleanup!{RESET}")
+    return G
 
     #clean up node steps, remove traversals stored in START nodes
     #generations only occur from an EXIT to a START
@@ -140,7 +143,7 @@ def pass_steps_to_parents(G: FlowGraphHandler, N: DoorNode | CombinedDoorNode):
     start_time = time.perf_counter()
 
     for P in G.predecessors(N):
-        P : DoorNode
+        P : DoorNode | CombinedDoorNode
 
         #pass all valid traversals in N to parent P
         for destination, traversals in N.last_steps.items():
@@ -186,10 +189,11 @@ def pass_steps_to_parents(G: FlowGraphHandler, N: DoorNode | CombinedDoorNode):
 
                     #exclude traversals that require double booking rooms
                     #create bipartite graphs to determine connected components where R < E
-                    new_traversal_type, _, _, _= add_to_bipartite_graph(new_bipartite_TW, new_bipartite_PT, new_bipartite_NPT, priority_traversal_type, new_edge)
+                    new_traversal_type = add_to_bipartite_graph(new_bipartite_TW, new_bipartite_PT, new_bipartite_NPT, priority_traversal_type, new_edge)
 
                     #no valid path exists
                     if (new_traversal_type == TraversalType.INVALID):
+                        log(f"traversal type of {traversal} with {new_edge} is INVALID. priority was {priority_traversal_type} and new was {new_traversal_type}")
                         continue
 
                 #get the edge set and prepend the current edge to the front

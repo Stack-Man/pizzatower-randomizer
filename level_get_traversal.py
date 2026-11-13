@@ -6,32 +6,55 @@
 from level_objects import BaseRoomPath, RoomPath, BranchRoomPath
 from enums import TraversalType, StartExitType
 from graph_from_rooms import FlowGraphHandler
-
+from level_clean_traversal import clean_depleted_traverals
 from graph_objects import DoorNode, CombinedDoorNode
 
 import networkx as nx
 
-def get_traversal(srp: BaseRoomPath, erp: BaseRoomPath, FG: FlowGraphHandler, traversal_type: TraversalType):
+LOGGING = True
 
+def log(msg: str):
+    if (LOGGING):
+        print(msg)
+
+def get_traversal(srp: BaseRoomPath, erp: BaseRoomPath, FG: FlowGraphHandler, traversal_type: TraversalType):
     #connect start rp's end to end rp's start
     #convert srp and erp into DoorNodes to search FG with
 
     source = get_path_end(srp, traversal_type)
     destination = get_path_start(erp, traversal_type)
 
+    log(f"get_traversal: Got SD from {source} to {destination}")
+
+    FG = clean_depleted_traverals(FG)
+
+    log(f"get_traversal: clean_depleted_traverals()")
+
     traversals = get_traversals_between(FG, source, destination)
+
+    log(f"get_traversal: Trying from {len(traversals)} traversals ")
 
     for traversal in traversals:
         if (traversal.traversal_type == traversal_type and traversal.has_no_zero_edges()):
+            log(f"get_traversal: Got traversal {traversal} ")
             return traversal
+
+        log(f"get_traversal: invalid traversal {traversal} of type {traversal.traversal_type}, wanted {traversal_type}. has no zero edges: {traversal.has_no_zero_edges()}")
 
     raise RuntimeError(f"No traversal of {traversal_type} between {source} and {destination}")
 
 def get_traversals_between(FG: FlowGraphHandler, source: DoorNode, destination: DoorNode ):
     for N in FG.nodes():
+
         N: DoorNode | CombinedDoorNode
-        if source in N:
-            return N.steps[destination]
+        if source == N:
+
+            log(f"get_traversals_between found source {N}")
+
+            if destination in N.steps:
+                return N.steps[destination]
+            else:
+                break 
 
     raise RuntimeError(f"No traversal between {source} and {destination}")
 

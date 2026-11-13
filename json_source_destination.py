@@ -61,6 +61,8 @@ class SourceDestinationHandler():
         return B[i]
 
     def copy(self):
+        #only the lists themselves need to be unique
+        #the Rooms within are just for reference
         return SourceDestinationHandler(self.E.copy(), self.EB.copy(), self.J.copy(), self.JB.copy(), self.BA.copy(), self.BS.copy(), self.BE.copy())
 
 
