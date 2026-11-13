@@ -6,7 +6,9 @@ from main import get_SD_FG
 from level_objects import Level
 
 def test_generate():
-    SD, FG = get_SD_FG(["johngutter"]) #TODO: branch from entrance_1 to entrance_5 fails
+    #TODO: branch from entrance_1 to entrance_5 fails
+    #TODO: entrance_1 is not a branch!!!
+    SD, FG = get_SD_FG(["johngutter"]) 
     levels = generate_levels_recursive_all(SD, FG)
 
     print_levels(levels)

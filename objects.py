@@ -106,6 +106,13 @@ class Path():
     def print_stats(self):
         print(f"    {self.start_door.letter} > {self.exit_door.letter}")
 
+    def print_stats_extended(self):
+        print(f"    {self.start_door.letter} > {self.exit_door.letter}")
+        print(f"        {self.path_time()}")
+        print(f"        {self.start_door.start_path_time} > {self.exit_door.exit_path_time}")
+        if self.oneway: print(f"        oneway: {self.oneway}")
+        if self.is_loop: print(f"        loop: {self.is_loop}")
+
     def path_time(self):
         if (self.start_door.start_path_time != PathTime.BOTH):
             return self.start_door.start_path_time
@@ -200,3 +207,12 @@ class Room():
 
         for p in self.paths:
             p.print_stats()
+
+    def print_paths_extended(self):
+        if (self.paths is None or len(self.paths) <= 0):
+            return
+
+        print(f"    Paths:")
+
+        for p in self.paths:
+            p.print_stats_extended()

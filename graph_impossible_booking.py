@@ -14,7 +14,7 @@
 #NPT: for NPT/OW/TW
 
 #If all path lists for a type contain only DB rooms, add that edge to the bipartite graph for that type
-LOGGING = True
+LOGGING = False
 LOG_BP_CLEANUP = True
 
 from graph_objects import PathEdge, EdgeTraversal, PathList

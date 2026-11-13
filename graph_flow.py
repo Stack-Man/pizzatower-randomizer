@@ -106,8 +106,8 @@ def flow(G: FlowGraphHandler):
 
     log(f"Total Time: ({total_time})")
 
-    log(f"{WARNING}WARNING: flow skips cleanup!{RESET}")
-    return G
+    #log(f"{WARNING}WARNING: flow skips cleanup!{RESET}")
+    #return G
 
     #clean up node steps, remove traversals stored in START nodes
     #generations only occur from an EXIT to a START

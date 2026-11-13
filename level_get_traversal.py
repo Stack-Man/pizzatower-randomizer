@@ -58,10 +58,19 @@ def get_traversals_between(FG: FlowGraphHandler, source: DoorNode, destination: 
 
     raise RuntimeError(f"No traversal between {source} and {destination}")
 
+#TODO: implement get_path_end/start for NPT PT and OW
+#depends on whether its room path or branch, and which type, which path and door is the start/end
+#actually if its OW and Branch its ambiguous, i'll need to determine that
 def get_path_end(rp: BaseRoomPath, traversal_type:TraversalType):
     match traversal_type:
         case TraversalType.ANY:
             return get_path_end_TW(rp)
+        case TraversalType.NOTPIZZATIME:
+            return get_path_end_NPT(rp)
+        case TraversalType.PIZZATIME:
+            return get_path_end_PT(rp)
+        case TraversalType.OW:
+            return get_path_end_OW(rp)
         case _:
             raise NotImplementedError(f"get_path_end() not implemented for {traversal_type}")
 
@@ -69,6 +78,12 @@ def get_path_start(rp: BaseRoomPath, traversal_type: TraversalType):
     match traversal_type:
         case TraversalType.ANY:
             return get_path_start_TW(rp)
+        case TraversalType.NOTPIZZATIME:
+            return get_path_start_NPT(rp)
+        case TraversalType.PIZZATIME:
+            return get_path_start_PT(rp)
+        case TraversalType.OW:
+            return get_path_start_OW(rp)
         case _:
             raise NotImplementedError(f"get_path_start() not implemented for {traversal_type}")
 
@@ -81,6 +96,8 @@ def get_path_end_TW(rp: BaseRoomPath):
         return DoorNode(t[0], t[1], StartExitType.EXIT) 
 
     raise TypeError(f"RP {rp.room} is not RoomPath or BranchRoomPath")
+
+
 
 def get_path_start_TW(rp: BaseRoomPath):
     if (type(rp) == RoomPath):

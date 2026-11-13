@@ -10,6 +10,8 @@ from colors import ERROR, RESET, WARNING
 
 import networkx as nx
 
+import copy
+
 
 class Node():
     def __init__(self, se_type: StartExitType):
@@ -52,6 +54,21 @@ class DoorNode(Node):
     
     def __contains__(self, item):
         return item == self
+
+    #reimplement deepcopy to prevent "DoorNode does not contain attribute" error during deepcopy
+    #by gauranteeing the attributes are initialized
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        result = cls(
+            #copy.deepcopy(self.door_type, memo),
+            #copy.deepcopy(self.door_dir, memo),
+            #copy.deepcopy(self.se_type, memo)
+            self.door_type,
+            self.door_dir,
+            self.se_type
+        )
+        memo[id(self)] = result
+        return result
 
 class CombinedDoorNode(Node):
     def __init__(self, nodes: list[DoorNode], se_type: StartExitType):

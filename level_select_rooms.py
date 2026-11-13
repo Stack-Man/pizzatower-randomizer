@@ -11,6 +11,12 @@ from graph_from_rooms import FlowGraphHandler
 from enums import TraversalType
 from colors import WARNING, RESET
 
+LOGGING = True
+
+def log(msg: str):
+    if (LOGGING):
+        print(msg)
+
 def select_rooms(FG: FlowGraphHandler, traversal: EdgeTraversal, traversal_type: TraversalType):
     print(f"{WARNING}select_rooms does not avoid impossible bookings!{RESET}")
 
@@ -20,13 +26,17 @@ def select_rooms(FG: FlowGraphHandler, traversal: EdgeTraversal, traversal_type:
     for edge in traversal.edges: #TODO traversal is not prioritizing edges from the bipartite graph with the fewest rooms.. impossible booking may be encountered!
 
         if (type(edge) == TransitionEdge): #no selection for transition edges
+            log(f"select_rooms: skip for Transition {edge}")
             continue
         elif (type(edge) == PathEdge):
+            log(f"select_rooms: start selection for Path {edge}")
             path, emptied_edge = get_path(edge, traversal_type)
 
             rp = RoomPath(path.room, path)
 
             room_paths.append(rp)
+
+            log(f"select_rooms: got path {path} of {path.room_name}, emptied? {emptied_edge}")
 
             #clean up other paths of consumed room from their respective edges
             if (path.is_double_bookable):
@@ -37,6 +47,13 @@ def select_rooms(FG: FlowGraphHandler, traversal: EdgeTraversal, traversal_type:
             if (emptied_edge):
                 FG.depleted_edges.append(edge)
 
+    if (LOGGING):
+        msg = "==select_rooms: Got Selection: "
+
+        for rp in room_paths:
+            msg += f"{rp.room}: {rp.path} > "
+
+        log(msg)
 
     return RoomSelection(room_paths)
 

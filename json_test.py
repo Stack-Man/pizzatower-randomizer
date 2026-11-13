@@ -19,7 +19,7 @@ def test_parse_all():
                  "dontmakeasound", "pizzascare", "war", 
                  "crumblingtowerofpizza", "trickytreat", "tutorial", "tutorial_noise"]
 
-    #filenames = ["bloodsauce"]
+    filenames = ["funfarm"]
 
     all_rooms = []
     
@@ -28,9 +28,9 @@ def test_parse_all():
 
         new_rooms = test_parse(filename)
         
-        #print("ROOMS  OF ", f)
-        #print("========================")
-        #print_rooms(new_rooms)
+        print("ROOMS  OF ", f)
+        print("========================")
+        print_rooms(new_rooms)
         
         all_rooms.extend(new_rooms)
 
@@ -59,7 +59,7 @@ def print_rooms(rooms):
 
         #room.print_doors()
 
-        room.print_paths()
+        room.print_paths_extended()
 
 def print_unique_path_types(rooms: list[Room]):
 
