@@ -231,8 +231,7 @@
                 {
                     "letter": "C",
                     "type": "horizontal",
-                    "dir": "right",
-                    "exitonly": true
+                    "dir": "right"
                 },
                 {
                     "letter": "A",

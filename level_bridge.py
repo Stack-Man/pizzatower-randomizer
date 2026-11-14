@@ -3,7 +3,7 @@
 
 #Bridge two rooms using the Flow Graph and select their rooms
 
-from objects import Room
+from json_objects import Room
 from colors import RESET, ERROR
 from level_objects import TwowaySegment, BranchSegment, BranchRoomPath, BaseRoomPath
 from enums import RoomType, TraversalType, StartExitType

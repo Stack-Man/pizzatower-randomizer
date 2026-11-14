@@ -4,7 +4,7 @@
 #Categorize potential Source and Destination rooms
 #Entrance, John, and Branch rooms
 
-from objects import Room
+from json_objects import Room
 from enums import RoomType, BranchType
 from colors import WARNING, RESET
 from level_objects import LevelSegment
