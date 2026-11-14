@@ -8,22 +8,33 @@
 #start (E/EB) > recursive branch/between branch (BS-BE or BE-BS)
 #cap with J/JB when reached branch limit or when impossible to extend branch further
 
+#every level of recursion creates a copy of SD/FG to avoid effecting
+#the previous level of recursion in case of step back
+#on cap with J/JB, return that recursion level's copy of SD/FG
+#this copy will be used as the starting point for the next level generation
+
+#1. level_generate_recursive.py: generate segments until branch limit reached or can't, then cap with J/JB
+#2. level_segment_generator.py: iterators that return segments of a certain type
+#3. level_bridge.py: attempts to bridge two rooms together, selecting some combination of paths in S and D to bridge with
+#4. level_room_path_generator.py: iterators that return every valid path selection for a room, used by level_bridge to try different bridges
+#5. 
+
 from json_source_destination import SourceDestinationHandler
-from level_bridge import *
-from enums import BranchType
-from level_objects import LevelSegment, Level
+
+from level_objects import LevelSegment, Level, TwowaySegment, BranchSegment, BranchRoomPath
 from graph_from_rooms import FlowGraphHandler
 
+from level_segment_generator import  entrance_or_entrance_branch_segments, branch_segments, john_segment, john_branch_segment, between_branch_segments, ej_or_ejb_segment
+
+from colors import ERROR, RESET
+
 MIN_BRANCH_COUNT = 1
-LOG_FAILED_SEGMENT_GEN = True
 
-def log_sg(msg: str|RuntimeError):
-    if (LOG_FAILED_SEGMENT_GEN):
-        print(msg, flush = True)
+LOGGING = True
 
-
-#TODO: we must pass the deepest-copy SD and FG through the return 
-# so that the can exist as the starting point for the next level generation
+def log_sg(msg: str|Exception):
+    if (LOGGING):
+        print(msg)
 
 def generate_levels_recursive_all(SD: SourceDestinationHandler, FG: FlowGraphHandler):
     levels = []
@@ -31,10 +42,15 @@ def generate_levels_recursive_all(SD: SourceDestinationHandler, FG: FlowGraphHan
     level_count = SD.entrance_count()
     i = 0
 
+    current_SD = SD
+    current_FG = FG
+
     try:
 
         while i < level_count:
-            segments = generate_level_recursive_start(SD, FG)
+            segments, new_SD, new_FG, = generate_level_recursive_start(current_SD, current_FG)
+            current_SD = new_SD
+            current_FG = new_FG
             levels.append(Level(segments=segments))
             i += 1
             
@@ -57,11 +73,11 @@ def generate_level_recursive_start(SD: SourceDestinationHandler, FG: FlowGraphHa
                 #if rest of segments generate from this seg, extend and return
                 try:
                     #entrance was Twoway, so continue gen with Branch
-                    next_segments = generate_level_recursive_branch(SD, FG, last_segment=entrance_segment, branch_count=0)
+                    next_segments, new_SD, new_FG = generate_level_recursive_branch(SD, FG, last_segment=entrance_segment, branch_count=0)
                     segments = [entrance_segment]
                     segments.extend(next_segments)
 
-                    return segments
+                    return segments, new_SD, new_FG #continued recursive, return the terminating code's copy of SD and FG
 
                 #if gen fails, it throws, catch and try next entrance seg
                 except RuntimeError as e:
@@ -70,11 +86,11 @@ def generate_level_recursive_start(SD: SourceDestinationHandler, FG: FlowGraphHa
             else: #entrance is BranchSegment
                 try:
                     #entrance was Branch so continue gen with Twoway
-                    next_segments = generate_level_recursive_between_branch(SD, FG, last_segment=entrance_segment, branch_count=0)
+                    next_segments, new_SD, new_FG = generate_level_recursive_between_branch(SD, FG, last_segment=entrance_segment, branch_count=0)
                     segments = [entrance_segment]
                     segments.extend(next_segments)
 
-                    return segments
+                    return segments, new_SD, new_FG #continued recursive, return the terminating code's copy of SD and FG
 
                 #if gen fails, it throws, catch and try next entrance seg
                 except RuntimeError as e:
@@ -87,8 +103,9 @@ def generate_level_recursive_start(SD: SourceDestinationHandler, FG: FlowGraphHa
 
     try:
         segments: list[TwowaySegment|BranchSegment] = []
-        segments.append(ej_or_ejb_segment(SD, FG))
-        return segments
+        segment = ej_or_ejb_segment(SD, FG)
+        segments.append(segment)
+        return segments, SD, FG #terminate, return this copy of SD and FG
     except RuntimeError as e:
         log_sg(e)
 
@@ -117,26 +134,28 @@ def generate_level_recursive_branch(SD: SourceDestinationHandler, FG: FlowGraphH
             if (branch_count < MIN_BRANCH_COUNT): #continue adding branch segments
 
                 try:
-                    next_segments = generate_level_recursive_between_branch(SD, FG, last_segment=branch_segment, branch_count=branch_count)
+                    next_segments, new_SD, new_FG = generate_level_recursive_between_branch(SD, FG, last_segment=branch_segment, branch_count=branch_count)
                     segments = []
                     segments.append(branch_segment)
                     segments.extend(next_segments)
 
-                    return segments
+                    return segments, new_SD, new_FG
                 except RuntimeError as e:
                     log_sg(e)
 
             else:
                 #completed all branches, cap this branch_segment with a J
                 try:
-                    return [branch_segment, john_segment(SD, FG, last_segment.end_room)]
+                    segment = john_segment(SD, FG, last_segment.end_room)
+                    return [branch_segment, segment], SD, FG #terminate, return this copy of SD and FG
                 except RuntimeError as e:
                     log_sg(e)
 
     #could not increase branch count, try capping with JB
     #assume that between branch would have attempted to cap a branch with J before raising an error
     try:
-        return [john_branch_segment(SD, FG, last_segment.end_room)]
+        segment = john_branch_segment(SD, FG, last_segment.end_room)
+        return [segment], SD, FG #terminate, return this copy of SD and FG
     except RuntimeError as e:
         log_sg(e)
 
@@ -155,98 +174,22 @@ def generate_level_recursive_between_branch(SD: SourceDestinationHandler, FG: Fl
         for between_branch_segment in between_branch_segments(SD, FG, last_segment.end_room):
 
             try: 
-                next_segments = generate_level_recursive_branch(SD, FG, last_segment=last_segment, branch_count=branch_count)
+                next_segments, new_SD, new_FG = generate_level_recursive_branch(SD, FG, last_segment=last_segment, branch_count=branch_count)
                 segments = []
                 segments.append(between_branch_segment)
                 segments.extend(next_segments)
 
-                return segments
+                return segments, new_SD, new_FG
             except RuntimeError as e:
                 log_sg(e)
 
     #could not increase branch count, try capping with J
     try:
-        return [john_segment(SD, FG, last_segment.end_room)]
+        segment = john_segment(SD, FG, last_segment.end_room)
+        return [segment], SD, FG #terminate, return this copy of SD and FG
     except RuntimeError as e:
         log_sg(e)
 
     raise RuntimeError(f"{ERROR}Failed to generate Between Branch Segment{RESET}")
 
 
-def entrance_or_entrance_branch_segments(SD: SourceDestinationHandler, FG: FlowGraphHandler):
-    #Pick either E or EB
-    for E_or_EB in SD.entrances():
-        E_or_EB.print_stats()
-        #if E, create a TwowaySegment with E and some BS
-        if (E_or_EB.branch_type == BranchType.NONE):
-            log_sg(f"entrance_or_entrance_branch_segments: {E_or_EB} was E")
-            for BS_or_BA in SD.branch_starts(): 
-                for seg in bridge_twoway_room_room(E_or_EB, BS_or_BA, FG):     
-                    yield seg
-        #if EB, create a Branch Segment with EB and some BE
-        else:
-            log_sg(f"entrance_or_entrance_branch_segments: {E_or_EB} was EB")
-            for BE_or_BA in SD.branch_ends():
-                for seg in bridge_branch_room_room(E_or_EB, BE_or_BA, FG):
-                    yield seg
-
-    raise RuntimeError(f"Failed to generate any E or EB segment")
-
-def branch_segments(SD: SourceDestinationHandler, FG: FlowGraphHandler, BS: BranchRoomPath):
-    #create a BranchSegment with BS and some BE or JB
-    for BA_or_BE in SD.branch_ends():
-        for seg in bridge_branch_rp_room(BS, BA_or_BE, FG):
-            yield seg
-
-    raise RuntimeError(f"Failed to generate any branch segment from {BS.room}")
-
-def john_branch_segment(SD: SourceDestinationHandler, FG: FlowGraphHandler, BS_or_EB: BaseRoomPath):
-    #create TwowaySegment with BE or E and some J
-    for JB in SD.john_branches():
-        for seg in bridge_twoway_rp_room(BS_or_EB, JB, FG):
-            return seg #return the first successful bridge
-
-    raise RuntimeError(f"Failed to generate John Branch segment from {BS_or_EB.room}")
-
-def john_segment(SD: SourceDestinationHandler, FG: FlowGraphHandler, BE_or_E: BaseRoomPath):
-    #create TwowaySegment with BE or E and some J
-    for J in SD.just_johns():
-        for seg in bridge_twoway_rp_room(BE_or_E, J, FG):
-            return seg #return the first successful bridge
-
-    raise RuntimeError(f"Failed to generate any John segment from {BE_or_E.room}")
-
-def between_branch_segments(SD: SourceDestinationHandler, FG: FlowGraphHandler, BE: BaseRoomPath):
-    #create TwowaySegment with Be and some BS or BA
-
-    for BA_or_BS in SD.branch_starts():
-        for seg in bridge_twoway_rp_room(BE, BA_or_BS, FG):
-            yield seg
-
-    raise RuntimeError(f"Failed to generate any between branch segment from {BE.room}")
-
-def ej_or_ejb_segment(SD: SourceDestinationHandler, FG: FlowGraphHandler):
-    #Create TwowaySegemnt between E and J or BranchSegment between EB and JB
-
-    #Pick either E or EB
-    try:
-        for E_or_EB in SD.entrances():
-            #if E, create a TwowaySegment with E and some J
-
-            log_sg(f"ej_or_ejb_segment with {E_or_EB} of branch type {E_or_EB.branch_type}")
-
-            if (E_or_EB.branch_type == BranchType.NONE):
-                for J in SD.just_johns(): 
-                    for seg in bridge_twoway_room_room(E_or_EB, J, FG):     
-                        return seg #return first valid seg
-                raise RuntimeError(f"No J to match E {E_or_EB}")
-            #if EB, create a Branch Segment with EB and some JB
-            else:
-                for JB in SD.john_branches():
-                    for seg in bridge_branch_room_room(E_or_EB, JB, FG):
-                        return seg
-                raise RuntimeError(f"No JB to match EB {E_or_EB}")
-    except RuntimeError as e:
-        log_sg(e)
-    
-    raise RuntimeError(f"Failed to generate any EJ or EJB segment")
