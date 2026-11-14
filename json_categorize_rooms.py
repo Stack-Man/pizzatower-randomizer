@@ -3,7 +3,7 @@
 
 #Categorize, identify, and mark Rooms and Paths
 
-from objects import Room, Path
+from json_objects import Room, Path
 from enums import RoomType, BranchType
 from colors import ERROR, RESET
 from json_double_booking import identify_double_bookable_rooms

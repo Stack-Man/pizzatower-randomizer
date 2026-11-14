@@ -18,7 +18,7 @@ LOGGING = False
 LOG_BP_CLEANUP = True
 
 from graph_objects import PathEdge, EdgeTraversal, PathList
-from objects import Path
+from json_objects import Path
 from enums import TraversalType
 import networkx as nx
 from colors import ERROR, RESET, CAUTION

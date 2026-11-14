@@ -6,7 +6,7 @@
 
 #iterate over potential RoomPath candidates for a room type
 
-from objects import Room, Path
+from json_objects import Room, Path
 from enums import StartExitType, RoomType, PathTime, DoorType
 from pairs import pairs
 from level_objects import BranchRoomPath, RoomPath
@@ -89,20 +89,20 @@ def branch_branch_room_path(room: Room, se_type: StartExitType):
 def branch_NPT_and_PT_branch(A: Path, B: Path):
     log_nptb(f"{A} is Branch NPT and {B} is PT Branch?")
     
-    if (A.start_door.branch and A.path_time() in [PathTime.NOTPIZZATIME, PathTime.BOTH]):
-        if (B.exit_door.branch and B.path_time() in [PathTime.PIZZATIME, PathTime.BOTH]):
+    if (A.start_door.branch and A.get_path_time() in [PathTime.NOTPIZZATIME, PathTime.BOTH]):
+        if (B.exit_door.branch and B.get_path_time() in [PathTime.PIZZATIME, PathTime.BOTH]):
             log_nptb(f"       pass")
             return True
         else:
-            log_nptb(f"       {A} start not branch: {A.start_door.branch} or {A.path_time()} not PT/BOTH")
+            log_nptb(f"       {A} start not branch: {A.start_door.branch} or {A.get_path_time()} not PT/BOTH")
             return False
     else:
-        log_nptb(f"       {A} start not branch: {A.start_door.branch} or {A.path_time()} not NPT/BOTH")
+        log_nptb(f"       {A} start not branch: {A.start_door.branch} or {A.get_path_time()} not NPT/BOTH")
         return False
 
 def NPT_branch_and_branch_PT(A: Path, B: Path):
-    if (A.exit_door.branch and A.path_time() in [PathTime.NOTPIZZATIME, PathTime.BOTH]):
-        if (B.start_door.branch and B.path_time() in [PathTime.PIZZATIME, PathTime.BOTH]):
+    if (A.exit_door.branch and A.get_path_time() in [PathTime.NOTPIZZATIME, PathTime.BOTH]):
+        if (B.start_door.branch and B.get_path_time() in [PathTime.PIZZATIME, PathTime.BOTH]):
             return True
 
     return False
@@ -130,8 +130,8 @@ def entrance_branch_room_path(room: Room):
 
 def LDNPT_to_PTLD(A: Path, B: Path):
 
-    if (A.start_door.door_type == DoorType.LEVELDOOR and A.path_time() in [PathTime.NOTPIZZATIME, PathTime.BOTH]):
-        if (B.exit_door.door_type == DoorType.LEVELDOOR and B.path_time() in [PathTime.PIZZATIME, PathTime.BOTH]):
+    if (A.start_door.door_type == DoorType.LEVELDOOR and A.get_path_time() in [PathTime.NOTPIZZATIME, PathTime.BOTH]):
+        if (B.exit_door.door_type == DoorType.LEVELDOOR and B.get_path_time() in [PathTime.PIZZATIME, PathTime.BOTH]):
             return True
     
     return False

@@ -1,6 +1,6 @@
 import json
 from json_to_objects import json_to_rooms
-from objects import Room, Path, Door
+from json_objects import Room, Path
 from enums import DoorType, DoorDir, RoomType
 
 #wasteyard graveyard_3 is not marked as a branch room because it has a pizzatime start but no notpizzatime exclusive exit, using a type FORCED_BRANCH_ANY

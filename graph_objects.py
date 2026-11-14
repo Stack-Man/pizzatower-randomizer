@@ -4,7 +4,7 @@
 #Class structure to use as nodes pr edges in an nx graph to store information about the node or edge
 
 from enums import DoorType, DoorDir, StartExitType, TraversalType
-from objects import Path
+from json_objects import Path
 
 from colors import ERROR, RESET, WARNING
 
@@ -165,7 +165,7 @@ class EdgeTraversal():
 
             if (type(edge) == PathEdge):
                 if edge.has_zero(self.traversal_type):
-                    #print(f"edge {edge} has zero in {self.traversal_type}")
+                    print(f"edge {edge} has zero in {self.traversal_type}")
                     return False
 
         return True
@@ -282,7 +282,7 @@ class PathEdge(Edge):
     def has_zero(self, traversal_type: TraversalType):
         match traversal_type:
             case TraversalType.ANY:
-                #print(f"TW len: {len(self.TW)}")
+                print(f"TW len: {len(self.TW)}")
                 return len(self.TW) <= 0
             case TraversalType.NOTPIZZATIME:
                 return len(self.NPT) <= 0 and len(self.OW) <= 0 and len(self.TW) <= 0

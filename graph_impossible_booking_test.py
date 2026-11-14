@@ -3,7 +3,7 @@
 
 #Test impossible booking by creating graphs that are forced through multiple DB edges
 
-from objects import Door, Path, Room
+from json_objects import Door, Path, Room
 from graph_objects import PathEdge, DoorNode
 from enums import DoorType, DoorDir, PathTime, AccessType, StartExitType, RoomType, TraversalType
 import networkx as nx

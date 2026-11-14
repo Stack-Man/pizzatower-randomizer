@@ -2,7 +2,7 @@
 #Date: 11/9/2026
 
 from enums import RoomType
-from objects import Room, Path, Door
+from json_objects import Room, Path, Door
 
 class BaseRoomPath():
     def __init__(self, room: Room):

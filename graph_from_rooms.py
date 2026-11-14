@@ -4,7 +4,7 @@
 #Categorize Transitions and Paths into a generalized Node and Edge graph.
 #Separate edges into three graphs: two-way paths only (TW), two-way or one-way pizza time paths (OWPT), and two way or one-way not pizza time paths (OWNPT).
 
-from objects import Room, Path
+from json_objects import Room, Path
 from graph_objects import DoorNode, PathEdge, TransitionEdge, CombinedDoorNode
 from settings import TraversalMode
 from enums import PathTime, RoomType, StartExitType, TraversalType
@@ -118,12 +118,12 @@ def categorize_paths_by_traversal_time(paths: list[Path]):
 
     for path in paths:
 
-        if (path.path_time() == PathTime.BOTH):
+        if (path.get_path_time() == PathTime.BOTH):
             if (not path.oneway):
                 pathsTWANY.append(path)
             else:
                 pathsOWANY.append(path)
-        elif (path.path_time() == PathTime.NOTPIZZATIME):
+        elif (path.get_path_time() == PathTime.NOTPIZZATIME):
 
             pathsNPT.append(path)
         else:

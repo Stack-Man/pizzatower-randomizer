@@ -1,4 +1,4 @@
-from objects import *
+from json_objects import *
 from enums import *
 from json_keys import *
 from settings import *
@@ -9,6 +9,11 @@ from colors import WARNING, CAUTION, RESET
 #   JSON to Object
 #-------------------
 
+LOGGING = True
+
+def log(msg):
+    if (LOGGING):
+        print("JSON: " + msg)
 
 
 def json_to_rooms(json):
@@ -53,6 +58,7 @@ def json_to_room(json_room):
     
     #TODO: check for CTOP Entrance, CTOP Exit, War EXIT
     
+    log(f"Processed {room}")
     return room
 
 def json_to_doors(json_room):
@@ -181,6 +187,9 @@ def doors_to_path(start_door, exit_door, is_john_room):
 
     path = Path(start_door, exit_door, is_oneway, is_loop)
 
+    
+    log(f"  Created {path}")
+    path.print_stats_extended()
 
     return path
 

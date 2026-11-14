@@ -3,7 +3,7 @@
 
 #https://docs.google.com/document/d/1eIOlqorCNpQHsdbUxTMJb7THjzEMT9qhj4xVf4d3E6A/edit?tab=t.0#heading=h.qr7048wz57ow
 
-from objects import Room, Path
+from json_objects import Room, Path
 from graph_collapse import pairs
 
 #Identify and mark rooms that are capable of "double-booking"

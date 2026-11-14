@@ -3,8 +3,7 @@
 
 #select rooms and paths to fill the edges of the traversal
 
-import networkx as nx
-from objects import Path, Room
+from json_objects import Room
 from graph_objects import EdgeTraversal, PathEdge, TransitionEdge, PathList
 from level_objects import RoomSelection, RoomPath
 from graph_from_rooms import FlowGraphHandler

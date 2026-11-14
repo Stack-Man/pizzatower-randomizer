@@ -108,12 +108,12 @@ class Path():
 
     def print_stats_extended(self):
         print(f"    {self.start_door.letter} > {self.exit_door.letter}")
-        print(f"        {self.path_time()}")
+        print(f"        {self.get_path_time()}")
         print(f"        {self.start_door.start_path_time} > {self.exit_door.exit_path_time}")
         if self.oneway: print(f"        oneway: {self.oneway}")
         if self.is_loop: print(f"        loop: {self.is_loop}")
 
-    def path_time(self):
+    def get_path_time(self):
         if (self.start_door.start_path_time != PathTime.BOTH):
             return self.start_door.start_path_time
         else:

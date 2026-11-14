@@ -34,10 +34,10 @@ def get_traversal(srp: BaseRoomPath, erp: BaseRoomPath, FG: FlowGraphHandler, tr
 
     for traversal in traversals:
         if (good_traversal_type(traversal.traversal_type, traversal_type) and traversal.has_no_zero_edges()):
-            log(f"      get_Got traversal {traversal} ")
+            log(f"      Got traversal {traversal} ")
             return traversal
 
-        log(f"      get_invalid traversal {traversal} of type {traversal.traversal_type}, wanted {traversal_type}. has no zero edges: {traversal.has_no_zero_edges()}")
+        log(f"      INVALID: {traversal} of type {traversal.traversal_type}, wanted {traversal_type}. has no zero edges: {traversal.has_no_zero_edges()}")
 
 
 
