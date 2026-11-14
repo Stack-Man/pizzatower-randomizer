@@ -26,6 +26,7 @@ def get_SD_FG(fn):
     
 
 def generate_levels():
+    return
     SD, FG = get_SD_FG(FILENAMES)
 
     levels = generate_levels_recursive_all(SD, FG)

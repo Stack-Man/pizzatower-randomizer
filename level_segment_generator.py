@@ -16,12 +16,12 @@ LOG_FAILED_SEGMENT_GEN = True
 
 def log_sg(msg: str|RuntimeError):
     if (LOG_FAILED_SEGMENT_GEN):
-        print(msg, flush = True)
+        print("SEGMENT: " + str(msg))
 
 def entrance_or_entrance_branch_segments(SD: SourceDestinationHandler, FG: FlowGraphHandler):
     #Pick either E or EB
     for E_or_EB in SD.entrances():
-        E_or_EB.print_stats()
+        #E_or_EB.print_stats()
         #if E, create a TwowaySegment with E and some BS
         if (E_or_EB.branch_type == BranchType.NONE):
             log_sg(f"entrance_or_entrance_branch_segments: {E_or_EB} was E")
@@ -39,17 +39,20 @@ def entrance_or_entrance_branch_segments(SD: SourceDestinationHandler, FG: FlowG
 
 def branch_segments(SD: SourceDestinationHandler, FG: FlowGraphHandler, BS: BranchRoomPath):
     #create a BranchSegment with BS and some BE or JB
+    i = 0
+
     for BA_or_BE in SD.branch_ends():
+        i += 1
         log_sg(f"branch_segments: Try Branch bridge from {BS} to {BA_or_BE}")
         for seg in bridge_branch_rp_room(BS, BA_or_BE, FG):
             yield seg
 
-    raise RuntimeError(f"Failed to generate any branch segment from {BS.room}")
+    raise RuntimeError(f"Failed to generate any branch segment from {BS.room} after {i} attempts")
 
-def john_branch_segment(SD: SourceDestinationHandler, FG: FlowGraphHandler, BS_or_EB: BaseRoomPath):
-    #create TwowaySegment with BE or E and some J
+def john_branch_segment(SD: SourceDestinationHandler, FG: FlowGraphHandler, BS_or_EB: BranchRoomPath):
+    #create TwowaySegment with BS BA or EB  and some JB
     for JB in SD.john_branches():
-        for seg in bridge_twoway_rp_room(BS_or_EB, JB, FG):
+        for seg in bridge_branch_rp_room(BS_or_EB, JB, FG):
             return seg #return the first successful bridge
 
     raise RuntimeError(f"Failed to generate John Branch segment from {BS_or_EB.room}")

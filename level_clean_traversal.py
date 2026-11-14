@@ -9,7 +9,7 @@ from graph_objects import DoorNode, CombinedDoorNode, EdgeTraversal, PathEdge
 from enums import TraversalType
 from graph_impossible_booking import add_to_bipartite_graph
  
-LOGGING = True
+LOGGING = False
 
 def log(msg: str):
     if (LOGGING):

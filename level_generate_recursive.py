@@ -34,7 +34,7 @@ LOGGING = True
 
 def log_sg(msg: str|Exception):
     if (LOGGING):
-        print(msg)
+        print("GEN: " + str(msg))
 
 def generate_levels_recursive_all(SD: SourceDestinationHandler, FG: FlowGraphHandler):
     levels = []
@@ -59,9 +59,6 @@ def generate_levels_recursive_all(SD: SourceDestinationHandler, FG: FlowGraphHan
 
     log_sg(f"Generated {i} levels")
     return levels
-
-#TODO: need to remove Source and Destination from the SD lists
-#
 
 def generate_level_recursive_start(SD: SourceDestinationHandler, FG: FlowGraphHandler):
 
@@ -144,46 +141,55 @@ def generate_level_recursive_branch(SD: SourceDestinationHandler, FG: FlowGraphH
     segments = []
 
     if (type(last_segment.end_room) == BranchRoomPath):
+        try:
+            branch_count += 1
 
-        branch_count += 1
+            for branch_segment in branch_segments(SD, FG, last_segment.end_room):
 
-        for branch_segment in branch_segments(SD, FG, last_segment.end_room):
+                log_sg(f"Segment Generated: {branch_segment.start_room} > {branch_segment.end_room}")
 
-            log_sg(f"Segment Generated: {branch_segment.start_room} > {branch_segment.end_room}")
+                if (branch_count < MIN_BRANCH_COUNT): #continue adding branch segments
 
-            if (branch_count < MIN_BRANCH_COUNT): #continue adding branch segments
+                    try:
+                        next_segments, new_SD, new_FG = generate_level_recursive_between_branch(SD, FG, last_segment=branch_segment, branch_count=branch_count)
+                        segments = []
+                        segments.append(branch_segment)
+                        segments.extend(next_segments)
 
-                try:
-                    next_segments, new_SD, new_FG = generate_level_recursive_between_branch(SD, FG, last_segment=branch_segment, branch_count=branch_count)
-                    segments = []
-                    segments.append(branch_segment)
-                    segments.extend(next_segments)
+                        return segments, new_SD, new_FG
+                    except RuntimeError as e:
+                        log_sg(e)
 
-                    return segments, new_SD, new_FG
-                except RuntimeError as e:
-                    log_sg(e)
+                else:
+                    #completed all branches, cap this branch_segment with a J
+                    try:
+                        segment = john_segment(SD, FG, last_segment.end_room)
+                        SD.remove_SD_in_segment(segment)
+                        log_sg(f"John Generated: {segment.start_room} > {segment.end_room}")
+                        return [branch_segment, segment], SD, FG #terminate, return this copy of SD and FG
+                    except RuntimeError as e:
+                        log_sg(e)
 
-            else:
-                #completed all branches, cap this branch_segment with a J
-                try:
-                    segment = john_segment(SD, FG, last_segment.end_room)
-                    SD.remove_SD_in_segment(segment)
-                    log_sg(f"John Generated: {segment.start_room} > {segment.end_room}")
-                    return [branch_segment, segment], SD, FG #terminate, return this copy of SD and FG
-                except RuntimeError as e:
-                    log_sg(e)
+                log_sg(f"Dump Segment: {branch_segment.start_room} > {branch_segment.end_room}")
 
-            log_sg(f"Dump Segment: {branch_segment.start_room} > {branch_segment.end_room}")
+            raise RuntimeError(f"Failed to gen non JB branch from {last_segment.end_room.room}")
 
-    #could not increase branch count, try capping with JB
-    #assume that between branch would have attempted to cap a branch with J before raising an error
-    try:
-        segment = john_branch_segment(SD, FG, last_segment.end_room)
-        SD.remove_SD_in_segment(segment)
-        log_sg(f"John Generated: {segment.start_room} > {segment.end_room}")
-        return [segment], SD, FG #terminate, return this copy of SD and FG
-    except RuntimeError as e:
-        log_sg(e)
+        except Exception as e:
+            log_sg(e)
+            
+            #could not increase branch count, try capping with JB
+            #assume that between branch would have attempted to cap a branch with J before raising an error
+            try:
+                log_sg(f"Try generate JB from {last_segment.end_room.room}")
+                segment = john_branch_segment(SD, FG, last_segment.end_room)
+                SD.remove_SD_in_segment(segment)
+                log_sg(f"John Generated: {segment.start_room} > {segment.end_room}")
+                return [segment], SD, FG #terminate, return this copy of SD and FG
+            except RuntimeError as e:
+                log_sg(e)
+
+    else:
+        raise ValueError(f"last_segment was not BranchRoomPath")
 
     raise RuntimeError(f"{ERROR}Failed to generate Branch Segment{RESET}")
 

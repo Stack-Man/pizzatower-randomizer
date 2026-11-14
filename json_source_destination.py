@@ -7,9 +7,7 @@
 from objects import Room
 from enums import RoomType, BranchType
 from colors import WARNING, RESET
-from level_objects import TwowaySegment, BranchSegment, LevelSegment
-
-import random
+from level_objects import LevelSegment
 
 class SourceDestinationHandler():
     def __init__ (self, E: list[Room], EB: list[Room], J: list[Room], JB: list[Room], BA: list[Room], BS: list[Room], BE: list[Room]):
@@ -71,6 +69,7 @@ class SourceDestinationHandler():
         return self.iterate_over([self.BS, self.BA])
 
     def branch_ends(self):
+        print(f"Branch Ends: iterating over BE {len(self.BE)} BA {len(self.BA)}")
         return self.iterate_over([self.BE, self.BA])
 
     def just_johns(self):

@@ -11,11 +11,11 @@ from graph_from_rooms import FlowGraphHandler
 from enums import TraversalType
 from colors import WARNING, RESET
 
-LOGGING = False
+LOGGING = True
 
 def log(msg: str):
     if (LOGGING):
-        print(msg)
+        print("SELECTION: " + str(msg))
 
 def select_rooms(FG: FlowGraphHandler, traversal: EdgeTraversal, traversal_type: TraversalType):
     print(f"{WARNING}select_rooms does not avoid impossible bookings!{RESET}")
@@ -48,7 +48,7 @@ def select_rooms(FG: FlowGraphHandler, traversal: EdgeTraversal, traversal_type:
                 FG.depleted_edges.append(edge)
 
     if (LOGGING):
-        msg = "==select_rooms: Got Selection: "
+        msg = "select_rooms: Got Selection: "
 
         for rp in room_paths:
             msg += f"{rp.room}: {rp.path} > "

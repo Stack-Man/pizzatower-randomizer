@@ -35,7 +35,7 @@ import time
 
 from colors import WARNING, RESET
 
-LOGGING = True
+LOGGING = False
 
 
 

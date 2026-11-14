@@ -18,7 +18,7 @@ LOG_FAILED_BRIDGE = True
 
 def log_bridge(msg: str|RuntimeError):
     if (LOG_FAILED_BRIDGE):
-        print(msg)
+        print("BRIDGE: " + str(msg))
 
 
 #Main Bridge functions that take a Source and Destination 
@@ -31,10 +31,10 @@ def bridge_twoway(start_rp: BaseRoomPath, end_rp: BaseRoomPath, FG: FlowGraphHan
     try:
         log_bridge(f"bridge_twoway: getting traversal")
         traversal = get_traversal(start_rp, end_rp, FG, TraversalType.ANY)
-        log_bridge(f"   bridge_twoway: got traversal {traversal}")
+
         log_bridge(f"bridge_twoway: getting selection")
         room_selection = select_rooms(FG, traversal, TraversalType.ANY)
-        log_bridge(f"   bridge_twoway: completed bridge {room_selection}")
+        log_bridge(f"bridge_twoway: completed bridge S: {start_rp} > {room_selection} > D: {end_rp}")
 
         return TwowaySegment(start_rp, end_rp, room_selection)
     except RuntimeError as e:
@@ -120,7 +120,7 @@ def bridge_twoway_rp_room(start_rp: BaseRoomPath, end_room: Room, FG: FlowGraphH
 
 def bridge_branch_rp_room(start_rp: BranchRoomPath, end_room: Room, FG: FlowGraphHandler):
 
-    log_bridge(f"BRIDGE: bridge_branch_rp_room: ")
+    log_bridge(f"bridge_branch_rp_room: ")
     log_bridge(f"   START: {start_rp.room} NPT: {start_rp.npt} PT: {start_rp.pt}")
     #srp is BS/BA so end_rp is BE/BA
     for end_rp in branch_room_path(end_room, StartExitType.EXIT):
