@@ -14,15 +14,20 @@ from colors import ERROR, RESET
 
 LOG_FAILED_RP_PAIRS = True
 LOG_NPTPTB_CHECK = False
+LOG_LD_CHECK = True
 
 def log_rp(msg: str|RuntimeError):
     if (LOG_FAILED_RP_PAIRS):
-        print(msg)
+        print("ROOM PATH: " + str(msg))
 
 
 def log_nptb(msg: str|RuntimeError):
     if (LOG_NPTPTB_CHECK):
         print(msg)
+
+def log_LD(msg: str|RuntimeError):
+    if (LOG_LD_CHECK):
+        print("     LD: " + str(msg))
 
 def branch_room_path(room: Room, se_type: StartExitType):
     #log_rp(f"branch_room_path: gen for {room.room_type} of {room}")
@@ -110,30 +115,26 @@ def entrance_branch_room_path(room: Room):
     for A, B in pairs(room.paths):
         i += 1
 
-        A_NPT = A.path_time == PathTime.NOTPIZZATIME or A.path_time == PathTime.BOTH
-        A_start_leveldoor = A.start_door.door_type == DoorType.LEVELDOOR
-        B_PT = B.path_time == PathTime.PIZZATIME or B.path_time == PathTime.BOTH
-        B_end_leveldoor = B.exit_door.door_type == DoorType.LEVELDOOR
-
         #NPT must start with leveldoor and PT must end with leveldoor
 
-        if (A_NPT and A_start_leveldoor and B_PT and B_end_leveldoor):
+        if (LDNPT_to_PTLD(A, B)):
             yield BranchRoomPath(room, A, B, A.start_door)
+        elif(LDNPT_to_PTLD(B, A)):
+            yield BranchRoomPath(room, B, A, B.start_door)
         else:
-            B_NPT = B.path_time == PathTime.NOTPIZZATIME or B.path_time == PathTime.BOTH
-            B_start_leveldoor = B.start_door.door_type == DoorType.LEVELDOOR
-            A_PT = A.path_time == PathTime.PIZZATIME or A.path_time == PathTime.BOTH
-            A_end_leveldoor = A.exit_door.door_type == DoorType.LEVELDOOR
-
-            if (B_NPT and B_start_leveldoor and A_PT and A_end_leveldoor):
-                yield BranchRoomPath(room, B, A, B.start_door)
-            else:
-                pass
-                #log_rp(f"invalid path pair of {A} and {B}")
-                #A.print_stats_extended()
-                #B.print_stats_extended()
+            log_rp(f"invalid path pair of {A} and {B}")
+            #A.print_stats_extended()
+            #B.print_stats_extended()
 
     raise RuntimeError(f"entrance_branch_room_path: no valid path pair after {i} pairs")
+
+def LDNPT_to_PTLD(A: Path, B: Path):
+
+    if (A.start_door.door_type == DoorType.LEVELDOOR and A.path_time() in [PathTime.NOTPIZZATIME, PathTime.BOTH]):
+        if (B.exit_door.door_type == DoorType.LEVELDOOR and B.path_time() in [PathTime.PIZZATIME, PathTime.BOTH]):
+            return True
+    
+    return False
 
 def john_branch_room_path(room: Room):
     i = 0

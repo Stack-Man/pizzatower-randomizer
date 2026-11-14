@@ -91,9 +91,9 @@ def bridge_branch_room_room(start_room: Room, end_room: Room, FG: FlowGraphHandl
             i += 1
             try:
                 yield bridge_branch(start_rp, end_rp, FG)
-            except RuntimeError as e:
+            except RuntimeError as e2:
                 #failure is added within bridge_branch so that only the failed  PT/NPT pair isa dded
-                log_bridge(e)
+                log_bridge(e2)
 
     raise RuntimeError(f"Could not bridge_branch_room_room between {start_room} and {end_room} after {i} pairs, {s} srps with {e} erps")
 
