@@ -27,7 +27,7 @@ from graph_objects import EdgeTraversal, DoorNode, CombinedDoorNode, StartExitTy
 from graph_impossible_booking import add_to_bipartite_graph
 import threading
 
-from enums import TraversalType
+from enums import TraversalType, DoorType, DoorDir, StartExitType
 
 from graph_from_rooms import FlowGraphHandler
 
@@ -76,7 +76,7 @@ def flow(G: FlowGraphHandler):
         for N in G.nodes():
             t = threading.Thread(target = pass_steps_to_parents, args=(G, N))
             threads.append(t)
-            t.start()      
+            t.start()
 
         for t in threads:
             t.join()
@@ -160,6 +160,13 @@ def pass_steps_to_parents(G: FlowGraphHandler, N: DoorNode | CombinedDoorNode):
                 new_edge : PathEdge | TransitionEdge = (G.get_edge_data(P, N)["object"])
                 new_traversal_type = TraversalType.ANY #default for TransitionEdge
 
+                #If traversal, still check traversal's old type
+                #and check for priority, to avoid overwriting with ANY
+                if (type(new_edge) == TransitionEdge):
+                    old_traversal_type = traversal.traversal_type
+                    priority_traversal_type = get_priority_traversal_type( TraversalType.ANY, old_traversal_type)
+                    new_traversal_type = priority_traversal_type
+
                 #Create shallow copies of the bipartite graph for the new edge traversal
                 #to avoid modifying the graphs of the original traversal
                 #(the graphs will be re-used during path selection)
@@ -191,6 +198,22 @@ def pass_steps_to_parents(G: FlowGraphHandler, N: DoorNode | CombinedDoorNode):
                     #create bipartite graphs to determine connected components where R < E
                     new_traversal_type = add_to_bipartite_graph(new_bipartite_TW, new_bipartite_PT, new_bipartite_NPT, priority_traversal_type, new_edge)
 
+                    if(type(new_edge.start_node) == DoorNode and type(new_edge.end_node) == DoorNode):
+                        s = new_edge.start_node
+                        
+                        if (s.door_type == DoorType.VERTICAL and s.door_dir == DoorDir.UP and s.se_type == StartExitType.START):
+
+                            e = new_edge.end_node
+
+                            if (e.door_type == DoorType.HORIZONTAL and e.door_dir == DoorDir.RIGHT and e.se_type == StartExitType.EXIT):
+
+                                log(f"============edge {new_edge} is type {edge_traversal_type} and new traversal is type {new_traversal_type}")
+                    
+                    if (old_traversal_type == TraversalType.OW and new_traversal_type == TraversalType.ANY):
+                        log(f"{WARNING}====BAD TRAVERSAL SWITCH, ADD OW BUT IS ANY!{RESET}")
+
+                    log(f"traversal to {new_traversal_type} from {old_traversal_type} with priority {priority_traversal_type}")
+                    
                     #no valid path exists
                     if (new_traversal_type == TraversalType.INVALID):
                         log(f"traversal type of {traversal} with {new_edge} is INVALID. priority was {priority_traversal_type} and new was {new_traversal_type}")
@@ -204,6 +227,7 @@ def pass_steps_to_parents(G: FlowGraphHandler, N: DoorNode | CombinedDoorNode):
                 #create new traversal including this edge
                 #TODO: determine rarity
                 new_traversal = EdgeTraversal(new_edge_list, rarity=0, traversal_type=new_traversal_type)
+                log(f"Generated new traversal of type: {new_traversal_type} for {new_traversal}\n")
 
                 #edge receives bipartite from last edge, so pass bipartite to both types of edges
                 new_traversal.bipartiteTW = new_bipartite_TW
@@ -242,6 +266,12 @@ def get_edge_traversal_type(edge : PathEdge | TransitionEdge):
                 traversal_type = TraversalType.NOTPIZZATIME
             elif (not has_pt and not has_owany and not has_npt):
                 traversal_type = TraversalType.INVALID #no available paths
+
+        #log(f"Traversal Type of edge {edge} is {traversal_type} \n" 
+            #+ f"      NPT: {len(edge.NPT)}\n"
+            #+ f"      PT: {len(edge.PT)}\n"
+            #+ f"      OW: {len(edge.OW)}\n"
+            #+ f"      TW: {len(edge.TW)}\n")
 
     return traversal_type
 

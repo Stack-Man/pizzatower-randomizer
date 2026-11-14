@@ -159,6 +159,8 @@ class EdgeTraversal():
         self.bipartiteNPT = nx.Graph()
 
     def has_no_zero_edges(self):
+        print(f"Traversal type: {self.traversal_type} for traversal {str(self)}")
+        
         for edge in self.edges:
             if (type(edge) == TransitionEdge):
                 continue

@@ -9,7 +9,7 @@ from colors import WARNING, CAUTION, RESET
 #   JSON to Object
 #-------------------
 
-LOGGING = True
+LOGGING = False
 
 def log(msg):
     if (LOGGING):
@@ -189,7 +189,9 @@ def doors_to_path(start_door, exit_door, is_john_room):
 
     
     log(f"  Created {path}")
-    path.print_stats_extended()
+    
+    if(LOGGING):
+        path.print_stats_extended()
 
     return path
 
