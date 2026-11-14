@@ -27,6 +27,14 @@ class RoomSelection():
     def __init__(self, rooms: list[RoomPath]):
         self.rooms = rooms
 
+    def __str__(self):
+        msg = ""
+        
+        for RP in self.rooms:
+            msg += RP.room.name + ": " + str(RP.path) + " > "
+
+        return msg
+
 class LevelSegment():
     def __init__(self, start_room: BaseRoomPath, end_room: BaseRoomPath):
         self.start_room = start_room
@@ -69,7 +77,7 @@ class BranchSegment(LevelSegment):
 
         msg += "\n"
 
-        msg = "     PT Seg = S:" + str(self.end_room)
+        msg += "     PT Seg = S:" + str(self.end_room)
         
         for room in self.pt_between_rooms.rooms:
             msg += " > " + str(room)
@@ -88,6 +96,6 @@ class Level():
         msg = ""
 
         for segment in self.segments:
-            msg += str(segment)
+            msg += str(segment) + "\n"
 
         return msg

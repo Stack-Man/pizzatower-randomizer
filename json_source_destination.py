@@ -7,6 +7,7 @@
 from objects import Room
 from enums import RoomType, BranchType
 from colors import WARNING, RESET
+from level_objects import TwowaySegment, BranchSegment, LevelSegment
 
 import random
 
@@ -22,6 +23,43 @@ class SourceDestinationHandler():
         self.BA = BA
         self.BS = BS
         self.BE = BE
+
+    def remove_SD_in_segment(self, seg: LevelSegment):
+        source = seg.start_room.room
+        destination = seg.end_room.room
+
+        self.remove_room_by_type(source)
+        self.remove_room_by_type(destination)
+
+    def remove_room_by_type(self, source: Room):
+        match source.room_type:
+            case RoomType.ENTRANCE:
+                if (source.branch_type == BranchType.NONE):
+                    self.remove_from(self.E, source)
+                else:
+                    self.remove_from(self.EB, source)
+            case RoomType.JOHN:
+                if (source.branch_type == BranchType.NONE):
+                    self.remove_from(self.J, source)
+                else:
+                    self.remove_from(self.JB, source)
+            case RoomType.BRANCH:
+                match source.branch_type:
+                    case BranchType.ANY:
+                        self.remove_from(self.BA, source)
+                    case BranchType.START:
+                        self.remove_from(self.BS, source)
+                    case BranchType.END:
+                        self.remove_from(self.BE, source)
+                    case _:
+                        raise NotImplementedError(f"SourceDestinationHandler() remove not implemented for type {source.branch_type}")
+        
+
+    def remove_from(self, list: list[Room], room: Room):
+        try:
+            list.remove(room)
+        except Exception:
+            pass
 
     def entrance_count(self):
         return len(self.E) + len(self.EB)
@@ -45,20 +83,6 @@ class SourceDestinationHandler():
         for L in lists:
             for l in L:
                 yield l
-
-    def get_one_from_two(self, A, B):
-        a_count = len(A)
-
-        min = 0
-        max = a_count + len(B)
-
-        i = random.randrange(min, max)
-
-        if (i > a_count):
-            i -= a_count
-            return A[i]
-
-        return B[i]
 
     def copy(self):
         #only the lists themselves need to be unique

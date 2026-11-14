@@ -4,11 +4,11 @@
 from level_generate_recursive import generate_levels_recursive_all
 from main import get_SD_FG
 from level_objects import Level
+from json_parse import FILENAMES
 
 def test_generate():
-    #TODO: branch from entrance_1 to entrance_5 fails
-    #TODO: entrance_1 is not a branch!!!
-    SD, FG = get_SD_FG(["johngutter"]) 
+    #SD, FG = get_SD_FG(["johngutter", "pizzascape"]) 
+    SD, FG = get_SD_FG(FILENAMES) 
     levels = generate_levels_recursive_all(SD, FG)
 
     print_levels(levels)

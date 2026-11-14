@@ -11,7 +11,7 @@ from graph_from_rooms import FlowGraphHandler
 from enums import TraversalType
 from colors import WARNING, RESET
 
-LOGGING = True
+LOGGING = False
 
 def log(msg: str):
     if (LOGGING):

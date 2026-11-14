@@ -16,7 +16,7 @@ def test_flow():
            "dontmakeasound", "pizzascare", "war", 
             "crumblingtowerofpizza", "trickytreat", "tutorial", "tutorial_noise"]
 
-    fn = ["pizzascape"]
+    fn = ["johngutter"]
     
     print(f"{WARNING}PERFORMING FLOW WITH {CAUTION}{fn} {RESET}")
     all_rooms = parse_json_to_rooms_all(fn)
@@ -54,13 +54,15 @@ def test_complete_graph():
 
 def print_steps(G: FlowGraphHandler, print_traversals: bool):
 
-    print(f"")
+    print(f"STEPS of G:")
 
     for N in G.nodes():
         N : Node
 
+        print(f"    {N}:")
+
         for destination, traversals in N.steps.items():
-            print(f"{N} > {destination}: {len(traversals)}")
+            print(f"        {N} > {destination}: {len(traversals)}")
 
     if (not print_traversals):
         return

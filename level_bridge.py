@@ -12,16 +12,14 @@ from graph_from_rooms import FlowGraphHandler
 from level_get_traversal import get_traversal
 from level_select_rooms import select_rooms
 
-
 from level_room_path_generator import branch_room_path, room_path_cap_TW, entrance_room_path
 
 LOG_FAILED_BRIDGE = True
 
-
-
 def log_bridge(msg: str|RuntimeError):
     if (LOG_FAILED_BRIDGE):
         print(msg)
+
 
 #Main Bridge functions that take a Source and Destination 
 #with their selected paths and creates a LevelSegment from it
@@ -36,7 +34,7 @@ def bridge_twoway(start_rp: BaseRoomPath, end_rp: BaseRoomPath, FG: FlowGraphHan
         log_bridge(f"   bridge_twoway: got traversal {traversal}")
         log_bridge(f"bridge_twoway: getting selection")
         room_selection = select_rooms(FG, traversal, TraversalType.ANY)
-        log_bridge(f"   bridge_twoway: got selection {room_selection}")
+        log_bridge(f"   bridge_twoway: completed bridge {room_selection}")
 
         return TwowaySegment(start_rp, end_rp, room_selection)
     except RuntimeError as e:
@@ -64,7 +62,7 @@ def bridge_oneway_branch(start_rp: BranchRoomPath, end_rp: BranchRoomPath, trave
 
 #Iterators that yield every potential combination of start path and end path for the selected SD
 #catch errors on bridge failure
-#utilize recursion to maintain position within iterator in case of step-back
+#utilize recursion in to maintain position within iterator in case of step-back
 
 def bridge_twoway_room_room(start_room: Room, end_room: Room, FG: FlowGraphHandler):
     log_bridge(f"Try bridge_twoway_room_room between {start_room} and {end_room}")
@@ -122,8 +120,13 @@ def bridge_twoway_rp_room(start_rp: BaseRoomPath, end_room: Room, FG: FlowGraphH
 
 def bridge_branch_rp_room(start_rp: BranchRoomPath, end_room: Room, FG: FlowGraphHandler):
 
+    log_bridge(f"BRIDGE: bridge_branch_rp_room: ")
+    log_bridge(f"   START: {start_rp.room} NPT: {start_rp.npt} PT: {start_rp.pt}")
     #srp is BS/BA so end_rp is BE/BA
     for end_rp in branch_room_path(end_room, StartExitType.EXIT):
+
+        log_bridge(f"   END: {end_rp.room} NPT: {end_rp.npt} PT: {end_rp.pt}")
+        
         #branch will connect NPT and PT together, so check both
         try:
             yield bridge_branch(start_rp, end_rp, FG)

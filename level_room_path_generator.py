@@ -13,24 +13,30 @@ from level_objects import BranchRoomPath, RoomPath
 from colors import ERROR, RESET
 
 LOG_FAILED_RP_PAIRS = True
+LOG_NPTPTB_CHECK = False
 
 def log_rp(msg: str|RuntimeError):
     if (LOG_FAILED_RP_PAIRS):
         print(msg)
 
+
+def log_nptb(msg: str|RuntimeError):
+    if (LOG_NPTPTB_CHECK):
+        print(msg)
+
 def branch_room_path(room: Room, se_type: StartExitType):
-    log_rp(f"branch_room_path: gen for {room.room_type} of {room}")
+    #log_rp(f"branch_room_path: gen for {room.room_type} of {room}")
 
     try:
         match room.room_type: #entrance/john dont have an actual branch door
             case RoomType.ENTRANCE:
-                log_rp(f"   branch_room_path: gen for ENTRANCE called")
+                #log_rp(f"   branch_room_path: gen for ENTRANCE called")
                 return entrance_branch_room_path(room)
             case RoomType.JOHN:
-                log_rp(f"   branch_room_path: gen for JOHN called")
+                #log_rp(f"   branch_room_path: gen for JOHN called")
                 return john_branch_room_path(room)
             case RoomType.BRANCH:
-                log_rp(f"   branch_room_path: gen for BRANCH called")
+                #log_rp(f"   branch_room_path: gen for BRANCH called")
                 return branch_branch_room_path(room, se_type)
             case _:
                 raise NotImplementedError(f"branch_room_path: not implemented for {room.room_type}")
@@ -42,17 +48,25 @@ def branch_room_path(room: Room, se_type: StartExitType):
 def branch_branch_room_path(room: Room, se_type: StartExitType):
     i = 0
 
+    log_nptb(f"branch_branch_room_path: {room} as {se_type}")
+
     for A, B in pairs(room.paths):
         i += 1
 
         #branch is source
         #we want branch > NPT and PT > branch
+        
+        
+
         if (se_type == StartExitType.START):
 
             if branch_NPT_and_PT_branch(A, B):
                 yield BranchRoomPath(room, A, B, A.start_door)
             elif branch_NPT_and_PT_branch(B, A):
                 yield BranchRoomPath(room, B, A, B.start_door)
+            else:
+                log_nptb(f"           {A}, {B} not BNPT to PTB or PTB to BNPT")
+            
 
         #branch is destination
         #we want NPT > branch and branch > PT
@@ -62,18 +76,31 @@ def branch_branch_room_path(room: Room, se_type: StartExitType):
                 yield BranchRoomPath(room, A, B, A.exit_door)
             elif NPT_branch_and_branch_PT(B, A):
                 yield BranchRoomPath(room, B, A, B.exit_door)
+            else:
+                log_nptb(f"           {A}, {B} not NPTB to BPT or BPT to NPTB")
 
     raise RuntimeError(f"branch_branch_room_path: no valid path pair after {i} pairs")
 
 def branch_NPT_and_PT_branch(A: Path, B: Path):
-    if (A.start_door.branch and A.path_time in [PathTime.NOTPIZZATIME, PathTime.BOTH]):
-        if (B.exit_door.branch and B.path_time in [PathTime.PIZZATIME, PathTime.BOTH]):
+    log_nptb(f"{A} is Branch NPT and {B} is PT Branch?")
+    
+    if (A.start_door.branch and A.path_time() in [PathTime.NOTPIZZATIME, PathTime.BOTH]):
+        if (B.exit_door.branch and B.path_time() in [PathTime.PIZZATIME, PathTime.BOTH]):
+            log_nptb(f"       pass")
             return True
+        else:
+            log_nptb(f"       {A} start not branch: {A.start_door.branch} or {A.path_time()} not PT/BOTH")
+            return False
+    else:
+        log_nptb(f"       {A} start not branch: {A.start_door.branch} or {A.path_time()} not NPT/BOTH")
+        return False
 
 def NPT_branch_and_branch_PT(A: Path, B: Path):
-    if (A.exit_door.branch and A.path_time in [PathTime.NOTPIZZATIME, PathTime.BOTH]):
-        if (B.start_door.branch and B.path_time in [PathTime.PIZZATIME, PathTime.BOTH]):
+    if (A.exit_door.branch and A.path_time() in [PathTime.NOTPIZZATIME, PathTime.BOTH]):
+        if (B.start_door.branch and B.path_time() in [PathTime.PIZZATIME, PathTime.BOTH]):
             return True
+
+    return False
 
 def entrance_branch_room_path(room: Room):
     log_rp(f"entrance_branch_room_path: try {room}")

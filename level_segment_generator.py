@@ -40,6 +40,7 @@ def entrance_or_entrance_branch_segments(SD: SourceDestinationHandler, FG: FlowG
 def branch_segments(SD: SourceDestinationHandler, FG: FlowGraphHandler, BS: BranchRoomPath):
     #create a BranchSegment with BS and some BE or JB
     for BA_or_BE in SD.branch_ends():
+        log_sg(f"branch_segments: Try Branch bridge from {BS} to {BA_or_BE}")
         for seg in bridge_branch_rp_room(BS, BA_or_BE, FG):
             yield seg
 

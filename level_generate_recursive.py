@@ -60,7 +60,12 @@ def generate_levels_recursive_all(SD: SourceDestinationHandler, FG: FlowGraphHan
     log_sg(f"Generated {i} levels")
     return levels
 
+#TODO: need to remove Source and Destination from the SD lists
+#
+
 def generate_level_recursive_start(SD: SourceDestinationHandler, FG: FlowGraphHandler):
+
+    log_sg(f"START GENERATE RECURSIVE")
 
     #1. Generate the segment
     #2. recursive call generate the rest of the segments
@@ -68,6 +73,9 @@ def generate_level_recursive_start(SD: SourceDestinationHandler, FG: FlowGraphHa
 
     try:
         for entrance_segment in entrance_or_entrance_branch_segments(SD, FG):
+
+            log_sg(f"Segment Generated: {entrance_segment.start_room} > {entrance_segment.end_room}")
+            
             if (type(entrance_segment) == TwowaySegment):
 
                 #if rest of segments generate from this seg, extend and return
@@ -95,6 +103,9 @@ def generate_level_recursive_start(SD: SourceDestinationHandler, FG: FlowGraphHa
                 #if gen fails, it throws, catch and try next entrance seg
                 except RuntimeError as e:
                     log_sg(e)
+
+            log_sg(f"Dump Segment: {entrance_segment.start_room} > {entrance_segment.end_room}")
+            
     except RuntimeError as e:
         log_sg(e)
 
@@ -105,6 +116,9 @@ def generate_level_recursive_start(SD: SourceDestinationHandler, FG: FlowGraphHa
         segments: list[TwowaySegment|BranchSegment] = []
         segment = ej_or_ejb_segment(SD, FG)
         segments.append(segment)
+
+        SD.remove_SD_in_segment(segment)
+
         return segments, SD, FG #terminate, return this copy of SD and FG
     except RuntimeError as e:
         log_sg(e)
@@ -114,6 +128,7 @@ def generate_level_recursive_start(SD: SourceDestinationHandler, FG: FlowGraphHa
 #alternate between branch and between branch until target branch count is reached
 #or we are forced to end with J or JB
 def generate_level_recursive_branch(SD: SourceDestinationHandler, FG: FlowGraphHandler, last_segment: LevelSegment, branch_count: int):
+    log_sg(f"GENERATE BRANCH SEGMENT")
 
     #guarantee that any recursive call has its own SD and FG
     #we make copies so that, should this recursive call step back,
@@ -123,6 +138,9 @@ def generate_level_recursive_branch(SD: SourceDestinationHandler, FG: FlowGraphH
     SD = SD.copy() 
     FG = FG.copy() 
 
+    #Texclude the source and destination rooms from last segment from the SD
+    SD.remove_SD_in_segment(last_segment)
+
     segments = []
 
     if (type(last_segment.end_room) == BranchRoomPath):
@@ -130,6 +148,8 @@ def generate_level_recursive_branch(SD: SourceDestinationHandler, FG: FlowGraphH
         branch_count += 1
 
         for branch_segment in branch_segments(SD, FG, last_segment.end_room):
+
+            log_sg(f"Segment Generated: {branch_segment.start_room} > {branch_segment.end_room}")
 
             if (branch_count < MIN_BRANCH_COUNT): #continue adding branch segments
 
@@ -147,14 +167,20 @@ def generate_level_recursive_branch(SD: SourceDestinationHandler, FG: FlowGraphH
                 #completed all branches, cap this branch_segment with a J
                 try:
                     segment = john_segment(SD, FG, last_segment.end_room)
+                    SD.remove_SD_in_segment(segment)
+                    log_sg(f"John Generated: {segment.start_room} > {segment.end_room}")
                     return [branch_segment, segment], SD, FG #terminate, return this copy of SD and FG
                 except RuntimeError as e:
                     log_sg(e)
+
+            log_sg(f"Dump Segment: {branch_segment.start_room} > {branch_segment.end_room}")
 
     #could not increase branch count, try capping with JB
     #assume that between branch would have attempted to cap a branch with J before raising an error
     try:
         segment = john_branch_segment(SD, FG, last_segment.end_room)
+        SD.remove_SD_in_segment(segment)
+        log_sg(f"John Generated: {segment.start_room} > {segment.end_room}")
         return [segment], SD, FG #terminate, return this copy of SD and FG
     except RuntimeError as e:
         log_sg(e)
@@ -162,8 +188,12 @@ def generate_level_recursive_branch(SD: SourceDestinationHandler, FG: FlowGraphH
     raise RuntimeError(f"{ERROR}Failed to generate Branch Segment{RESET}")
 
 def generate_level_recursive_between_branch(SD: SourceDestinationHandler, FG: FlowGraphHandler, last_segment: LevelSegment, branch_count: int):
+    log_sg(f"GENERATE TWOWAY SEGMENT")
+    
     SD = SD.copy() 
     FG = FG.copy()
+
+    SD.remove_SD_in_segment(last_segment)
 
     segments = []
 
@@ -172,6 +202,8 @@ def generate_level_recursive_between_branch(SD: SourceDestinationHandler, FG: Fl
     if (type(last_segment.end_room) == BranchRoomPath and branch_count < MIN_BRANCH_COUNT):
 
         for between_branch_segment in between_branch_segments(SD, FG, last_segment.end_room):
+
+            log_sg(f"Generated Segment: {between_branch_segment.start_room} > {between_branch_segment.end_room}")
 
             try: 
                 next_segments, new_SD, new_FG = generate_level_recursive_branch(SD, FG, last_segment=last_segment, branch_count=branch_count)
@@ -183,9 +215,13 @@ def generate_level_recursive_between_branch(SD: SourceDestinationHandler, FG: Fl
             except RuntimeError as e:
                 log_sg(e)
 
+            log_sg(f"Dump Segment: {between_branch_segment.start_room} > {between_branch_segment.end_room}")
+
     #could not increase branch count, try capping with J
     try:
         segment = john_segment(SD, FG, last_segment.end_room)
+        SD.remove_SD_in_segment(segment)
+        log_sg(f"John Generated: {segment.start_room} > {segment.end_room}")
         return [segment], SD, FG #terminate, return this copy of SD and FG
     except RuntimeError as e:
         log_sg(e)

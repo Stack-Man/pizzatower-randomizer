@@ -58,16 +58,24 @@ class DoorNode(Node):
     #reimplement deepcopy to prevent "DoorNode does not contain attribute" error during deepcopy
     #by gauranteeing the attributes are initialized
     def __deepcopy__(self, memo):
-        cls = self.__class__
-        result = cls(
-            #copy.deepcopy(self.door_type, memo),
-            #copy.deepcopy(self.door_dir, memo),
-            #copy.deepcopy(self.se_type, memo)
+        # Return existing copy if already copied
+        if id(self) in memo:
+            return memo[id(self)]
+
+        # Initialize the new object
+        result = DoorNode(
             self.door_type,
             self.door_dir,
             self.se_type
         )
+
+        # Register BEFORE copying other attributes.
+        # This is important for circular references.
         memo[id(self)] = result
+
+        # Deepcopy all inherited and local attributes
+        result.__dict__.update(copy.deepcopy(self.__dict__, memo))
+
         return result
 
 class CombinedDoorNode(Node):
@@ -108,6 +116,21 @@ class CombinedDoorNode(Node):
 
     def __contains__(self, item):
         return item in self.nodes
+
+    def __deepcopy__(self, memo):
+        if id(self) in memo:
+            return memo[id(self)]
+
+        result = CombinedDoorNode(
+            [],
+            self.se_type
+        )
+
+        memo[id(self)] = result
+
+        result.__dict__.update(copy.deepcopy(self.__dict__, memo))
+
+        return result
 
 class Edge():
     def __init__(self, start_node: DoorNode | CombinedDoorNode, end_node: DoorNode | CombinedDoorNode):
