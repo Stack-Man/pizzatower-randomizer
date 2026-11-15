@@ -29,7 +29,7 @@ def entrance_or_entrance_branch_segments(SD: SourceDestinationHandler, FG: FlowG
             #surround each bridge generator with try catch in case
             #bridge fails, we can continue with the next SD pair
             for BS_or_BA in SD.branch_starts(): 
-                log_sg(f"E: {E_or_EB} to {BE_or_BA}")
+                log_sg(f"E: {E_or_EB} to {BS_or_BA}")
                 for seg in bridge_twoway_room_room(E_or_EB, BS_or_BA, FG):     
                     yield seg
             

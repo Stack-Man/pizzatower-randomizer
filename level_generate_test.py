@@ -9,8 +9,10 @@ from json_objects import Room
 
 from level_bridge import bridge_branch_room_room
 
+to_test = ["fastfoodsaloon"]
+
 def test_generate():
-    SD, FG, _ = get_SD_FG_rooms(["wasteyard"]) 
+    SD, FG, _ = get_SD_FG_rooms(to_test) 
     levels = generate_levels_recursive_all(SD, FG)
 
     print_levels(levels)
@@ -29,7 +31,7 @@ def room_by_name(rooms: list[Room], A: str):
     raise ValueError(f"No room of name {A} in rooms!")
 
 def test_bridge_branch_room_room_by_name(A: str, B: str):
-    SD, FG, all_rooms = get_SD_FG_rooms(["wasteyard"]) 
+    SD, FG, all_rooms = get_SD_FG_rooms(to_test) 
     room_A = room_by_name(all_rooms, A)
     room_B = room_by_name(all_rooms, B)
 
