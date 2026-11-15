@@ -46,6 +46,7 @@ def select_rooms(FG: FlowGraphHandler, traversal: EdgeTraversal, traversal_type:
             #FG updates its traversals before access in get_traversal() in level_get_traversal.py
             if (emptied_edge):
                 FG.depleted_edges.append(edge)
+                FG.selected_rooms.append(path.room.name)
 
     if (LOGGING):
         msg = "select_rooms: Got Selection: "

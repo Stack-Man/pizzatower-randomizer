@@ -11,7 +11,7 @@ from seeded_random import set_seed
 
 from settings import TraversalMode
 
-def get_SD_FG(fn):
+def get_SD_FG_rooms(fn):
     set_seed(0)
     
     all_rooms = parse_json_to_rooms_all(fn)
@@ -22,7 +22,7 @@ def get_SD_FG(fn):
 
     #TODO: seeded randomize order of SD and FG lists
 
-    return SD, FG
+    return SD, FG, all_rooms
     
 
 def generate_levels():

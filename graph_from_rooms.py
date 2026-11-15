@@ -18,6 +18,7 @@ class FlowGraphHandler():
         #store depleted edges so next time we get a traversal we can update the traversals
         self.depleted_edges: list[PathEdge] = [] 
         self.changed_last_round = True 
+        self.selected_rooms: list[str] = []
 
     def nodes(self):
         return self.G.nodes()
@@ -43,8 +44,15 @@ class FlowGraphHandler():
         # the edges within are just for reference
         copy.depleted_edges = self.depleted_edges.copy()
         copy.changed_last_round = self.changed_last_round
+        copy.selected_rooms = self.selected_rooms.copy()
 
         return copy
+
+    def revert(self, other):
+        self.G = other.G
+        self.depleted_edges = other.depleted_edges
+        self.changed_last_round = other.changed_last_round
+        self.selected_rooms = other.selected_rooms
     
 
 def rooms_to_graph(rooms: list[Room], traversal_mode : TraversalMode = TraversalMode.MATCHING_PERFECT ):

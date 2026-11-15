@@ -160,9 +160,15 @@ class Path():
     entrance-|              
               <--- return <-- mid branch leave <-- mid return
 """
+from colors import CAUTION, RESET
+
 class Room():
     def __init__(self, name, doors, paths : list[Path], john, entrance, is_forced_branch_any, is_forced_branch_start):
         self.name = name
+
+        #if (name == "graveyard_7"):
+            #self.name = f"{CAUTION}graveyard_7{RESET}"
+
         self.doors = doors
         self.paths = paths
         self.branch_type = BranchType.ANY

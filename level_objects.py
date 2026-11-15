@@ -53,10 +53,20 @@ class TwowaySegment(LevelSegment):
     def __str__(self):
         msg = "TW Seg = S:" + str(self.start_room)
 
+        if (type(self.start_room) == BranchRoomPath):
+            msg += " " + str(self.start_room.branch_door)
+        elif(type(self.start_room) == RoomPath):
+            msg += " " + str(self.start_room.path)
+
         for room in self.between_rooms.rooms:
-            msg += " > " + str(room)
+            msg += " > " + str(room) + " " + str(room.path)
 
         msg += " > D: " + str(self.end_room)
+
+        if (type(self.end_room) == BranchRoomPath):
+            msg += " " + str(self.end_room.branch_door)
+        elif(type(self.end_room) == RoomPath):
+            msg += " " + str(self.end_room.path)
 
         return msg
 
@@ -70,19 +80,39 @@ class BranchSegment(LevelSegment):
         msg = "Branch Seg: \n"
         msg += "     NPT Seg = S:" + str(self.start_room)
 
+        if (type(self.start_room) == BranchRoomPath):
+            msg += " " + str(self.start_room.npt)
+        elif(type(self.start_room) == RoomPath):
+            msg += " " + str(self.start_room.path)
+
         for room in self.npt_between_rooms.rooms:
-            msg += " > " + str(room)
+            msg += " > " + str(room) + " " + str(room.path)
 
         msg += " > D: " + str(self.end_room)
+
+        if (type(self.end_room) == BranchRoomPath):
+            msg += " " + str(self.end_room.npt)
+        elif(type(self.end_room) == RoomPath):
+            msg += " " + str(self.end_room.path)
 
         msg += "\n"
 
         msg += "     PT Seg = S:" + str(self.end_room)
+
+        if (type(self.end_room) == BranchRoomPath):
+            msg += " " + str(self.end_room.pt)
+        elif(type(self.end_room) == RoomPath):
+            msg += " " + str(self.end_room.path.start_door)
         
         for room in self.pt_between_rooms.rooms:
-            msg += " > " + str(room)
+            msg += " > " + str(room) + " " + str(room.path)
 
         msg += " > D: " + str(self.start_room)
+
+        if (type(self.start_room) == BranchRoomPath):
+            msg += " " + str(self.start_room.pt)
+        elif(type(self.start_room) == RoomPath):
+            msg += " " + str(self.start_room.path)
 
         return msg
 

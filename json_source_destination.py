@@ -43,11 +43,11 @@ class SourceDestinationHandler():
                     self.remove_from(self.JB, source)
             case RoomType.BRANCH:
                 match source.branch_type:
-                    case BranchType.ANY:
+                    case BranchType.ANY | BranchType.FORCED_ANY:
                         self.remove_from(self.BA, source)
-                    case BranchType.START:
+                    case BranchType.START | BranchType.FORCED_START:
                         self.remove_from(self.BS, source)
-                    case BranchType.END:
+                    case BranchType.END | BranchType.FORCED_END:
                         self.remove_from(self.BE, source)
                     case _:
                         raise NotImplementedError(f"SourceDestinationHandler() remove not implemented for type {source.branch_type}")
