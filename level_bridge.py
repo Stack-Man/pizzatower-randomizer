@@ -18,7 +18,7 @@ LOG_FAILED_BRIDGE = True
 
 def log_bridge(msg: str|RuntimeError):
     if (LOG_FAILED_BRIDGE):
-        print("BRIDGE: " + str(msg))
+        print("         BRIDGE: " + str(msg))
 
 
 #Main Bridge functions that take a Source and Destination 
@@ -38,9 +38,10 @@ def bridge_twoway(start_rp: BaseRoomPath, end_rp: BaseRoomPath, FG: FlowGraphHan
 
         return TwowaySegment(start_rp, end_rp, room_selection)
     except RuntimeError as e:
-        log_bridge(e)
+        pass
+        #log_bridge(e)
 
-    raise RuntimeError(f"bridge_twoway: failed traversal or room_selection")
+    raise RuntimeError(f"bridge_twoway: failed traversal or room_selection between {start_rp.room} and {end_rp.room}")
 
     
 def bridge_branch(start_rp: BranchRoomPath, end_rp: BranchRoomPath, FG: FlowGraphHandler):
@@ -50,9 +51,10 @@ def bridge_branch(start_rp: BranchRoomPath, end_rp: BranchRoomPath, FG: FlowGrap
 
         return BranchSegment(start_rp, end_rp, PT, NPT)
     except RuntimeError as e:
-        log_bridge(e)
+        pass
+        #log_bridge(e)
 
-    raise RuntimeError(f"bridge_twoway: failed traversal or room_selection")
+    raise RuntimeError(f"bridge_branch: failed traversal or room_selection between {start_rp.room} and {end_rp.room}")
     
 
 def bridge_oneway_branch(start_rp: BranchRoomPath, end_rp: BranchRoomPath, traversal_type: TraversalType, FG: FlowGraphHandler):
@@ -73,7 +75,7 @@ def bridge_twoway_room_room(start_room: Room, end_room: Room, FG: FlowGraphHandl
         case _:
             raise NotImplementedError(f"{ERROR}ERROR: bridge_twoway_room_room() not implemented for start_room of type {start_room.room_type}{RESET}")
 
-    raise RuntimeError(f"Could not bridge_twoway_room_room between {start_room} and {end_room}")
+    log_bridge(f"Could not bridge_twoway_room_room between {start_room} and {end_room}")
     
 
 def bridge_branch_room_room(start_room: Room, end_room: Room, FG: FlowGraphHandler):
@@ -92,10 +94,9 @@ def bridge_branch_room_room(start_room: Room, end_room: Room, FG: FlowGraphHandl
             try:
                 yield bridge_branch(start_rp, end_rp, FG)
             except RuntimeError as e2:
-                #failure is added within bridge_branch so that only the failed  PT/NPT pair isa dded
                 log_bridge(e2)
 
-    raise RuntimeError(f"Could not bridge_branch_room_room between {start_room} and {end_room} after {i} pairs, {s} srps with {e} erps")
+    log_bridge(f"Could not bridge_branch_room_room between {start_room} and {end_room} after {i} pairs, {s} srps with {e} erps")
 
 
 def bridge_twoway_from_entrance(start_room: Room, end_room: Room, FG: FlowGraphHandler):
@@ -106,7 +107,7 @@ def bridge_twoway_from_entrance(start_room: Room, end_room: Room, FG: FlowGraphH
             except RuntimeError as e:
                 log_bridge(e)
 
-    raise RuntimeError("Could not bridge_twoway_from_entrance")
+    log_bridge("Could not bridge_twoway_from_entrance")
 
 #make bridges from start room with already selected paths
 def bridge_twoway_rp_room(start_rp: BaseRoomPath, end_room: Room, FG: FlowGraphHandler):
@@ -116,7 +117,7 @@ def bridge_twoway_rp_room(start_rp: BaseRoomPath, end_room: Room, FG: FlowGraphH
         except RuntimeError as e:
             log_bridge(e)
 
-    raise RuntimeError("Could not bridge_twoway_rp_room")
+    log_bridge("Could not bridge_twoway_rp_room")
 
 def bridge_branch_rp_room(start_rp: BranchRoomPath, end_room: Room, FG: FlowGraphHandler):
 
@@ -134,7 +135,7 @@ def bridge_branch_rp_room(start_rp: BranchRoomPath, end_room: Room, FG: FlowGrap
             #failure is added within bridge_branch so that only the failed  PT/NPT pair isa dded
             log_bridge(e)
 
-    raise RuntimeError("Could not bridge_branch_rp_room")
+    log_bridge("Could not bridge_branch_rp_room")
 
 
         

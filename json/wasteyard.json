@@ -70,7 +70,8 @@
                 {
                     "letter" : "B",
                     "type": "horizontal",
-                    "dir": "left"
+                    "dir": "left",
+                    "branch" : true
                 },
                 {
                     "letter" : "D",

@@ -9,6 +9,7 @@ class BranchType(Enum):
     MID = 4
     FORCED_ANY = 5
     FORCED_START = 6
+    FORCED_END = 7
  
 class PathTime(Enum):
     BOTH = 0

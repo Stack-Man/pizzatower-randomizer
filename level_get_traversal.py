@@ -15,7 +15,7 @@ LOGGING = True
 
 def log(msg: str):
     if (LOGGING):
-        print("TRAVERSAL: " + str(msg))
+        print("                 TRAVERSAL: " + str(msg))
 
 def get_traversal(srp: BaseRoomPath, erp: BaseRoomPath, FG: FlowGraphHandler, traversal_type: TraversalType):
     #connect start rp's end to end rp's start
@@ -24,7 +24,7 @@ def get_traversal(srp: BaseRoomPath, erp: BaseRoomPath, FG: FlowGraphHandler, tr
     source = get_path_end(srp, traversal_type)
     destination = get_path_start(erp, traversal_type)
 
-    log(f"get_Got SD from {source} to {destination}")
+    log(f"Got SD from {source} to {destination} for {srp} to {erp}")
 
     FG = clean_depleted_traverals(FG)
 
@@ -39,11 +39,7 @@ def get_traversal(srp: BaseRoomPath, erp: BaseRoomPath, FG: FlowGraphHandler, tr
 
         log(f"      INVALID: {traversal} of type {traversal.traversal_type}, wanted {traversal_type}. has no zero edges: {traversal.has_no_zero_edges()}")
 
-    
-
-
-
-
+    log(f"No traversal of {traversal_type} between {source} and {destination}")
     raise RuntimeError(f"No traversal of {traversal_type} between {source} and {destination}")
 
 def good_traversal_type(given: TraversalType, wanted: TraversalType):
@@ -71,13 +67,10 @@ def get_traversals_between(FG: FlowGraphHandler, source: DoorNode, destination: 
             if destination in N.steps:
                 return N.steps[destination]
             else:
-                break 
+                log(f"No traversal between {source} and {destination}")
+                raise RuntimeError(f"No traversal between {source} and {destination}")
 
-    log(f"NO TRAVERSAL FOUND")
-
-    #print_steps(FG, False)
-
-    raise RuntimeError(f"No traversal between {source} and {destination}")
+    raise LookupError(f"{source} was not in FG!")
 
 def get_path_end(rp: BaseRoomPath, traversal_type:TraversalType):
     if (type(rp) == RoomPath):

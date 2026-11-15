@@ -71,10 +71,6 @@ def rooms_to_edges_and_nodes(rooms: list[Room]):
     #categorize every path by edge type
     for room in rooms:
 
-        #Exclude non normal rooms from the flow graph
-        if room.room_type is not RoomType.NORMAL:
-            continue
-
         for path in room.paths:
 
             edge : PathEdge = path_to_edge(path)
@@ -83,8 +79,13 @@ def rooms_to_edges_and_nodes(rooms: list[Room]):
             edge.start_node = get_existing_node(edge.start_node, door_nodes)
             edge.end_node = get_existing_node(edge.end_node, door_nodes)
 
-            if (edge not in paths_by_path_edge):
-                paths_by_path_edge[edge] = []
+            #Exclude non normal rooms from the flow graph
+            #but do include their nodes for TransitionEdges
+            if (edge not in paths_by_path_edge or room.room_type != RoomType.NORMAL):
+
+                #only add edges from normal rooms to the graph
+                if (room.room_type == RoomType.NORMAL):
+                    paths_by_path_edge[edge] = []
 
                 #whenever we add a new edge, check if its nodes are already added
                 if (edge.start_node not in door_nodes):
@@ -93,8 +94,8 @@ def rooms_to_edges_and_nodes(rooms: list[Room]):
                 if (edge.end_node not in door_nodes):
                     door_nodes.append(edge.end_node)
 
-
-            paths_by_path_edge[edge].append(path)
+            if (room.room_type == RoomType.NORMAL):
+                paths_by_path_edge[edge].append(path)
 
     path_edges = []
 

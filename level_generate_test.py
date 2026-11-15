@@ -7,7 +7,7 @@ from level_objects import Level
 from json_parse import FILENAMES
 
 def test_generate():
-    SD, FG = get_SD_FG(["oreganodesert"]) 
+    SD, FG = get_SD_FG(["wasteyard"]) 
     levels = generate_levels_recursive_all(SD, FG)
 
     print_levels(levels)

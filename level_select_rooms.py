@@ -14,15 +14,16 @@ LOGGING = True
 
 def log(msg: str):
     if (LOGGING):
-        print("SELECTION: " + str(msg))
+        print("                 SELECTION: " + str(msg))
 
 def select_rooms(FG: FlowGraphHandler, traversal: EdgeTraversal, traversal_type: TraversalType):
+    #TODO traversal is not prioritizing edges from the bipartite graph with the fewest rooms.. impossible booking may be encountered!
     print(f"{WARNING}select_rooms does not avoid impossible bookings!{RESET}")
 
     room_paths : list[RoomPath] = []
 
 
-    for edge in traversal.edges: #TODO traversal is not prioritizing edges from the bipartite graph with the fewest rooms.. impossible booking may be encountered!
+    for edge in traversal.edges: 
 
         if (type(edge) == TransitionEdge): #no selection for transition edges
             log(f"select_rooms: skip for Transition {edge}")

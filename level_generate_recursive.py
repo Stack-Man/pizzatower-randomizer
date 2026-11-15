@@ -17,7 +17,8 @@
 #2. level_segment_generator.py: iterators that return segments of a certain type
 #3. level_bridge.py: attempts to bridge two rooms together, selecting some combination of paths in S and D to bridge with
 #4. level_room_path_generator.py: iterators that return every valid path selection for a room, used by level_bridge to try different bridges
-#5. 
+#5. level_get_traversal.py: with two room paths (source and destination), get an edge traversal that connects them
+#6. level_select_rooms.py: with the traversal, choose rooms to fufill the paths selected
 
 from json_source_destination import SourceDestinationHandler
 
@@ -69,6 +70,8 @@ def generate_level_recursive_start(SD: SourceDestinationHandler, FG: FlowGraphHa
     segments = []
 
     try:
+        i = 0
+        
         for entrance_segment in entrance_or_entrance_branch_segments(SD, FG):
 
             log_sg(f"Segment Generated: {entrance_segment.start_room} > {entrance_segment.end_room}")
@@ -91,7 +94,8 @@ def generate_level_recursive_start(SD: SourceDestinationHandler, FG: FlowGraphHa
             else: #entrance is BranchSegment
                 try:
                     #entrance was Branch so continue gen with Twoway
-                    next_segments, new_SD, new_FG = generate_level_recursive_between_branch(SD, FG, last_segment=entrance_segment, branch_count=0)
+                    #start with 1 branch count
+                    next_segments, new_SD, new_FG = generate_level_recursive_between_branch(SD, FG, last_segment=entrance_segment, branch_count=1)
                     segments = [entrance_segment]
                     segments.extend(next_segments)
 
@@ -102,23 +106,27 @@ def generate_level_recursive_start(SD: SourceDestinationHandler, FG: FlowGraphHa
                     log_sg(e)
 
             log_sg(f"Dump Segment: {entrance_segment.start_room} > {entrance_segment.end_room}")
-            
+
+        log_sg(f"Did not generate from any entrance_segment after {i} attempts")
+
+        #total failure, try connecting any E or EB to any J or JB directly
+        #this is the only combination not tried
+    
+        try:
+            segments: list[TwowaySegment|BranchSegment] = []
+            segment = ej_or_ejb_segment(SD, FG)
+            segments.append(segment)
+    
+            SD.remove_SD_in_segment(segment)
+    
+            return segments, SD, FG #terminate, return this copy of SD and FG
+        except RuntimeError as e:
+            log_sg(e)
+        
     except RuntimeError as e:
         log_sg(e)
 
-    #total failure, try connecting any E or EB to any J or JB directly
-    #this is the only combination not tried
-
-    try:
-        segments: list[TwowaySegment|BranchSegment] = []
-        segment = ej_or_ejb_segment(SD, FG)
-        segments.append(segment)
-
-        SD.remove_SD_in_segment(segment)
-
-        return segments, SD, FG #terminate, return this copy of SD and FG
-    except RuntimeError as e:
-        log_sg(e)
+    
 
     raise RuntimeError(f"Failed to generate any level")
 
@@ -205,7 +213,13 @@ def generate_level_recursive_between_branch(SD: SourceDestinationHandler, FG: Fl
 
     #typecast end room to BranchRoomPath
     #check branch count again in case we want to immediately add a john
-    if (type(last_segment.end_room) == BranchRoomPath and branch_count < MIN_BRANCH_COUNT):
+    #but go ahead anyways if we cant end with J
+
+    can_end_with_J = len(SD.J) > 0
+
+    if (type(last_segment.end_room) == BranchRoomPath and (branch_count < MIN_BRANCH_COUNT or not can_end_with_J)):
+
+        log_sg(f"continuing with TW seg gen")
 
         for between_branch_segment in between_branch_segments(SD, FG, last_segment.end_room):
 
@@ -222,6 +236,9 @@ def generate_level_recursive_between_branch(SD: SourceDestinationHandler, FG: Fl
                 log_sg(e)
 
             log_sg(f"Dump Segment: {between_branch_segment.start_room} > {between_branch_segment.end_room}")
+    else:
+        log_sg(f"last seg end is branch?: {type(last_segment.end_room) == BranchRoomPath} branch count < MIN? {branch_count} < {MIN_BRANCH_COUNT} can end with J? {can_end_with_J}")
+
 
     #could not increase branch count, try capping with J
     try:

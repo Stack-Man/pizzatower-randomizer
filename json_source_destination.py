@@ -69,7 +69,7 @@ class SourceDestinationHandler():
         return self.iterate_over([self.BS, self.BA])
 
     def branch_ends(self):
-        print(f"Branch Ends: iterating over BE {len(self.BE)} BA {len(self.BA)}")
+        #print(f"Branch Ends: iterating over BE {len(self.BE)} BA {len(self.BA)}")
         return self.iterate_over([self.BE, self.BA])
 
     def just_johns(self):
@@ -130,7 +130,7 @@ def branch_by_type(rooms: list[Room]):
     branch_start = []
     branch_end = []
 
-    print(f"{WARNING}WARNING: IGNORING BRANCH ROOMS OF TYPE MID, FORCEDSTART, FORCEDEND{RESET}")
+    print(f"{WARNING}WARNING: IGNORING BRANCH ROOMS OF TYPE MID{RESET}")
 
     for room in rooms:
 
@@ -141,6 +141,41 @@ def branch_by_type(rooms: list[Room]):
                 branch_start.append(room)
             case BranchType.END:
                 branch_end.append(room)
-            
+            case BranchType.FORCED_ANY:
+                if (not has_more_than_one_branch_door(room)):
+                    raise ValueError(f"{room} is {room.branch_type} but does not have more than one branch door" )
+
+                print(f"{WARNING}{room} is {room.branch_type}{RESET}")
+                
+                branch_any.append(room)
+
+            case BranchType.FORCED_START:
+                if (not has_more_than_one_branch_door(room)):
+                    raise ValueError(f"{room} is {room.branch_type}  but does not have more than one branch door" )
+
+                print(f"{WARNING}{room} is {room.branch_type}{RESET}")
+                
+                branch_start.append(room)
+
+            case BranchType.FORCED_END:
+                if (not has_more_than_one_branch_door(room)):
+                    raise ValueError(f"{room} is {room.branch_type}  but does not have more than one branch door" )
+
+
+                print(f"{WARNING}{room} is {room.branch_type}{RESET}")
+                
+                branch_end.append(room)
 
     return branch_any, branch_start, branch_end
+
+def has_more_than_one_branch_door(room: Room):
+    i = 0
+    
+    for door in room.doors:
+        if (door.branch):
+            i +=1
+
+        if i > 1:
+            return True
+
+    return False
