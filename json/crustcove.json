@@ -292,14 +292,14 @@
 				{
 					"letter" : "A",
 					"type" : "horizontal",
-					"notpizzatime" : true,
+					"pizzatime" : true,
 					"dir" : "left",
 					"exitonly" : true
 				},
 				
 				{
 					"letter" : "B",
-					"pizzatime" : true,
+					"notpizzatime" : true,
 					"type" : "door"
 				}
 			]

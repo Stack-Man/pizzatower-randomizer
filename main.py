@@ -11,6 +11,8 @@ from seeded_random import set_seed
 
 from settings import TraversalMode
 
+#TODO: minigolf_8 needs special johnloop type, loops to self, and must be used as J and not JB
+
 def get_SD_FG_rooms(fn):
     set_seed(0)
     

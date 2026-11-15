@@ -188,10 +188,10 @@ def doors_to_path(start_door, exit_door, is_john_room):
     path = Path(start_door, exit_door, is_oneway, is_loop)
 
     
-    log(f"  Created {path}")
+    #log(f"  Created {path}")
     
-    if(LOGGING):
-        path.print_stats_extended()
+    #if(LOGGING):
+        #path.print_stats_extended()
 
     return path
 
@@ -200,8 +200,10 @@ def doors_to_path(start_door, exit_door, is_john_room):
 #-------------------
 def get_branch_type(room):
     #branchstart and branchend values mean the door is a branchmid?
-    if room.has_john and has_PT_NPT_path(room):
+    if room.has_john and has_NPT_to_PT_path(room):
         return BranchType.END
+    elif room.has_john:
+        log(f"  {WARNING}{room} has john but is not branch!{RESET}")
     
     if room.has_entrance and has_entrance_branch_paths(room):
         return BranchType.START
@@ -263,10 +265,12 @@ def has_entrance_branch_paths(room):
     
     return has_entrance_NPT and has_PT_entrance
 
-def has_PT_NPT_path(room):
+def has_NPT_to_PT_path(room):
     for path in room.paths:
         if path.start_door.start_path_time == PathTime.NOTPIZZATIME and path.exit_door.exit_path_time == PathTime.PIZZATIME:
             return True
+        else:
+            log(f"Path {path} is {path.start_door.start_path_time} to {path.exit_door.exit_path_time}")
     
     return False
 
