@@ -6,11 +6,13 @@
 
 from graph_from_rooms import FlowGraphHandler
 from graph_objects import DoorNode, CombinedDoorNode, EdgeTraversal, PathEdge
-from enums import TraversalType, DoorType, DoorDir, StartExitType
+from enums import TraversalType
 from graph_impossible_booking import add_to_bipartite_graph
 from colors import WARNING, RESET
+
+import time
  
-LOGGING = True
+LOGGING = False
 
 def log(msg: str):
     if (LOGGING):
@@ -19,6 +21,8 @@ def log(msg: str):
 DEBUG_SKIP_CLEAN = False
 
 def clean_depleted_traverals(FG: FlowGraphHandler):
+    start = time.perf_counter()
+    
     if (DEBUG_SKIP_CLEAN):
         print(f"{WARNING}FG CLEAN SKIPPED{RESET}")
         return FG
@@ -38,6 +42,9 @@ def clean_depleted_traverals(FG: FlowGraphHandler):
             if (edge in traversal):
                 log(f"updating {traversal}")
                 update_traversal_type(node, destination, traversal, edge)
+
+    end = time.perf_counter()
+    print(f"CLEAN: Clean Finished ({end-start:6f})")
 
     FG.depleted_edges.clear()
 

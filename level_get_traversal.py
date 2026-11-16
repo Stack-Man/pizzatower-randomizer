@@ -60,15 +60,18 @@ def get_traversals_between(FG: FlowGraphHandler, source: DoorNode, destination: 
     for N in FG.nodes():
 
         N: DoorNode | CombinedDoorNode
-        if source == N:
+        if source in N: #use IN so Combined node works too
 
             log(f"get_traversals_between found source {N}")
 
-            if destination in N.steps:
-                return N.steps[destination]
-            else:
-                log(f"No traversal between {source} and {destination}")
-                raise RuntimeError(f"No traversal between {source} and {destination}")
+            #use iteration so we ca ncheck if destination is 
+            #within a possible combined node K
+            for K, V in N.steps.items():
+                if destination in K:
+                    return V
+            
+            log(f"No traversal between {source} and {destination}")
+            raise RuntimeError(f"No traversal between {source} and {destination}")
 
     raise LookupError(f"{source} was not in FG!")
 

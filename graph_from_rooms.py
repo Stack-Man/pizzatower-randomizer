@@ -7,7 +7,7 @@
 from json_objects import Room, Path
 from graph_objects import DoorNode, PathEdge, TransitionEdge, CombinedDoorNode
 from settings import TraversalMode
-from enums import PathTime, RoomType, StartExitType, TraversalType
+from enums import PathTime, RoomType, StartExitType, TraversalType, DoorType
 from graph_transition_edge import transition_edges_from_nodes
 import networkx as nx
 from copy import deepcopy
@@ -80,6 +80,10 @@ def rooms_to_edges_and_nodes(rooms: list[Room]):
     for room in rooms:
 
         for path in room.paths:
+
+            #skip paths with a leveldoor, leveldoor will never be used for the flow
+            if (path.start_door.door_type == DoorType.LEVELDOOR or path.exit_door.door_type == DoorType.LEVELDOOR):
+                continue
 
             edge : PathEdge = path_to_edge(path)
 
