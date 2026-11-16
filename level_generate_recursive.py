@@ -54,12 +54,15 @@ def generate_levels_recursive_all(SD: SourceDestinationHandler, FG: FlowGraphHan
             current_FG = new_FG
             levels.append(Level(segments=segments))
             i += 1
+
+            log_sg(f"GENERATED LEVEL FROM: {segments[0].start_room.room}\n\n\n")
             
     except RuntimeError as e:
         log_sg(e)
 
     log_sg(f"Generated {i} levels")
-    return levels
+
+    return levels, current_SD, current_FG
 
 
 #TODO: should extend level by 1 branch if we cant connect to J, so we can connect to JB instead
@@ -153,6 +156,11 @@ def generate_level_recursive_branch(SD: SourceDestinationHandler, FG: FlowGraphH
 
     if (type(last_segment.end_room) == BranchRoomPath):
         try:
+            can_end_with_JB = len(SD.JB) > 0
+            
+            if (branch_count >= MIN_BRANCH_COUNT and can_end_with_JB):
+                raise RuntimeError(f"Skip branch gen to end with JB")
+            
             branch_count += 1
 
             for branch_segment in branch_segments(SD, FG, last_segment.end_room):
@@ -175,18 +183,18 @@ def generate_level_recursive_branch(SD: SourceDestinationHandler, FG: FlowGraphH
                 else:
                     #completed all branches, cap this branch_segment with a J
                     try:
-                        segment = john_segment(SD, FG, last_segment.end_room)
+                        segment = john_segment(SD, FG, branch_segment.end_room)
                         SD.remove_SD_in_segment(segment)
                         log_sg(f"John Generated: {segment.start_room} > {segment.end_room}")
                         return [branch_segment, segment], SD, FG #terminate, return this copy of SD and FG
                     except RuntimeError as e:
-                        log_sg(e)
+                        log_sg("J cap from branch_segment: " + str(e))
 
                 log_sg(f"DUMP: {branch_segment.start_room} > {branch_segment.end_room}")
 
             raise RuntimeError(f"Failed to gen non JB branch from {last_segment.end_room.room}")
 
-        except Exception as e:
+        except RuntimeError as e:
             log_sg(e)
             
             #could not increase branch count, try capping with JB

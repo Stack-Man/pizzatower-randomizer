@@ -25,7 +25,7 @@ def get_SD_FG_rooms(fn):
     all_rooms = parse_json_to_rooms_all(fn)
     SD = get_source_destination_rooms(all_rooms)
 
-    FG = rooms_to_graph(all_rooms, traversal_mode=TraversalMode.ARBITRARY_NO_RESTRICTIONS)
+    FG = rooms_to_graph(all_rooms, traversal_mode=TraversalMode.MATCHING_PERFECT)
     FG = collapse_all_nodes_and_edges(FG)
     FG = flow(FG)
 
@@ -35,7 +35,7 @@ def get_SD_FG_rooms(fn):
 
 def test_generate():
     SD, FG, _ = get_SD_FG_rooms(to_test) 
-    levels = generate_levels_recursive_all(SD, FG)
+    levels, new_SD, new_FG = generate_levels_recursive_all(SD, FG)
 
     print_levels(levels)
 
@@ -59,7 +59,21 @@ def test_bridge_branch_room_room_by_name(A: str, B: str):
 
     for branch in bridge_branch_room_room(room_A, room_B, FG):
         print(f"{branch}")
+
+def print_room_by_name(room_name: str):
+    all_rooms = parse_json_to_rooms_all(FILENAMES)
+
+    for room in all_rooms:
+        if (room.name == room_name):
+            room.print_stats()
+
+            for path in room.paths:
+                path.print_stats_extended()
+
+            return
+    
     
 
 test_generate()
-#test_bridge_branch_room_room_by_name("graveyard_3", "graveyard_5c")
+#test_bridge_branch_room_room_by_name("sewer_1", "chateau_5")
+#print_room_by_name("chateau_5")

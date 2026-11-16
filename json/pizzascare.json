@@ -164,7 +164,7 @@
                 {
                     "letter" : "C",
                     "type": "door",
-                    "exitonly": true,
+                    "exitonly" : true,
                     "ratblocked": true,
 					"branch" : true,
                     "powerup": {

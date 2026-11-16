@@ -167,8 +167,11 @@ def doors_to_paths(doors, is_john_room):
 
 def doors_to_path(start_door, exit_door, is_john_room):
 
+    #add exception for chateau_5's branch door, must be exit only for NPT but start for PT
+    chateau_5_exception = (start_door.access_type == AccessType.EXITONLY and start_door.initially_blocked and start_door.branch and exit_door.exit_path_time is not PathTime.NOTPIZZATIME)
+
     #start is exitonly or exit is startonly
-    if start_door.access_type == AccessType.EXITONLY or exit_door.access_type == AccessType.STARTONLY:
+    if not chateau_5_exception and (start_door.access_type == AccessType.EXITONLY or exit_door.access_type == AccessType.STARTONLY):
         return None
 
     #path time mismatch, unless it is in a john room
@@ -181,8 +184,11 @@ def doors_to_path(start_door, exit_door, is_john_room):
         return None
     
     #oneway = start or exit only but not initially blocked
-    #initially_blocked is processed from the door itself in the objects to graph stage
+    #initially_blocked is processed from the door itself in the objects to graph stage TODO: is it still after refactor?
     is_oneway = (start_door.access_type == AccessType.STARTONLY and not start_door.initially_blocked) or (exit_door.access_type == AccessType.EXITONLY and not exit_door.initially_blocked)
+
+
+
     is_loop = start_door.is_loop or exit_door.is_loop
 
     path = Path(start_door, exit_door, is_oneway, is_loop)

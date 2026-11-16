@@ -13,7 +13,7 @@ from level_objects import BranchRoomPath, RoomPath
 from colors import ERROR, RESET
 
 LOG_FAILED_RP_PAIRS = True
-LOG_NPTPTB_CHECK = False
+LOG_NPTPTB_CHECK = True
 LOG_LD_CHECK = True
 
 def log_rp(msg: str|RuntimeError):

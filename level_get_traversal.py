@@ -37,7 +37,7 @@ def get_traversal(srp: BaseRoomPath, erp: BaseRoomPath, FG: FlowGraphHandler, tr
             log(f"      Got traversal {traversal} ")
             return traversal
 
-        log(f"      INVALID: {traversal} of type {traversal.traversal_type}, wanted {traversal_type}. has no zero edges: {traversal.has_no_zero_edges()}")
+        #log(f"      INVALID: {traversal} of type {traversal.traversal_type}, wanted {traversal_type}. has no zero edges: {traversal.has_no_zero_edges()}")
 
     log(f"No traversal of {traversal_type} between {source} and {destination}")
     raise RuntimeError(f"No traversal of {traversal_type} between {source} and {destination}")
