@@ -18,6 +18,8 @@ from graph_collapse import collapse_all_nodes_and_edges
 
 from settings import TraversalMode
 
+from perf_counter import print_perf
+
 
 to_test = FILENAMES
 
@@ -75,5 +77,6 @@ def print_room_by_name(room_name: str):
     
 
 test_generate()
+print_perf()
 #test_bridge_branch_room_room_by_name("sewer_1", "chateau_5")
 #print_room_by_name("chateau_5")

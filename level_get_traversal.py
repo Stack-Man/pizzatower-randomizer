@@ -9,6 +9,8 @@ from graph_from_rooms import FlowGraphHandler
 from level_clean_traversal import clean_depleted_traverals
 from graph_objects import DoorNode, CombinedDoorNode
 
+from perf_counter import start_perf, end_perf, PerfType
+
 LOGGING = True
 
 #from graph_flow_test import print_steps
@@ -18,6 +20,8 @@ def log(msg: str):
         print("                 TRAVERSAL: " + str(msg))
 
 def get_traversal(srp: BaseRoomPath, erp: BaseRoomPath, FG: FlowGraphHandler, traversal_type: TraversalType):
+    start_perf(PerfType.TRAVERSAL)
+    
     #connect start rp's end to end rp's start
     #convert srp and erp into DoorNodes to search FG with
 
@@ -35,11 +39,13 @@ def get_traversal(srp: BaseRoomPath, erp: BaseRoomPath, FG: FlowGraphHandler, tr
     for traversal in traversals:
         if (good_traversal_type(traversal.traversal_type, traversal_type) and traversal.has_no_zero_edges()):
             log(f"      Got traversal {traversal} ")
+            end_perf(PerfType.TRAVERSAL)
             return traversal
 
         #log(f"      INVALID: {traversal} of type {traversal.traversal_type}, wanted {traversal_type}. has no zero edges: {traversal.has_no_zero_edges()}")
 
     log(f"No traversal of {traversal_type} between {source} and {destination}")
+    end_perf(PerfType.TRAVERSAL)
     raise RuntimeError(f"No traversal of {traversal_type} between {source} and {destination}")
 
 def good_traversal_type(given: TraversalType, wanted: TraversalType):
@@ -71,6 +77,7 @@ def get_traversals_between(FG: FlowGraphHandler, source: DoorNode, destination: 
                     return V
             
             log(f"No traversal between {source} and {destination}")
+            end_perf(PerfType.TRAVERSAL)
             raise RuntimeError(f"No traversal between {source} and {destination}")
 
     raise LookupError(f"{source} was not in FG!")

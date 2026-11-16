@@ -14,14 +14,13 @@ from level_select_rooms import select_rooms
 
 from level_room_path_generator import branch_room_path, room_path_cap_TW, entrance_room_path
 
+from perf_counter import start_perf, end_perf, PerfType
+
 LOG_FAILED_BRIDGE = True
 
 def log_bridge(msg: str|RuntimeError):
     if (LOG_FAILED_BRIDGE):
         print("         BRIDGE: " + str(msg))
-
-import time
-
 
 #Main Bridge functions that take a Source and Destination 
 #with their selected paths and creates a LevelSegment from it
@@ -29,7 +28,8 @@ import time
 #TODO: failed traversals/selections modify FG, need to revert on fail
 
 def bridge_twoway(start_rp: BaseRoomPath, end_rp: BaseRoomPath, FG: FlowGraphHandler):
-    start = time.perf_counter()
+
+    start_perf(PerfType.BRIDGE)
 
     #need to preverse pre-bridge FG
     #in case we consume a room but ultimately fail
@@ -45,9 +45,8 @@ def bridge_twoway(start_rp: BaseRoomPath, end_rp: BaseRoomPath, FG: FlowGraphHan
         room_selection = select_rooms(FG, traversal, TraversalType.ANY)
         log_bridge(f"bridge_twoway: completed bridge S: {start_rp} > {room_selection} > D: {end_rp}")
 
-        end = time.perf_counter()
-        log_bridge(f"bridge_twoway: ({end-start})")
 
+        end_perf(PerfType.BRIDGE)
         return TwowaySegment(start_rp, end_rp, room_selection)
     except RuntimeError as e:
         pass
@@ -56,10 +55,13 @@ def bridge_twoway(start_rp: BaseRoomPath, end_rp: BaseRoomPath, FG: FlowGraphHan
     #on fail, revert FG so that selected rooms/traversals
     #are replenished
     FG.revert(pre_bridge_FG) 
+    end_perf(PerfType.BRIDGE)
     raise RuntimeError(f"bridge_twoway: failed traversal or room_selection between {start_rp.room} and {end_rp.room}")
 
     
 def bridge_branch(start_rp: BranchRoomPath, end_rp: BranchRoomPath, FG: FlowGraphHandler):
+
+    start_perf(PerfType.BRIDGE)
 
     pre_bridge_FG = FG.copy()
 
@@ -68,6 +70,7 @@ def bridge_branch(start_rp: BranchRoomPath, end_rp: BranchRoomPath, FG: FlowGrap
         NPT = bridge_oneway_branch(start_rp, end_rp, TraversalType.NOTPIZZATIME, FG)
         PT = bridge_oneway_branch(end_rp, start_rp, TraversalType.PIZZATIME, FG)
 
+        end_perf(PerfType.BRIDGE)
         return BranchSegment(start_rp, end_rp, PT, NPT)
     except RuntimeError as e:
         pass
@@ -75,6 +78,7 @@ def bridge_branch(start_rp: BranchRoomPath, end_rp: BranchRoomPath, FG: FlowGrap
         
     FG.revert(pre_bridge_FG) 
 
+    end_perf(PerfType.BRIDGE)
     raise RuntimeError(f"bridge_branch: failed traversal or room_selection between {start_rp.room} and {end_rp.room}")
     
 
@@ -107,42 +111,58 @@ def bridge_branch_room_room(start_room: Room, end_room: Room, FG: FlowGraphHandl
     e = 0
 
     #branch to branch, connecting BS/BA to BE/BA 
+    start_perf(PerfType.ROOMPATH)
     for start_rp in branch_room_path(start_room, StartExitType.START): #branch is source
         s += 1
         for end_rp in branch_room_path(end_room, StartExitType.EXIT): #branch is destination
             e += 1
             i += 1
+            end_perf(PerfType.ROOMPATH)
             try:
                 yield bridge_branch(start_rp, end_rp, FG)
             except RuntimeError as e2:
                 log_bridge(e2)
+            start_perf(PerfType.ROOMPATH)
 
+    end_perf(PerfType.ROOMPATH)
     log_bridge(f"Could not bridge_branch_room_room between {start_room} and {end_room} after {i} pairs, {s} srps with {e} erps")
 
 
 def bridge_twoway_from_entrance(start_room: Room, end_room: Room, FG: FlowGraphHandler):
+
+    start_perf(PerfType.ROOMPATH)
     for start_rp in entrance_room_path(start_room):
         for end_rp in room_path_cap_TW(end_room):
+
+            end_perf(PerfType.ROOMPATH)
             try:
                 yield bridge_twoway(start_rp, end_rp, FG)
             except RuntimeError as e:
                 log_bridge(e)
 
+            start_perf(PerfType.ROOMPATH)
+
+    end_perf(PerfType.ROOMPATH)
     log_bridge("Could not bridge_twoway_from_entrance")
 
 #make bridges from start room with already selected paths
 def bridge_twoway_rp_room(start_rp: BaseRoomPath, end_room: Room, FG: FlowGraphHandler):
     i = 0
     s = 0
-    
+
+    start_perf(PerfType.ROOMPATH)
     for end_rp in room_path_cap_TW(end_room):
         i+=1
+        end_perf(PerfType.ROOMPATH)
         try:
             s += 1
             yield bridge_twoway(start_rp, end_rp, FG)
         except RuntimeError as e:
             log_bridge(e)
 
+        start_perf(PerfType.ROOMPATH)
+
+    end_perf(PerfType.ROOMPATH)
     log_bridge(f"Could not bridge_twoway_rp_room from {start_rp.room} to {end_room} after {i} erps and {s} yields")
 
 def bridge_branch_rp_room(start_rp: BranchRoomPath, end_room: Room, FG: FlowGraphHandler):
@@ -150,17 +170,21 @@ def bridge_branch_rp_room(start_rp: BranchRoomPath, end_room: Room, FG: FlowGrap
     log_bridge(f"bridge_branch_rp_room: ")
     log_bridge(f"   START: {start_rp.room} NPT: {start_rp.npt} PT: {start_rp.pt}")
     #srp is BS/BA so end_rp is BE/BA
+    start_perf(PerfType.ROOMPATH)
     for end_rp in branch_room_path(end_room, StartExitType.EXIT):
 
         log_bridge(f"   END: {end_rp.room} NPT: {end_rp.npt} PT: {end_rp.pt}")
-        
+
+        end_perf(PerfType.ROOMPATH)
         #branch will connect NPT and PT together, so check both
         try:
             yield bridge_branch(start_rp, end_rp, FG)
         except RuntimeError as e:
             #failure is added within bridge_branch so that only the failed  PT/NPT pair isa dded
             log_bridge(e)
+        start_perf(PerfType.ROOMPATH)
 
+    end_perf(PerfType.ROOMPATH)
     log_bridge("Could not bridge_branch_rp_room")
 
 

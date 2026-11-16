@@ -12,11 +12,16 @@ from colors import WARNING, RESET
 
 LOGGING = True
 
+from perf_counter import start_perf, end_perf, PerfType
+
 def log(msg: str):
     if (LOGGING):
         print("                 SELECTION: " + str(msg))
 
 def select_rooms(FG: FlowGraphHandler, traversal: EdgeTraversal, traversal_type: TraversalType):
+
+    start_perf(PerfType.SELECTION)
+    
     #TODO traversal is not prioritizing edges from the bipartite graph with the fewest rooms.. impossible booking may be encountered!
     print(f"{WARNING}select_rooms does not avoid impossible bookings!{RESET}")
 
@@ -56,6 +61,7 @@ def select_rooms(FG: FlowGraphHandler, traversal: EdgeTraversal, traversal_type:
 
         log(msg)
 
+    end_perf(PerfType.SELECTION)
     return RoomSelection(room_paths)
 
 def clean_DB_room(room: Room):
@@ -75,6 +81,7 @@ def get_path(edge: PathEdge, traversal_type: TraversalType):
         case TraversalType.PIZZATIME:
             return get_path_from_path_lists([edge.PT, edge.OW, edge.TW])
 
+    end_perf(PerfType.SELECTION)
     raise ValueError(f"get_room not implemented for {traversal_type}")
 
 def get_path_from_path_lists(path_lists: list[PathList]):
@@ -88,7 +95,8 @@ def get_path_from_path_lists(path_lists: list[PathList]):
         elif (len(pl.DB) > 0):
             return pl.DB.pop(), len(pl.DB) == 0
 
-    raise RuntimeError(f"get_path_from_path_lists aclled on lists with 0 paths amongst them")
+    end_perf(PerfType.SELECTION)
+    raise RuntimeError(f"get_path_from_path_lists called on lists with 0 paths amongst them")
 
     
             

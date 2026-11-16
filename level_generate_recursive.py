@@ -33,11 +33,15 @@ MIN_BRANCH_COUNT = 1
 
 LOGGING = True
 
+
+from perf_counter import start_perf, end_perf, PerfType
+
 def log_sg(msg: str|Exception):
     if (LOGGING):
         print("GEN: " + str(msg))
 
 def generate_levels_recursive_all(SD: SourceDestinationHandler, FG: FlowGraphHandler):
+    start_perf(PerfType.GEN)
     levels = []
     
     level_count = SD.entrance_count()
@@ -62,6 +66,7 @@ def generate_levels_recursive_all(SD: SourceDestinationHandler, FG: FlowGraphHan
 
     log_sg(f"Generated {i} levels")
 
+    end_perf(PerfType.GEN)
     return levels, current_SD, current_FG
 
 

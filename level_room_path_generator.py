@@ -12,6 +12,7 @@ from pairs import pairs
 from level_objects import BranchRoomPath, RoomPath
 from colors import ERROR, RESET
 
+
 LOG_FAILED_RP_PAIRS = True
 LOG_NPTPTB_CHECK = False
 LOG_LD_CHECK = True
@@ -54,8 +55,7 @@ def branch_room_path(room: Room, se_type: StartExitType):
     #this should never happen
     raise NotImplementedError(f"{ERROR}branch_room_path: could not get branch path from {room} This line should never run!{RESET}")
 
-def branch_branch_room_path(room: Room, se_type: StartExitType):
-
+def branch_branch_room_path(room: Room, se_type: StartExitType):   
     debug = False
 
     if (room.name == "graveyard_3"):
@@ -67,12 +67,12 @@ def branch_branch_room_path(room: Room, se_type: StartExitType):
     log_nptb(f"branch_branch_room_path: {room} as {se_type}")
 
     for A, B in pairs(room.paths):
+
         i += 1
 
         #branch is source
         #we want branch > NPT and PT > branch
-        
-        
+
 
         if (se_type == StartExitType.START):
 
@@ -171,9 +171,6 @@ def entrance_branch_room_path(room: Room):
             yield BranchRoomPath(room, B, A, B.start_door)
         else:
             pass
-            #log_rp(f"{room}: INVALID path pair of {A} and {B}")
-            #A.print_stats_extended()
-            #B.print_stats_extended()
 
     log_rp(f"entrance_branch_room_path: exhausted {i} pairs after {s} yields")
 
@@ -215,6 +212,7 @@ def room_path_cap_TW(room: Room):
             raise ValueError(f"{ERROR}ERROR: room_path() not implemented for room of type {room.room_type}{RESET}")
 
 def entrance_room_path(room: Room):
+    
     for P in room.paths:
         if P.start_door.letter == "A" and P.start_door.door_type == DoorType.LEVELDOOR:
             yield RoomPath(room, P)
