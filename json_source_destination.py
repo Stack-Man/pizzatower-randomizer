@@ -142,28 +142,11 @@ def branch_by_type(rooms: list[Room]):
             case BranchType.END:
                 branch_end.append(room)
             case BranchType.FORCED_ANY:
-                if (not has_more_than_one_branch_door(room)):
-                    raise ValueError(f"{room} is {room.branch_type} but does not have more than one branch door" )
-
-                print(f"{WARNING}{room} is {room.branch_type}{RESET}")
-                
                 branch_any.append(room)
-
             case BranchType.FORCED_START:
-                if (not room.name == "saloon_2" and not has_more_than_one_branch_door(room)):
-                    raise ValueError(f"{room} is {room.branch_type}  but does not have more than one branch door" )
-
-                print(f"{WARNING}{room} is {room.branch_type}{RESET}")
-                
                 branch_start.append(room)
 
             case BranchType.FORCED_END:
-                if (not has_more_than_one_branch_door(room)):
-                    raise ValueError(f"{room} is {room.branch_type}  but does not have more than one branch door" )
-
-
-                print(f"{WARNING}{room} is {room.branch_type}{RESET}")
-                
                 branch_end.append(room)
 
     return branch_any, branch_start, branch_end
