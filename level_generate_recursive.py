@@ -116,20 +116,19 @@ def generate_level_recursive_start(SD: SourceDestinationHandler, FG: FlowGraphHa
         #total failure, try connecting any E or EB to any J or JB directly
         #this is the only combination not tried
     
-        try:
-            segments: list[TwowaySegment|BranchSegment] = []
-            segment = ej_or_ejb_segment(SD, FG)
-            segments.append(segment)
-    
-            SD.remove_SD_in_segment(segment)
-    
-            return segments, SD, FG #terminate, return this copy of SD and FG
-        except RuntimeError as e:
-            log_sg(e)
-        
     except RuntimeError as e:
         log_sg(e)
 
+    try:
+        segments: list[TwowaySegment|BranchSegment] = []
+        segment = ej_or_ejb_segment(SD, FG)
+        segments.append(segment)
+
+        SD.remove_SD_in_segment(segment)
+
+        return segments, SD, FG #terminate, return this copy of SD and FG
+    except RuntimeError as e:
+        log_sg(e)
     
 
     raise RuntimeError(f"Failed to generate any level")

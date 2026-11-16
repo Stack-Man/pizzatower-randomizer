@@ -57,9 +57,6 @@ def bridge_branch(start_rp: BranchRoomPath, end_rp: BranchRoomPath, FG: FlowGrap
 
     pre_bridge_FG = FG.copy()
 
-    log_bridge(f"===PRE BRANCH: bridge FG selected rooms length: {len(FG.selected_rooms)}")
-    log_bridge(f"===PRE BRANCH: bridge pre_bridge_FG selected rooms length: {len(pre_bridge_FG.selected_rooms)}")
-
     try:
     
         NPT = bridge_oneway_branch(start_rp, end_rp, TraversalType.NOTPIZZATIME, FG)
@@ -69,10 +66,7 @@ def bridge_branch(start_rp: BranchRoomPath, end_rp: BranchRoomPath, FG: FlowGrap
     except RuntimeError as e:
         pass
         #log_bridge(e)
-
-    log_bridge(f"===POST BRANCH: bridge FG selected rooms length: {len(FG.selected_rooms)}")
-    log_bridge(f"===POST BRANCH: bridge pre_bridge_FG selected rooms length: {len(pre_bridge_FG.selected_rooms)}")
-
+        
     FG.revert(pre_bridge_FG) 
 
     raise RuntimeError(f"bridge_branch: failed traversal or room_selection between {start_rp.room} and {end_rp.room}")

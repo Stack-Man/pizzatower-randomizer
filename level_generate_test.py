@@ -9,7 +9,7 @@ from json_objects import Room
 
 from level_bridge import bridge_branch_room_room
 
-to_test = ["crustcove"]
+to_test = ["deepdish9"]
 
 def test_generate():
     SD, FG, _ = get_SD_FG_rooms(to_test) 

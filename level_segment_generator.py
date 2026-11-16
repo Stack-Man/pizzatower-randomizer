@@ -37,12 +37,18 @@ def entrance_or_entrance_branch_segments(SD: SourceDestinationHandler, FG: FlowG
             
         #if EB, create a Branch Segment with EB and some BE
         else:
+
+            i = 0
+            y = 0
+            
             for BE_or_BA in SD.branch_ends():
+                i += 1
                 log_sg(f"EB: {E_or_EB} to {BE_or_BA}")
                 for seg in bridge_branch_room_room(E_or_EB, BE_or_BA, FG):
+                    y += 1
                     yield seg
             
-            log_sg(f"tried all BE_or_BA with seg EB {E_or_EB}")
+            log_sg(f"no EB_BE segment after {i} pairs and {y} yields")
 
     raise RuntimeError(f"Failed to generate any E or EB segment after {i} entrances")
 

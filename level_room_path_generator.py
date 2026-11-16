@@ -187,17 +187,21 @@ def LDNPT_to_PTLD(A: Path, B: Path):
 
 def john_branch_room_path(room: Room):
     i = 0
+    y = 0
 
     for P in room.paths:
         i += 1
         if (P.start_door.start_path_time == PathTime.NOTPIZZATIME and P.exit_door.exit_path_time == PathTime.PIZZATIME):
+
+            y += 1
 
             #will use NPT's start and PT's exit, so its already lined up
             #the branch door will not be used since its a john room
             yield BranchRoomPath(room, P, P, P.start_door)
 
     #keep as not implemented because this should never happen
-    raise NotImplementedError(f"john_branch_room_path: exhausted {i} paths but should have at least one valid")
+    if (y <= 0):
+        raise NotImplementedError(f"ERROR: john_branch_room_path: exhausted {i} paths but should have at least one valid")
 
 def room_path_cap_TW(room: Room):
     match room.room_type:
