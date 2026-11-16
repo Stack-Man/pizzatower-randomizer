@@ -12,6 +12,8 @@ from enums import BranchType
 
 from level_bridge import bridge_twoway_room_room, bridge_branch_room_room, bridge_branch_rp_room, bridge_twoway_rp_room
 
+from colors import ERROR, RESET, CAUTION, WARNING
+
 LOG_FAILED_SEGMENT_GEN = True
 
 def log_sg(msg: str|RuntimeError):
@@ -22,18 +24,30 @@ def log_sg(msg: str|RuntimeError):
 
 def entrance_or_entrance_branch_segments(SD: SourceDestinationHandler, FG: FlowGraphHandler):
     #Pick either E or EB
-    i = 0
+    es = 0
+
+    EEB_count = len(SD.E) + len(SD.EB)
+    print(f"{CAUTION}GEN E or EB with {EEB_count} E/EBs left!{RESET}")
+
     for E_or_EB in SD.entrances():
-        i += 1
+        es += 1
         #E_or_EB.print_stats()
         #if E, create a TwowaySegment with E and some BS
         if (E_or_EB.branch_type == BranchType.NONE):
             #surround each bridge generator with try catch in case
             #bridge fails, we can continue with the next SD pair
+
+            i = 0
+            y = 0
+
             for BS_or_BA in SD.branch_starts(): 
                 log_sg(f"E: {E_or_EB} to {BS_or_BA}")
+                i += 1
                 for seg in bridge_twoway_room_room(E_or_EB, BS_or_BA, FG):     
+                    y += 1
                     yield seg
+
+            log_sg(f"no E_BS segment for E {E_or_EB} {es} after {i} BE pairs and {y} yields")
             
         #if EB, create a Branch Segment with EB and some BE
         else:
@@ -48,9 +62,12 @@ def entrance_or_entrance_branch_segments(SD: SourceDestinationHandler, FG: FlowG
                     y += 1
                     yield seg
             
-            log_sg(f"no EB_BE segment after {i} pairs and {y} yields")
+            log_sg(f"no EB_BE segment for EB {E_or_EB} {es} after {i} BE pairs and {y} yields")
 
-    raise RuntimeError(f"Failed to generate any E or EB segment after {i} entrances")
+    if (es == 0):
+        log_sg(f"{ERROR}THERE WEREN'T ANY ENTRANCES TO GEN FROM???{RESET}")
+
+    raise RuntimeError(f"{WARNING}Failed to generate any E or EB segment after {RESET}{es}{WARNING} entrances{RESET}")
 
 def branch_segments(SD: SourceDestinationHandler, FG: FlowGraphHandler, BS: BranchRoomPath):
     #create a BranchSegment with BS and some BE or JB

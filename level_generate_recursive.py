@@ -29,7 +29,7 @@ from level_segment_generator import  entrance_or_entrance_branch_segments, branc
 
 from colors import ERROR, RESET
 
-MIN_BRANCH_COUNT = 2
+MIN_BRANCH_COUNT = 1
 
 LOGGING = True
 

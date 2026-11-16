@@ -20,6 +20,8 @@ def log_bridge(msg: str|RuntimeError):
     if (LOG_FAILED_BRIDGE):
         print("         BRIDGE: " + str(msg))
 
+import time
+
 
 #Main Bridge functions that take a Source and Destination 
 #with their selected paths and creates a LevelSegment from it
@@ -27,6 +29,7 @@ def log_bridge(msg: str|RuntimeError):
 #TODO: failed traversals/selections modify FG, need to revert on fail
 
 def bridge_twoway(start_rp: BaseRoomPath, end_rp: BaseRoomPath, FG: FlowGraphHandler):
+    start = time.perf_counter()
 
     #need to preverse pre-bridge FG
     #in case we consume a room but ultimately fail
@@ -41,6 +44,9 @@ def bridge_twoway(start_rp: BaseRoomPath, end_rp: BaseRoomPath, FG: FlowGraphHan
         log_bridge(f"bridge_twoway: getting selection")
         room_selection = select_rooms(FG, traversal, TraversalType.ANY)
         log_bridge(f"bridge_twoway: completed bridge S: {start_rp} > {room_selection} > D: {end_rp}")
+
+        end = time.perf_counter()
+        log_bridge(f"bridge_twoway: ({end-start})")
 
         return TwowaySegment(start_rp, end_rp, room_selection)
     except RuntimeError as e:
