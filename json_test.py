@@ -1,7 +1,12 @@
 import json
 from json_to_objects import json_to_rooms
 from json_objects import Room, Path
-from enums import DoorType, DoorDir, RoomType
+from enums import DoorType, DoorDir, RoomType, BranchType
+
+import logging as log
+import log_config
+logger = log.getLogger(__name__)   
+
 
 #wasteyard graveyard_3 is not marked as a branch room because it has a pizzatime start but no notpizzatime exclusive exit, using a type FORCED_BRANCH_ANY
 #ruins_1 has an unhandled key loop, marking B and C as "loop" for now
@@ -19,25 +24,27 @@ def test_parse_all():
                  "dontmakeasound", "pizzascare", "war", 
                  "crumblingtowerofpizza", "trickytreat", "tutorial", "tutorial_noise"]
 
-    filenames = ["funfarm"]
-
     all_rooms = []
     
     for f in filenames: 
         filename = "json/" + f + ".json"
 
         new_rooms = test_parse(filename)
+
+        if (logger.isEnabledFor(log.DEBUG)):
+            log_room_counts(f, new_rooms)
         
-        print("ROOMS  OF ", f)
-        print("========================")
-        print_rooms(new_rooms)
+        #print("ROOMS  OF ", f)
+        #print("========================")
+        #print_rooms(new_rooms)
         
         all_rooms.extend(new_rooms)
 
 
     #print_unique_path_types(all_rooms)
     
-    
+
+ 
 
 def test_parse(filename):
 
@@ -47,11 +54,51 @@ def test_parse(filename):
         
         rooms = json_to_rooms(file)
 
+       
+
         return rooms
     
     print("failed load of ", filename)
     
     return []
+
+def log_room_counts(name: str, rooms: list[Room]):
+
+    E = 0
+    EB = 0
+    J = 0
+    JB = 0
+    BS = 0
+    BE = 0
+    BA = 0
+    N = 0
+
+    for room in rooms:
+        match room.room_type:
+            case RoomType.ENTRANCE:
+                if (room.branch_type == BranchType.NONE):
+                    E += 1
+                else:
+                    EB += 1 
+            case RoomType.JOHN:
+                if (room.branch_type == BranchType.NONE):
+                    J += 1
+                else:
+                    JB += 1
+            case RoomType.BRANCH:
+                match room.branch_type:
+                    case BranchType.START | BranchType.FORCED_START:
+                        BS += 1
+                    case BranchType.END | BranchType.FORCED_END:
+                        BE += 1
+                    case BranchType.ANY | BranchType.FORCED_ANY:
+                        BA += 1
+            case _:
+                N += 1
+
+    log.debug("E:%s, EB:%s, J:%s, JB:%s, BS:%s, BE:%s, BA:%s, N:%s, %s", E, EB, J, JB, BS, BE, BA, N, name)
+                        
+                    
 
 def print_rooms(rooms):
     for room in rooms:

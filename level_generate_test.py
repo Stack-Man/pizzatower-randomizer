@@ -18,8 +18,10 @@ from graph_collapse import collapse_all_nodes_and_edges
 
 from settings import TraversalMode
 
-from perf_counter import print_perf
+from perf_counter import print_perf, print_perf_type, PerfType
 
+import log_config
+import logging as log
 
 to_test = FILENAMES
 
@@ -37,6 +39,9 @@ def get_SD_FG_rooms(fn):
 
 def test_generate():
     SD, FG, _ = get_SD_FG_rooms(to_test) 
+    print_perf_type(PerfType.JSON)
+    print_perf_type(PerfType.GRAPH)
+    print_perf_type(PerfType.FLOW)
     levels, new_SD, new_FG = generate_levels_recursive_all(SD, FG)
 
     print_levels(levels)
@@ -73,8 +78,6 @@ def print_room_by_name(room_name: str):
                 path.print_stats_extended()
 
             return
-    
-    
 
 test_generate()
 print_perf()

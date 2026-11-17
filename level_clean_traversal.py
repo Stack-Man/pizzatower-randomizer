@@ -9,29 +9,15 @@ from graph_objects import DoorNode, CombinedDoorNode, EdgeTraversal, PathEdge
 from enums import TraversalType
 from graph_impossible_booking import add_to_bipartite_graph
 
-from perf_counter import start_perf, end_perf, PerfType
-
-LOGGING = False
-
-def log(msg: str):
-    if (LOGGING):
-        print("                     CLEAN :" + msg)
-
 
 def clean_depleted_traverals(FG: FlowGraphHandler):
-
-    start_perf(PerfType.CLEAN)
-
     for edge in FG.depleted_edges:
         for traversal, node, destination in all_traversals(FG):
 
             if (edge in traversal):
-                log(f"updating {traversal}")
                 update_traversal_type(node, destination, traversal, edge)
 
     FG.depleted_edges.clear()
-
-    end_perf(PerfType.CLEAN)
 
     return FG
 
@@ -47,8 +33,5 @@ def update_traversal_type(node: DoorNode | CombinedDoorNode, destination: DoorNo
     old_traversal_type = traversal.traversal_type
     traversal.traversal_type = new_traversal_type
 
-    log(f"traversal type from {old_traversal_type} to {new_traversal_type}")
-
     if (new_traversal_type == TraversalType.INVALID):
         node.steps[destination].remove(traversal)
-        log(f"traversal to {destination} removed from {node}. now has {len(node.steps[destination])} traversals")

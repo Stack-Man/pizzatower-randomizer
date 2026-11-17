@@ -10,18 +10,9 @@ from graph_from_rooms import FlowGraphHandler
 from enums import TraversalType
 from colors import WARNING, RESET
 
-LOGGING = True
-
-from perf_counter import start_perf, end_perf, PerfType
-
-def log(msg: str):
-    if (LOGGING):
-        print("                 SELECTION: " + str(msg))
 
 def select_rooms(FG: FlowGraphHandler, traversal: EdgeTraversal, traversal_type: TraversalType):
 
-    start_perf(PerfType.SELECTION)
-    
     #TODO traversal is not prioritizing edges from the bipartite graph with the fewest rooms.. impossible booking may be encountered!
     print(f"{WARNING}select_rooms does not avoid impossible bookings!{RESET}")
 
@@ -31,17 +22,13 @@ def select_rooms(FG: FlowGraphHandler, traversal: EdgeTraversal, traversal_type:
     for edge in traversal.edges: 
 
         if (type(edge) == TransitionEdge): #no selection for transition edges
-            log(f"select_rooms: skip for Transition {edge}")
             continue
         elif (type(edge) == PathEdge):
-            log(f"select_rooms: start selection for Path {edge}")
             path, emptied_edge = get_path(edge, traversal_type)
 
             rp = RoomPath(path.room, path)
 
             room_paths.append(rp)
-
-            log(f"select_rooms: got path {path} of {path.room_name}, emptied? {emptied_edge}")
 
             #clean up other paths of consumed room from their respective edges
             if (path.is_double_bookable):
@@ -53,15 +40,6 @@ def select_rooms(FG: FlowGraphHandler, traversal: EdgeTraversal, traversal_type:
                 FG.depleted_edges.append(edge)
                 FG.selected_rooms.append(path.room.name)
 
-    if (LOGGING):
-        msg = "select_rooms: Got Selection: "
-
-        for rp in room_paths:
-            msg += f"{rp.room}: {rp.path} > "
-
-        log(msg)
-
-    end_perf(PerfType.SELECTION)
     return RoomSelection(room_paths)
 
 def clean_DB_room(room: Room):
@@ -81,7 +59,6 @@ def get_path(edge: PathEdge, traversal_type: TraversalType):
         case TraversalType.PIZZATIME:
             return get_path_from_path_lists([edge.PT, edge.OW, edge.TW])
 
-    end_perf(PerfType.SELECTION)
     raise ValueError(f"get_room not implemented for {traversal_type}")
 
 def get_path_from_path_lists(path_lists: list[PathList]):
@@ -95,7 +72,6 @@ def get_path_from_path_lists(path_lists: list[PathList]):
         elif (len(pl.DB) > 0):
             return pl.DB.pop(), len(pl.DB) == 0
 
-    end_perf(PerfType.SELECTION)
     raise RuntimeError(f"get_path_from_path_lists called on lists with 0 paths amongst them")
 
     

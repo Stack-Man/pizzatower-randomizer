@@ -14,176 +14,81 @@ from level_bridge import bridge_twoway_room_room, bridge_branch_room_room, bridg
 
 from colors import ERROR, RESET, CAUTION, WARNING
 
-from perf_counter import start_perf, end_perf, PerfType
-
-LOG_FAILED_SEGMENT_GEN = True
-
-def log_sg(msg: str|RuntimeError):
-    if (LOG_FAILED_SEGMENT_GEN):
-        print("     SEGMENT: " + str(msg))
-
-
-
 def entrance_or_entrance_branch_segments(SD: SourceDestinationHandler, FG: FlowGraphHandler):
     #Pick either E or EB
-    es = 0
-
-    EEB_count = len(SD.E) + len(SD.EB)
-    print(f"{CAUTION}GEN E or EB with {EEB_count} E/EBs left!{RESET}")
-
-    start_perf(PerfType.SEG)
-
     for E_or_EB in SD.entrances():
-        es += 1
         #E_or_EB.print_stats()
         #if E, create a TwowaySegment with E and some BS
         if (E_or_EB.branch_type == BranchType.NONE):
             #surround each bridge generator with try catch in case
             #bridge fails, we can continue with the next SD pair
 
-            i = 0
-            y = 0
-
             for BS_or_BA in SD.branch_starts(): 
-                log_sg(f"E: {E_or_EB} to {BS_or_BA}")
-                i += 1
-                end_perf(PerfType.SEG)
                 for seg in bridge_twoway_room_room(E_or_EB, BS_or_BA, FG):     
-                    y += 1
                     yield seg
-
-                start_perf(PerfType.SEG)
-
-            log_sg(f"no E_BS segment for E {E_or_EB} {es} after {i} BE pairs and {y} yields")
             
         #if EB, create a Branch Segment with EB and some BE
-        else:
-
-            i = 0
-            y = 0
-            
+        else:      
             for BE_or_BA in SD.branch_ends():
-                i += 1
-                log_sg(f"EB: {E_or_EB} to {BE_or_BA}")
-
-                end_perf(PerfType.SEG)
                 for seg in bridge_branch_room_room(E_or_EB, BE_or_BA, FG):
-                    y += 1
                     yield seg
 
-                start_perf(PerfType.SEG)
-            
-            log_sg(f"no EB_BE segment for EB {E_or_EB} {es} after {i} BE pairs and {y} yields")
-
-    if (es == 0):
-        log_sg(f"{ERROR}THERE WEREN'T ANY ENTRANCES TO GEN FROM???{RESET}")
-
-    end_perf(PerfType.SEG)
-    raise RuntimeError(f"{WARNING}Failed to generate any E or EB segment after {RESET}{es}{WARNING} entrances{RESET}")
+    raise RuntimeError(f"{WARNING}Failed to generate any E or EB segment after entrances{RESET}")
 
 def branch_segments(SD: SourceDestinationHandler, FG: FlowGraphHandler, BS: BranchRoomPath):
-
-    start_perf(PerfType.SEG)
     #create a BranchSegment with BS and some BE or JB
-    i = 0
-
     for BA_or_BE in SD.branch_ends():
-        i += 1
-        log_sg(f"branch_segments: Try Branch bridge from {BS} to {BA_or_BE}")
-        end_perf(PerfType.SEG)
         for seg in bridge_branch_rp_room(BS, BA_or_BE, FG):
             yield seg
 
-        start_perf(PerfType.SEG)
-
-    end_perf(PerfType.SEG)
-    raise RuntimeError(f"Failed to generate any branch segment from {BS.room} after {i} attempts")
+    raise RuntimeError(f"Failed to generate any branch segment from {BS.room} after attempts")
 
 def john_branch_segment(SD: SourceDestinationHandler, FG: FlowGraphHandler, BS_or_EB: BranchRoomPath):
-
-    start_perf(PerfType.SEG)
-    
     #create TwowaySegment with BS BA or EB  and some JB
-    i = 0
-
     for JB in SD.john_branches():  
-        i += 1
-        end_perf(PerfType.SEG)
         for seg in bridge_branch_rp_room(BS_or_EB, JB, FG):
             return seg #return the first successful bridge
-
-        start_perf(PerfType.SEG)
-
-    end_perf(PerfType.SEG)
-    raise RuntimeError(f"Failed to generate John Branch segment from {BS_or_EB.room} after {i} JBs")
+        
+    raise RuntimeError(f"Failed to generate John Branch segment from {BS_or_EB.room} after JBs")
 
 def john_segment(SD: SourceDestinationHandler, FG: FlowGraphHandler, BE_or_E: BaseRoomPath):
     #create TwowaySegment with BE or E and some J
-
-    start_perf(PerfType.SEG)
-
     for J in SD.just_johns():
-        end_perf(PerfType.SEG)
         for seg in bridge_twoway_rp_room(BE_or_E, J, FG):
             return seg #return the first successful bridge
-        start_perf(PerfType.SEG)
 
-    end_perf(PerfType.SEG)
     raise RuntimeError(f"Failed to generate any John segment from {BE_or_E.room}")
 
 def between_branch_segments(SD: SourceDestinationHandler, FG: FlowGraphHandler, BE: BaseRoomPath):
     #create TwowaySegment with Be and some BS or BA
 
-    start_perf(PerfType.SEG)
-
-    i = 0
-
-    log_sg(f"Try seg from {BE} with BA: {len(SD.BA)} and BS: {len(SD.BS)}")
-
     for BA_or_BS in SD.branch_starts():
-
-        log_sg(f"{BE} to {BA_or_BS}")
-        i += 1
-        end_perf(PerfType.SEG)
         for seg in bridge_twoway_rp_room(BE, BA_or_BS, FG):
             yield seg
-        start_perf(PerfType.SEG)
 
-    end_perf(PerfType.SEG)
-    raise RuntimeError(f"Failed to generate any between branch segment from {BE.room} after {i} segments")
+    raise RuntimeError(f"Failed to generate any between branch segment from {BE.room} after segments")
 
 def ej_or_ejb_segment(SD: SourceDestinationHandler, FG: FlowGraphHandler):
     #Create TwowaySegemnt between E and J or BranchSegment between EB and JB
-
     #Pick either E or EB
-    start_perf(PerfType.SEG)
     try:
         for E_or_EB in SD.entrances():
             #if E, create a TwowaySegment with E and some J
-
-            log_sg(f"ej_or_ejb_segment with {E_or_EB} of branch type {E_or_EB.branch_type}")
-
             if (E_or_EB.branch_type == BranchType.NONE):
             
                 for J in SD.just_johns(): 
-                    end_perf(PerfType.SEG)
                     for seg in bridge_twoway_room_room(E_or_EB, J, FG):     
                         return seg #return first valid seg
-                    start_perf(PerfType.SEG)
 
-                        
                 raise RuntimeError(f"No J to match E {E_or_EB}")
             #if EB, create a Branch Segment with EB and some JB
             else:
                 for JB in SD.john_branches():
-                    end_perf(PerfType.SEG)
                     for seg in bridge_branch_room_room(E_or_EB, JB, FG):
                         return seg
-                    start_perf(PerfType.SEG)
 
                 raise RuntimeError(f"No JB to match EB {E_or_EB}")
     except RuntimeError as e:
-        log_sg(e)
+        pass
 
-    end_perf(PerfType.SEG)
     raise RuntimeError(f"Failed to generate any EJ or EJB segment")

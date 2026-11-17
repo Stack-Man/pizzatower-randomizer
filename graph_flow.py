@@ -34,6 +34,7 @@ from graph_from_rooms import FlowGraphHandler
 import time
 
 from colors import WARNING, RESET
+from perf_counter import start_perf, end_perf, PerfType
 
 LOGGING = False
 
@@ -44,6 +45,7 @@ LOGGING = False
 #an EXIT node will never have its steps list read
 #though they may be necessary for the flow process even if the end result is unneeded.
 def flow(G: FlowGraphHandler):
+    start_perf(PerfType.FLOW)
     log(f"Flow of G with {len(G.nodes())} nodes and {len(G.edges())} Edges begin")
 
     #initialize nodes with traversal to self
@@ -127,6 +129,7 @@ def flow(G: FlowGraphHandler):
             for d in to_remove:
                 N.steps.pop(d, None)
 
+    end_perf(PerfType.FLOW)
     return G
 
 def contains_repeat_subset(subset_traversals: dict[DoorNode | CombinedDoorNode, list[EdgeTraversal]], superset_traversal : EdgeTraversal):

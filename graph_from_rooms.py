@@ -12,6 +12,8 @@ from graph_transition_edge import transition_edges_from_nodes
 import networkx as nx
 from copy import deepcopy
 
+from perf_counter import start_perf, end_perf, PerfType
+
 class FlowGraphHandler():
     def __init__(self, G: nx.DiGraph):
         self.G = G
@@ -56,6 +58,7 @@ class FlowGraphHandler():
     
 
 def rooms_to_graph(rooms: list[Room], traversal_mode : TraversalMode = TraversalMode.MATCHING_PERFECT ):
+    start_perf(PerfType.GRAPH)
     path_edges, nodes = rooms_to_edges_and_nodes(rooms)
     transition_edges = transition_edges_from_nodes(nodes, traversal_mode)
 
@@ -66,6 +69,7 @@ def rooms_to_graph(rooms: list[Room], traversal_mode : TraversalMode = Traversal
 
     graph = graph_from_nodes_and_edges(nodes, edges)
 
+    end_perf(PerfType.GRAPH)
     return FlowGraphHandler(graph)
 
 def get_existing_node(node: DoorNode | CombinedDoorNode, door_nodes: list[DoorNode | CombinedDoorNode]):

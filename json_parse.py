@@ -7,6 +7,8 @@ from json_to_objects import json_to_rooms
 from settings import *
 from colors import ERROR, RESET, CAUTION, WARNING
 
+from perf_counter import start_perf, end_perf, PerfType
+
 FILENAMES = ["johngutter", "ancientcheese", "bloodsauce", "pizzascape",
             "fastfoodsaloon", "wasteyard", "funfarm", "oreganodesert", 
             "crustcove", "deepdish9", "gnomeforest", "golf",
@@ -15,6 +17,7 @@ FILENAMES = ["johngutter", "ancientcheese", "bloodsauce", "pizzascape",
             "crumblingtowerofpizza", "trickytreat", "tutorial", "tutorial_noise"]
 
 def parse_json_to_rooms_all(filenames):
+    start_perf(PerfType.JSON)
     if (not JSON_ROOMS_ALLOW_BRANCH_ROOMS):
         print(f"{WARNING}WARNING: IGNORING BRANCH ROOMS IN PARSE!{RESET}")
     if (not JSON_DOORS_ALLOW_TAXI_OR_ROCKET_DOORS):
@@ -33,6 +36,7 @@ def parse_json_to_rooms_all(filenames):
         new_rooms = parse_json_to_rooms(filename)
         all_rooms.extend(new_rooms)
 
+    end_perf(PerfType.JSON)
     return all_rooms
 
 def parse_json_to_rooms(filename):

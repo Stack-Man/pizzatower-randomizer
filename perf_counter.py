@@ -15,6 +15,9 @@ class PerfType(Enum):
     TRAVERSAL = 4
     SELECTION = 5
     CLEAN = 6
+    JSON = 7
+    GRAPH = 8
+    FLOW = 9
 
 start_times: dict[PerfType, float] = {}
 total_times: dict[PerfType, float] = {}
@@ -37,8 +40,10 @@ def end_perf(type: PerfType):
 
     total_times[type] = prev_time + new_time
 
-def print_perf():
+def print_perf_type(type: PerfType):
+    if type in total_times:
+        print(f"{type}: {total_times[type]}", flush = True)
 
+def print_perf():
     for type in PerfType:
-        if type in total_times:
-            print(f"{type}: {total_times[type]}")
+        print_perf_type(type)
