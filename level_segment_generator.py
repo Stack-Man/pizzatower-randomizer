@@ -6,13 +6,17 @@
 from json_source_destination import SourceDestinationHandler
 from graph_from_rooms import FlowGraphHandler
 
-from level_objects import BranchRoomPath, BaseRoomPath
+from level_objects import BranchRoomPath, BaseRoomPath, SelfLoopRoomPath, TwowaySegment
 
 from enums import BranchType
 
-from level_bridge import bridge_twoway_room_room, bridge_branch_room_room, bridge_branch_rp_room, bridge_twoway_rp_room
+from level_bridge import bridge_twoway_room_room, bridge_branch_room_room, bridge_branch_rp_room, bridge_twoway_rp_room, bridge_self_loop
 
 from colors import ERROR, RESET, CAUTION, WARNING
+
+from json_objects import Room
+
+import logging as log
 
 def entrance_or_entrance_branch_segments(SD: SourceDestinationHandler, FG: FlowGraphHandler):
     #Pick either E or EB
@@ -54,10 +58,48 @@ def john_branch_segment(SD: SourceDestinationHandler, FG: FlowGraphHandler, BS_o
 def john_segment(SD: SourceDestinationHandler, FG: FlowGraphHandler, BE_or_E: BaseRoomPath):
     #create TwowaySegment with BE or E and some J
     for J in SD.just_johns():
-        for seg in bridge_twoway_rp_room(BE_or_E, J, FG):
-            return seg #return the first successful bridge
+        if (J.needs_self_loop): #special case for minigolf_8
+            return john_segment_with_loop_rp(FG, BE_or_E, J)
+        else:      
+            for seg in bridge_twoway_rp_room(BE_or_E, J, FG):
+                return seg #return the first successful bridge
 
     raise RuntimeError(f"Failed to generate any John segment from {BE_or_E.room}")
+
+def john_segment_with_loop_rp(FG: FlowGraphHandler, BE_or_E: BaseRoomPath, J: Room):
+    for seg in bridge_twoway_rp_room(BE_or_E, J, FG):
+        try:
+            return john_segment_with_loop(seg, BE_or_E.room, J, FG)
+        except:
+            pass
+
+    raise RuntimeError(f"Failed to generate John segment from {BE_or_E.room} with loop")
+
+def john_segment_with_loop_room(FG: FlowGraphHandler, E: Room, J: Room):
+    for seg in bridge_twoway_room_room(E, J, FG):
+        try:
+            return john_segment_with_loop(seg, E, J, FG)
+        except:
+            pass
+
+    raise RuntimeError(f"Failed to generate John segment from {E} with loop")
+
+def john_segment_with_loop(seg: TwowaySegment, E_or_BE: Room, J: Room, FG: FlowGraphHandler):
+    try:
+        loop_path = bridge_self_loop(J, FG)
+        seg.has_loop_path = True
+        seg.loop_path = loop_path
+
+        self_loop_room = SelfLoopRoomPath(J, J.self_loop.start, J.self_loop.end)
+        seg.loop_room = self_loop_room
+
+        log.debug("success gen loop_path with seg")
+        return seg #return the first successful bridge  
+    except:
+        log.debug("failed to gen loop_path with seg")
+        pass #failed to bridge with loop path
+    
+    raise RuntimeError(f"Failed to generate any John segment from {E_or_BE} with loop")
 
 def between_branch_segments(SD: SourceDestinationHandler, FG: FlowGraphHandler, BE: BaseRoomPath):
     #create TwowaySegment with Be and some BS or BA
@@ -77,8 +119,11 @@ def ej_or_ejb_segment(SD: SourceDestinationHandler, FG: FlowGraphHandler):
             if (E_or_EB.branch_type == BranchType.NONE):
             
                 for J in SD.just_johns(): 
-                    for seg in bridge_twoway_room_room(E_or_EB, J, FG):     
-                        return seg #return first valid seg
+                    if (J.needs_self_loop):
+                        return john_segment_with_loop_room(FG, E_or_EB, J)
+                    else:
+                        for seg in bridge_twoway_room_room(E_or_EB, J, FG):     
+                            return seg #return first valid seg
 
                 raise RuntimeError(f"No J to match E {E_or_EB}")
             #if EB, create a Branch Segment with EB and some JB

@@ -162,6 +162,13 @@ class Path():
 """
 from colors import CAUTION, RESET
 
+class SelfLoop():
+    def __init__ (self, start: Path, end: Path, path_time: PathTime, allow_oneway: bool):
+        self.start = start
+        self.end = end
+        self.path_time = path_time
+        self.allow_oneway = allow_oneway
+
 class Room():
     def __init__(self, name, doors, paths : list[Path], john, entrance, is_forced_branch_any, is_forced_branch_start, needs_self_loop):
         self.name = name
@@ -179,6 +186,8 @@ class Room():
         self.is_forced_branch_start = is_forced_branch_start
         self.is_double_bookable = False
         self.needs_self_loop = needs_self_loop
+
+        self.self_loop : SelfLoop | Any = None
 
         for path in self.paths:
             path.room_name = name

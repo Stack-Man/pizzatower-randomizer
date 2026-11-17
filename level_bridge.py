@@ -3,9 +3,9 @@
 
 #Bridge two rooms using the Flow Graph and select their rooms
 
-from json_objects import Room
-from level_objects import TwowaySegment, BranchSegment, BranchRoomPath, BaseRoomPath
-from enums import RoomType, TraversalType, StartExitType
+from json_objects import Room, SelfLoop
+from level_objects import TwowaySegment, BranchSegment, BranchRoomPath, BaseRoomPath, RoomPath
+from enums import RoomType, TraversalType, StartExitType, PathTime
 from graph_from_rooms import FlowGraphHandler
 
 from level_get_traversal import get_traversal
@@ -57,6 +57,38 @@ def bridge_branch(start_rp: BranchRoomPath, end_rp: BranchRoomPath, FG: FlowGrap
 def bridge_oneway_branch(start_rp: BranchRoomPath, end_rp: BranchRoomPath, traversal_type: TraversalType, FG: FlowGraphHandler):
     traversal = get_traversal(start_rp, end_rp, FG, traversal_type)
     room_selection = select_rooms(FG, traversal, traversal_type)
+    return room_selection
+
+def bridge_self_loop(room: Room, FG: FlowGraphHandler):
+
+    if (not room.needs_self_loop):
+        raise ValueError(f"Invalid bridge_self_loop for {room}")
+
+    self_loop = room.self_loop
+
+    if (self_loop == None or type(self_loop) != SelfLoop):
+        raise ValueError(f"Invalid bridge_self_loop for {room}, self loop is not defined")
+
+    start_rp = RoomPath(room, self_loop.start)
+    end_rp = RoomPath(room, self_loop.end)
+
+    traversal_type = TraversalType.ANY
+
+    match self_loop.path_time:
+        case PathTime.NOTPIZZATIME:
+            traversal_type = TraversalType.NOTPIZZATIME
+        case PathTime.PIZZATIME:
+            traversal_type = TraversalType.PIZZATIME
+        case PathTime.BOTH:
+            if (self_loop.allow_oneway):
+                traversal_type = TraversalType.OW
+            else:
+                traversal_type = TraversalType.ANY
+            
+
+    traversal = get_traversal(start_rp, end_rp, FG, traversal_type)
+    room_selection = select_rooms(FG, traversal, traversal_type)
+
     return room_selection
 
 #Iterators that yield every potential combination of start path and end path for the selected SD

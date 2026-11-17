@@ -5,6 +5,8 @@ from settings import *
 from colors import WARNING, CAUTION, RESET
 import logging as log
 
+from json_modify_room import modify_room
+
 #-------------------
 #   JSON to Object
 #-------------------
@@ -21,7 +23,9 @@ def json_to_rooms(json):
             log.warning("%sfreezer_9 is being skipped! needs self loop handling in select_rooms.py%s", WARNING, RESET)
             continue
         elif (room.name == "minigolf_8"):
-            log.warning("%sminigolf_8 is being skipped! needs self loop handling and treatment as J instead of JB%s", WARNING, RESET)
+            #log.warning("%sminigolf_8 is being skipped! needs self loop handling and treatment as J instead of JB%s", WARNING, RESET)
+            minigolf_8 = modify_room(room, "minigolf_8")
+            rooms.append(minigolf_8)
             continue
         elif(room.name == "war_13"):
             log.warning("%swar_13 is being skipped! needs special room type and one way level generation%s", WARNING, RESET)

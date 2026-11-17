@@ -31,17 +31,18 @@ def test_parse_all():
 
         new_rooms = test_parse(filename)
 
-        #if (logger.isEnabledFor(log.DEBUG)):
-            #log_room_counts(f, new_rooms)
+        if (logger.isEnabledFor(log.DEBUG)):
+            log_room_counts(f, new_rooms)
         
         #print("ROOMS  OF ", f)
         #print("========================")
 
-        #if (f == "freezer"):
+        #if (f == "johngutter"):
             #print_rooms(new_rooms)
         
         all_rooms.extend(new_rooms)
 
+    log_room_counts("all", all_rooms)
 
     #print_unique_path_types(all_rooms)
     
@@ -98,12 +99,12 @@ def log_room_counts(name: str, rooms: list[Room]):
             case _:
                 N += 1
 
-    #log.debug("E:%s, EB:%s, J:%s, JB:%s, BS:%s, BE:%s, BA:%s, N:%s, %s", E, EB, J, JB, BS, BE, BA, N, name)
+    log.debug("E:%s, EB:%s, J:%s, JB:%s, BS:%s, BE:%s, BA:%s, N:%s, %s", E, EB, J, JB, BS, BE, BA, N, name)
 
     total_BS = BS + EB
     total_BE = JB + BE
 
-    log.debug("BS:%s, BE:%s, BA:%s, %s", total_BS, total_BE, BA, name)
+   #log.debug("BS:%s, BE:%s, BA:%s, %s", total_BS, total_BE, BA, name)
                         
                     
 

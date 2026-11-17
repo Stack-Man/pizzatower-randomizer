@@ -3,6 +3,7 @@
 
 from enums import RoomType
 from json_objects import Room, Path, Door
+from typing import Any
 
 class BaseRoomPath():
     def __init__(self, room: Room):
@@ -10,6 +11,12 @@ class BaseRoomPath():
 
     def __str__(self):
         return str(self.room)
+
+class SelfLoopRoomPath(BaseRoomPath):
+    def __init__(self, room: Room, start: Path, end: Path):
+        super().__init__(room)
+        self.start = start
+        self.end = end
 
 class RoomPath(BaseRoomPath):
     def __init__(self, room: Room, path: Path):
@@ -49,6 +56,9 @@ class TwowaySegment(LevelSegment):
     def __init__(self, start_room: BaseRoomPath, end_room: BaseRoomPath, between_rooms: RoomSelection):
         super().__init__(start_room, end_room)
         self.between_rooms = between_rooms
+        self.has_loop_path : bool = False
+        self.loop_path : Any = None
+        self.loop_room: Any = None
 
     def __str__(self):
         msg = "TW Seg = S:" + str(self.start_room)
@@ -67,6 +77,10 @@ class TwowaySegment(LevelSegment):
             msg += " " + str(self.end_room.branch_door)
         elif(type(self.end_room) == RoomPath):
             msg += " " + str(self.end_room.path)
+
+        if (self.has_loop_path):
+            msg += f"\n     LOOP PATH: {self.loop_room.room} {self.loop_room.start.exit_door} > "
+            msg += str(self.loop_path) + f"{self.loop_room.room} {self.loop_room.end.start_door}"
 
         return msg
 

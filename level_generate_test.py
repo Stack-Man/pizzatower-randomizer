@@ -23,7 +23,7 @@ from perf_counter import print_perf, print_perf_type, PerfType
 import log_config
 import logging as log
 
-to_test = FILENAMES
+to_test = ["golf"]
 
 def get_SD_FG_rooms(fn):
     all_rooms = parse_json_to_rooms_all(fn)
