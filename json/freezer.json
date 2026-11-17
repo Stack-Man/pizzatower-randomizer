@@ -269,6 +269,7 @@
 		
 		{
 			"title" : "freezer_9",
+			"needsselfloop": true,
 			"maxscore" : 0,
 			"loop" : true,
 			"doors" :

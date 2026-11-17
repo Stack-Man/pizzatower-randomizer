@@ -91,7 +91,7 @@ class Path():
         #apply room when adding paths to room 
         #deepcopy automatically prevents circular deep copying with this ref
         #used during room selection to flush out all paths of a consumed DB room
-        self.room : Room = Room("", [], [], False, False, False, False)
+        self.room : Room = Room("", [], [], False, False, False, False, False)
 
         #apply edge when adding paths to edge
         #used during room selection to quickly flush out all paths of a DB room from their respective edges
@@ -163,7 +163,7 @@ class Path():
 from colors import CAUTION, RESET
 
 class Room():
-    def __init__(self, name, doors, paths : list[Path], john, entrance, is_forced_branch_any, is_forced_branch_start):
+    def __init__(self, name, doors, paths : list[Path], john, entrance, is_forced_branch_any, is_forced_branch_start, needs_self_loop):
         self.name = name
 
         #if (name == "graveyard_7"):
@@ -178,6 +178,7 @@ class Room():
         self.is_forced_branch_any = is_forced_branch_any
         self.is_forced_branch_start = is_forced_branch_start
         self.is_double_bookable = False
+        self.needs_self_loop = needs_self_loop
 
         for path in self.paths:
             path.room_name = name

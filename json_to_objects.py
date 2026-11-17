@@ -3,17 +3,11 @@ from enums import *
 from json_keys import *
 from settings import *
 from colors import WARNING, CAUTION, RESET
-
+import logging as log
 
 #-------------------
 #   JSON to Object
 #-------------------
-
-LOGGING = False
-
-def log(msg):
-    if (LOGGING):
-        print("JSON: " + msg)
 
 
 def json_to_rooms(json):
@@ -22,6 +16,22 @@ def json_to_rooms(json):
 
     for json_room in json_rooms:
         room = json_to_room(json_room)
+
+        if (room.name == "freezer_9"):
+            log.warning("%sfreezer_9 is being skipped! needs self loop handling in select_rooms.py%s", WARNING, RESET)
+            continue
+        elif (room.name == "minigolf_8"):
+            log.warning("%sminigolf_8 is being skipped! needs self loop handling and treatment as J instead of JB%s", WARNING, RESET)
+            continue
+        elif(room.name == "war_13"):
+            log.warning("%swar_13 is being skipped! needs special room type and one way level generation%s", WARNING, RESET)
+            continue
+        elif(room.name == "tower_entrance"):
+            log.warning("%stower_entrance is being skipped! needs special room type and one way level generation%s", WARNING, RESET)
+            continue
+        elif(room.name == "tower_finalhallway"):
+            log.warning("%stower_finalhallway is being skipped! needs special room type and one way level generation%s", WARNING, RESET)
+            continue
 
         #skip rooms with one or less transitions if disallowed
         if (not JSON_ROOMS_ALLOW_LOOP_ROOMS and room.room_type == RoomType.LOOP):
@@ -32,7 +42,7 @@ def json_to_rooms(json):
 
         if (not JSON_ROOMS_ALLOW_BRANCH_ROOMS and (room.room_type == RoomType.BRANCH or room.branch_type is not BranchType.NONE)):
             continue
-
+        
         rooms.append(room)
         
     return rooms
@@ -45,20 +55,20 @@ def json_to_room(json_room):
     room_name = json_room[JSON_ROOM_NAME]
     is_forced_branch_any = JSON_FORCED_BRANCH_ANY in json_room
     is_forced_branch_start = JSON_FORCED_BRANCH_START in json_room
+    needs_self_loop = JSON_NEEDS_SELF_LOOP in json_room
     
     doors = json_to_doors(json_room)
     
     paths = doors_to_paths(doors, is_john_room)
     
-    room = Room(room_name, doors, paths, is_john_room, is_entrance_room, is_forced_branch_any, is_forced_branch_start)
+    room = Room(room_name, doors, paths, is_john_room, is_entrance_room, is_forced_branch_any, is_forced_branch_start, needs_self_loop)
     
     room.branch_type = get_branch_type(room)
     
     room.room_type =  get_room_type(room)
     
     #TODO: check for CTOP Entrance, CTOP Exit, War EXIT
-    
-    log(f"Processed {room}")
+
     return room
 
 def json_to_doors(json_room):
@@ -118,6 +128,8 @@ def json_to_door(json_door):
 
     is_loop = DOOR_LOOP in json_door
 
+
+
     door = Door(letter,
                 door_type,
                 door_dir,
@@ -129,7 +141,8 @@ def json_to_door(json_door):
                 access_type,
                 path_time_if_start,
                 if_notpizzatime_exit_only,
-                is_loop)
+                is_loop
+                )
     
     return door
 
@@ -208,8 +221,6 @@ def get_branch_type(room):
     #branchstart and branchend values mean the door is a branchmid?
     if room.has_john and has_NPT_to_PT_path(room):
         return BranchType.END
-    elif room.has_john:
-        log(f"  {WARNING}{room} has john but is not branch!{RESET}")
     
     if room.has_entrance and has_entrance_branch_paths(room):
         return BranchType.START
@@ -275,8 +286,6 @@ def has_NPT_to_PT_path(room):
     for path in room.paths:
         if path.start_door.start_path_time == PathTime.NOTPIZZATIME and path.exit_door.exit_path_time == PathTime.PIZZATIME:
             return True
-        else:
-            log(f"Path {path} is {path.start_door.start_path_time} to {path.exit_door.exit_path_time}")
     
     return False
 
