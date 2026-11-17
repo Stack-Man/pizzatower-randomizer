@@ -115,24 +115,54 @@ def ej_or_ejb_segment(SD: SourceDestinationHandler, FG: FlowGraphHandler):
     #Pick either E or EB
     try:
         for E_or_EB in SD.entrances():
-            #if E, create a TwowaySegment with E and some J
-            if (E_or_EB.branch_type == BranchType.NONE):
+
+            log.debug("Try %s immediate to J/JB", E_or_EB)
             
-                for J in SD.just_johns(): 
-                    if (J.needs_self_loop):
-                        return john_segment_with_loop_room(FG, E_or_EB, J)
-                    else:
-                        for seg in bridge_twoway_room_room(E_or_EB, J, FG):     
-                            return seg #return first valid seg
+            try: #inner try catch allows us to try with the next E instead of exiting immediately 
 
-                raise RuntimeError(f"No J to match E {E_or_EB}")
-            #if EB, create a Branch Segment with EB and some JB
-            else:
-                for JB in SD.john_branches():
-                    for seg in bridge_branch_room_room(E_or_EB, JB, FG):
-                        return seg
+                #if E, create a TwowaySegment with E and some J
+                if (E_or_EB.branch_type == BranchType.NONE):
 
-                raise RuntimeError(f"No JB to match EB {E_or_EB}")
+                    log.debug("Try %s immediate to J with %i Js", E_or_EB, len(SD.J))
+                
+                    for J in SD.just_johns(): 
+
+                        log.debug("Try %s immediate to %s", E_or_EB, J)
+
+                        #make sure we try all Js before terminating
+                        try:
+                            if (J.needs_self_loop):
+                                return john_segment_with_loop_room(FG, E_or_EB, J)
+                            else:
+                                for seg in bridge_twoway_room_room(E_or_EB, J, FG):     
+                                    return seg #return first valid seg
+                        except:
+                            pass
+
+                    raise RuntimeError(f"No J to match E {E_or_EB}")
+                
+                #if EB, create a Branch Segment with EB and some JB
+                else:
+
+                    log.debug("Try %s immediate to JB with %i JBs", E_or_EB, len(SD.JB))
+                    
+                    for JB in SD.john_branches():
+
+                        log.debug("Try %s immediate to %s", E_or_EB, JB)
+
+                        #make sure we try all JBs before terminating
+                        try:
+                            for seg in bridge_branch_room_room(E_or_EB, JB, FG):
+                                return seg
+                        except:
+                            pass
+
+                    log.debug(f"No JB to match EB {E_or_EB}")
+                        
+            except:
+                
+                pass
+            
     except RuntimeError as e:
         pass
 

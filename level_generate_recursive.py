@@ -36,10 +36,6 @@ from colors import ERROR, RESET, CONTINUE, FAIL, CAUTION
 MIN_BRANCH_COUNT = 1
 MAX_BRANCH_COUNT = 2
 
-#TODO: branching tries many branch segments even if the continuation fails many times
-#possibly trying redundant paths after? could we reduce? but have to account for path replenishing...
-#seems to try the segment, then just gives up without continuing to a between branch...
-
 def generate_levels_recursive_all(SD: SourceDestinationHandler, FG: FlowGraphHandler):
     levels = []
     
@@ -87,8 +83,6 @@ def generate_level_recursive_start(SD: SourceDestinationHandler, FG: FlowGraphHa
         log.debug("%sBSs left: %i, BEs left: %i, BAs left:%i%s", CAUTION, len(SD.BS), len(SD.BE), len(SD.BA), RESET)
     
     try:
-        i = 0
-        
         for entrance_segment in entrance_or_entrance_branch_segments(SD, FG):
 
             log.debug("%sTRY entrance_segment: %s to %s%s", CONTINUE, entrance_segment.start_room, entrance_segment.end_room, RESET)
