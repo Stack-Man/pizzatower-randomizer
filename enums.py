@@ -56,6 +56,10 @@ class RoomType(Enum):
     ENTRANCE = 3
     JOHN = 4
     LOOP = 5
+    WAR_START = 6
+    WAR_EXIT = 7
+    CTOP_START = 8
+    CTOP_EXIT = 9
 
 class StartExitType(Enum):
     START = "S"

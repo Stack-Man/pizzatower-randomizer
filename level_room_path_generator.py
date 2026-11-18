@@ -7,11 +7,12 @@
 #iterate over potential RoomPath candidates for a room type
 
 from json_objects import Room, Path
-from enums import StartExitType, RoomType, PathTime, DoorType
+from enums import StartExitType, RoomType, PathTime, DoorType, TraversalType
 from pairs import pairs
 from level_objects import BranchRoomPath, RoomPath
 from colors import ERROR, RESET
 
+import logging as log
 #for generators, avoid raising error on generation exhausation
 #as the calling loop needs to continue cleanly
 
@@ -127,3 +128,32 @@ def entrance_room_path(room: Room):
 def any_room_path(room: Room):
     for P in room.paths:
         yield RoomPath(room, P)
+
+def oneway_entrance_room_path(room: Room, traversal_type: TraversalType):
+    for P in room.paths:
+        if P.start_door.letter == "A" and P.start_door.door_type == DoorType.LEVELDOOR:
+            
+            path_times = get_times(traversal_type)
+
+            if P.get_path_time() in path_times:
+                yield RoomPath(room, P)
+                    
+    
+def oneway_exit_room_path(room: Room, traversal_type: TraversalType):
+    for P in room.paths:
+
+        if P.exit_door.letter == "A" and P.exit_door.door_type == DoorType.LEVELDOOR:
+
+            path_times = get_times(traversal_type)
+
+            if P.get_path_time() in path_times:
+                yield RoomPath(room, P)
+
+def get_times(traversal_type: TraversalType):
+    match traversal_type:
+        case TraversalType.NOTPIZZATIME:
+            return [PathTime.NOTPIZZATIME, PathTime.BOTH]
+        case TraversalType.PIZZATIME:
+            return [PathTime.PIZZATIME, PathTime.BOTH]
+        case _:
+            raise NotImplementedError("%soneway_entrance_room_path not implemented for traversal type %s%s", ERROR, traversal_type, RESET)

@@ -22,10 +22,12 @@
 
 from json_source_destination import SourceDestinationHandler
 
+from json_objects import Room
+from enums import TraversalType
 from level_objects import LevelSegment, Level, TwowaySegment, BranchSegment, BranchRoomPath
 from graph_from_rooms import FlowGraphHandler
 
-from level_segment_generator import  entrance_or_entrance_branch_segments, branch_segments, john_segment, john_branch_segment, between_branch_segments, ej_or_ejb_segment
+from level_segment_generator import  entrance_or_entrance_branch_segments, branch_segments, john_segment, john_branch_segment, between_branch_segments, ej_or_ejb_segment, oneway_segment
 
 from perf_counter import PerfType, start_perf, end_perf, print_perf_type
 import logging as log
@@ -61,13 +63,34 @@ def generate_levels_recursive_all(SD: SourceDestinationHandler, FG: FlowGraphHan
             end_perf(PerfType.GEN)
             print_perf_type(PerfType.GEN)
             log.debug("%i: %s", i, level)
-            
 
     except RuntimeError as e:
+            pass
+
+
+    try:
+        war_segments, war_FG = generate_level_oneway(current_FG, SD.WAR_START, SD.WAR_EXIT, TraversalType.NOTPIZZATIME)
+        war_level = Level(segments=war_segments)
+        levels.append(war_level)
+
+        i += 1
+
+        log.debug("%i: %s", i, war_level)
+    except:
         pass
 
+    try:
+        ctop_segments, ctop_FG = generate_level_oneway(war_FG, SD.CTOP_START, SD.CTOP_EXIT, TraversalType.PIZZATIME)
+        ctop_level = Level(segments=ctop_segments)
+        levels.append(ctop_level)
 
-    log.debug("Generated %i levels of %i", i, level_count)
+        i += 1
+
+        log.debug("%i: %s", i, ctop_level)
+    except:
+        pass
+
+    log.debug("Generated %i levels of %i", i, level_count + 2)
 
     return levels, current_SD, current_FG
 
@@ -300,3 +323,11 @@ def generate_level_recursive_between_branch(SD: SourceDestinationHandler, FG: Fl
     raise RuntimeError(f"{ERROR}Failed to generate Between Branch Segment{RESET}")
 
 
+def generate_level_oneway(FG: FlowGraphHandler, start: Room, exit: Room, traversal_type: TraversalType):
+    segment = oneway_segment(FG, start, exit, traversal_type)
+
+    segments: list[BranchSegment|TwowaySegment] = []
+
+    segments.append(segment)
+
+    return segments, FG

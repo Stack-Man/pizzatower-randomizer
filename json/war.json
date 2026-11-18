@@ -374,6 +374,12 @@
 					{
 						"type" : "shotgun"
 					}
+				},
+				{
+					"letter" : "A",
+					"type" : "leveldoor",
+					"exitonly" : true
+
 				}
 			]
 		},

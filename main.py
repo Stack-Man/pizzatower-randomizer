@@ -12,7 +12,6 @@ from graph_collapse import collapse_all_nodes_and_edges
 
 from settings import TraversalMode,  GRAPH_TRAVERSAL_MODE
 
-#TODO: minigolf_8 needs special johnloop type, loops to self, and must be used as J and not JB
 #TODO: war and ctop need special creation logic and exit types with OW segment creation
 
 #TODO: only 9 levels generated, even though it should be around 20 (and all levels can generate individually)

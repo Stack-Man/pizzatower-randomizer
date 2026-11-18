@@ -23,18 +23,28 @@ def json_to_rooms(json):
             log.warning("%sfreezer_9 is being skipped! needs self loop handling in select_rooms.py%s", WARNING, RESET)
             continue
         elif (room.name == "minigolf_8"):
-            #log.warning("%sminigolf_8 is being skipped! needs self loop handling and treatment as J instead of JB%s", WARNING, RESET)
             minigolf_8 = modify_room(room, "minigolf_8")
             rooms.append(minigolf_8)
             continue
-        elif(room.name == "war_13"):
-            log.warning("%swar_13 is being skipped! needs special room type and one way level generation%s", WARNING, RESET)
+        elif(room.name == "war_1"):
+            room.room_type = RoomType.WAR_START
+            rooms.append(room)
+            log.debug("ADDED WAR_1 as WAR_START")
             continue
-        elif(room.name == "tower_entrance"):
-            log.warning("%stower_entrance is being skipped! needs special room type and one way level generation%s", WARNING, RESET)
+        elif(room.name == "war_13"):
+            room.room_type = RoomType.WAR_EXIT
+            rooms.append(room)
+            log.debug("ADDED WAR_13 as WAR_EXIT")
+            continue
+        elif(room.name == "tower_entrancehall"):
+            room.room_type = RoomType.CTOP_EXIT
+            rooms.append(room)
+            log.debug("ADDED tower_entrancehall as CTOP_EXIT")
             continue
         elif(room.name == "tower_finalhallway"):
-            log.warning("%stower_finalhallway is being skipped! needs special room type and one way level generation%s", WARNING, RESET)
+            room.room_type = RoomType.CTOP_START
+            rooms.append(room)
+            log.debug("ADDED tower_finalhallway as CTOP_START")
             continue
 
         #skip rooms with one or less transitions if disallowed

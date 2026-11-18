@@ -28,12 +28,14 @@
         {
           "letter": "B",
           "type": "horizontal",
-          "dir": "left"
+          "dir": "left",
+          "pizzatime": true
         },
         {
           "letter": "C",
           "type": "horizontal",
-          "dir": "left"
+          "dir": "left",
+          "pizzatime": true
         }
       ]
     },
@@ -102,12 +104,14 @@
         {
           "letter": "D",
           "type": "horizontal",
-          "dir": "left"
+          "dir": "left",
+          "pizzatime": true
         },
         {
           "letter": "C",
           "type": "horizontal",
-          "dir": "right"
+          "dir": "right",
+          "pizzatime": true
         }
       ]
     },
@@ -173,13 +177,15 @@
           "letter": "D",
           "type": "horizontal",
           "dir": "right",
-          "startonly": true
+          "startonly": true,
+          "pizzatime": true
         },
         {
           "letter": "E",
           "type": "horizontal",
           "dir": "left",
-          "exitonly": true
+          "exitonly": true,
+          "pizzatime": true
         }
       ]
     },
@@ -247,12 +253,14 @@
         {
           "letter": "D",
           "type": "horizontal",
-          "dir": "left"
+          "dir": "left",
+          "pizzatime": true
         },
         {
           "letter": "A",
           "type": "horizontal",
-          "dir": "right"
+          "dir": "right",
+          "pizzatime": true
         }
       ]
     },
@@ -312,28 +320,33 @@
         {
           "letter": "C",
           "type": "horizontal",
-          "dir": "left"
+          "dir": "left",
+          "pizzatime": true
         },
         {
           "letter": "B",
           "type": "horizontal",
-          "dir": "right"
+          "dir": "right",
+          "pizzatime": true
         }
       ]
     },
     {
       "title": "tower_johngutterhall",
       "maxscore": 0,
+      "exit": true,
       "doors": [
         {
           "letter": "C",
           "type": "horizontal",
-          "dir": "right"
+          "dir": "right",
+          "pizzatime": true
         },
         {
           "letter": "B",
           "type": "horizontal",
-          "dir": "left"
+          "dir": "left",
+          "pizzatime": true
         }
       ]
     },
@@ -345,13 +358,15 @@
         {
           "letter": "A",
           "type": "leveldoor",
-          "exitonly": true
+          "exitonly": true,
+          "pizzatime": true
         },
         {
           "letter": "B",
           "type": "horizontal",
           "dir": "right",
-          "startonly": true
+          "startonly": true,
+          "pizzatime": true
         }
       ]
     }

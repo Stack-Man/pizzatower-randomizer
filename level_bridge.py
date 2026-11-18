@@ -10,9 +10,11 @@ from graph_from_rooms import FlowGraphHandler
 
 from level_get_traversal import get_traversal
 from level_select_rooms import select_rooms
-from level_room_path_generator import branch_room_path, room_path_cap_TW, entrance_room_path
+from level_room_path_generator import branch_room_path, room_path_cap_TW, entrance_room_path, oneway_entrance_room_path, oneway_exit_room_path
 
 from colors import RESET, ERROR
+
+import logging as log
 
 #Main Bridge functions that take a Source and Destination 
 #with their selected paths and creates a LevelSegment from it
@@ -42,8 +44,8 @@ def bridge_branch(start_rp: BranchRoomPath, end_rp: BranchRoomPath, FG: FlowGrap
 
     try:
     
-        NPT = bridge_oneway_branch(start_rp, end_rp, TraversalType.NOTPIZZATIME, FG)
-        PT = bridge_oneway_branch(end_rp, start_rp, TraversalType.PIZZATIME, FG)
+        NPT = bridge_oneway(start_rp, end_rp, TraversalType.NOTPIZZATIME, FG)
+        PT = bridge_oneway(end_rp, start_rp, TraversalType.PIZZATIME, FG)
 
         return BranchSegment(start_rp, end_rp, PT, NPT)
     except RuntimeError as e:
@@ -54,7 +56,7 @@ def bridge_branch(start_rp: BranchRoomPath, end_rp: BranchRoomPath, FG: FlowGrap
     raise RuntimeError(f"bridge_branch: failed traversal or room_selection between {start_rp.room} and {end_rp.room}")
     
 
-def bridge_oneway_branch(start_rp: BranchRoomPath, end_rp: BranchRoomPath, traversal_type: TraversalType, FG: FlowGraphHandler):
+def bridge_oneway(start_rp: BranchRoomPath | RoomPath, end_rp: BranchRoomPath | RoomPath, traversal_type: TraversalType, FG: FlowGraphHandler):
     traversal = get_traversal(start_rp, end_rp, FG, traversal_type)
     room_selection = select_rooms(FG, traversal, traversal_type)
     return room_selection
@@ -151,5 +153,21 @@ def bridge_branch_rp_room(start_rp: BranchRoomPath, end_room: Room, FG: FlowGrap
         except RuntimeError as e:
             pass
 
+def bridge_oneway_room_room(start_room: Room, end_room: Room, traversal_type: TraversalType, FG: FlowGraphHandler):
+    e = 0
 
+    for start_rp in oneway_entrance_room_path(start_room, traversal_type):
+        
+        for end_rp in oneway_exit_room_path(end_room, traversal_type):
+
+            e += 1
+
+            try:
+                selection = bridge_oneway(start_rp, end_rp, traversal_type, FG)
+                return TwowaySegment(start_rp, end_rp, selection)
+            except RuntimeError as e:
+                pass
+            
+    log.debug("No oneway bridge between %s and %s after %i attempts", start_room, end_room, e)
+    raise RuntimeError(f"No oneway bridge between {start_room} and {end_room} after {e} attempts")
         

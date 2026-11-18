@@ -10,7 +10,8 @@ from colors import WARNING, RESET
 from level_objects import LevelSegment
 
 class SourceDestinationHandler():
-    def __init__ (self, E: list[Room], EB: list[Room], J: list[Room], JB: list[Room], BA: list[Room], BS: list[Room], BE: list[Room]):
+    def __init__ (self, E: list[Room], EB: list[Room], J: list[Room], JB: list[Room], BA: list[Room], BS: list[Room], BE: list[Room]
+                  , WAR_START: Room, WAR_EXIT: Room, CTOP_START: Room, CTOP_EXIT: Room):
 
         #TODO: use seeded randomization to randomize the order of rooms. This will be part of our randomization.
 
@@ -21,6 +22,10 @@ class SourceDestinationHandler():
         self.BA = BA
         self.BS = BS
         self.BE = BE
+        self.WAR_START = WAR_START
+        self.WAR_EXIT = WAR_EXIT
+        self.CTOP_START = CTOP_START
+        self.CTOP_EXIT = CTOP_EXIT
 
     def remove_SD_in_segment(self, seg: LevelSegment):
         source = seg.start_room.room
@@ -86,7 +91,8 @@ class SourceDestinationHandler():
     def copy(self):
         #only the lists themselves need to be unique
         #the Rooms within are just for reference
-        return SourceDestinationHandler(self.E.copy(), self.EB.copy(), self.J.copy(), self.JB.copy(), self.BA.copy(), self.BS.copy(), self.BE.copy())
+        return SourceDestinationHandler(self.E.copy(), self.EB.copy(), self.J.copy(), self.JB.copy(), self.BA.copy(), self.BS.copy(), self.BE.copy(),
+                                        self.WAR_START, self.WAR_EXIT, self.CTOP_START, self.CTOP_EXIT)
 
 
 def get_source_destination_rooms(rooms: list[Room]):
@@ -94,6 +100,11 @@ def get_source_destination_rooms(rooms: list[Room]):
     entrance = []
     john = []
     branch = []
+
+    WS = None
+    WE = None
+    CS = None
+    CE = None
 
     for room in rooms:
 
@@ -104,13 +115,25 @@ def get_source_destination_rooms(rooms: list[Room]):
                 john.append(room)
             case RoomType.BRANCH:
                 branch.append(room)
+            case RoomType.WAR_START:
+                WS = room
+            case RoomType.WAR_EXIT:
+                WE = room
+            case RoomType.CTOP_START:
+                CS = room
+            case RoomType.CTOP_EXIT:
+                CE = room
 
-    E, EB = branch_from_EJ(entrance)
-    J, JB = branch_from_EJ(john)
+    if (WS is not None and WE is not None and CS is not None and CE is not None):
 
-    BA, BS, BE = branch_by_type(branch)
+        E, EB = branch_from_EJ(entrance)
+        J, JB = branch_from_EJ(john)
 
-    return SourceDestinationHandler(E, EB, J, JB, BA, BS, BE)
+        BA, BS, BE = branch_by_type(branch)
+
+        return SourceDestinationHandler(E, EB, J, JB, BA, BS, BE, WS, WE, CS, CE)
+    else:
+        raise RuntimeError("Failed to find WS %s, WE %s, CS  %s or CE %s in rooms", WS, WE, CS, CE)
 
 def branch_from_EJ(rooms: list[Room]):
 

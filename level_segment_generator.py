@@ -8,9 +8,9 @@ from graph_from_rooms import FlowGraphHandler
 
 from level_objects import BranchRoomPath, BaseRoomPath, SelfLoopRoomPath, TwowaySegment
 
-from enums import BranchType
+from enums import BranchType, TraversalType
 
-from level_bridge import bridge_twoway_room_room, bridge_branch_room_room, bridge_branch_rp_room, bridge_twoway_rp_room, bridge_self_loop
+from level_bridge import bridge_twoway_room_room, bridge_branch_room_room, bridge_branch_rp_room, bridge_twoway_rp_room, bridge_self_loop, bridge_oneway_room_room
 
 from colors import ERROR, RESET, CAUTION, WARNING
 
@@ -167,3 +167,6 @@ def ej_or_ejb_segment(SD: SourceDestinationHandler, FG: FlowGraphHandler):
         pass
 
     raise RuntimeError(f"Failed to generate any EJ or EJB segment")
+
+def oneway_segment(FG: FlowGraphHandler, S: Room, E: Room, traversal_type: TraversalType):
+    return bridge_oneway_room_room(S, E, traversal_type, FG)
