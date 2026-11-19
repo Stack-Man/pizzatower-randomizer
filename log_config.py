@@ -14,7 +14,8 @@ class FileStyleFilter(logging.Filter):
         "level_bridge.py" :             ("      ", "[BRIDGE]"),
         "level_room_path_generator.py": ("          ", "[ROOMPATH]"),
         "level_get_traversal.py":       ("              ", "[TRAVERSAL]"),
-        "level_select_rooms.py":        ("                  ", "[SELECTION]")
+        "level_select_rooms.py":        ("                  ", "[SELECTION]"),
+        "level_grow.py":       ("", "[GROW] "),
     }
 
     def filter(self, record):

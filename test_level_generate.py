@@ -42,7 +42,7 @@ def test_generate():
     print_perf_type(PerfType.JSON)
     print_perf_type(PerfType.GRAPH)
     print_perf_type(PerfType.FLOW)
-    levels, new_SD, new_FG = generate_levels_recursive_all(SD, FG)
+    levels, SD2, FG2 = generate_levels_recursive_all(SD, FG)
 
     print_levels(levels)
 

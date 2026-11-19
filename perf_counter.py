@@ -18,6 +18,7 @@ class PerfType(Enum):
     JSON = 7
     GRAPH = 8
     FLOW = 9
+    GROWTH = 10
 
 start_times: dict[PerfType, float] = {}
 total_times: dict[PerfType, float] = {}
@@ -39,6 +40,8 @@ def end_perf(type: PerfType):
     start_times.pop(type) #remove type so we ensure we never call end more than start
 
     total_times[type] = prev_time + new_time
+
+    return new_time
 
 def print_perf_type(type: PerfType):
     if type in total_times:

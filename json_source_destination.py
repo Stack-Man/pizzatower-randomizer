@@ -101,10 +101,10 @@ def get_source_destination_rooms(rooms: list[Room]):
     john = []
     branch = []
 
-    WS = None
-    WE = None
-    CS = None
-    CE = None
+    WS = Room("INVALID_WS", [], [], False, False, False, False, False)
+    WE = Room("INVALID_WE", [], [], False, False, False, False, False)
+    CS = Room("INVALID_CS", [], [], False, False, False, False, False)
+    CE = Room("INVALID_CE", [], [], False, False, False, False, False)
 
     for room in rooms:
 
@@ -124,16 +124,12 @@ def get_source_destination_rooms(rooms: list[Room]):
             case RoomType.CTOP_EXIT:
                 CE = room
 
-    if (WS is not None and WE is not None and CS is not None and CE is not None):
+    E, EB = branch_from_EJ(entrance)
+    J, JB = branch_from_EJ(john)
 
-        E, EB = branch_from_EJ(entrance)
-        J, JB = branch_from_EJ(john)
+    BA, BS, BE = branch_by_type(branch)
 
-        BA, BS, BE = branch_by_type(branch)
-
-        return SourceDestinationHandler(E, EB, J, JB, BA, BS, BE, WS, WE, CS, CE)
-    else:
-        raise RuntimeError("Failed to find WS %s, WE %s, CS  %s or CE %s in rooms", WS, WE, CS, CE)
+    return SourceDestinationHandler(E, EB, J, JB, BA, BS, BE, WS, WE, CS, CE)
 
 def branch_from_EJ(rooms: list[Room]):
 

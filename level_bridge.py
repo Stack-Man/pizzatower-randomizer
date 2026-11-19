@@ -170,4 +170,13 @@ def bridge_oneway_room_room(start_room: Room, end_room: Room, traversal_type: Tr
             
     log.debug("No oneway bridge between %s and %s after %i attempts", start_room, end_room, e)
     raise RuntimeError(f"No oneway bridge between {start_room} and {end_room} after {e} attempts")
+
         
+def bridge_rp_rp(A: BaseRoomPath, B: BaseRoomPath, FG: FlowGraphHandler, traversal_type: TraversalType, force_extension = False):
+
+    if (force_extension):
+        log.warning("force_extension not implemented")
+    
+    traversal = get_traversal(A, B, FG, traversal_type)
+    room_selection = select_rooms(FG, traversal, traversal_type)
+    return room_selection

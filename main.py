@@ -9,22 +9,16 @@ from graph_flow import flow
 from level_generate_recursive import generate_levels_recursive_all
 from seeded_random import set_seed
 from graph_collapse import collapse_all_nodes_and_edges
+from level_grow import grow_levels
 
-from settings import TraversalMode,  GRAPH_TRAVERSAL_MODE
+from settings import TraversalMode,  GRAPH_TRAVERSAL_MODE, get_growth_settings
 
-#TODO: war and ctop need special creation logic and exit types with OW segment creation
+def get_SD_FG_rooms(fn: list[str], traversal_mode : TraversalMode):
 
-#TODO: only 9 levels generated, even though it should be around 20 (and all levels can generate individually)
-#happens even if we use ARBITRARY NO TURNAROUNDS, which should have more than enough paths to match
-#ther may be some logic preventing thed oor nodes from being matchd together?
-
-def get_SD_FG_rooms(fn):
-    set_seed(0)
-    
     all_rooms = parse_json_to_rooms_all(fn)
     SD = get_source_destination_rooms(all_rooms)
 
-    FG = rooms_to_graph(all_rooms, traversal_mode=GRAPH_TRAVERSAL_MODE)
+    FG = rooms_to_graph(all_rooms, traversal_mode=traversal_mode)
     FG = collapse_all_nodes_and_edges(FG)
     FG = flow(FG)
 
@@ -34,10 +28,12 @@ def get_SD_FG_rooms(fn):
     
 
 def generate_levels():
-    return
-    SD, FG = get_SD_FG(FILENAMES)
+    set_seed(0)
+    
+    SD, FG, rooms = get_SD_FG_rooms(FILENAMES, GRAPH_TRAVERSAL_MODE)
 
-    levels = generate_levels_recursive_all(SD, FG)
+    levels, SD2, FG2 = generate_levels_recursive_all(SD, FG)
+    levels = grow_levels(levels, FG2, get_growth_settings())
 
     #TODO: grow size of levels
 

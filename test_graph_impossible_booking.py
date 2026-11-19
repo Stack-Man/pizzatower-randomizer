@@ -17,7 +17,7 @@ def test_2_edges_1_room():
     path_AB.is_double_bookable = True
     path_CD.is_double_bookable = True
 
-    room_AB_CD = Room("room_AB_CD", [door_A, door_B, door_C, door_D], [path_AB, path_CD], False, False, False, False)
+    room_AB_CD = Room("room_AB_CD", [door_A, door_B, door_C, door_D], [path_AB, path_CD], False, False, False, False, False)
 
     room_AB_CD.is_double_bookable = True
     room_AB_CD.room_type = RoomType.NORMAL
@@ -45,8 +45,8 @@ def test_2_edges_2_rooms():
     path_AB.is_double_bookable = True
     path_CD.is_double_bookable = True
 
-    room_AB = Room("room_AB", [door_A, door_B], [path_AB], False, False, False, False)
-    room_CD = Room("room_CD", [door_C, door_D], [path_CD], False, False, False, False)
+    room_AB = Room("room_AB", [door_A, door_B], [path_AB], False, False, False, False, False)
+    room_CD = Room("room_CD", [door_C, door_D], [path_CD], False, False, False, False, False)
 
     room_AB.is_double_bookable = True
     room_AB.room_type = RoomType.NORMAL
@@ -77,8 +77,8 @@ def test_2_edges_2_rooms_then_2_edges_1_room():
     path_AB.is_double_bookable = True
     path_CD.is_double_bookable = True
 
-    room_AB = Room("room_AB", [door_A, door_B], [path_AB], False, False, False, False)
-    room_CD = Room("room_CD", [door_C, door_D], [path_CD], False, False, False, False)
+    room_AB = Room("room_AB", [door_A, door_B], [path_AB], False, False, False, False, False)
+    room_CD = Room("room_CD", [door_C, door_D], [path_CD], False, False, False, False, False)
 
     room_AB.is_double_bookable = True
     room_AB.room_type = RoomType.NORMAL
@@ -103,7 +103,7 @@ def test_2_edges_2_rooms_then_2_edges_1_room():
     path_AB2.is_double_bookable = True
     path_CD2.is_double_bookable = True
 
-    room_AB_CD = Room("room_AB_CD", [door_A2, door_B2, door_C2, door_D2], [path_AB2, path_CD2], False, False, False, False)
+    room_AB_CD = Room("room_AB_CD", [door_A2, door_B2, door_C2, door_D2], [path_AB2, path_CD2], False, False, False, False, False)
 
     room_AB_CD.is_double_bookable = True
     room_AB_CD.room_type = RoomType.NORMAL

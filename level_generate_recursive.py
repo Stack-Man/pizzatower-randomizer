@@ -69,9 +69,15 @@ def generate_levels_recursive_all(SD: SourceDestinationHandler, FG: FlowGraphHan
 
 
     try:
+        if (SD.WAR_EXIT.name != "war_13" or SD.WAR_START.name != "war_1"):
+            log.warning("WAR not parsed for generation")
+            raise RuntimeError("WAR not parsed for generation")
+        
         war_segments, war_FG = generate_level_oneway(current_FG, SD.WAR_START, SD.WAR_EXIT, TraversalType.NOTPIZZATIME)
         war_level = Level(segments=war_segments)
         levels.append(war_level)
+
+        current_FG = war_FG
 
         i += 1
 
@@ -80,9 +86,15 @@ def generate_levels_recursive_all(SD: SourceDestinationHandler, FG: FlowGraphHan
         pass
 
     try:
-        ctop_segments, ctop_FG = generate_level_oneway(war_FG, SD.CTOP_START, SD.CTOP_EXIT, TraversalType.PIZZATIME)
+        if (SD.CTOP_EXIT.name != "tower_entrancehall" or SD.CTOP_START.name != "tower_finalhallway"):
+            log.warning("CTOP not parsed for generation")
+            raise RuntimeError("CTOP not parsed for generation")
+        
+        ctop_segments, ctop_FG = generate_level_oneway(current_FG, SD.CTOP_START, SD.CTOP_EXIT, TraversalType.PIZZATIME)
         ctop_level = Level(segments=ctop_segments)
         levels.append(ctop_level)
+
+        current_FG = ctop_FG
 
         i += 1
 
