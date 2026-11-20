@@ -23,7 +23,7 @@ def identify_double_bookable_rooms(rooms: list[Room]):
 def mark_if_double_bookable(room: Room):
     #1. The room must have at least two paths.
     if (len(room.paths) < 2):
-        log.debug("%s is not DB: paths < 2", room.name)
+        #log.debug("%s is not DB: paths < 2", room.name)
         return
 
     #if (not has_three_transition_types(room.paths)):
@@ -33,14 +33,14 @@ def mark_if_double_bookable(room: Room):
     has_double_bookable_paths = has_double_bookable_path_pair(room.paths)
 
     if (not has_double_bookable_paths):
-        log.debug("%s is not DB: no DB path pair", room.name)
+        #log.debug("%s is not DB: no DB path pair", room.name)
         return
 
     #Mark the room and its paths as double-bookable
     #The paths also need to know which room they are from
     room.is_double_bookable = True
 
-    log.debug("%s is DB!", room.name)
+    #log.debug("%s is DB!", room.name)
 
     #print(f"{room} is DB")
 

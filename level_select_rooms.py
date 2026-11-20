@@ -19,7 +19,7 @@ def select_rooms(FG: FlowGraphHandler, traversal: EdgeTraversal, traversal_type:
 
     room_paths : list[RoomPath] = []
 
-
+    
     for edge in traversal.edges: 
 
         if (type(edge) == TransitionEdge): #no selection for transition edges
@@ -29,16 +29,16 @@ def select_rooms(FG: FlowGraphHandler, traversal: EdgeTraversal, traversal_type:
 
             rp = RoomPath(path.room, path)
 
-            for rp2 in room_paths:
-                if (rp.room.name == rp2.room.name):
-                    log.error("%sDouble booking detected! %s %s and %s %s%s", ERROR, rp.room.name, rp.path, rp2.room.name, rp2.path, RESET) 
+            #for rp2 in room_paths:
+                #if (rp.room.name == rp2.room.name):
+                    #log.error("%sDouble booking detected! %s %s and %s %s%s", ERROR, rp.room.name, rp.path, rp2.room.name, rp2.path, RESET) 
 
             room_paths.append(rp)
 
             #clean up other paths of consumed room from their respective edges
             #occurs with non DB rooms as a room can still contribute to more than
             #one edge even if those edges cannot be used in the same traversal
-            log.debug("Cleaning up room %s from selection of %s", path.room, path)
+            #log.debug("Cleaning up room %s from selection of %s", path.room, path)
             clean_other_room_paths(path.room)
 
             #Store emptied edges in FG
@@ -79,12 +79,12 @@ def get_path_from_path_lists(path_lists: list[PathList]):
             
             p = pl.NDB.pop()
 
-            log.debug("Returning %s %s of NDB of %s", p.room_name, p, len(pl.NDB) + 1)
+            #log.debug("Returning %s %s of NDB of %s", p.room_name, p, len(pl.NDB) + 1)
             
             return p, len(pl.NDB) == 0 #return and remove from list, return if list is emptied
         elif (len(pl.DB) > 0):
 
-            log.debug("Returning 1 of DB from %s", len(pl.NDB))
+            #log.debug("Returning 1 of DB from %s", len(pl.NDB))
             
             return pl.DB.pop(), len(pl.DB) == 0
 

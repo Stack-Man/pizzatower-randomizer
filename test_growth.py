@@ -9,8 +9,16 @@ from graph_create import FlowGraphHandler
 from graph_objects import PathEdge, PathList
 
 from perf_counter import print_perf
+from json_parse import FILENAMES
 
-fn = ["johngutter", "ancientcheese"]
+import cProfile
+import pstats
+
+
+
+
+fn = ["johngutter", "ancientcheese", "bloodsauce", "pizzascape",
+        "fastfoodsaloon", "wasteyard", "funfarm", "oreganodesert"]
 
 import log_config
 import logging as log
@@ -58,4 +66,13 @@ def print_path_list(PL: PathList):
     if (msg != ""):
         log.debug("paths: " + str(PL))
 
+
+
+profiler = cProfile.Profile()
+profiler.enable()
 test_growth()
+profiler.disable()
+
+# Sort results by cumulative time spent in each function
+stats = pstats.Stats(profiler).sort_stats("cumtime")
+stats.print_stats(50)  # Print top 10 slowest functions

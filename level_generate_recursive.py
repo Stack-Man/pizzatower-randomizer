@@ -60,9 +60,9 @@ def generate_levels_recursive_all(SD: SourceDestinationHandler, FG: FlowGraphHan
             levels.append(level)
             i += 1
 
-            end_perf(PerfType.GEN)
+            time = end_perf(PerfType.GEN)
             print_perf_type(PerfType.GEN)
-            log.debug("%i: %s", i, level)
+            log.debug("%i in (%s): %s", i, time, level)
 
     except RuntimeError as e:
             pass

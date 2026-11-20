@@ -13,6 +13,11 @@ from level_grow import grow_levels
 
 from settings import TraversalMode,  GRAPH_TRAVERSAL_MODE, get_growth_settings
 
+#TODO: main performance cost is deepcopy
+#since we have to copy for every single recursion call we end up calling deepcopy on the graph a LOT
+#is there a more efficient way to handle it?
+#maybe if instead of making a copy for every recursion depth, we actually resupply the graph with the failed consumed rooms and paths...
+
 def get_SD_FG_rooms(fn: list[str], traversal_mode : TraversalMode):
 
     all_rooms = parse_json_to_rooms_all(fn)
