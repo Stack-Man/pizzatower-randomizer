@@ -6,6 +6,8 @@
 from json_objects import Room, Path
 from graph_collapse import pairs
 
+import logging as log
+
 #Identify and mark rooms that are capable of "double-booking"
 #to prevent use of the same room multiple times in a generation
 
@@ -15,29 +17,36 @@ from graph_collapse import pairs
 def identify_double_bookable_rooms(rooms: list[Room]):
 
     for room in rooms:
+        mark_if_double_bookable(room)
+       
 
-        #1. The room must have at least two paths.
-        if (len(room.paths) < 2):
-            continue
+def mark_if_double_bookable(room: Room):
+    #1. The room must have at least two paths.
+    if (len(room.paths) < 2):
+        log.debug("%s is not DB: paths < 2", room.name)
+        return
 
-        #if (not has_three_transition_types(room.paths)):
-            #continue
+    #if (not has_three_transition_types(room.paths)):
+        #continue
 
-        #2. At least two of the paths don't share a start or an end transition type.
-        has_double_bookable_paths = has_double_bookable_path_pair(room.paths)
+    #2. At least two of the paths don't share a start or an end transition type.
+    has_double_bookable_paths = has_double_bookable_path_pair(room.paths)
 
-        if (not has_double_bookable_paths):
-            continue
+    if (not has_double_bookable_paths):
+        log.debug("%s is not DB: no DB path pair", room.name)
+        return
 
-        #Mark the room and its paths as double-bookable
-        #The paths also need to know which room they are from
-        room.is_double_bookable = True
+    #Mark the room and its paths as double-bookable
+    #The paths also need to know which room they are from
+    room.is_double_bookable = True
 
-        #print(f"{room} is DB")
+    log.debug("%s is DB!", room.name)
 
-        for path in room.paths:
-            path.is_double_bookable = True
-            path.room_name = room.name
+    #print(f"{room} is DB")
+
+    for path in room.paths:
+        path.is_double_bookable = True
+        path.room_name = room.name
 
 def has_three_transition_types(paths: list[Path]):
     transition_types = []

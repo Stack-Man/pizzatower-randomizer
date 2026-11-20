@@ -45,7 +45,7 @@
 
 import networkx as nx
 from graph_objects import DoorNode, CombinedDoorNode, PathEdge, TransitionEdge
-from graph_from_rooms import graph_from_nodes_and_edges, FlowGraphHandler
+from graph_create import graph_from_nodes_and_edges, FlowGraphHandler
 from enums import StartExitType
 from colors import ERROR, RESET
 

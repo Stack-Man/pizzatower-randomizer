@@ -6,7 +6,7 @@
 from json_objects import Room, SelfLoop
 from level_objects import TwowaySegment, BranchSegment, BranchRoomPath, BaseRoomPath, RoomPath
 from enums import RoomType, TraversalType, StartExitType, PathTime
-from graph_from_rooms import FlowGraphHandler
+from graph_create import FlowGraphHandler
 
 from level_get_traversal import get_traversal
 from level_select_rooms import select_rooms
@@ -174,9 +174,6 @@ def bridge_oneway_room_room(start_room: Room, end_room: Room, traversal_type: Tr
         
 def bridge_rp_rp(A: BaseRoomPath, B: BaseRoomPath, FG: FlowGraphHandler, traversal_type: TraversalType, force_extension = False):
 
-    if (force_extension):
-        log.warning("force_extension not implemented")
-    
-    traversal = get_traversal(A, B, FG, traversal_type)
+    traversal = get_traversal(A, B, FG, traversal_type, force_extension = True)
     room_selection = select_rooms(FG, traversal, traversal_type)
     return room_selection

@@ -5,12 +5,14 @@
 
 from level_objects import BaseRoomPath, RoomPath, BranchRoomPath
 from enums import TraversalType, StartExitType
-from graph_from_rooms import FlowGraphHandler
+from graph_create import FlowGraphHandler
 from level_clean_traversal import clean_depleted_traverals
 from graph_objects import DoorNode, CombinedDoorNode
 
+import logging as log
 
-def get_traversal(srp: BaseRoomPath, erp: BaseRoomPath, FG: FlowGraphHandler, traversal_type: TraversalType):
+
+def get_traversal(srp: BaseRoomPath, erp: BaseRoomPath, FG: FlowGraphHandler, traversal_type: TraversalType, force_extension: bool = False):
 
     #connect start rp's end to end rp's start
     #convert srp and erp into DoorNodes to search FG with
@@ -24,7 +26,11 @@ def get_traversal(srp: BaseRoomPath, erp: BaseRoomPath, FG: FlowGraphHandler, tr
 
     for traversal in traversals:
         if (good_traversal_type(traversal.traversal_type, traversal_type) and traversal.has_no_zero_edges()):
-            return traversal
+
+            #traversal must be longer than one edge (direct connection) if 
+            #we are forcing extension. used for growth
+            if  (not force_extension) or (force_extension and len(traversal) > 1):
+                return traversal
 
         #log(f"      INVALID: {traversal} of type {traversal.traversal_type}, wanted {traversal_type}. has no zero edges: {traversal.has_no_zero_edges()}")
 

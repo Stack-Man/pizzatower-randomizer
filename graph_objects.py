@@ -158,6 +158,10 @@ class EdgeTraversal():
         self.bipartitePT = nx.Graph()
         self.bipartiteNPT = nx.Graph()
 
+    def __iter__(self):
+        for e in self.edges:
+            yield e
+
     def has_no_zero_edges(self):
         for edge in self.edges:
             if (type(edge) == TransitionEdge):
@@ -221,6 +225,17 @@ class PathList():
                 #print(f"add {p} to NDB")
                 self.NDB.append(p)
 
+    def __str__(self):
+        msg = ""
+        
+        for NDB in self.NDB:
+            msg += f"\n NDB: {NDB.room_name} {NDB} {NDB.edge}"
+
+        for DB in self.DB:
+            msg += f"\n DB: {DB.room_name} {DB} {DB.edge}"
+
+        return msg
+
     def __iter__(self):
         for p in self.NDB:
             yield p
@@ -276,6 +291,27 @@ class PathEdge(Edge):
         self.OW = PathList([])
         self.NPT = PathList([])
         self.PT = PathList([])
+
+    #reimplement deepcopy to prevent uninitialized attribute error
+    def __deepcopy__(self, memo):
+        # Return existing copy if already copied
+        if id(self) in memo:
+            return memo[id(self)]
+
+        # Initialize the new object
+        result = PathEdge(
+            self.start_node,
+            self.end_node
+        )
+
+        # Register BEFORE copying other attributes.
+        # This is important for circular references.
+        memo[id(self)] = result
+
+        # Deepcopy all inherited and local attributes
+        result.__dict__.update(copy.deepcopy(self.__dict__, memo))
+
+        return result
 
     #edge must have at least one path valid for the traversal type to be used
     def has_zero(self, traversal_type: TraversalType):

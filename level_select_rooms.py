@@ -6,10 +6,11 @@
 from json_objects import Room
 from graph_objects import EdgeTraversal, PathEdge, TransitionEdge, PathList
 from level_objects import RoomSelection, RoomPath
-from graph_from_rooms import FlowGraphHandler
+from graph_create import FlowGraphHandler
 from enums import TraversalType
-from colors import WARNING, RESET
+from colors import WARNING, RESET, ERROR
 
+import logging as log
 
 def select_rooms(FG: FlowGraphHandler, traversal: EdgeTraversal, traversal_type: TraversalType):
 
@@ -28,11 +29,17 @@ def select_rooms(FG: FlowGraphHandler, traversal: EdgeTraversal, traversal_type:
 
             rp = RoomPath(path.room, path)
 
+            for rp2 in room_paths:
+                if (rp.room.name == rp2.room.name):
+                    log.error("%sDouble booking detected! %s %s and %s %s%s", ERROR, rp.room.name, rp.path, rp2.room.name, rp2.path, RESET) 
+
             room_paths.append(rp)
 
             #clean up other paths of consumed room from their respective edges
-            if (path.is_double_bookable):
-                clean_DB_room(path.room)
+            #occurs with non DB rooms as a room can still contribute to more than
+            #one edge even if those edges cannot be used in the same traversal
+            log.debug("Cleaning up room %s from selection of %s", path.room, path)
+            clean_other_room_paths(path.room)
 
             #Store emptied edges in FG
             #FG updates its traversals before access in get_traversal() in level_get_traversal.py
@@ -42,7 +49,7 @@ def select_rooms(FG: FlowGraphHandler, traversal: EdgeTraversal, traversal_type:
 
     return RoomSelection(room_paths)
 
-def clean_DB_room(room: Room):
+def clean_other_room_paths(room: Room):
     for path in room.paths:
         path.edge.remove(path)
 
@@ -68,8 +75,17 @@ def get_path_from_path_lists(path_lists: list[PathList]):
     for pl in path_lists:
 
         if (len(pl.NDB) > 0):
-            return pl.NDB.pop(), len(pl.NDB) == 0 #return and remove from list, return if list is emptied
+            
+            
+            p = pl.NDB.pop()
+
+            log.debug("Returning %s %s of NDB of %s", p.room_name, p, len(pl.NDB) + 1)
+            
+            return p, len(pl.NDB) == 0 #return and remove from list, return if list is emptied
         elif (len(pl.DB) > 0):
+
+            log.debug("Returning 1 of DB from %s", len(pl.NDB))
+            
             return pl.DB.pop(), len(pl.DB) == 0
 
     raise RuntimeError(f"get_path_from_path_lists called on lists with 0 paths amongst them")

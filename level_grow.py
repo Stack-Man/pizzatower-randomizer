@@ -5,7 +5,7 @@
 
 from level_objects import Level, TwowaySegment, BranchSegment, BaseRoomPath, RoomSelection
 from json_source_destination import SourceDestinationHandler
-from graph_from_rooms import FlowGraphHandler
+from graph_create import FlowGraphHandler
 from settings import GrowthMode, GrowthQueueMode, InnerGrowthRecursionMode, GrowthSettings, LevelGrowthSettings
 from enums import TraversalType
 from level_bridge import bridge_rp_rp
@@ -22,8 +22,12 @@ def grow_levels(levels: list[Level], FG: FlowGraphHandler, growth_settings: Leve
     for level in levels:
         log.debug("Growing level %s: ", level.segments[0].start_room.room.name)
         start_perf(PerfType.GROWTH)
+
         grown_level = grow_level(level, FG, growth_settings)
         grown_levels.append(grown_level)
+        
+        log.debug("Length: %i to %i", len(level), len(grown_level))
+        
         time = end_perf(PerfType.GROWTH)
         log.debug("Time: (%i)", time)
     
@@ -96,22 +100,22 @@ def grow_inner_segment(old_rooms: list[BaseRoomPath], FG:FlowGraphHandler, trave
     
     for A, B in every_two(old_rooms):
 
-        log.debug("         Growing between rooms %s and %s:", str(A), str(B))
+        #log.debug("         Growing between rooms %s and %s:", str(A), str(B))
 
         try:
             bridge = bridge_rp_rp(A, B, FG, TraversalType.ANY, force_extension = True)
             rooms.extend(bridge.rooms)
 
-            log.debug("             Grew with %s:", str(bridge))
+            #log.debug("             Grew with %s:", str(bridge))
 
         except Exception as e:
-            log.debug("             " + str(e))
+            #log.debug("             " + str(e))
             pass
 
         #only append B because A was added last loop
         rooms.append(B)
 
-    log.debug("         Grew from %i to %i", len(old_rooms), len(rooms))
+    #log.debug("         Grew from %i to %i", len(old_rooms), len(rooms))
 
 
 

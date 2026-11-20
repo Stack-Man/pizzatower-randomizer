@@ -16,6 +16,7 @@ class FileStyleFilter(logging.Filter):
         "level_get_traversal.py":       ("              ", "[TRAVERSAL]"),
         "level_select_rooms.py":        ("                  ", "[SELECTION]"),
         "level_grow.py":       ("", "[GROW] "),
+        "graph_impossible_booking.py":       ("", "[DB] "),
     }
 
     def filter(self, record):

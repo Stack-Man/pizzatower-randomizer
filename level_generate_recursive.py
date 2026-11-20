@@ -25,7 +25,7 @@ from json_source_destination import SourceDestinationHandler
 from json_objects import Room
 from enums import TraversalType
 from level_objects import LevelSegment, Level, TwowaySegment, BranchSegment, BranchRoomPath
-from graph_from_rooms import FlowGraphHandler
+from graph_create import FlowGraphHandler
 
 from level_segment_generator import  entrance_or_entrance_branch_segments, branch_segments, john_segment, john_branch_segment, between_branch_segments, ej_or_ejb_segment, oneway_segment
 

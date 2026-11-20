@@ -29,7 +29,7 @@ import threading
 
 from enums import TraversalType, DoorType, DoorDir, StartExitType
 
-from graph_from_rooms import FlowGraphHandler
+from graph_create import FlowGraphHandler
 
 import time
 

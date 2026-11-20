@@ -4,7 +4,7 @@
 #clean up traversals in FG based on FG.depleted_edges
 #update the traversal type based on the OG traversal type and the new state of the edge
 
-from graph_from_rooms import FlowGraphHandler
+from graph_create import FlowGraphHandler
 from graph_objects import DoorNode, CombinedDoorNode, EdgeTraversal, PathEdge
 from enums import TraversalType
 from graph_impossible_booking import add_to_bipartite_graph

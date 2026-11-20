@@ -1,5 +1,5 @@
 from json_parse import parse_json_to_rooms_all, FILENAMES
-from graph_from_rooms import rooms_to_graph, FlowGraphHandler
+from graph_create import rooms_to_graph, FlowGraphHandler
 from graph_flow import flow
 from graph_objects import DoorNode, EdgeTraversal, StartExitType, Edge, Node
 import networkx as nx

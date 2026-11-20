@@ -2,7 +2,7 @@
 #Date: 11/4/2026
 
 from json_parse import parse_json_to_rooms_all, FILENAMES
-from graph_from_rooms import rooms_to_graph
+from graph_create import rooms_to_graph
 from graph_collapse import collapse_all_nodes_and_edges, FlowGraphHandler
 from settings import TraversalMode
 from graph_flow import flow

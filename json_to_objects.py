@@ -6,6 +6,7 @@ from colors import WARNING, CAUTION, RESET
 import logging as log
 
 from json_modify_room import modify_room
+from json_double_booking import mark_if_double_bookable
 
 #-------------------
 #   JSON to Object
@@ -15,6 +16,8 @@ from json_modify_room import modify_room
 def json_to_rooms(json):
     json_rooms = json[JSON_ROOMS]
     rooms = []
+
+    
 
     for json_room in json_rooms:
         room = json_to_room(json_room)
@@ -56,8 +59,13 @@ def json_to_rooms(json):
 
         if (not JSON_ROOMS_ALLOW_BRANCH_ROOMS and (room.room_type == RoomType.BRANCH or room.branch_type is not BranchType.NONE)):
             continue
+
+        if (room.room_type == RoomType.NORMAL):
+            mark_if_double_bookable(room)
         
         rooms.append(room)
+
+
         
     return rooms
 

@@ -42,6 +42,9 @@ class RoomSelection():
 
         return msg
 
+    def __len__(self):
+        return len(self.rooms)
+
 class LevelSegment():
     def __init__(self, start_room: BaseRoomPath, end_room: BaseRoomPath):
         self.start_room = start_room
@@ -51,6 +54,9 @@ class LevelSegment():
     def __str__(self):
         msg = "Seg = S: " + str(self.start_room) + " > D: " + str(self.end_room)
         return msg
+
+    def __len__(self):
+        return 2
 
 class TwowaySegment(LevelSegment):
     def __init__(self, start_room: BaseRoomPath, end_room: BaseRoomPath, between_rooms: RoomSelection):
@@ -83,6 +89,9 @@ class TwowaySegment(LevelSegment):
             msg += str(self.loop_path) + f"{self.loop_room.room} {self.loop_room.end.start_door}"
 
         return msg
+
+    def __len__(self):
+        return 2 + len(self.between_rooms)
 
 class BranchSegment(LevelSegment):
     def __init__(self, start_room: BaseRoomPath, end_room: BaseRoomPath, pt_between_rooms: RoomSelection, npt_between_rooms: RoomSelection):
@@ -130,6 +139,9 @@ class BranchSegment(LevelSegment):
 
         return msg
 
+    def __len__(self):
+        return 2 + len(self.npt_between_rooms) + len(self.pt_between_rooms)
+
 class Level():
 
     def __init__(self, segments: list[BranchSegment | TwowaySegment]):
@@ -143,3 +155,11 @@ class Level():
             msg += str(segment) + "\n"
 
         return msg
+
+    def __len__(self):
+        i = 0
+
+        for seg in self.segments:
+            i += len(seg)
+
+        return i

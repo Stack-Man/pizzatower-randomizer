@@ -29,6 +29,6 @@ from level_get_traversal import get_traversal
 
 from level_objects import BaseRoomPath, RoomPath, BranchRoomPath
 from enums import TraversalType, StartExitType
-from graph_from_rooms import FlowGraphHandler
+from graph_create import FlowGraphHandler
 #from level_clean_traversal import clean_depleted_traverals
 from graph_objects import DoorNode, CombinedDoorNode

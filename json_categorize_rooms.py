@@ -3,6 +3,8 @@
 
 #Categorize, identify, and mark Rooms and Paths
 
+#DEPRECATED: not actually used, we mark DB in json_to_room and categorize in json_source_destination
+
 from json_objects import Room, Path
 from enums import RoomType, BranchType
 from colors import ERROR, RESET

@@ -4,7 +4,7 @@
 #Generate a single level segment of a specific type
 
 from json_source_destination import SourceDestinationHandler
-from graph_from_rooms import FlowGraphHandler
+from graph_create import FlowGraphHandler
 
 from level_objects import BranchRoomPath, BaseRoomPath, SelfLoopRoomPath, TwowaySegment
 

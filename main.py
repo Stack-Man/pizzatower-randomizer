@@ -4,7 +4,7 @@
 #Run the program
 from json_parse import parse_json_to_rooms_all, FILENAMES
 from json_source_destination import get_source_destination_rooms
-from graph_from_rooms import rooms_to_graph
+from graph_create import rooms_to_graph
 from graph_flow import flow
 from level_generate_recursive import generate_levels_recursive_all
 from seeded_random import set_seed
