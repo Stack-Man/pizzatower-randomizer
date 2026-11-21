@@ -152,7 +152,7 @@ def generate_level_recursive_start(SD: SourceDestinationHandler, FG: FlowGraphHa
                     pass
 
             log.debug("%sDUMP entrance_segment: %s to %s%s", FAIL, entrance_segment.start_room, entrance_segment.end_room, RESET)
-            
+        
         #total failure, try connecting any E or EB to any J or JB directly
         #this is the only combination not tried
     

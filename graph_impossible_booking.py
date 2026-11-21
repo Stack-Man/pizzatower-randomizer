@@ -25,6 +25,8 @@ from colors import ERROR, RESET, CAUTION
 #edge: An edge which might be DB
 def add_to_bipartite_graph(bipartite_TW: nx.Graph, bipartite_PT: nx.Graph, bipartite_NPT: nx.Graph, traversal_type: TraversalType, edge: PathEdge):
 
+
+
     #check if type is already impossible or meets impossible booking reqs
     #TW = not OW, PT or NPT
     impossibleTW = (traversal_type != TraversalType.ANY or 
@@ -37,6 +39,10 @@ def add_to_bipartite_graph(bipartite_TW: nx.Graph, bipartite_PT: nx.Graph, bipar
     #NPT = AnNY NPT or OW but not PT
     impossibleNPT = (traversal_type == TraversalType.PIZZATIME or 
                      add_to_bipartite_graph_by_type(bipartite_NPT, edge, [edge.TW, edge.OW, edge.NPT]))
+
+    #no need to make an OW bipartite graph as there is never a timeless OW path needed
+    #(CTOP is PT and WAR is NPT) 
+    #OW is simply a generic "both PT and NPT can work"
 
     new_traversal_type : TraversalType = get_traversal_type_from_impossible_bookings(impossibleTW, impossiblePT, impossibleNPT)
 

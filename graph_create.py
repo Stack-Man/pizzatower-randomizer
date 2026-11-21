@@ -36,7 +36,19 @@ class FlowGraphHandler():
 
     def get_edge_data(self, U, V):
         return self.G.get_edge_data(U, V)
-        
+
+    def path_count(self):
+
+        i = 0
+
+        for U, V in self.edges():
+            obj = self.get_edge_data(U, V)["object"]
+
+            if (type(obj) == PathEdge):
+                i += len(obj.TW) + len(obj.OW) + len(obj.NPT) + len(obj.PT)
+
+        return i
+    
     def copy(self):
         #make a deepcopy of the graph so that all nodes and edges
         #and all the lists within are unique from previous graph

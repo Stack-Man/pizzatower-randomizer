@@ -20,6 +20,8 @@ import pstats
 fn = ["johngutter", "ancientcheese", "bloodsauce", "pizzascape",
         "fastfoodsaloon", "wasteyard", "funfarm", "oreganodesert"]
 
+fn = FILENAMES
+
 import log_config
 import logging as log
 
@@ -75,4 +77,4 @@ profiler.disable()
 
 # Sort results by cumulative time spent in each function
 stats = pstats.Stats(profiler).sort_stats("cumtime")
-stats.print_stats(50)  # Print top 10 slowest functions
+stats.print_stats(10)  # Print top 10 slowest functions
