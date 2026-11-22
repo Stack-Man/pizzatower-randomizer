@@ -12,83 +12,87 @@ from colors import WARNING, RESET, ERROR
 
 import logging as log
 
-def select_rooms(FG: FlowGraphHandler, traversal: EdgeTraversal, traversal_type: TraversalType):
+#select rooms from path list without removing them from the path list
+#select rooms and track used room names to avoid reusing the same room
+def select_rooms_non_empty(traversal: EdgeTraversal, traversal_type):
 
-    #TODO traversal is not prioritizing edges from the bipartite graph with the fewest rooms.. impossible booking may be encountered!
+    #TODO traversal is not prioritizing edges from the bipartite graph the node with the fewest rooms.. impossible booking may be encountered!
     print(f"{WARNING}select_rooms does not avoid impossible bookings!{RESET}")
 
     room_paths : list[RoomPath] = []
+    used_rooms : list[str] = []
 
-    
-    for edge in traversal.edges: 
+    for edge in traversal.edges:
 
-        if (type(edge) == TransitionEdge): #no selection for transition edges
+        #no selection for transition edges
+        if (type(edge) == TransitionEdge):
             continue
+
         elif (type(edge) == PathEdge):
-            path, emptied_edge = get_path(edge, traversal_type)
 
-            rp = RoomPath(path.room, path)
+            for path in get_path_non_empty(edge, traversal_type):
 
-            #for rp2 in room_paths:
-                #if (rp.room.name == rp2.room.name):
-                    #log.error("%sDouble booking detected! %s %s and %s %s%s", ERROR, rp.room.name, rp.path, rp2.room.name, rp2.path, RESET) 
+                if (path.room_name not in used_rooms):
 
-            room_paths.append(rp)
+                    #track used room names since
+                    #we don't clean immediately
+                    used_rooms.append(path.room_name)
 
-            #clean up other paths of consumed room from their respective edges
-            #occurs with non DB rooms as a room can still contribute to more than
-            #one edge even if those edges cannot be used in the same traversal
-            #log.debug("Cleaning up room %s from selection of %s", path.room, path)
-            clean_other_room_paths(path.room)
+                    rp = RoomPath(path.room, path)
+                    room_paths.append(rp)
 
-            #Store emptied edges in FG
-            #FG updates its traversals before access in get_traversal() in level_get_traversal.py
-            if (emptied_edge):
-                FG.depleted_edges.append(edge)
-                FG.selected_rooms.append(path.room.name)
+                    #exit to next edge
+                    break
+
+            #failed to choose path for edge
+            #should never happen if impossible bookings
+            #are properly avoided (currently, NOT)
+            raise LookupError("No non-used path for edge but selection should be possible")
+        
+        else:
+
+            raise ValueError(f"Edge not of type Transition or Path but {str(type(edge))}")
 
     return RoomSelection(room_paths)
 
-def clean_other_room_paths(room: Room):
-    for path in room.paths:
-        path.edge.remove(path)
-
-def get_path(edge: PathEdge, traversal_type: TraversalType):
+def get_path_non_empty(edge: PathEdge, traversal_type: TraversalType):
 
     #intentional bias in PathList order towards most-specific path type to least-specific
     match traversal_type:
         case TraversalType.ANY:
-            return get_path_from_path_lists([edge.TW])
+            return get_path_from_path_lists_non_empty([edge.TW])
         case TraversalType.OW:
-            return get_path_from_path_lists([edge.OW, edge.TW])
+            return get_path_from_path_lists_non_empty([edge.OW, edge.TW])
         case TraversalType.NOTPIZZATIME:
-            return get_path_from_path_lists([edge.NPT, edge.OW, edge.TW])
+            return get_path_from_path_lists_non_empty([edge.NPT, edge.OW, edge.TW])
         case TraversalType.PIZZATIME:
-            return get_path_from_path_lists([edge.PT, edge.OW, edge.TW])
+            return get_path_from_path_lists_non_empty([edge.PT, edge.OW, edge.TW])
 
     raise ValueError(f"get_room not implemented for {traversal_type}")
+     
 
-def get_path_from_path_lists(path_lists: list[PathList]):
+def get_path_from_path_lists_non_empty(path_lists: list[PathList]):
 
     #TODO: biased towards NDB rooms
 
+    i = 0
+
     for pl in path_lists:
 
-        if (len(pl.NDB) > 0):
-            
-            
-            p = pl.NDB.pop()
+        for p in pl.NDB:
+            i += 1
+            yield p
 
-            #log.debug("Returning %s %s of NDB of %s", p.room_name, p, len(pl.NDB) + 1)
-            
-            return p, len(pl.NDB) == 0 #return and remove from list, return if list is emptied
-        elif (len(pl.DB) > 0):
+        for p in pl.DB:
+            i += 1
+            yield p
 
-            #log.debug("Returning 1 of DB from %s", len(pl.NDB))
-            
-            return pl.DB.pop(), len(pl.DB) == 0
+    if (i == 0):
+        raise RuntimeError(f"get_path_from_path_lists called on lists with 0 paths amongst them")
 
-    raise RuntimeError(f"get_path_from_path_lists called on lists with 0 paths amongst them")
 
-    
+           
+
+
+        
             

@@ -115,6 +115,13 @@ from settings import TraversalMode,  GRAPH_TRAVERSAL_MODE, get_growth_settings
 #2. avoids modifying a list as it is being iterated on
 
 
+#TODO:
+#1. clean on TRY segment
+#2. replenish on DUMP segment
+#3. track used rooms in selection
+#4. clean on TRY NPT
+#5. replenish on DUMP NPT
+#6. be sure to replenish TW, Branch, AND self loop properly
 
 
 

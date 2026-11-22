@@ -3,7 +3,7 @@
 
 #Class structure to use as nodes pr edges in an nx graph to store information about the node or edge
 
-from enums import DoorType, DoorDir, StartExitType, TraversalType
+from enums import DoorType, DoorDir, StartExitType, TraversalType, PathTime
 from json_objects import Path
 
 from colors import ERROR, RESET, WARNING
@@ -246,13 +246,36 @@ class PathList():
     def remove(self, path: Path):
         try:
             self.NDB.remove(path)
+
+            if (len(self.NDB) == 0):
+                return True #depleted
+
         except Exception as e:
             pass
 
         try:
             self.DB.remove(path)
+
+            if (len(self.DB) == 0):
+                return True #depleted 
+
         except Exception as e:
             pass
+
+        return False
+
+    def add(self, path: Path):
+        if (path.is_double_bookable):
+            self.DB.append(path)
+
+            if (len(self.DB) == 1):
+                return True #replenished
+            
+        else:
+            self.NDB.append(path)
+
+            if (len(self.NDB) == 1):
+                return True #replenished
 
     def is_double_bookable(self):
         return len(self.DB) > 0 and len(self.NDB) == 0
@@ -260,16 +283,6 @@ class PathList():
     def __len__(self):
         return len(self.NDB) + len(self.DB)
 
-    def pick_path(self):
-        print(f"{WARNING}WARNING: pick_path in PathList in graph_objects.py is not implemente   d!")
-
-        path = self.get_random_path(self.NDB)
-
-        return path
-
-    def get_random_path(self, paths: list[Path]):
-        return paths.pop()
-        
 
 class PathEdge(Edge):
     def __init__(self, start_node: DoorNode | CombinedDoorNode, end_node:  DoorNode | CombinedDoorNode):
@@ -325,7 +338,6 @@ class PathEdge(Edge):
             case TraversalType.OW:
                 return len(self.OW) <=0 and len(self.TW) <= 0
 
-
     def count_DB(self, paths: list[Path]):
         db = 0
         notDB = 0
@@ -355,9 +367,29 @@ class PathEdge(Edge):
     def remove(self, path: Path):
         lists = [self.TW, self.OW, self.PT, self.NPT]
 
-        for pl in lists:
-            pl.remove(path)
+        depleted = False
 
+        for pl in lists:
+            pl_depleted = pl.remove(path)
+            depleted = depleted or pl_depleted
+
+        return depleted
+
+    def add(self, path: Path):
+        replenished = False
+        
+        if (path.get_path_time() == PathTime.BOTH):
+            if (not path.oneway):
+                replenished = self.TW.add(path)
+            else:
+                replenished = self.OW.add(path)
+        elif (path.get_path_time() == PathTime.NOTPIZZATIME):
+            replenished = self.NPT.add(path)
+        else:
+            replenished = self.PT.add(path)
+
+        return replenished
+    
     def get_DB_paths(self, P: list[Path]):
         p_NDB = []
         p_DB = []

@@ -10,12 +10,13 @@ class FileStyleFilter(logging.Filter):
         "graph_flow.py":            ("", "[FLOW] "),
         "graph_from_rooms.py":      ("", "[GRAPH] "),
         "level_generate_recursive.py":  ("", "[GEN]"),
-        "level_segment_generator.py":   ("  ", "[SEG]"),
-        "level_bridge.py" :             ("      ", "[BRIDGE]"),
-        "level_room_path_generator.py": ("          ", "[ROOMPATH]"),
-        "level_get_traversal.py":       ("              ", "[TRAVERSAL]"),
-        "level_select_rooms.py":        ("                  ", "[SELECTION]"),
+        "level_segment_generator.py":   ("", "[SEG]"),
+        "level_bridge.py" :             ("", "[BRIDGE]"),
+        "level_room_path_generator.py": ("", "[ROOMPATH]"),
+        "level_get_traversal.py":       ("", "[TRAVERSAL]"),
+        "level_select_rooms.py":        ("", "[SELECTION]"),
         "level_grow.py":       ("", "[GROW] "),
+        "level_clean_replenish.py":       ("", "[CLEAN] "),
         "graph_impossible_booking.py":       ("", "[DB] "),
     }
 

@@ -38,6 +38,7 @@ from colors import ERROR, RESET, CONTINUE, FAIL, CAUTION
 MIN_BRANCH_COUNT = 1
 MAX_BRANCH_COUNT = 2
 
+
 def generate_levels_recursive_all(SD: SourceDestinationHandler, FG: FlowGraphHandler):
     levels = []
     
@@ -185,7 +186,6 @@ def generate_level_recursive_branch(SD: SourceDestinationHandler, FG: FlowGraphH
 
     #custom copy() copies only deep enough for our purposes
     SD = SD.copy() 
-    FG = FG.copy() 
 
     #Texclude the source and destination rooms from last segment from the SD
     SD.remove_SD_in_segment(last_segment)
@@ -205,6 +205,7 @@ def generate_level_recursive_branch(SD: SourceDestinationHandler, FG: FlowGraphH
             for branch_segment in branch_segments(SD, FG, last_segment.end_room):
 
                 log.debug("%sTRY branch_segment: %s to %s%s", CONTINUE, branch_segment.start_room, branch_segment.end_room, RESET)
+                log.warning("%sNot cleaning FG with branch segment%s", ERROR, RESET)
 
                 tried_J = False
                 
@@ -250,6 +251,7 @@ def generate_level_recursive_branch(SD: SourceDestinationHandler, FG: FlowGraphH
                     
 
                 log.debug("%sDUMP branch_segment: %s to %s%s", FAIL, branch_segment.start_room, branch_segment.end_room, RESET)
+                log.warning("%sNot repenishing FG with branch segment%s", ERROR, RESET)
 
             raise RuntimeError(f"Failed to gen non JB branch from {last_segment.end_room.room}")
 
@@ -265,6 +267,7 @@ def generate_level_recursive_branch(SD: SourceDestinationHandler, FG: FlowGraphH
                 SD.remove_SD_in_segment(segment)
 
                 log.debug("%sBS to JB: %s to %s%s", CONTINUE, segment.start_room, segment.end_room, RESET)
+                log.warning("%sNot cleaning FG with JB segment%s", ERROR, RESET)
 
                 return [segment], SD, FG #terminate, return this copy of SD and FG
             except RuntimeError as e:
@@ -280,14 +283,13 @@ def try_cap_with_J_branch(SD: SourceDestinationHandler, FG: FlowGraphHandler, br
     segment = john_segment(SD, FG, branch_segment.end_room)
     SD.remove_SD_in_segment(segment)
 
-    log.debug("%sJ from BE: %s to %s%s", CONTINUE, segment.start_room, segment.end_room, RESET)
+    log.debug("%sJ from BE: %s to %s%s", CONTINUE, segment.start_room, segment.end_room, RESET) 
+    log.warning("%sNot cleaning FG with J segment%s", ERROR, RESET)
 
     return [branch_segment, segment], SD, FG #terminate, return this copy of SD and FG
 
 def generate_level_recursive_between_branch(SD: SourceDestinationHandler, FG: FlowGraphHandler, last_segment: LevelSegment, branch_count: int, min_branch_count: int):
     SD = SD.copy() 
-    FG = FG.copy()
-
     SD.remove_SD_in_segment(last_segment)
 
     segments = []
@@ -302,6 +304,7 @@ def generate_level_recursive_between_branch(SD: SourceDestinationHandler, FG: Fl
         for between_branch_segment in between_branch_segments(SD, FG, last_segment.end_room):
 
             log.debug("%sTRY TW: %s to %s%s", CONTINUE, between_branch_segment.start_room, between_branch_segment.end_room, RESET)
+            log.warning("%sNot cleaning FG with TW segment%s", ERROR, RESET)
             
             try: 
                 next_segments, new_SD, new_FG = generate_level_recursive_branch(SD, FG, last_segment=between_branch_segment, branch_count=branch_count,min_branch_count=min_branch_count)
@@ -314,6 +317,7 @@ def generate_level_recursive_between_branch(SD: SourceDestinationHandler, FG: Fl
                 pass
 
             log.debug("%sDUMP TW: %s to %s%s", FAIL, between_branch_segment.start_room, between_branch_segment.end_room, RESET)
+            log.warning("%sNot replenishing FG with TW segment%s", ERROR, RESET)
     else:
         pass
 
@@ -325,7 +329,10 @@ def generate_level_recursive_between_branch(SD: SourceDestinationHandler, FG: Fl
         segment = john_segment(SD, FG, last_segment.end_room)
         SD.remove_SD_in_segment(segment)
 
+        
+
         log.debug("%sBE to J: %s to %s%s", CONTINUE, segment.start_room, segment.end_room, RESET)
+        log.warning("%sNot cleaning FG with J segment%s", ERROR, RESET)
 
         return [segment], SD, FG #terminate, return this copy of SD and FG
     except RuntimeError as e:
@@ -341,5 +348,8 @@ def generate_level_oneway(FG: FlowGraphHandler, start: Room, exit: Room, travers
     segments: list[BranchSegment|TwowaySegment] = []
 
     segments.append(segment)
+
+    
+    log.warning("%sNot cleaning FG with OW segment%s", ERROR, RESET)
 
     return segments, FG

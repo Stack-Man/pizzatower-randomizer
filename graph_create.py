@@ -47,27 +47,7 @@ class FlowGraphHandler():
             if (type(obj) == PathEdge):
                 i += len(obj.TW) + len(obj.OW) + len(obj.NPT) + len(obj.PT)
 
-        return i
-    
-    def copy(self):
-        #make a deepcopy of the graph so that all nodes and edges
-        #and all the lists within are unique from previous graph
-        copy = FlowGraphHandler(deepcopy(self.G)) 
-
-        #only the list itself needs to be unique, 
-        # the edges within are just for reference
-        copy.depleted_edges = self.depleted_edges.copy()
-        copy.changed_last_round = self.changed_last_round
-        copy.selected_rooms = self.selected_rooms.copy()
-
-        return copy
-
-    def revert(self, other):
-        self.G = other.G
-        self.depleted_edges = other.depleted_edges
-        self.changed_last_round = other.changed_last_round
-        self.selected_rooms = other.selected_rooms
-    
+        return i      
 
 def rooms_to_graph(rooms: list[Room], traversal_mode : TraversalMode = TraversalMode.MATCHING_PERFECT ):
     start_perf(PerfType.GRAPH)

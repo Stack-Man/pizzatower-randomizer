@@ -24,9 +24,6 @@ from colors import ERROR, RESET, CAUTION
 #traversal_type: priority traversal type accounting for a pathlist in edge being empty
 #edge: An edge which might be DB
 def add_to_bipartite_graph(bipartite_TW: nx.Graph, bipartite_PT: nx.Graph, bipartite_NPT: nx.Graph, traversal_type: TraversalType, edge: PathEdge):
-
-
-
     #check if type is already impossible or meets impossible booking reqs
     #TW = not OW, PT or NPT
     impossibleTW = (traversal_type != TraversalType.ANY or 
@@ -84,7 +81,11 @@ def add_to_bipartite_graph_by_type(BG: nx.Graph, edge: PathEdge, path_lists: lis
         for R in Rs:
             BG.add_node(R, bipartite=1)
             BG.add_edge(E, R)
-    else: #if E was already in BG, remove edges to E not in Rs anymore (consumed)
+
+    #if E was already in BG, 
+    else:
+
+        #remove Rs not in E anymore (depleted)
 
         to_remove = []
 
@@ -94,6 +95,11 @@ def add_to_bipartite_graph_by_type(BG: nx.Graph, edge: PathEdge, path_lists: lis
                 to_remove.append(R)
 
         BG.remove_nodes_from(to_remove)
+
+        #still add edges and Rs in E but not present (replenished)
+        for R in Rs:
+            BG.add_node(R, bipartite=1)
+            BG.add_edge(E, R)
     
     #6. for each connected component, check if R < E and if so, return False
 

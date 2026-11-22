@@ -6,11 +6,10 @@
 from level_objects import BaseRoomPath, RoomPath, BranchRoomPath
 from enums import TraversalType, StartExitType
 from graph_create import FlowGraphHandler
-from level_clean_traversal import clean_depleted_traverals
 from graph_objects import DoorNode, CombinedDoorNode
 
 import logging as log
-
+from colors import ERROR, RESET
 
 def get_traversal(srp: BaseRoomPath, erp: BaseRoomPath, FG: FlowGraphHandler, traversal_type: TraversalType, force_extension: bool = False):
 
@@ -20,7 +19,7 @@ def get_traversal(srp: BaseRoomPath, erp: BaseRoomPath, FG: FlowGraphHandler, tr
     source = get_path_end(srp, traversal_type)
     destination = get_path_start(erp, traversal_type)
 
-    FG = clean_depleted_traverals(FG)
+    log.warning("%sget traversal does not update traversals before selection%s", ERROR, RESET)
 
     traversals = get_traversals_between(FG, source, destination)
 
@@ -31,8 +30,6 @@ def get_traversal(srp: BaseRoomPath, erp: BaseRoomPath, FG: FlowGraphHandler, tr
             #we are forcing extension. used for growth
             if  (not force_extension) or (force_extension and len(traversal) > 1):
                 return traversal
-
-        #log(f"      INVALID: {traversal} of type {traversal.traversal_type}, wanted {traversal_type}. has no zero edges: {traversal.has_no_zero_edges()}")
 
     raise RuntimeError(f"No traversal of {traversal_type} between {source} and {destination}")
 

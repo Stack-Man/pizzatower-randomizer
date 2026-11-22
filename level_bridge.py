@@ -9,7 +9,7 @@ from enums import RoomType, TraversalType, StartExitType, PathTime
 from graph_create import FlowGraphHandler
 
 from level_get_traversal import get_traversal
-from level_select_rooms import select_rooms
+from level_select_rooms import select_rooms_non_empty
 from level_room_path_generator import branch_room_path, room_path_cap_TW, entrance_room_path, oneway_entrance_room_path, oneway_exit_room_path
 
 from colors import RESET, ERROR
@@ -20,14 +20,10 @@ import logging as log
 #with their selected paths and creates a LevelSegment from it
 
 def bridge_twoway(start_rp: BaseRoomPath, end_rp: BaseRoomPath, FG: FlowGraphHandler):
-    #need to preverse pre-bridge FG
-    #in case we consume a room but ultimately fail
-    pre_bridge_FG = FG.copy()
-
     try:
         
         traversal = get_traversal(start_rp, end_rp, FG, TraversalType.ANY)
-        room_selection = select_rooms(FG, traversal, TraversalType.ANY)
+        room_selection = select_rooms_non_empty(traversal, TraversalType.ANY)
         return TwowaySegment(start_rp, end_rp, room_selection)
     
     except RuntimeError as e:
@@ -35,30 +31,34 @@ def bridge_twoway(start_rp: BaseRoomPath, end_rp: BaseRoomPath, FG: FlowGraphHan
 
     #on fail, revert FG so that selected rooms/traversals
     #are replenished
-    FG.revert(pre_bridge_FG) 
+
     raise RuntimeError(f"bridge_twoway: failed traversal or room_selection between {start_rp.room} and {end_rp.room}")
 
     
 def bridge_branch(start_rp: BranchRoomPath, end_rp: BranchRoomPath, FG: FlowGraphHandler):
-    pre_bridge_FG = FG.copy()
-
     try:
     
         NPT = bridge_oneway(start_rp, end_rp, TraversalType.NOTPIZZATIME, FG)
+
+        #TODO: clean up FG between bridges and replenish with NPT if PT fails
+        #we MUST do it here because we need to know about changed traversal types and impossible bookings if any
+        log.warning("%sbridge_branch does not clean between NPT and PT %s", ERROR, RESET)
+
         PT = bridge_oneway(end_rp, start_rp, TraversalType.PIZZATIME, FG)
 
         return BranchSegment(start_rp, end_rp, PT, NPT)
     except RuntimeError as e:
+        
+        log.warning("%sbridge_branch does not replenish with NPT after PT fails %s", ERROR, RESET)
+
         pass
         
-    FG.revert(pre_bridge_FG) 
-
     raise RuntimeError(f"bridge_branch: failed traversal or room_selection between {start_rp.room} and {end_rp.room}")
     
 
 def bridge_oneway(start_rp: BranchRoomPath | RoomPath, end_rp: BranchRoomPath | RoomPath, traversal_type: TraversalType, FG: FlowGraphHandler):
     traversal = get_traversal(start_rp, end_rp, FG, traversal_type)
-    room_selection = select_rooms(FG, traversal, traversal_type)
+    room_selection = select_rooms_non_empty(traversal, traversal_type)
     return room_selection
 
 def bridge_self_loop(room: Room, FG: FlowGraphHandler):
@@ -89,7 +89,7 @@ def bridge_self_loop(room: Room, FG: FlowGraphHandler):
             
 
     traversal = get_traversal(start_rp, end_rp, FG, traversal_type)
-    room_selection = select_rooms(FG, traversal, traversal_type)
+    room_selection = select_rooms_non_empty(traversal, traversal_type)
 
     return room_selection
 
@@ -175,5 +175,5 @@ def bridge_oneway_room_room(start_room: Room, end_room: Room, traversal_type: Tr
 def bridge_rp_rp(A: BaseRoomPath, B: BaseRoomPath, FG: FlowGraphHandler, traversal_type: TraversalType, force_extension = False):
 
     traversal = get_traversal(A, B, FG, traversal_type, force_extension = True)
-    room_selection = select_rooms(FG, traversal, traversal_type)
+    room_selection = select_rooms_non_empty(traversal, traversal_type)
     return room_selection
