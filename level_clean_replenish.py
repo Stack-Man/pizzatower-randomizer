@@ -76,7 +76,7 @@ def update_traversal_type(traversal: EdgeTraversal, edge: PathEdge):
     old_traversal_type = traversal.traversal_type
     traversal.traversal_type = new_traversal_type
 
-    log.debug("Traversal %s from %s to %s", str(traversal), old_traversal_type, new_traversal_type)
+    #log.debug("Traversal %s from %s to %s", str(traversal), old_traversal_type, new_traversal_type)
 
     #if invalid, don't remove, keep the traversal, it'll just have an invalid type and won't be used
 
@@ -92,6 +92,9 @@ def get_selections(segment: TwowaySegment | BranchSegment):
 
     elif (type(segment) == BranchSegment):
 
+        #NPT is cleaned before PT during bridge_branch
+        #will get recleaned after TRY but we keep this here
+        #so we can replenish after a DUMP
         selections.append(segment.npt_between_rooms)
         selections.append(segment.pt_between_rooms)
 
@@ -107,7 +110,9 @@ def get_selections(segment: TwowaySegment | BranchSegment):
 
 def clean_segment(FG: FlowGraphHandler, segment: TwowaySegment | BranchSegment):
     selections: list[RoomSelection] = get_selections(segment)
-
+    clean_selections(FG, selections)
+    
+def clean_selections(FG: FlowGraphHandler, selections: list[RoomSelection]):
     #any edge whos NDB or DB paths were emptied
     depleted_edges: set[PathEdge] = set()
 
@@ -144,7 +149,9 @@ def clean_selection(selection: RoomSelection):
 # 2. use bipartite graph to recalculate traversal type of traversals with added paths
 def replenish_segment(FG: FlowGraphHandler, segment: TwowaySegment | BranchSegment):
     selections: list[RoomSelection] = get_selections(segment)
+    replenish_selections(FG, selections)
 
+def replenish_selections(FG: FlowGraphHandler, selections: list[RoomSelection]):
     #any edge whose NDB or DB paths were moved from empty to not
     replenished_edges: set[PathEdge] = set()
 

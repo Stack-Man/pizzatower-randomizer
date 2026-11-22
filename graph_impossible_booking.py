@@ -125,8 +125,8 @@ def update_in_bipartite_graph_by_type(BG: nx.Graph, edge: PathEdge, path_lists :
         remove_edge_from_BG(BG, edge)
     elif (not was_DB and is_DB):
         add_edge_to_BG(BG, edge, path_lists)
-    else:
-        log.debug("ignoring %s edge change state from NDB to NDB", edge)
+    #else:
+        #log.debug("ignoring %s edge change state from NDB to NDB", edge)
 
     return check_for_impossible_booking(BG)
 

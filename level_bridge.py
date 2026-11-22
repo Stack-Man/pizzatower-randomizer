@@ -11,10 +11,12 @@ from graph_create import FlowGraphHandler
 from level_get_traversal import get_traversal
 from level_select_rooms import select_rooms_non_empty
 from level_room_path_generator import branch_room_path, room_path_cap_TW, entrance_room_path, oneway_entrance_room_path, oneway_exit_room_path
+from level_clean_replenish import clean_selections, replenish_selections
 
 from colors import RESET, ERROR
 
 import logging as log
+
 
 #Main Bridge functions that take a Source and Destination 
 #with their selected paths and creates a LevelSegment from it
@@ -42,15 +44,18 @@ def bridge_branch(start_rp: BranchRoomPath, end_rp: BranchRoomPath, FG: FlowGrap
 
         #TODO: clean up FG between bridges and replenish with NPT if PT fails
         #we MUST do it here because we need to know about changed traversal types and impossible bookings if any
-        log.warning("%sbridge_branch does not clean between NPT and PT %s", ERROR, RESET)
+        clean_selections(FG, [NPT])
 
-        PT = bridge_oneway(end_rp, start_rp, TraversalType.PIZZATIME, FG)
+        try:
+            PT = bridge_oneway(end_rp, start_rp, TraversalType.PIZZATIME, FG)
 
-        return BranchSegment(start_rp, end_rp, PT, NPT)
-    except RuntimeError as e:
+            return BranchSegment(start_rp, end_rp, PT, NPT)
         
-        log.warning("%sbridge_branch does not replenish with NPT after PT fails %s", ERROR, RESET)
-
+        except RuntimeError as e:
+            replenish_selections(FG, [NPT])
+            raise(e)
+        
+    except RuntimeError as e:
         pass
         
     raise RuntimeError(f"bridge_branch: failed traversal or room_selection between {start_rp.room} and {end_rp.room}")

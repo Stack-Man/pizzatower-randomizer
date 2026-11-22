@@ -19,8 +19,6 @@ def get_traversal(srp: BaseRoomPath, erp: BaseRoomPath, FG: FlowGraphHandler, tr
     source = get_path_end(srp, traversal_type)
     destination = get_path_start(erp, traversal_type)
 
-    log.warning("%sget traversal does not update traversals before selection%s", ERROR, RESET)
-
     traversals = get_traversals_between(FG, source, destination)
 
     for traversal in traversals:

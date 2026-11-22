@@ -22,7 +22,15 @@ def select_rooms_non_empty(traversal: EdgeTraversal, traversal_type):
     room_paths : list[RoomPath] = []
     used_rooms : list[str] = []
 
+    #log.debug("Start Selection for %s of type %s", traversal, traversal_type)
+
+    e = 0
+
     for edge in traversal.edges:
+
+        e += 1
+
+        #log.debug("Edge %s of %s", e, len(traversal.edges))
 
         #no selection for transition edges
         if (type(edge) == TransitionEdge):
@@ -30,9 +38,13 @@ def select_rooms_non_empty(traversal: EdgeTraversal, traversal_type):
 
         elif (type(edge) == PathEdge):
 
+            found = False
+
             for path in get_path_non_empty(edge, traversal_type):
 
                 if (path.room_name not in used_rooms):
+
+                    #log.debug("Edge %s use %s", e, path.room_name)
 
                     #track used room names since
                     #we don't clean immediately
@@ -42,12 +54,14 @@ def select_rooms_non_empty(traversal: EdgeTraversal, traversal_type):
                     room_paths.append(rp)
 
                     #exit to next edge
+                    found = True
                     break
 
             #failed to choose path for edge
             #should never happen if impossible bookings
             #are properly avoided (currently, NOT)
-            raise LookupError("No non-used path for edge but selection should be possible")
+            if (not found):
+                raise LookupError("No non-used path for edge but selection should be possible")
         
         else:
 
