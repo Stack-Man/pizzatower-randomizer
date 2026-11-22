@@ -247,6 +247,7 @@ class PathList():
         try:
             self.NDB.remove(path)
 
+            #must update if NDB moves from 1 to 0
             if (len(self.NDB) == 0):
                 return True #depleted
 
@@ -256,8 +257,9 @@ class PathList():
         try:
             self.DB.remove(path)
 
-            if (len(self.DB) == 0):
-                return True #depleted 
+            #must update if NDB is 0 and DB count changed
+            #DB must have changed if remove succeeded
+            return (len(self.NDB) == 0)
 
         except Exception as e:
             pass
@@ -268,12 +270,14 @@ class PathList():
         if (path.is_double_bookable):
             self.DB.append(path)
 
-            if (len(self.DB) == 1):
-                return True #replenished
+            #update if NDB is 0 and DB count changed
+            #DB must have changed if remove succeeded
+            return len(self.NDB) == 0
             
         else:
             self.NDB.append(path)
 
+            #must update if NDB moves from 0 to 1
             if (len(self.NDB) == 1):
                 return True #replenished
 

@@ -20,6 +20,10 @@ from enums import TraversalType
 import networkx as nx
 from colors import ERROR, RESET, CAUTION 
 
+import logging as log
+
+#These first two functions are used during traversal construction to check traversal type
+#as we create the traversal, allowing us to terminate invalid traversals
 #bipartite_TW/PT/NPT: A bipartite graph constructed from the edge traversal up to this point
 #traversal_type: priority traversal type accounting for a pathlist in edge being empty
 #edge: An edge which might be DB
@@ -49,8 +53,7 @@ def add_to_bipartite_graph(bipartite_TW: nx.Graph, bipartite_PT: nx.Graph, bipar
 #return TRUE: impossible, FALSE: not impossible
 def add_to_bipartite_graph_by_type(BG: nx.Graph, edge: PathEdge, path_lists: list[PathList]):
 
-    #1. Confirm edge is DB (all PathLists contain only DB)
-    i = 1
+    #Confirm edge is DB (all PathLists contain only DB)
     has_at_least_one_path = False
 
     for pl in path_lists:
@@ -66,50 +69,111 @@ def add_to_bipartite_graph_by_type(BG: nx.Graph, edge: PathEdge, path_lists: lis
     if (not has_at_least_one_path):
         return True
 
-    #2. Create node E with edge
+    #Add Edge as an E node
+    #and DB rooms that can satisfy that edge as R nodes
+    add_edge_to_BG(BG, edge, path_lists)
+
+    #for each connected component, check if R < E and if so, return IMPOSSIBLE
+    return check_for_impossible_booking(BG)
+
+#The following is used during level_clean_replenish to update traversals
+#whose DB edges have changed status
+def update_in_bipartite_graph(bipartite_TW: nx.Graph, bipartite_PT: nx.Graph, bipartite_NPT: nx.Graph, edge: PathEdge):
+    impossibleTW = update_in_bipartite_graph_by_type(bipartite_TW, edge, [edge.TW])
+    impossiblePT = update_in_bipartite_graph_by_type(bipartite_PT, edge, [edge.TW, edge.OW, edge.PT])
+    impossibleNPT = update_in_bipartite_graph_by_type(bipartite_NPT, edge, [edge.TW, edge.OW, edge.NPT])
+
+    new_traversal_type : TraversalType = get_traversal_type_from_impossible_bookings(impossibleTW, impossiblePT, impossibleNPT)
+
+    return new_traversal_type
+
+def update_in_bipartite_graph_by_type(BG: nx.Graph, edge: PathEdge, path_lists : list[PathList]):
+
+    #Four possible states for an edge:
+    #1. Just became DB and wasn't before (add)
+    #2. Was DB and no longer is (remove)
+    #3. Was DB and still is (update)
+    #4. Wasn't DB and still isn't (NDB 0 > 1 or 1 < 0 but DB 0) #this last case, we ignore b/c we check for non zero edges in get traversal
+
     E = PathEdgeNode(edge)
+    was_DB = E in BG
+
+    is_DB = True
+
+    has_at_least_one_path = False
+
+    #check if all paths are 
+    for pl in path_lists:
+        
+        if len(pl) == 0: #dont check empty lists
+            continue
+
+        has_at_least_one_path = True
+
+        if not pl.is_double_bookable():
+            is_DB = False #Not DB
+            break
 
 
-    #3. Create nodes Rs from DB rooms in PathLists.DBs (no object for room is needed so duplicating node is okay)
+    #if all path lists are empty, then this traversal type is impossible
+    if (not has_at_least_one_path):
+        is_DB = False #Mark as NOT DB so it is removed
+
+    if (was_DB and is_DB):
+        update_edge_in_BG(BG, edge, path_lists)
+    elif (was_DB and not is_DB):
+        remove_edge_from_BG(BG, edge)
+    elif (not was_DB and is_DB):
+        add_edge_to_BG(BG, edge, path_lists)
+    else:
+        log.debug("ignoring %s edge change state from NDB to NDB", edge)
+
+    return check_for_impossible_booking(BG)
+
+#modify room to edge connections in BG for edge E
+def update_edge_in_BG(BG: nx.Graph, edge: PathEdge, path_lists : list[PathList]):
+
+    E = PathEdgeNode(edge)
     Rs = room_nodes_from_path_lists(path_lists)
 
-    if (E not in BG.nodes()): #if E was not in BG, add it and its Rs
-        #4. add E and Rs to BG
-        #5. add edge to BG for each [E, R] 
-        BG.add_node(E, bipartite=0)
+    #add all rooms and edges to them
+    #duplicates don't re-add
+    for R in Rs:
+        BG.add_node(R, bipartite=1)
+        BG.add_edge(E, R)
 
-        for R in Rs:
-            BG.add_node(R, bipartite=1)
-            BG.add_edge(E, R)
+    #remove edges to rooms connected to E but not in Rs
+    #leave the node in case its attached to another E
+    #isolated Rs are OK
+    for R in BG.neighbors(E):
+        if R not in Rs:
+            BG.remove_edge(E, R)
 
-    #if E was already in BG, 
-    else:
+def remove_edge_from_BG(BG: nx.Graph, edge: PathEdge):
 
-        #remove Rs not in E anymore (depleted)
+    E = PathEdgeNode(edge)
 
-        to_remove = []
+    #automatically disconnects all edges to E
+    #isolated Rs are OK 
+    BG.remove_node(E)
 
-        for E, R in BG.edges(E):
+def add_edge_to_BG(BG: nx.Graph, edge: PathEdge, path_lists : list[PathList]):
 
-            if (R not in Rs):
-                to_remove.append(R)
+    E = PathEdgeNode(edge)
+    Rs = room_nodes_from_path_lists(path_lists)
 
-        BG.remove_nodes_from(to_remove)
+    BG.add_node(E, bipartite=0)
 
-        #still add edges and Rs in E but not present (replenished)
-        for R in Rs:
-            BG.add_node(R, bipartite=1)
-            BG.add_edge(E, R)
-    
-    #6. for each connected component, check if R < E and if so, return False
+    for R in Rs:
+        BG.add_node(R, bipartite=1)
+        BG.add_edge(E, R)
 
-    i = 1
+def check_for_impossible_booking(BG: nx.Graph):
 
+    #6. for each connected component, check if R < E and if so, return IMPOSSIBLE
     for connected_component in nx.connected_components(BG):
-        if more_nodes_in_group_zero(BG, connected_component):
-            return True #Impossible Booking discovered
-
-        i += 1
+            if more_nodes_in_group_zero(BG, connected_component):
+                return True #Impossible Booking discovered
 
     return False #not impossible booking 
 

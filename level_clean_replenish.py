@@ -6,10 +6,9 @@
 
 from graph_create import FlowGraphHandler
 from graph_objects import DoorNode, CombinedDoorNode, EdgeTraversal, PathEdge
-from enums import TraversalType
-from graph_impossible_booking import add_to_bipartite_graph
+from graph_impossible_booking import update_in_bipartite_graph
 
-from level_objects import TwowaySegment, BranchSegment, RoomSelection, SelfLoopRoomPath
+from level_objects import TwowaySegment, BranchSegment, RoomSelection
 
 import logging as log
 
@@ -58,7 +57,13 @@ def all_traversals(FG: FlowGraphHandler):
             for t in traversals:
                 yield t, N, D
 
+#Edges must update if their status would effect any bipartite graph
+#This occurs when nodes are added or removed (NDB to 0 or away from 0)
+#Or when the number of edges from an E node changes (NDB is 0 AND DB changes)
 def update_traversals(FG: FlowGraphHandler, updated_edges: set[PathEdge]):
+
+    #TODO: batch modified traversals and don't check traversal type until all updated edges have been applied
+    
     for edge in updated_edges:
         for traversal, _, _ in all_traversals(FG):
             if (edge in traversal):
@@ -67,8 +72,7 @@ def update_traversals(FG: FlowGraphHandler, updated_edges: set[PathEdge]):
     return FG
 
 def update_traversal_type(traversal: EdgeTraversal, edge: PathEdge):
-    #ADD considers edges already in the graph and instead updates the edges based on available rooms
-    new_traversal_type = add_to_bipartite_graph(traversal.bipartiteTW, traversal.bipartitePT, traversal.bipartiteNPT, traversal.traversal_type, edge)
+    new_traversal_type = update_in_bipartite_graph(traversal.bipartiteTW, traversal.bipartitePT, traversal.bipartiteNPT, edge)
     old_traversal_type = traversal.traversal_type
     traversal.traversal_type = new_traversal_type
 
@@ -122,17 +126,17 @@ def clean_selection(selection: RoomSelection):
 
     #store depleted edges so we can clean up traversals
     #set so each edge is only stored once
-    depleted_edges : set[PathEdge] = set() 
+    to_update : set[PathEdge] = set() 
 
     for rp in selection.rooms:
         for path in rp.room.paths:
             edge : PathEdge = path.edge
-            depleted = edge.remove(path)
+            should_update = edge.remove(path)
 
-            if (depleted):
-                depleted_edges.add(edge)
+            if (should_update):
+                to_update.add(edge)
 
-    return depleted_edges
+    return to_update
 
 # Replenish:
 # 1. for each room of each path in segment traversal 
@@ -156,15 +160,15 @@ def replenish_segment(FG: FlowGraphHandler, segment: TwowaySegment | BranchSegme
     update_traversals(FG, replenished_edges)
 
 def replenish_selection(selection: RoomSelection):
-    replenished_edges : set[PathEdge] = set() 
+    to_update : set[PathEdge] = set() 
     
     for rp in selection.rooms:
         for path in rp.room.paths:
             edge : PathEdge = path.edge
-            replenished = edge.add(path)
+            should_update = edge.add(path)
 
-            if (replenished):
-                replenished_edges.add(edge)
+            if (should_update):
+                to_update.add(edge)
 
-    return replenished_edges
+    return to_update
     
