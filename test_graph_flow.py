@@ -1,9 +1,9 @@
 from json_parse import parse_json_to_rooms_all, FILENAMES
 from graph_create import rooms_to_graph, FlowGraphHandler
 from graph_flow import flow
-from graph_objects import DoorNode, EdgeTraversal, StartExitType, Edge, Node
+from graph_objects import DoorNode, EdgeTraversal, StartExitType, Edge, Node, PathEdge
 import networkx as nx
-from colors import WARNING, CAUTION, RESET
+from colors import WARNING, CAUTION, RESET, CONTINUE
 from enums import DoorType, DoorDir
 from settings import TraversalMode
 
@@ -16,17 +16,65 @@ def test_flow():
            "dontmakeasound", "pizzascare", "war", 
             "crumblingtowerofpizza", "trickytreat", "tutorial", "tutorial_noise"]
 
-    fn = ["johngutter"]
+    #fn = ["johngutter"]
     
     print(f"{WARNING}PERFORMING FLOW WITH {CAUTION}{fn} {RESET}")
     all_rooms = parse_json_to_rooms_all(fn)
 
     graph = rooms_to_graph(all_rooms, traversal_mode = TraversalMode.MATCHING_PERFECT) 
 
-    #graph = test_complete_graph()
-    flow(graph)
+    NDB = 0
+    DB = 0
 
-    print_steps(graph, print_traversals=False)
+    for U, V in graph.edges():
+
+        obj = graph.get_edge_data(U, V)["object"]
+
+        if (type(obj) == PathEdge):
+            PLs = [obj.TW, obj.OW, obj.PT, obj.NPT]
+
+            for PL in PLs:
+                if (len(PL.NDB) > 0 or len(PL.DB) > 0):
+                    print(f"{obj}: NDB: {len(PL.NDB)} DB: {len(PL.DB)}")
+                NDB += len(PL.NDB)
+                DB += len(PL.DB)
+
+    print(f"NDB: {NDB} DB: {DB}")
+
+    #graph = test_complete_graph()
+    #flow(graph)
+
+    count_all_traversals(graph)
+
+    #print_steps(graph, print_traversals=False)
+
+def count_all_traversals(FG: FlowGraphHandler):
+    all = 0
+    
+    for N in FG.nodes():
+        N: DoorNode
+
+        for_N = 0
+
+        
+
+        for D, traversals in N.steps.items():
+            if (for_N == 0):
+                print(f"{WARNING}{N}:{RESET}")
+            
+            print(f"    {CONTINUE}{D}: {len(traversals)}{RESET}")
+            
+            for_N += len(traversals)
+
+            for T in traversals:
+               print(f"        {T}")
+
+        if (for_N != 0):
+            print(f"    TOTAL: {for_N} traversals")
+
+        all += for_N
+
+    print(f"Total: {all}")
 
 def test_complete_graph():
 

@@ -90,8 +90,14 @@ def update_in_bipartite_graph(bipartite_TW: nx.Graph, bipartite_PT: nx.Graph, bi
 
     return new_traversal_type
 
-def update_in_bipartite_graph_by_type(BG: nx.Graph, edge: PathEdge, path_lists : list[PathList]):
+def update_all_in_bipartite_graph_no_type_check(bipartite_TW: nx.Graph, bipartite_PT: nx.Graph, bipartite_NPT: nx.Graph, edges: set[PathEdge]):
+    #update all edges in the bipartites without checking for traversal type
+    for edge in edges:
+        update_in_bipartite_graph_by_type_no_type_check(bipartite_TW, edge, [edge.TW])
+        update_in_bipartite_graph_by_type_no_type_check(bipartite_PT, edge, [edge.TW, edge.OW, edge.PT])
+        update_in_bipartite_graph_by_type_no_type_check(bipartite_NPT, edge, [edge.TW, edge.OW, edge.NPT])
 
+def update_in_bipartite_graph_by_type_no_type_check(BG: nx.Graph, edge: PathEdge, path_lists : list[PathList]):
     #Four possible states for an edge:
     #1. Just became DB and wasn't before (add)
     #2. Was DB and no longer is (remove)
@@ -128,10 +134,20 @@ def update_in_bipartite_graph_by_type(BG: nx.Graph, edge: PathEdge, path_lists :
         remove_edge_from_BG(BG, edge)
     elif (not was_DB and is_DB):
         add_edge_to_BG(BG, edge, path_lists)
-    #else:
-        #log.debug("ignoring %s edge change state from NDB to NDB", edge)
 
+def update_in_bipartite_graph_by_type(BG: nx.Graph, edge: PathEdge, path_lists : list[PathList]):
+    update_in_bipartite_graph_by_type_no_type_check(BG, edge, path_lists)
     return check_for_impossible_booking(BG)
+
+def check_bipartites_for_traversal_type(bipartite_TW: nx.Graph, bipartite_PT: nx.Graph, bipartite_NPT: nx.Graph):
+    impossibleTW = check_for_impossible_booking(bipartite_TW)
+    impossiblePT = check_for_impossible_booking(bipartite_PT)
+    impossibleNPT = check_for_impossible_booking(bipartite_NPT)
+
+    new_traversal_type : TraversalType = get_traversal_type_from_impossible_bookings(impossibleTW, impossiblePT, impossibleNPT)
+    
+    return new_traversal_type
+
 
 #modify room to edge connections in BG for edge E
 def update_edge_in_BG(BG: nx.Graph, edge: PathEdge, path_lists : list[PathList]):

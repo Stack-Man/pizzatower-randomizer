@@ -21,8 +21,6 @@ def minigolf_8(room: Room):
     #treat minigolf_8 as a J room
     #modify so that E is the only path and add a SelfLoop 
     
-    log.warning("%sminigolf_8 does not have SelfLoop logic fully implemented!%s", WARNING, RESET)
-
     door_E = Door(
         "E", 
         DoorType.DOOR, 

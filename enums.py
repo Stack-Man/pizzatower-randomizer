@@ -17,15 +17,15 @@ class PathTime(Enum):
     NOTPIZZATIME = 2
     
 class DoorType(Enum):
-    NONE = "NONE"
-    HORIZONTAL = "HORIZONTAL"
-    VERTICAL = "VERTICAL"
-    DOOR = "DOOR"
-    BOX = "BOX"
-    SECRET = "SECRET"
-    ROCKET = "ROCKET"
-    TAXI = "TAXI"
-    LEVELDOOR = "LEVELDOOR"
+    NONE = "N"
+    HORIZONTAL = "H"
+    VERTICAL = "V"
+    DOOR = "D"
+    BOX = "B"
+    SECRET = "S"
+    ROCKET = "R"
+    TAXI = "T"
+    LEVELDOOR = "L"
     ANY = "ANY"
     A = "A"
     B = "B"
@@ -37,12 +37,12 @@ class DoorType(Enum):
     D2 = "D2"
     
 class DoorDir(Enum):
-    NONE = "NONE"
-    UP = "UP"
-    DOWN = "DOWN"
-    LEFT = "LEFT"
-    RIGHT = "RIGHT"
-    ANY = "ANY"
+    NONE = "N"
+    UP = "U"
+    DOWN = "D"
+    LEFT = "L"
+    RIGHT = "R"
+    ANY = "A"
 
 class AccessType(Enum):
     ANY = 0

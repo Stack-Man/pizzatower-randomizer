@@ -5,7 +5,7 @@
 #Separate edges into three graphs: two-way paths only (TW), two-way or one-way pizza time paths (OWPT), and two way or one-way not pizza time paths (OWNPT).
 
 from json_objects import Room, Path
-from graph_objects import DoorNode, PathEdge, TransitionEdge, CombinedDoorNode
+from graph_objects import DoorNode, PathEdge, TransitionEdge, CombinedDoorNode, EdgeTraversal
 from settings import TraversalMode
 from enums import PathTime, RoomType, StartExitType, TraversalType, DoorType
 from graph_transition_edge import transition_edges_from_nodes
@@ -21,6 +21,21 @@ class FlowGraphHandler():
         self.depleted_edges: list[PathEdge] = [] 
         self.changed_last_round = True 
         self.selected_rooms: list[str] = []
+
+        self.edge_to_traversals: dict[PathEdge, list[EdgeTraversal]] = {}
+
+        #Construct an index of PathEdge to the traversal that contain it, for fast lookup
+        #during impossible booking
+        #for N in self.nodes():
+           #N : DoorNode | CombinedDoorNode
+            #for D, traversals in N.steps.items():
+
+                #traversals: list[EdgeTraversal]
+
+                #for T in traversals:
+                    #for edge in T:
+                        #if (type(edge) == PathEdge):
+                            #self.edge_to_traversals.setdefault(edge, []).append(T)
 
     def nodes(self):
         return self.G.nodes()
