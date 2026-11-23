@@ -70,8 +70,11 @@ def add_to_bipartite_graph_by_type(BG: nx.Graph, edge: PathEdge, path_lists: lis
         return True
 
     #Add Edge as an E node
-    #and DB rooms that can satisfy that edge as R nodes
-    add_edge_to_BG(BG, edge, path_lists)
+    #and DB rooms that can satisfy that edge as R nodes'
+    E = PathEdgeNode(edge)
+
+    if (E not in BG):
+        add_edge_to_BG(BG, edge, path_lists)
 
     #for each connected component, check if R < E and if so, return IMPOSSIBLE
     return check_for_impossible_booking(BG)
@@ -145,7 +148,8 @@ def update_edge_in_BG(BG: nx.Graph, edge: PathEdge, path_lists : list[PathList])
     #remove edges to rooms connected to E but not in Rs
     #leave the node in case its attached to another E
     #isolated Rs are OK
-    for R in BG.neighbors(E):
+    #use LIST to avoid "modify dictionary during iteration" error
+    for R in list(BG.neighbors(E)):
         if R not in Rs:
             BG.remove_edge(E, R)
 
@@ -172,8 +176,8 @@ def check_for_impossible_booking(BG: nx.Graph):
 
     #6. for each connected component, check if R < E and if so, return IMPOSSIBLE
     for connected_component in nx.connected_components(BG):
-            if more_nodes_in_group_zero(BG, connected_component):
-                return True #Impossible Booking discovered
+        if more_nodes_in_group_zero(BG, connected_component):
+            return True #Impossible Booking discovered
 
     return False #not impossible booking 
 
@@ -234,6 +238,8 @@ class PathEdgeNode():
     def __init__(self, path_edge: PathEdge):
         self.path_edge = path_edge
 
+        self._hash = hash(self.path_edge)
+
     def __eq__(self, other):
         if (type(other) != PathEdgeNode):
             return False
@@ -241,7 +247,7 @@ class PathEdgeNode():
         return self.path_edge == other.path_edge
 
     def __hash__(self):
-        return hash(self.path_edge)
+        return self._hash
 
 class RoomNode():
     def __init__(self, room_name: str):

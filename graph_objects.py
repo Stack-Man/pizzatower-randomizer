@@ -39,6 +39,9 @@ class DoorNode(Node):
         self.door_type = door_type
         self.door_dir = door_dir
 
+        #cache hash to avoid rehashing since types are immutable
+        self._hash = hash((self.door_type, self.door_dir, self.se_type))
+
     def __eq__(self, other):
         if (type(other) != DoorNode):
             return False
@@ -46,7 +49,7 @@ class DoorNode(Node):
         return self.door_type == other.door_type and self.door_dir == other.door_dir and self.se_type == other.se_type
 
     def __hash__(self):
-        return hash((self.door_type, self.door_dir, self.se_type))
+        return self._hash 
 
     def __str__(self):
         return str(self.door_type.value) + " " + str(self.door_dir.value) + " " + str(self.se_type.value)
@@ -55,34 +58,14 @@ class DoorNode(Node):
     def __contains__(self, item):
         return item == self
 
-    #reimplement deepcopy to prevent "DoorNode does not contain attribute" error during deepcopy
-    #by gauranteeing the attributes are initialized
-    def __deepcopy__(self, memo):
-        # Return existing copy if already copied
-        if id(self) in memo:
-            return memo[id(self)]
-
-        # Initialize the new object
-        result = DoorNode(
-            self.door_type,
-            self.door_dir,
-            self.se_type
-        )
-
-        # Register BEFORE copying other attributes.
-        # This is important for circular references.
-        memo[id(self)] = result
-
-        # Deepcopy all inherited and local attributes
-        result.__dict__.update(copy.deepcopy(self.__dict__, memo))
-
-        return result
-
 class CombinedDoorNode(Node):
     def __init__(self, nodes: list[DoorNode], se_type: StartExitType):
         super().__init__(se_type)
 
         self.nodes = nodes
+
+        #cache hash to avoid rehashing since types are immutable
+        self._hash = hash(tuple(hash(node) for node in self.nodes))
 
     def __eq__(self, other):
 
@@ -104,7 +87,7 @@ class CombinedDoorNode(Node):
 
     #combine the hash results of the list into a single tuple and hash that
     def __hash__(self):
-        return hash(tuple(hash(node) for node in self.nodes))
+        return self._hash
 
     def __str__(self):
         msg = "("
@@ -117,20 +100,6 @@ class CombinedDoorNode(Node):
     def __contains__(self, item):
         return item in self.nodes
 
-    def __deepcopy__(self, memo):
-        if id(self) in memo:
-            return memo[id(self)]
-
-        result = CombinedDoorNode(
-            [],
-            self.se_type
-        )
-
-        memo[id(self)] = result
-
-        result.__dict__.update(copy.deepcopy(self.__dict__, memo))
-
-        return result
 
 class Edge():
     def __init__(self, start_node: DoorNode | CombinedDoorNode, end_node: DoorNode | CombinedDoorNode):
@@ -309,26 +278,7 @@ class PathEdge(Edge):
         self.NPT = PathList([])
         self.PT = PathList([])
 
-    #reimplement deepcopy to prevent uninitialized attribute error
-    def __deepcopy__(self, memo):
-        # Return existing copy if already copied
-        if id(self) in memo:
-            return memo[id(self)]
-
-        # Initialize the new object
-        result = PathEdge(
-            self.start_node,
-            self.end_node
-        )
-
-        # Register BEFORE copying other attributes.
-        # This is important for circular references.
-        memo[id(self)] = result
-
-        # Deepcopy all inherited and local attributes
-        result.__dict__.update(copy.deepcopy(self.__dict__, memo))
-
-        return result
+        self._hash = hash((self.start_node, self.end_node))
 
     #edge must have at least one path valid for the traversal type to be used
     def has_zero(self, traversal_type: TraversalType):
@@ -410,7 +360,7 @@ class PathEdge(Edge):
         return self.start_node == other.start_node and self.end_node == other.end_node
 
     def __hash__(self):
-        return hash((self.start_node, self.end_node))
+        return self._hash
 
 class TransitionEdge(Edge):
     def __init__(self, start_node: DoorNode | CombinedDoorNode, end_node:  DoorNode | CombinedDoorNode):
@@ -419,8 +369,10 @@ class TransitionEdge(Edge):
         if (start_node.se_type is not StartExitType.EXIT or end_node.se_type is not StartExitType.START):
             print(f"{ERROR} ERROR: Transition Edge {start_node} to {end_node} is not EXIT to START {RESET}")
 
+        self._hash = hash((self.start_node, self.end_node))
+
     def __eq__(self, other):
         return self.start_node == other.start_node and self.end_node == other.end_node
         
     def __hash__(self):
-        return hash((self.start_node, self.end_node))
+        return  self._hash

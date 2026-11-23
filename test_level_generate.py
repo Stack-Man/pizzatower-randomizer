@@ -22,6 +22,8 @@ from perf_counter import print_perf, print_perf_type, PerfType
 
 import log_config
 import logging as log
+import cProfile
+import pstats
 
 to_test = FILENAMES
 
@@ -79,7 +81,15 @@ def print_room_by_name(room_name: str):
 
             return
 
+#profiler = cProfile.Profile()
+#profiler.enable()
 test_generate()
+#profiler.disable()
+
+# Sort results by cumulative time spent in each function
+#stats = pstats.Stats(profiler).sort_stats("cumtime")
+#stats.print_stats(10)  # Print top 10 slowest functions
+
 print_perf()
 #test_bridge_branch_room_room_by_name("sewer_1", "chateau_5")
 #print_room_by_name("chateau_5")

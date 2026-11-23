@@ -121,13 +121,20 @@ def generate_level_recursive_start(SD: SourceDestinationHandler, FG: FlowGraphHa
         for entrance_segment in entrance_or_entrance_branch_segments(SD, FG):
 
             log.debug("%sTRY entrance_segment: %s to %s%s", CONTINUE, entrance_segment.start_room, entrance_segment.end_room, RESET)
-            clean_segment(FG, entrance_segment)
+
+            try:
+                clean_segment(FG, entrance_segment)
+            except Exception as e:
+                log.debug("%s====================Fatal error from clean: %s%s", ERROR, e, RESET)
+                raise(e)
             
             if (type(entrance_segment) == TwowaySegment):
+                log.debug("Continue seg as E")
 
                 #if rest of segments generate from this seg, extend and return
                 try:
                     #entrance was Twoway, so continue gen with Branch
+                    log.debug("About to try generate_level_recursive_branch")
                     next_segments, new_SD = generate_level_recursive_branch(SD, FG, last_segment=entrance_segment, branch_count=0, min_branch_count=MIN_BRANCH_COUNT)
                     segments = [entrance_segment]
                     segments.extend(next_segments)
@@ -136,9 +143,12 @@ def generate_level_recursive_start(SD: SourceDestinationHandler, FG: FlowGraphHa
 
                 #if gen fails, it throws, catch and try next entrance seg
                 except RuntimeError as e:
+                    log.debug("Failed seg as E: %s", e)
                     pass
 
             else: #entrance is BranchSegment
+                log.debug("Continue seg as EB")
+
                 try:
                     #entrance was Branch so continue gen with Twoway
                     #start with 1 branch count
@@ -147,8 +157,10 @@ def generate_level_recursive_start(SD: SourceDestinationHandler, FG: FlowGraphHa
                     segments.extend(next_segments)
 
                     return segments, new_SD #continued recursive, return the terminating code's copy of SD
+                
                 #if gen fails, it throws, catch and try next entrance seg
                 except RuntimeError as e:
+                    log.debug("Failed seg as EB: %s", e)
                     pass
 
             log.debug("%sDUMP entrance_segment: %s to %s%s", FAIL, entrance_segment.start_room, entrance_segment.end_room, RESET)
