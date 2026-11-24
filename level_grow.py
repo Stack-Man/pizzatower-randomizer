@@ -10,6 +10,7 @@ from settings import GrowthMode, GrowthQueueMode, InnerGrowthRecursionMode, Grow
 from enums import TraversalType
 from level_bridge import bridge_rp_rp
 from perf_counter import start_perf, end_perf, PerfType
+from level_clean_replenish import clean_selections
 import logging as log
 
 from colors import ERROR, RESET
@@ -18,7 +19,8 @@ from colors import ERROR, RESET
 
 def grow_levels(levels: list[Level], FG: FlowGraphHandler, growth_settings: LevelGrowthSettings):
 
-    log.error("%sERROR: grow_levels does not clean traversals after selection!%s", ERROR, RESET)
+    log.warning("%sgrow_levels does not customize War/CTOP OW paths with custom times%s", ERROR, RESET)
+    log.warning("%sgrow_levels does not utilize GrowthSettings to grow!%s", ERROR, RESET)
 
     #TODO: use growth_settings to iterate over levels
     grown_levels = []
@@ -107,8 +109,11 @@ def grow_inner_segment(old_rooms: list[BaseRoomPath], FG:FlowGraphHandler, trave
         #log.debug("         Growing between rooms %s and %s:", str(A), str(B))
 
         try:
-            bridge = bridge_rp_rp(A, B, FG, TraversalType.ANY, force_extension = True)
+            bridge = bridge_rp_rp(A, B, FG, traversal_type, force_extension = True)
             rooms.extend(bridge.rooms)
+
+            #Clean up 
+            clean_selections(FG, selections=[bridge])
 
             #log.debug("             Grew with %s:", str(bridge))
 

@@ -196,6 +196,19 @@ class PathEdge(Edge):
 
         self._hash = hash((self.start_node, self.end_node))
 
+    def get_path_lists(self, traversal_type: TraversalType):
+        match traversal_type:
+            case TraversalType.ANY:
+                return [self.TW]
+            case TraversalType.NOTPIZZATIME:
+                return [self.NPT, self.OW, self.TW]
+            case TraversalType.PIZZATIME:
+                return [self.PT, self.OW, self.TW]
+            case TraversalType.OW:
+                return [self.OW, self.TW]
+            case _:
+                raise NotImplementedError(f"select_rooms_from_matching not implemented for {traversal_type}")
+
     #edge must have at least one path valid for the traversal type to be used
     def has_zero(self, traversal_type: TraversalType):
         match traversal_type:
@@ -538,9 +551,8 @@ class BipartiteGraph():
 
 
 class EdgeTraversal():
-    def __init__(self, edges: list[Edge], rarity : float, traversal_type: TraversalType = TraversalType.ANY):
+    def __init__(self, edges: list[Edge], traversal_type: TraversalType = TraversalType.ANY):
         self.edges = edges
-        self.rarity = rarity
         self.traversal_type = traversal_type
 
         #initialize bipartite graphs for use later during impossible-booking exclusion and path selection
@@ -553,6 +565,18 @@ class EdgeTraversal():
         self.to_update : set[PathEdge] = set()
 
         #raise NotImplementedError(f"EdgeTraversal does not implement update before access!")
+
+    def get_matching(self, traversal_type: TraversalType):
+
+        if (traversal_type == TraversalType.ANY):
+            return self.bipartiteTW.matching
+        elif (traversal_type == TraversalType.PIZZATIME):
+            return self.bipartitePT.matching
+        elif (traversal_type == TraversalType.NOTPIZZATIME):
+            return self.bipartiteNPT.matching
+        else:
+            raise NotImplementedError(f"EdgeTraversal get_matching not implemented for {traversal_type}")
+        
 
     def __iter__(self):
         for e in self.edges:

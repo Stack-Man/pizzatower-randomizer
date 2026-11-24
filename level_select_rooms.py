@@ -3,34 +3,31 @@
 
 #select rooms and paths to fill the edges of the traversal
 
-from json_objects import Room
+from json_objects import Path
 from graph_objects import EdgeTraversal, PathEdge, TransitionEdge, PathList
 from level_objects import RoomSelection, RoomPath
-from graph_create import FlowGraphHandler
-from enums import TraversalType
+from enums import TraversalType, PathTime
 from colors import WARNING, RESET, ERROR
 
 import logging as log
 
 #select rooms from path list without removing them from the path list
 #select rooms and track used room names to avoid reusing the same room
-def select_rooms_non_empty(traversal: EdgeTraversal, traversal_type):
+def select_rooms_non_empty(traversal: EdgeTraversal, traversal_type: TraversalType):
+    #store matches by edge so that they
+    #can be reconsructed afterwards even
+    #if we do it out of order due to DB matching
+    matching : dict[PathEdge, RoomPath] = {} 
+    matching_DB = traversal.get_matching(traversal_type)
+    has_DB_matching = len(matching_DB.keys()) != 0
 
-    #TODO traversal is not prioritizing edges from the bipartite graph the node with the fewest rooms.. impossible booking may be encountered!
-    print(f"{WARNING}select_rooms does not utilize DB matching!{RESET}")
+    if (has_DB_matching):
+        matching = select_rooms_from_matching(traversal_type, matching_DB)
 
     room_paths : list[RoomPath] = []
     used_rooms : list[str] = []
 
-    #log.debug("Start Selection for %s of type %s", traversal, traversal_type)
-
-    e = 0
-
     for edge in traversal.edges:
-
-        e += 1
-
-        #log.debug("Edge %s of %s", e, len(traversal.edges))
 
         #no selection for transition edges
         if (type(edge) == TransitionEdge):
@@ -38,20 +35,28 @@ def select_rooms_non_empty(traversal: EdgeTraversal, traversal_type):
 
         elif (type(edge) == PathEdge):
 
+            #skip DB edges that are already in the matchign
+            if (has_DB_matching):
+                if edge in matching:
+                    continue
+
             found = False
 
-            for path in get_path_non_empty(edge, traversal_type):
+            for path in get_path_from_path_lists_non_empty(edge.get_path_lists(traversal_type)):
 
                 if (path.room_name not in used_rooms):
-
-                    #log.debug("Edge %s use %s", e, path.room_name)
-
                     #track used room names since
                     #we don't clean immediately
                     used_rooms.append(path.room_name)
 
                     rp = RoomPath(path.room, path)
-                    room_paths.append(rp)
+
+                    #if matching, store edge, RP in matching
+                    if (has_DB_matching):
+                        matching[edge] = rp
+                    #use list directly if no DB matching
+                    else: 
+                        room_paths.append(rp)
 
                     #exit to next edge
                     found = True
@@ -67,24 +72,56 @@ def select_rooms_non_empty(traversal: EdgeTraversal, traversal_type):
 
             raise ValueError(f"Edge not of type Transition or Path but {str(type(edge))}")
 
+    #reconstruct room paths list from matching dict
+    if (has_DB_matching):
+        for edge in traversal:
+            if (type(edge) == PathEdge):
+                room_paths.append(matching[edge])
+
     return RoomSelection(room_paths)
 
-def get_path_non_empty(edge: PathEdge, traversal_type: TraversalType):
+def select_rooms_from_matching( traversal_type: TraversalType, matching_DB: dict[PathEdge, str]):
 
-    #intentional bias in PathList order towards most-specific path type to least-specific
+    matching : dict[PathEdge, RoomPath] = {} 
+
+    for edge in matching_DB.keys():
+
+        #from edge, get the room name and path that matches the edeg and traversal type
+        path_lists = edge.get_path_lists(traversal_type)
+        target_room_name = matching_DB[edge]
+
+        found = False
+
+        for PL in path_lists:
+            for P in PL:
+
+                #on target path found, braek out of loop
+                if P.room_name == target_room_name and matches_traversal_type(P, traversal_type):
+                    matching[edge] = RoomPath(P.room, P)
+                    found = True
+                    break
+
+            #path was found, stop
+            if (found):
+                break
+
+    return matching
+
+def matches_traversal_type(path: Path, traversal_type: TraversalType):
+
     match traversal_type:
         case TraversalType.ANY:
-            return get_path_from_path_lists_non_empty([edge.TW])
-        case TraversalType.OW:
-            return get_path_from_path_lists_non_empty([edge.OW, edge.TW])
+            return not path.oneway and path.get_path_time() == PathTime.BOTH
         case TraversalType.NOTPIZZATIME:
-            return get_path_from_path_lists_non_empty([edge.NPT, edge.OW, edge.TW])
+            return path.get_path_time() in [PathTime.NOTPIZZATIME, PathTime.BOTH]
         case TraversalType.PIZZATIME:
-            return get_path_from_path_lists_non_empty([edge.PT, edge.OW, edge.TW])
-
-    raise ValueError(f"get_room not implemented for {traversal_type}")
-     
-
+            return path.get_path_time() in [PathTime.PIZZATIME, PathTime.BOTH]
+        case TraversalType.OW:
+            return path.get_path_time == path.get_path_time() == PathTime.BOTH
+            
+                    
+        
+    
 def get_path_from_path_lists_non_empty(path_lists: list[PathList]):
 
     #TODO: biased towards NDB rooms

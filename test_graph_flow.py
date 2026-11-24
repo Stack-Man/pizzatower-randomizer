@@ -7,6 +7,13 @@ from colors import WARNING, CAUTION, RESET, CONTINUE
 from enums import DoorType, DoorDir
 from settings import TraversalMode
 
+from perf_counter import print_perf
+from json_parse import FILENAMES
+
+import cProfile
+import pstats
+
+
 def test_flow():
 
     fn = ["johngutter", "ancientcheese", "bloodsauce", "pizzascape",
@@ -23,28 +30,8 @@ def test_flow():
 
     graph = rooms_to_graph(all_rooms, traversal_mode = TraversalMode.MATCHING_PERFECT) 
 
-    NDB = 0
-    DB = 0
-
-    for U, V in graph.edges():
-
-        obj = graph.get_edge_data(U, V)["object"]
-
-        if (type(obj) == PathEdge):
-            PLs = [obj.TW, obj.OW, obj.PT, obj.NPT]
-
-            for PL in PLs:
-                if (len(PL.NDB) > 0 or len(PL.DB) > 0):
-                    print(f"{obj}: NDB: {len(PL.NDB)} DB: {len(PL.DB)}")
-                NDB += len(PL.NDB)
-                DB += len(PL.DB)
-
-    print(f"NDB: {NDB} DB: {DB}")
-
     #graph = test_complete_graph()
-    #flow(graph)
-
-    count_all_traversals(graph)
+    flow(graph)
 
     #print_steps(graph, print_traversals=False)
 
@@ -128,4 +115,12 @@ def print_steps(G: FlowGraphHandler, print_traversals: bool):
                     print(f"    {traversal}")
     
 
+
+profiler = cProfile.Profile()
+profiler.enable()
 test_flow()
+profiler.disable()
+
+# Sort results by cumulative time spent in each function
+stats = pstats.Stats(profiler).sort_stats("cumtime")
+stats.print_stats(15)  # Print top 10 slowest functions

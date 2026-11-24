@@ -40,7 +40,7 @@ def flow(G: FlowGraphHandler):
     #initialize nodes with traversal to self
     for N in G.nodes():
         #base has no paths and rarity 0
-        base_traversal = EdgeTraversal([], rarity=0)
+        base_traversal = EdgeTraversal([])
 
         N.last_steps[N] = [base_traversal]
 
@@ -164,7 +164,7 @@ def pass_steps_to_parents(G: FlowGraphHandler, N: DoorNode | CombinedDoorNode):
                 new_edge_list.insert(0, new_edge)
 
                 #create new traversal including this edge
-                new_traversal = EdgeTraversal(new_edge_list, rarity=0, traversal_type=new_traversal_type)
+                new_traversal = EdgeTraversal(new_edge_list, traversal_type=new_traversal_type)
 
                 #edge receives bipartite from last edge, so pass bipartite to both types of edges
                 new_traversal.bipartiteTW = new_bipartite_TW
@@ -201,12 +201,6 @@ def get_edge_traversal_type(edge : PathEdge | TransitionEdge):
                 traversal_type = TraversalType.NOTPIZZATIME
             elif (not has_pt and not has_owany and not has_npt):
                 traversal_type = TraversalType.INVALID #no available paths
-
-        #log(f"Traversal Type of edge {edge} is {traversal_type} \n" 
-            #+ f"      NPT: {len(edge.NPT)}\n"
-            #+ f"      PT: {len(edge.PT)}\n"
-            #+ f"      OW: {len(edge.OW)}\n"
-            #+ f"      TW: {len(edge.TW)}\n")
 
     return traversal_type
 

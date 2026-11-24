@@ -30,15 +30,15 @@ def test_growth():
     levels, FG = generate_levels(fn = fn, traversal_mode=TraversalMode.MATCHING_PERFECT)
 
     log.debug("Generated %i levels in %s\n\n\n", len(levels), get_perf(PerfType.GEN))
-    #log.debug("Try Grow %i Levels", len(levels))
+    log.debug("Try Grow %i Levels", len(levels))
 
     #print_all_path_lists(FG)
 
-    #grown_levels = grow_levels(levels, FG, get_growth_settings())
+    grown_levels = grow_levels(levels, FG, get_growth_settings())
 
-    #log.debug("Grew %i levels", len(grown_levels))
+    log.debug("Grew %i levels", len(grown_levels))
 
-    #print_levels(grown_levels)
+    print_levels(grown_levels)
 
     print_perf()
 
