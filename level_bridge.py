@@ -177,8 +177,11 @@ def bridge_oneway_room_room(start_room: Room, end_room: Room, traversal_type: Tr
     raise RuntimeError(f"No oneway bridge between {start_room} and {end_room} after {e} attempts")
 
         
-def bridge_rp_rp(A: BaseRoomPath, B: BaseRoomPath, FG: FlowGraphHandler, traversal_type: TraversalType, force_extension = False):
+def bridge_rp_rp(A: BaseRoomPath, B: BaseRoomPath, FG: FlowGraphHandler, traversal_type: TraversalType):
+
 
     traversal = get_traversal(A, B, FG, traversal_type, force_extension = True)
+
+
     room_selection = select_rooms_non_empty(traversal, traversal_type)
     return room_selection

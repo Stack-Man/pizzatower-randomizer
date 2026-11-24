@@ -1,7 +1,7 @@
 #Author: Stack Man
 #Date: 11/18/2026
 
-from level_generate import generate_levels
+from level_generate import generate_base_levels
 from level_grow import grow_levels
 from settings import get_growth_settings, TraversalMode
 from level_objects import Level
@@ -27,7 +27,7 @@ import logging as log
 from perf_counter import get_perf, PerfType
 
 def test_growth():
-    levels, FG = generate_levels(fn = fn, traversal_mode=TraversalMode.MATCHING_PERFECT)
+    levels, FG = generate_base_levels(fn = fn, traversal_mode=TraversalMode.MATCHING_PERFECT)
 
     log.debug("Generated %i levels in %s\n\n\n", len(levels), get_perf(PerfType.GEN))
     log.debug("Try Grow %i Levels", len(levels))

@@ -49,4 +49,4 @@ root_logger.addHandler(handler)
 
 logging.basicConfig(level=logging.DEBUG)
 
-logging.disable()
+#logging.disable()

@@ -4,9 +4,8 @@
 #Test impossible booking by creating graphs that are forced through multiple DB edges
 
 from json_objects import Door, Path, Room
-from graph_objects import PathEdge, DoorNode
+from graph_objects import PathEdge, DoorNode, BipartiteGraph
 from enums import DoorType, DoorDir, PathTime, AccessType, StartExitType, RoomType, TraversalType
-import networkx as nx
 from graph_impossible_booking import add_to_bipartite_graph
 
 def test_2_edges_1_room():
@@ -25,9 +24,9 @@ def test_2_edges_1_room():
     edge_AB = edge_from_doors(door_A, door_B)
     edge_CD = edge_from_doors(door_C, door_D)
 
-    bipartite_TW = nx.Graph()
-    bipartite_PT = nx.Graph()
-    bipartite_NPT = nx.Graph()
+    bipartite_TW = BipartiteGraph()
+    bipartite_PT = BipartiteGraph()
+    bipartite_NPT = BipartiteGraph()
 
     edge_AB.set_paths([path_AB], [], [], [])
     edge_CD.set_paths([path_CD], [], [], [])
@@ -57,9 +56,9 @@ def test_2_edges_2_rooms():
     edge_AB = edge_from_doors(door_A, door_B)
     edge_CD = edge_from_doors(door_C, door_D)
 
-    bipartite_TW = nx.Graph()
-    bipartite_PT = nx.Graph()
-    bipartite_NPT = nx.Graph()
+    bipartite_TW = BipartiteGraph()
+    bipartite_PT = BipartiteGraph()
+    bipartite_NPT = BipartiteGraph()
 
     edge_AB.set_paths([path_AB], [], [], [])
     edge_CD.set_paths([path_CD], [], [], [])
@@ -114,9 +113,9 @@ def test_2_edges_2_rooms_then_2_edges_1_room():
     edge_AB2.set_paths([path_AB2], [], [], [])
     edge_CD2.set_paths([path_CD2], [], [], [])
 
-    bipartite_TW = nx.Graph()
-    bipartite_PT = nx.Graph()
-    bipartite_NPT = nx.Graph()
+    bipartite_TW = BipartiteGraph()
+    bipartite_PT = BipartiteGraph()
+    bipartite_NPT = BipartiteGraph()
 
     add_to_bipartite_graph(bipartite_TW, bipartite_PT, bipartite_NPT, TraversalType.ANY, edge_AB)
     add_to_bipartite_graph(bipartite_TW, bipartite_PT, bipartite_NPT, TraversalType.ANY, edge_CD) #should NOT incur impossible booking

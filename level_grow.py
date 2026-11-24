@@ -16,6 +16,7 @@ import logging as log
 from colors import ERROR, RESET
 
 #TODO: add oneway segment growth for War/CTOP (Change their TW segment to new OW segment?)
+#TODO: cannot grow between segments that already connect directly (Hallway right E to hallway left S for example does not insert a new Hall RE to Hall LS)
 
 def grow_levels(levels: list[Level], FG: FlowGraphHandler, growth_settings: LevelGrowthSettings):
 
@@ -24,6 +25,8 @@ def grow_levels(levels: list[Level], FG: FlowGraphHandler, growth_settings: Leve
 
     #TODO: use growth_settings to iterate over levels
     grown_levels = []
+
+    levels.reverse()
 
     for level in levels:
         log.debug("Growing level %s: ", level.segments[0].start_room.room.name)
@@ -75,15 +78,17 @@ def grow_twoway_segment(segment: TwowaySegment, FG: FlowGraphHandler, growth_set
     return TwowaySegment(segment.start_room, segment.end_room, new_selection)
 
 def grow_branch_segment(segment: BranchSegment, FG: FlowGraphHandler, growth_settings: LevelGrowthSettings):
-    old_rooms_PT = [segment.start_room]
+    #PT is end > between > start
+    old_rooms_PT = [segment.end_room]
     old_rooms_PT.extend(segment.pt_between_rooms.rooms)
-    old_rooms_PT.append(segment.end_room)
+    old_rooms_PT.append(segment.start_room)
 
     rooms_PT = grow_inner_segment(old_rooms_PT, FG, TraversalType.PIZZATIME, growth_settings)
 
-    old_rooms_NPT = [segment.end_room]
+    #NPT is start > between > end
+    old_rooms_NPT = [segment.start_room]
     old_rooms_NPT.extend(segment.npt_between_rooms.rooms)
-    old_rooms_NPT.append(segment.start_room)
+    old_rooms_NPT.append(segment.end_room)
 
     rooms_NPT = grow_inner_segment(old_rooms_NPT, FG, TraversalType.NOTPIZZATIME, growth_settings)
 
@@ -106,32 +111,28 @@ def grow_inner_segment(old_rooms: list[BaseRoomPath], FG:FlowGraphHandler, trave
     
     for A, B in every_two(old_rooms):
 
-        #log.debug("         Growing between rooms %s and %s:", str(A), str(B))
+        log.debug("         Growing between rooms %s and %s:", str(A), str(B))
 
         try:
-            bridge = bridge_rp_rp(A, B, FG, traversal_type, force_extension = True)
+            bridge = bridge_rp_rp(A, B, FG, traversal_type)
             rooms.extend(bridge.rooms)
 
             #Clean up 
             clean_selections(FG, selections=[bridge])
 
-            #log.debug("             Grew with %s:", str(bridge))
+            log.debug("             Grew with %s:", str(bridge))
 
-        except Exception as e:
-            #log.debug("             " + str(e))
+        except RuntimeError as e:
+            log.debug("             " + str(e))
             pass
 
         #only append B because A was added last loop
         rooms.append(B)
 
-    #log.debug("         Grew from %i to %i", len(old_rooms), len(rooms))
-
-
-
+    log.debug("         Grew from %i to %i", len(old_rooms), len(rooms))
+    
     log.debug("             old rooms: %s", ">".join(room.room.name for room in old_rooms))
     log.debug("             new rooms: %s", ">".join(room.room.name for room in rooms))
-
-
 
     return rooms
 

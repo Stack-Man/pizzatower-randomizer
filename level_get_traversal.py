@@ -4,10 +4,11 @@
 #get a traversal between a two room paths from FG
 
 from level_objects import BaseRoomPath, RoomPath, BranchRoomPath
-from enums import TraversalType, StartExitType
+from enums import TraversalType, StartExitType, DoorType
 from graph_create import FlowGraphHandler
-from graph_objects import DoorNode, CombinedDoorNode
+from graph_objects import DoorNode, CombinedDoorNode, EdgeTraversal, TransitionEdge, PathEdge
 from level_clean_replenish import update_traversal_type
+from graph_impossible_booking import add_to_bipartite_graph
 
 import logging as log
 from colors import ERROR, RESET
@@ -32,10 +33,67 @@ def get_traversal(srp: BaseRoomPath, erp: BaseRoomPath, FG: FlowGraphHandler, tr
 
             #traversal must be longer than one edge (direct connection) if 
             #we are forcing extension. used for growth
+
+            #TODO: if a direct connection, we can add a room by repeating the path type and he dierct connection twice
+            #traversals specifically ignore this, how to handle it?
+
+           
+
             if  (not force_extension) or (force_extension and len(traversal) > 1):
                 return traversal
+            elif (force_extension and len(traversal) == 1):
+                #if a direct connection, we can add a room by repeating the direct connection twice
+                #example A--B extends to A--B==A--B
+                repeat_traversal = repeat_direct_connection(FG, traversal)
+
+                #log.debug("Trying repeat traversal")
+
+                try:
+                    if (good_traversal_type(repeat_traversal.traversal_type, traversal_type) and repeat_traversal.has_no_zero_edges()):
+                        #log.debug(f"Used repeat traversal: {repeat_traversal}")
+                        return repeat_traversal
+                except RuntimeError as e:
+                    pass
+                    #log.debug(e)
+
+                #log.debug("Failed repeat traversal")
+
+            #bad traversal and no repeat traversal
+            #try next
+
 
     raise RuntimeError(f"No traversal of {traversal_type} between {source} and {destination}")
+
+def repeat_direct_connection(FG: FlowGraphHandler, direct_traversal: EdgeTraversal):
+    direct_edge = direct_traversal.edges[0]
+
+    if (type(direct_edge) != TransitionEdge):
+        raise TypeError(f"Direct Edge in repeat_direct_connection was not TransitionEdge but {type(direct_edge)}")
+
+    source = direct_edge.start_node
+    destination = direct_edge.end_node
+
+    #reverse S and D so we get the path edge instead of the transition edge
+    edge = FG.get_edge_data(destination, source)
+    
+    #edge may not exist
+    if (edge is not None):
+        path_edge : PathEdge = edge["object"]
+
+        #log.debug("Repeating with %s to %s to %s", direct_edge, path_edge, direct_edge)
+
+        #have to manually add all of the edges to the traversal
+        new_traversal = EdgeTraversal([direct_edge, path_edge, direct_edge])
+
+        #use ANY as starting point for traversal check
+        #only adds to BG not to traversal itself, so we add path-edge to traversal manually
+        add_to_bipartite_graph(new_traversal.bipartiteTW, new_traversal.bipartitePT, new_traversal.bipartiteNPT, TraversalType.ANY, path_edge)
+
+        return new_traversal
+    
+    else:
+    
+        raise RuntimeError(f"No edge of type {destination} to {source}")
 
 def good_traversal_type(given: TraversalType, wanted: TraversalType):
 
@@ -89,6 +147,10 @@ def get_path_end(rp: BaseRoomPath, traversal_type:TraversalType):
                 raise NotImplementedError(f"get_path_end() not implemented for {traversal_type}")
 
         t = door.get_type_as_tuple()
+
+        if (t[0] == DoorType.LEVELDOOR):
+            raise ValueError(f"end door of {rp.room} was LevelDoor with traversal type {traversal_type}")
+
         return DoorNode(t[0], t[1], StartExitType.EXIT) 
     else:
         raise TypeError(f"RP {rp.room} is not RoomPath or BranchRoomPath")
@@ -118,6 +180,10 @@ def get_path_start(rp: BaseRoomPath, traversal_type: TraversalType):
                 raise NotImplementedError(f"get_path_start() not implemented for {traversal_type}")
 
         t = door.get_type_as_tuple()
+
+        if (t[0] == DoorType.LEVELDOOR):
+            raise ValueError(f"start door of {rp.room} was LevelDoor with traversal type {traversal_type}")
+
         return DoorNode(t[0], t[1], StartExitType.START)
     else:
         raise TypeError(f"RP {rp.room} is not RoomPath or BranchRoomPath")
