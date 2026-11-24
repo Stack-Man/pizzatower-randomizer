@@ -11,10 +11,9 @@ from seeded_random import set_seed
 from graph_collapse import collapse_all_nodes_and_edges
 from level_grow import grow_levels
 
-from settings import TraversalMode,  GRAPH_TRAVERSAL_MODE, get_growth_settings
+from settings import TraversalMode, GRAPH_TRAVERSAL_MODE, get_growth_settings
 
-#TODO: replace nx graphs in EdgeTraversal with BipartiteGraph
-#TODO: update impossible booking to use BipartiteGraph funcs with BiaprtiteGraph's funcs
+#TODO: 
 
 
 def get_SD_FG_rooms(fn: list[str], traversal_mode : TraversalMode):

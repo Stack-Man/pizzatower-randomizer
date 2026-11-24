@@ -24,15 +24,10 @@
 
 from graph_objects import EdgeTraversal, DoorNode, CombinedDoorNode, StartExitType, PathEdge, TransitionEdge, BipartiteGraph
 from graph_impossible_booking import add_to_bipartite_graph
-import threading
-from enums import TraversalType, DoorType, DoorDir, StartExitType
+from enums import TraversalType,  StartExitType
 from graph_create import FlowGraphHandler
 
-from colors import WARNING, RESET
 from perf_counter import start_perf, end_perf, PerfType
-
-LOGGING = False
-
 
 
 #can an additional optimization be made considering steps with START vs EXIT nodes?
@@ -41,7 +36,6 @@ LOGGING = False
 #though they may be necessary for the flow process even if the end result is unneeded.
 def flow(G: FlowGraphHandler):
     start_perf(PerfType.FLOW)
-    log(f"Flow of G with {len(G.nodes())} nodes and {len(G.edges())} Edges begin")
 
     #initialize nodes with traversal to self
     for N in G.nodes():
@@ -58,33 +52,18 @@ def flow(G: FlowGraphHandler):
 
         G.changed_last_round = False
 
-        #threads = []
 
         #pass all valid edge traversal from N to its parents P
         #overhead of starting threads seems to kill any performance benefits :/
         for N in G.nodes():
             pass_steps_to_parents(G, N)
-            #t = threading.Thread(target = pass_steps_to_parents, args=(G, N))
-            #threads.append(t)
-            #t.start()
-
-        #for t in threads:
-            #t.join()
-
-        #threads = []
 
         #At the end of every round, save next to steps, last = next and clear next
         #ensures all nodes complete before modifying N.steps and tracks this round's steps
         
         for N in G.nodes():
             store_steps(N)
-            #t = threading.Thread(target = store_steps, args=(N,))
-            #threads.append(t)
-            #t.start()
-            
-               
-        #for t in threads:
-            #t.join() 
+
 
         R = R + 1
 
@@ -174,26 +153,9 @@ def pass_steps_to_parents(G: FlowGraphHandler, N: DoorNode | CombinedDoorNode):
                     #exclude traversals that require double booking rooms
                     #create bipartite graphs to determine connected components where R < E
                     new_traversal_type = add_to_bipartite_graph(new_bipartite_TW, new_bipartite_PT, new_bipartite_NPT, priority_traversal_type, new_edge)
-
-                    if(type(new_edge.start_node) == DoorNode and type(new_edge.end_node) == DoorNode):
-                        s = new_edge.start_node
-                        
-                        if (s.door_type == DoorType.VERTICAL and s.door_dir == DoorDir.UP and s.se_type == StartExitType.START):
-
-                            e = new_edge.end_node
-
-                            if (e.door_type == DoorType.HORIZONTAL and e.door_dir == DoorDir.RIGHT and e.se_type == StartExitType.EXIT):
-
-                                log(f"============edge {new_edge} is type {edge_traversal_type} and new traversal is type {new_traversal_type}")
-                    
-                    if (old_traversal_type == TraversalType.OW and new_traversal_type == TraversalType.ANY):
-                        log(f"{WARNING}====BAD TRAVERSAL SWITCH, ADD OW BUT IS ANY!{RESET}")
-
-                    log(f"traversal to {new_traversal_type} from {old_traversal_type} with priority {priority_traversal_type}")
-                    
+    
                     #no valid path exists
                     if (new_traversal_type == TraversalType.INVALID):
-                        log(f"traversal type of {traversal} with {new_edge} is INVALID. priority was {priority_traversal_type} and new was {new_traversal_type}")
                         continue
 
                 #get the edge set and prepend the current edge to the front
@@ -202,9 +164,7 @@ def pass_steps_to_parents(G: FlowGraphHandler, N: DoorNode | CombinedDoorNode):
                 new_edge_list.insert(0, new_edge)
 
                 #create new traversal including this edge
-                #TODO: determine rarity
                 new_traversal = EdgeTraversal(new_edge_list, rarity=0, traversal_type=new_traversal_type)
-                log(f"Generated new traversal of type: {new_traversal_type} for {new_traversal}\n")
 
                 #edge receives bipartite from last edge, so pass bipartite to both types of edges
                 new_traversal.bipartiteTW = new_bipartite_TW
@@ -281,6 +241,3 @@ def store_steps(N: DoorNode):
     N.last_steps = N.next_steps.copy()
     N.next_steps = {}
 
-def log(msg: str):
-    if (LOGGING):
-        print(msg, flush=True)

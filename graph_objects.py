@@ -8,7 +8,9 @@ from json_objects import Path
 
 from colors import ERROR, RESET, WARNING
 
-
+#__eq__ implementations compare cached hashes if possible
+#hashes are already hashes of the otherwise compared attributes
+#so comparison is equivalent
 
 class Node():
     def __init__(self, se_type: StartExitType):
@@ -40,18 +42,14 @@ class DoorNode(Node):
         self._hash = hash((self.door_type, self.door_dir, self.se_type))
 
     def __eq__(self, other):
-        if (type(other) != DoorNode):
-            return False
-
-        return self.door_type == other.door_type and self.door_dir == other.door_dir and self.se_type == other.se_type
+        return self._hash == other._hash
 
     def __hash__(self):
         return self._hash 
 
     def __str__(self):
         return str(self.door_type.value) + " " + str(self.door_dir.value) + " " + str(self.se_type.value)
-        #return "(" + str(self.door_type.value) + ", " + str(self.door_dir.value) + ", " + str(self.se_type.value) + ")"
-    
+
     def __contains__(self, item):
         return item == self
 
@@ -65,22 +63,7 @@ class CombinedDoorNode(Node):
         self._hash = hash(tuple(hash(node) for node in self.nodes))
 
     def __eq__(self, other):
-
-        if (type(other) != CombinedDoorNode):
-            return False
-
-        #all nodes in self in other
-        for n in self.nodes:
-            if n not in other.nodes:
-                return False
-
-        #other does not contain nodes not in self
-        if len(self.nodes) != len(other.nodes):
-            return False
-
-        #final sanity check
-        if self.se_type == other.se_type:
-            return True
+        return self._hash == other._hash       
 
     #combine the hash results of the list into a single tuple and hash that
     def __hash__(self):
