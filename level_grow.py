@@ -12,9 +12,13 @@ from level_bridge import bridge_rp_rp
 from perf_counter import start_perf, end_perf, PerfType
 import logging as log
 
+from colors import ERROR, RESET
+
 #TODO: add oneway segment growth for War/CTOP (Change their TW segment to new OW segment?)
 
 def grow_levels(levels: list[Level], FG: FlowGraphHandler, growth_settings: LevelGrowthSettings):
+
+    log.error("%sERROR: grow_levels does not clean traversals after selection!%s", ERROR, RESET)
 
     #TODO: use growth_settings to iterate over levels
     grown_levels = []

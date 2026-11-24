@@ -7,6 +7,7 @@ from level_objects import BaseRoomPath, RoomPath, BranchRoomPath
 from enums import TraversalType, StartExitType
 from graph_create import FlowGraphHandler
 from graph_objects import DoorNode, CombinedDoorNode
+from level_clean_replenish import update_traversal_type
 
 import logging as log
 from colors import ERROR, RESET
@@ -22,6 +23,11 @@ def get_traversal(srp: BaseRoomPath, erp: BaseRoomPath, FG: FlowGraphHandler, tr
     traversals = get_traversals_between(FG, source, destination)
 
     for traversal in traversals:
+
+        #we deferred updating the traversal type until we actually
+        #tried to access it
+        update_traversal_type(traversal)
+        
         if (good_traversal_type(traversal.traversal_type, traversal_type) and traversal.has_no_zero_edges()):
 
             #traversal must be longer than one edge (direct connection) if 

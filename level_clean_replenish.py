@@ -6,7 +6,7 @@
 
 from graph_create import FlowGraphHandler
 from graph_objects import DoorNode, CombinedDoorNode, EdgeTraversal, PathEdge
-from graph_impossible_booking import update_in_bipartite_graph, update_all_in_bipartite_graph_no_type_check, check_bipartites_for_traversal_type
+from graph_impossible_booking import store_edges_to_update_in_traversal, check_bipartites_for_traversal_type, update_all_in_bipartite_graph_no_type_check
 
 from level_objects import TwowaySegment, BranchSegment, RoomSelection
 
@@ -62,18 +62,7 @@ def all_traversals(FG: FlowGraphHandler):
 #Edges must update if their status would effect any bipartite graph
 #This occurs when nodes are added or removed (NDB to 0 or away from 0)
 #Or when the number of edges from an E node changes (NDB is 0 AND DB changes)
-def update_traversals(FG: FlowGraphHandler, updated_edges: set[PathEdge]):
-
-    #TODO: batch modified traversals and don't check traversal type until all updated edges have been applied
-    
-    for edge in updated_edges:
-        for traversal, _, _ in all_traversals(FG):
-            if (edge in traversal):
-                update_traversal_type(traversal, edge)
-
-    return FG
-
-def update_traversals_batch(FG: FlowGraphHandler, updated_edges: set[PathEdge]):
+def store_traversal_updated_edges_batch(FG: FlowGraphHandler, updated_edges: set[PathEdge]):
 
     #dict to store to update traversals and its list of updated edges
     to_update : dict[EdgeTraversal, set[PathEdge]]= {} 
@@ -87,44 +76,29 @@ def update_traversals_batch(FG: FlowGraphHandler, updated_edges: set[PathEdge]):
                 #add or append edge to traversal list
                 to_update.setdefault(traversal, set()).add(edge)
 
-    print(
-        f"{CONTINUE}Updated edges: {len(updated_edges)}, "
-        f"Affected traversals: {len(to_update)}, "
-        f"Total Traversals: {i}"
-        f"Total edge updates: {sum(map(len, to_update.values()))}{RESET}"
-    )            
-    
-    #use pre computed lookup to find traversals that contain an edge
-    #then construct a dict of each traversal and the updated edges in contains
-    #TODO: for some reason, index does not contain most (any?) edges
-    #for edge in updated_edges:
-        
-        #traversals = FG.edge_to_traversals[edge]
-
-        #for T in traversals:
-            #to_update.setdefault(T, set()).add(edge)
-
-
     #for each traversal and its list of effected edges
     for traversal, edges in to_update.items():
 
         #update the traversal's bipartites with all of the effected edges, one by one
-        update_all_in_bipartite_graph_no_type_check(traversal.bipartiteTW, traversal.bipartitePT, traversal.bipartiteNPT, edges)
+        store_edges_to_update_in_traversal(traversal, edges)
 
+        #DONT perform these until we actually want to access the traversal later
         #perform impossible booking check only after we've completed updated all edges
-        new_traversal_type = check_bipartites_for_traversal_type(traversal.bipartiteTW, traversal.bipartitePT, traversal.bipartiteNPT)
+        #new_traversal_type = check_bipartites_for_traversal_type(traversal.bipartiteTW, traversal.bipartitePT, traversal.bipartiteNPT)
 
         #set the new traversal type
-        traversal.traversal_type = new_traversal_type
+        #traversal.traversal_type = new_traversal_type
 
-def update_traversal_type(traversal: EdgeTraversal, edge: PathEdge):
-    new_traversal_type = update_in_bipartite_graph(traversal.bipartiteTW, traversal.bipartitePT, traversal.bipartiteNPT, edge)
-    old_traversal_type = traversal.traversal_type
+def update_traversal_type(traversal: EdgeTraversal):
+    #Update traversal's BGs with updated edges
+    update_all_in_bipartite_graph_no_type_check(traversal, traversal.to_update)
+    traversal.to_update.clear()
+    
+    #perform matching check after we've updated all edges
+    new_traversal_type = check_bipartites_for_traversal_type(traversal.bipartiteTW, traversal.bipartitePT, traversal.bipartiteNPT)
+
+    #set the new traversal type
     traversal.traversal_type = new_traversal_type
-
-    #log.debug("Traversal %s from %s to %s", str(traversal), old_traversal_type, new_traversal_type)
-
-    #if invalid, don't remove, keep the traversal, it'll just have an invalid type and won't be used
 
 def get_selections(segment: TwowaySegment | BranchSegment):
     selections: list[RoomSelection] = []
@@ -171,7 +145,7 @@ def clean_selections(FG: FlowGraphHandler, selections: list[RoomSelection]):
             depleted_edges.add(e)
 
     #remove depleted edges from bipartite graphs of traversals containing them
-    update_traversals_batch(FG, depleted_edges)
+    store_traversal_updated_edges_batch(FG, depleted_edges)
     
 def clean_selection(selection: RoomSelection):
 
@@ -210,7 +184,7 @@ def replenish_selections(FG: FlowGraphHandler, selections: list[RoomSelection]):
             replenished_edges.add(e)
 
     #update replenished edges 
-    update_traversals_batch(FG, replenished_edges)
+    store_traversal_updated_edges_batch(FG, replenished_edges)
 
 def replenish_selection(selection: RoomSelection):
     to_update : set[PathEdge] = set() 

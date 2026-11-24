@@ -43,6 +43,12 @@ def end_perf(type: PerfType):
 
     return new_time
 
+def get_perf(type: PerfType):
+    if (type in total_times):
+        return total_times[type]
+
+    return -1
+
 def print_perf_type(type: PerfType):
     if type in total_times:
         print(f"{type}: {total_times[type]}", flush = True)

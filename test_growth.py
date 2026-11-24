@@ -24,12 +24,12 @@ fn = FILENAMES
 
 import log_config
 import logging as log
-
+from perf_counter import get_perf, PerfType
 
 def test_growth():
     levels, FG = generate_levels(fn = fn, traversal_mode=TraversalMode.MATCHING_PERFECT)
 
-    log.debug("Generated %i levels", len(levels))
+    log.debug("Generated %i levels in %s\n\n\n", len(levels), get_perf(PerfType.GEN))
     log.debug("Try Grow %i Levels", len(levels))
 
     #print_all_path_lists(FG)

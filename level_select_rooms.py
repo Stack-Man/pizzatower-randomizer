@@ -17,7 +17,7 @@ import logging as log
 def select_rooms_non_empty(traversal: EdgeTraversal, traversal_type):
 
     #TODO traversal is not prioritizing edges from the bipartite graph the node with the fewest rooms.. impossible booking may be encountered!
-    print(f"{WARNING}select_rooms does not avoid impossible bookings!{RESET}")
+    print(f"{WARNING}select_rooms does not utilize DB matching!{RESET}")
 
     room_paths : list[RoomPath] = []
     used_rooms : list[str] = []

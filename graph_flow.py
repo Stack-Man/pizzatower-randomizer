@@ -22,16 +22,11 @@
 #                   if {path} does not contain a subset in P.Steps_Round_X //Must check all sets
 #                       P.Steps_Round_R[Destination] = steps + 1, {path + N}
 
-import networkx as nx
-from graph_objects import EdgeTraversal, DoorNode, CombinedDoorNode, StartExitType, PathEdge, TransitionEdge
+from graph_objects import EdgeTraversal, DoorNode, CombinedDoorNode, StartExitType, PathEdge, TransitionEdge, BipartiteGraph
 from graph_impossible_booking import add_to_bipartite_graph
 import threading
-
 from enums import TraversalType, DoorType, DoorDir, StartExitType
-
 from graph_create import FlowGraphHandler
-
-import time
 
 from colors import WARNING, RESET
 from perf_counter import start_perf, end_perf, PerfType
@@ -53,13 +48,6 @@ def flow(G: FlowGraphHandler):
         #base has no paths and rarity 0
         base_traversal = EdgeTraversal([], rarity=0)
 
-        #initialize with empty bipartite graphs, 
-        # to be copied and modified when this traversal
-        # is extended
-        base_traversal.bipartiteTW = nx.Graph()
-        base_traversal.bipartitePT = nx.Graph()
-        base_traversal.bipartiteNPT = nx.Graph()
-
         N.last_steps[N] = [base_traversal]
 
     R = 1
@@ -70,46 +58,35 @@ def flow(G: FlowGraphHandler):
 
         G.changed_last_round = False
 
-        threads = []
-
-        start_time = time.perf_counter()
+        #threads = []
 
         #pass all valid edge traversal from N to its parents P
+        #overhead of starting threads seems to kill any performance benefits :/
         for N in G.nodes():
-            t = threading.Thread(target = pass_steps_to_parents, args=(G, N))
-            threads.append(t)
-            t.start()
+            pass_steps_to_parents(G, N)
+            #t = threading.Thread(target = pass_steps_to_parents, args=(G, N))
+            #threads.append(t)
+            #t.start()
 
-        for t in threads:
-            t.join()
+        #for t in threads:
+            #t.join()
 
-        threads = []
+        #threads = []
 
         #At the end of every round, save next to steps, last = next and clear next
         #ensures all nodes complete before modifying N.steps and tracks this round's steps
         
         for N in G.nodes():
-            t = threading.Thread(target = store_steps, args=(N,))
-            threads.append(t)
-            t.start()
+            store_steps(N)
+            #t = threading.Thread(target = store_steps, args=(N,))
+            #threads.append(t)
+            #t.start()
             
                
-        for t in threads:
-            t.join() 
-
-        end_time = time.perf_counter()
-
-        process_time = end_time - start_time
-        total_time += process_time
-
-        log(f"Round {R}: ({process_time})")
+        #for t in threads:
+            #t.join() 
 
         R = R + 1
-
-    log(f"Total Time: ({total_time})")
-
-    #log(f"{WARNING}WARNING: flow skips cleanup!{RESET}")
-    #return G
 
     #clean up node steps, remove traversals stored in START nodes
     #generations only occur from an EXIT to a START
@@ -142,9 +119,6 @@ def contains_repeat_subset(subset_traversals: dict[DoorNode | CombinedDoorNode, 
     return False
 
 def pass_steps_to_parents(G: FlowGraphHandler, N: DoorNode | CombinedDoorNode):
-
-    start_time = time.perf_counter()
-
     for P in G.predecessors(N):
         P : DoorNode | CombinedDoorNode
 
@@ -240,8 +214,6 @@ def pass_steps_to_parents(G: FlowGraphHandler, N: DoorNode | CombinedDoorNode):
                 P.next_steps[destination].append(new_traversal)
 
                 G.changed_last_round = True
-
-    end_time = time.perf_counter()
 
 def get_edge_traversal_type(edge : PathEdge | TransitionEdge):
 

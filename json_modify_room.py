@@ -6,9 +6,6 @@
 from json_objects import Room, Door, Path, SelfLoop
 from enums import RoomType, BranchType, PathTime, DoorDir, DoorType, AccessType
 
-import logging as log
-from colors import WARNING, RESET
-
 def modify_room(room: Room, name: str):
     match name:
         case "minigolf_8":
