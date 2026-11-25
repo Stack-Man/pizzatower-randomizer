@@ -4,11 +4,12 @@ from perf_counter import print_perf
 import cProfile
 import pstats
 
+
 def profile_test(func, logging = False):
     if (not logging):
         log.disable()
-
     profiler = cProfile.Profile()
+
     profiler.enable()
     func()
     profiler.disable()
@@ -17,4 +18,7 @@ def profile_test(func, logging = False):
     stats = pstats.Stats(profiler).sort_stats("cumtime")
     stats.print_stats(15)  # Print top 10 slowest functions
 
+    stats.print_stats(r'\((bridge_twoway_room_room|bridge_branch_room_room)\)$')
+
     print_perf()
+

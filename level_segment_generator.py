@@ -18,6 +18,8 @@ from json_objects import Room
 
 import logging as log
 
+
+
 def entrance_or_entrance_branch_segments(SD: SourceDestinationHandler, FG: FlowGraphHandler):
     #Pick either E or EB
     for E_or_EB in SD.entrances():
@@ -28,14 +30,24 @@ def entrance_or_entrance_branch_segments(SD: SourceDestinationHandler, FG: FlowG
             #bridge fails, we can continue with the next SD pair
 
             for BS_or_BA in SD.branch_starts(): 
-                for seg in bridge_twoway_room_room(E_or_EB, BS_or_BA, FG):     
+                
+                log.debug("Try with bridge with EB %s and %s",E_or_EB, BS_or_BA)  
+                for seg in bridge_twoway_room_room(E_or_EB, BS_or_BA, FG):
+                    
+                    log.debug("Try with seg with EB %s and %s",E_or_EB, BS_or_BA)  
                     yield seg
             
         #if EB, create a Branch Segment with EB and some BE
         else:      
             for BE_or_BA in SD.branch_ends():
+                log.debug("Try with bridge with E %s and %s", E_or_EB, BE_or_BA)  
+
                 for seg in bridge_branch_room_room(E_or_EB, BE_or_BA, FG):
+                    
+                    log.debug("Try with seg with E %s and %s", E_or_EB, BE_or_BA)  
+                    
                     yield seg
+                
 
     raise RuntimeError(f"{WARNING}Failed to generate any E or EB segment after entrances{RESET}")
 

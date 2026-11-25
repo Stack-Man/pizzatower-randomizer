@@ -209,12 +209,15 @@ def generate_level_recursive_branch(SD: SourceDestinationHandler, FG: FlowGraphH
     if (type(last_segment.end_room) == BranchRoomPath):
         try:
             can_end_with_JB = len(SD.JB) > 0
+            can_end_with_J = len(SD.J) > 0
             
             if (branch_count >= min_branch_count and can_end_with_JB):
                 log.debug("%sSKIP branch gen, go directly to JB%s", CAUTION, RESET)
                 raise RuntimeError(f"Skip branch gen to end with JB")
             
             branch_count += 1
+
+
 
             for branch_segment in branch_segments(SD, FG, last_segment.end_room):
 
@@ -223,8 +226,8 @@ def generate_level_recursive_branch(SD: SourceDestinationHandler, FG: FlowGraphH
 
                 tried_J = False
                 
-                #At desired branch count, try  cap with J
-                if (branch_count >= min_branch_count):
+                #At desired branch count, try cap with J
+                if (branch_count >= min_branch_count and can_end_with_J):
                     tried_J = True
 
                     try:
@@ -243,7 +246,7 @@ def generate_level_recursive_branch(SD: SourceDestinationHandler, FG: FlowGraphH
 
 
                 #check in case target branch count was not actually increased
-                if (branch_count < min_branch_count):
+                if (branch_count < min_branch_count or not can_end_with_J):
                     #Failed to cap with J or not at desired branch count
                     try:
                         next_segments, new_SD = generate_level_recursive_between_branch(SD, FG, last_segment=branch_segment, branch_count=branch_count, min_branch_count=min_branch_count)
@@ -267,6 +270,7 @@ def generate_level_recursive_branch(SD: SourceDestinationHandler, FG: FlowGraphH
                 log.debug("%sDUMP branch_segment: %s to %s%s", FAIL, branch_segment.start_room, branch_segment.end_room, RESET)
                 replenish_segment(FG, branch_segment)
 
+            log.debug("failed to continue from any branch_segment")
             raise RuntimeError(f"Failed to gen non JB branch from {last_segment.end_room.room}")
 
         except RuntimeError as e:
@@ -334,6 +338,8 @@ def generate_level_recursive_between_branch(SD: SourceDestinationHandler, FG: Fl
 
             log.debug("%sDUMP TW: %s to %s%s", FAIL, between_branch_segment.start_room, between_branch_segment.end_room, RESET)
             replenish_segment(FG, between_branch_segment)
+
+        log.debug("failed to continue from any between_branch_segment")
     else:
         pass
 

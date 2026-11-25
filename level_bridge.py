@@ -110,31 +110,59 @@ def bridge_twoway_room_room(start_room: Room, end_room: Room, FG: FlowGraphHandl
         case _:
             raise NotImplementedError(f"{ERROR}ERROR: bridge_twoway_room_room() not implemented for start_room of type {start_room.room_type}{RESET}")
 
+#from profiler import profiler
+
 def bridge_branch_room_room(start_room: Room, end_room: Room, FG: FlowGraphHandler):
     i = 0
-    s = 0
-    e = 0
 
     #branch to branch, connecting BS/BA to BE/BA 
     for start_rp in branch_room_path(start_room, StartExitType.START): #branch is source
-        s += 1
         for end_rp in branch_room_path(end_room, StartExitType.EXIT): #branch is destination
-            e += 1
             i += 1
 
             try:
                 yield bridge_branch(start_rp, end_rp, FG)
-            except RuntimeError as e2:
+            except RuntimeError as e:
                 pass
+
+    log.debug("Tried %s pairs from %s to %s", i, start_room, end_room)
+
+#def profile_call(func, *args):
+    #profiler.enable()
+    #try:
+        #return func(*args)
+    #finally:
+        #profiler.disable()
+
+#def bridge_branch_room_room_profile(start_room: Room, end_room: Room, FG: FlowGraphHandler):
+    #i = 0
+
+    #branch to branch, connecting BS/BA to BE/BA 
+    #for start_rp in profile_call(branch_room_path, start_room, StartExitType.START): #branch is source
+        #for end_rp in profile_call(branch_room_path, end_room, StartExitType.EXIT): #branch is destination
+            #i += 1
+
+            #try:
+                #result = profile_call(bridge_branch, start_rp, end_rp, FG)
+                #yield result
+            #except RuntimeError as e:
+                #pass
+
+    #log.debug("Tried %s pairs from %s to %s", i, start_room, end_room)
 
 def bridge_twoway_from_entrance(start_room: Room, end_room: Room, FG: FlowGraphHandler):
 
+    i = 0
+
     for start_rp in entrance_room_path(start_room):
         for end_rp in room_path_cap_TW(end_room):
+            i += 1
             try:
                 yield bridge_twoway(start_rp, end_rp, FG)
             except RuntimeError as e:
                 pass
+
+    log.debug("Tried %s pairs from %s to %s", i, start_room, end_room)
 
 #make bridges from start room with already selected paths
 def bridge_twoway_rp_room(start_rp: BaseRoomPath, end_room: Room, FG: FlowGraphHandler):

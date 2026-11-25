@@ -597,12 +597,7 @@ class EdgeTraversal():
         return len(self.edges)
 
     def __contains__(self, item):
-        if (type(item) != PathEdge and type(item) != TransitionEdge):
-            return False
-
-        for edge in self.edges:
-            if item == edge:
-                return True
+        return item in self.edges
 
     def contains(self, node: DoorNode | CombinedDoorNode):
         for edge in self.edges:
