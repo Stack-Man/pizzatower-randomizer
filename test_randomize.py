@@ -3,6 +3,7 @@ from settings import TraversalMode, GrowthMode
 from json_parse import FILENAMES
 from level_randomize import randomize_SD_FG, set_seed
 from json_source_destination import SourceDestinationHandler
+from graph_create import FlowGraphHandler
 
 from profiler import profile_test#, profiler
 import pstats
@@ -26,12 +27,13 @@ def test_randomize():
 
         log.debug("PRE %s:", i)
         #print_SD(SD)
+        print_FG(FG)
 
-        
         randomize_SD_FG(SD, FG)
 
         log.debug("POST %s:", i)
         #print_SD(SD)
+        print_FG(FG)
 
 
 def print_SD(SD: SourceDestinationHandler):
@@ -43,6 +45,34 @@ def print_SD(SD: SourceDestinationHandler):
         for x in L:
             log.debug("         %s", x.name)
 
+
+#TODO: the first N and first D and first T change even though this SHOULD be deterministic
+
+def print_FG(FG: FlowGraphHandler):
+
+    nodes = sorted(FG.nodes(), key = lambda x: x.unique_id)
+
+    #for N in nodes:
+
+    N = nodes[0]
+
+    log.debug("N: %s", N)
+
+    destinations = sorted(N.steps.keys(), key = lambda x : x.unique_id)
+
+    #for D in destinations:
+
+    D = destinations[0]
+    
+    log.debug("     D: %s", D)
+
+    traversals = N.steps[D]
+
+    #for T in traversals:
+
+    T = traversals[0]
+
+    log.debug("         %s", T)
 
 
 #test_randomize() #test with inner profiler

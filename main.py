@@ -8,5 +8,4 @@
 #TODO: replace tower_tutorial1N/tower_tutorial with custom option between the two
 #and use it for both peppino and noise
 
-#TODO: random seed is not deterministic because of DB matching
-#DB matching is NOT deterministic
+#TODO: run script with PYTHONHASHSEED = 0 before python to make seeds deterministic between runs

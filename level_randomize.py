@@ -31,13 +31,13 @@ def randomize_SD(SD: SourceDestinationHandler):
 def randomize_FG_deterministic(FG: FlowGraphHandler):
 
     #use sorted() to ensure consistent order every time
-    for N in sorted(FG.nodes(), key=lambda x: x._hash):
+    for N in sorted(FG.nodes(), key=lambda x: x.unique_id):
 
         #log.debug("Randomizing %s", N)
 
         N: DoorNode | CombinedDoorNode
 
-        for D, traversals in sorted(N.steps.items(), key=lambda x: x[0]._hash):
+        for D, traversals in sorted(N.steps.items(), key=lambda x: x[0].unique_id):
 
             #log.debug("     Randomizing %s of %s", D, N)
             random.shuffle(traversals)

@@ -41,6 +41,8 @@ class DoorNode(Node):
         #cache hash to avoid rehashing since types are immutable
         self._hash = hash((self.door_type, self.door_dir, self.se_type))
 
+        self.unique_id = str(door_type) + str(door_dir) + str(se_type)
+
     def __eq__(self, other):
         return self._hash == other._hash
 
@@ -57,10 +59,18 @@ class CombinedDoorNode(Node):
     def __init__(self, nodes: list[DoorNode], se_type: StartExitType):
         super().__init__(se_type)
 
-        self.nodes = nodes
+        self.nodes = sorted(nodes, key=lambda x:x.unique_id)
 
         #cache hash to avoid rehashing since types are immutable
         self._hash = hash(tuple(hash(node) for node in self.nodes))
+
+        id = ""
+
+        for n in nodes:
+            id += n.unique_id
+
+        self.unique_id = id
+            
 
     def __eq__(self, other):
         return self._hash == other._hash       
@@ -195,6 +205,9 @@ class PathEdge(Edge):
         self.PT = PathList([])
 
         self._hash = hash((self.start_node, self.end_node))
+
+        
+        self.unique_id = start_node.unique_id + "," + end_node.unique_id
 
     def get_path_lists(self, traversal_type: TraversalType):
         match traversal_type:
@@ -456,7 +469,7 @@ class BipartiteGraph():
         INF = float("inf")
 
         #store to avoid resorted lists more than once per matching
-        E_nodes = sorted(self.edge_nodes, key=lambda x : x._hash)
+        E_nodes = sorted(self.edge_nodes, key=lambda x : x.unique_id)
         sorted_Rs : dict[PathEdge, list[str]] = {}
 
         def BFS():
