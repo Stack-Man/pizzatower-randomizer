@@ -51,8 +51,8 @@ from colors import ERROR, RESET
 
 from pairs import pairs
 
-def collapse_all_nodes_and_edges(G: FlowGraphHandler):
-    old_nodes = list(G.nodes())
+def collapse_all_nodes_and_edges(FG: FlowGraphHandler):
+    old_nodes = list(FG.nodes())
     old_count = len(old_nodes)
     
     #Store list of parents/children in each node for easy access 
@@ -61,16 +61,16 @@ def collapse_all_nodes_and_edges(G: FlowGraphHandler):
         n: DoorNode | CombinedDoorNode
 
         if (n.se_type == StartExitType.START):
-            for p in G.predecessors(n):
+            for p in FG.predecessors(n):
                 n.parents.append(p)
 
         elif (n.se_type == StartExitType.EXIT):
-            for c in G.successors(n):
+            for c in FG.successors(n):
                 n.children.append(c)
 
-    new_nodes = collapse_nodes_repeat(old_nodes)
+    new_nodes = collapse_nodes_repeat(old_nodes, FG)
 
-    old_edges = get_edges_from_graph(G.G)
+    old_edges = get_edges_from_graph(FG.G)
     old_edge_count = len(old_edges)
     updated_edges = update_edge_nodes(old_edges, new_nodes)
     new_edges = collapse_edges_repeat(updated_edges)
@@ -79,16 +79,16 @@ def collapse_all_nodes_and_edges(G: FlowGraphHandler):
 
     print(f"G {old_count} nodes and {old_edge_count} edges collapse to {len(new_nodes)} nodes and {len(new_edges)} edges")
 
-    G.G = new_G
+    FG.G = new_G
 
-    return G
+    return FG
 
-def collapse_nodes_repeat(old_nodes: list[DoorNode|CombinedDoorNode]):
+def collapse_nodes_repeat(old_nodes: list[DoorNode|CombinedDoorNode], FG: FlowGraphHandler):
     new_nodes = old_nodes
 
     while (True):
         last_nodes = new_nodes
-        new_nodes = collapse_nodes(new_nodes)
+        new_nodes = collapse_nodes(new_nodes, FG)
 
         print(f"collapsed {len(last_nodes)} nodes to {len(new_nodes)}", flush = True)
 
@@ -98,7 +98,7 @@ def collapse_nodes_repeat(old_nodes: list[DoorNode|CombinedDoorNode]):
 
     return new_nodes
 
-def collapse_nodes(nodes: list[DoorNode|CombinedDoorNode]):
+def collapse_nodes(nodes: list[DoorNode|CombinedDoorNode], FG: FlowGraphHandler):
     new_nodes = []
 
     for n in nodes:
@@ -119,7 +119,7 @@ def collapse_nodes(nodes: list[DoorNode|CombinedDoorNode]):
             if ((a.se_type == StartExitType.START and same_lists(a.parents, b.parents)) or
                 (a.se_type == StartExitType.EXIT and same_lists(a.children, b.children))):
                 #print(f"    {a} and {b} are collapsed")
-                new_node = create_combined_node(a, b)
+                new_node = create_combined_node(a, b, FG)
                 new_nodes.append(new_node)
                 a.combined = True
                 b.combined = True
@@ -138,7 +138,7 @@ def collapse_nodes(nodes: list[DoorNode|CombinedDoorNode]):
 
     return new_nodes
 
-def create_combined_node(a: DoorNode | CombinedDoorNode, b: DoorNode | CombinedDoorNode):
+def create_combined_node(a: DoorNode | CombinedDoorNode, b: DoorNode | CombinedDoorNode, FG: FlowGraphHandler):
 
     all_nodes = []
 
@@ -153,6 +153,11 @@ def create_combined_node(a: DoorNode | CombinedDoorNode, b: DoorNode | CombinedD
         all_nodes.append(b)
 
     new_node = CombinedDoorNode(all_nodes, a.se_type)
+
+    #update index for all nodes in combined node 
+    #to be the created combined node
+    for N in all_nodes:
+        FG.node_index[N] = new_node
 
     #only the parents or the children are shared
     if (new_node.se_type == StartExitType.START):

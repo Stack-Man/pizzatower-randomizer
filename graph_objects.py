@@ -18,11 +18,11 @@ class Node():
         self.se_type = se_type #helps enforce a movement direction from path edge to transition edge
 
         #Dictionary of lists, for each destination DoorNode, hold a list of EdgeTraversals
-        self.steps : dict[DoorNode, list[EdgeTraversal]] = {}
+        self.steps : dict[DoorNode | CombinedDoorNode, list[EdgeTraversal]] = {}
         
         #helper dicts for Flow algorithm
-        self.next_steps : dict[DoorNode, list[EdgeTraversal]] = {}
-        self.last_steps : dict[DoorNode, list[EdgeTraversal]] = {}
+        self.next_steps : dict[DoorNode | CombinedDoorNode, list[EdgeTraversal]] = {}
+        self.last_steps : dict[DoorNode | CombinedDoorNode, list[EdgeTraversal]] = {}
 
         #helper bool for graph_collapse.py
         self.combined = False

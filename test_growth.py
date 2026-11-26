@@ -27,13 +27,12 @@ traverse = TraversalMode.MATCHING_PERFECT
 fn = ["johngutter", "ancientcheese", "bloodsauce", "pizzascape",
         "fastfoodsaloon", "wasteyard", "funfarm", "oreganodesert"]
 
-#fn = FILENAMES
+fn = FILENAMES
 
 def test_generate():
     levels, FG = generate_base_levels(fn = fn, traversal_mode=traverse)
     log.debug("Generated %i levels in %s\n\n\n", len(levels), get_perf(PerfType.GEN))
     print_levels(levels)
-    print_perf()
     
 
 def test_growth():
@@ -48,7 +47,6 @@ def test_growth():
 
     print_levels(grown_levels)
 
-    print_perf()
 
 def test_growth_forced(A: str, B: str):
     SD, FG = get_SD_FG(fn = fn, traversal_mode=traverse)

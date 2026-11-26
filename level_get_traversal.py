@@ -110,20 +110,16 @@ def good_traversal_type(given: TraversalType, wanted: TraversalType):
             raise NotImplementedError(f"good_traversal_type not implemented for {wanted}")
 
 def get_traversals_between(FG: FlowGraphHandler, source: DoorNode, destination: DoorNode ):
-    for N in FG.nodes():
 
-        N: DoorNode | CombinedDoorNode
-        if source in N: #use IN so Combined node works too
+    N = FG.get_node_containing(source)
+    K = FG.get_node_containing(destination)
 
-            #use iteration so we ca ncheck if destination is 
-            #within a possible combined node K
-            for K, V in N.steps.items():
-                if destination in K:
-                    return V
+    traversals = N.steps.get(K)
 
-            raise RuntimeError(f"No traversal between {source} and {destination}")
+    if (traversals):
+        return traversals
 
-    raise LookupError(f"{source} was not in FG!")
+    raise RuntimeError(f"No traversal between {source} and {destination}")
 
 def get_path_end(rp: BaseRoomPath, traversal_type:TraversalType):
     if (type(rp) == RoomPath):

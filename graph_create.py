@@ -24,18 +24,26 @@ class FlowGraphHandler():
 
         self.edge_to_traversals: dict[PathEdge, list[EdgeTraversal]] = {}
 
-        #Construct an index of PathEdge to the traversal that contain it, for fast lookup
-        #during impossible booking
-        #for N in self.nodes():
-           #N : DoorNode | CombinedDoorNode
-            #for D, traversals in N.steps.items():
+        #store the combined or door node containing each door node in the graph
+        #for fast look up by DoorNode
+        self.node_index : dict[DoorNode, DoorNode | CombinedDoorNode] = {}
 
-                #traversals: list[EdgeTraversal]
+        #init the node index
+        for N in self.nodes():
+            self.node_index[N] = N
 
-                #for T in traversals:
-                    #for edge in T:
-                        #if (type(edge) == PathEdge):
-                            #self.edge_to_traversals.setdefault(edge, []).append(T)
+    def get_node_containing(self, C: DoorNode):
+
+        if C not in self.node_index:
+
+            print(f"Index count: {len(self.node_index.items())}")
+
+            for K, V in self.node_index.items():
+                print(f"Index: {K}: {V}")
+            
+            raise LookupError(f"{C} was not in node index!")
+        
+        return self.node_index[C]
 
     def nodes(self):
         return self.G.nodes()
