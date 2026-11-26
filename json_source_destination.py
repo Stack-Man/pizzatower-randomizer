@@ -56,7 +56,23 @@ class SourceDestinationHandler():
                         self.remove_from(self.BE, source)
                     case _:
                         raise NotImplementedError(f"SourceDestinationHandler() remove not implemented for type {source.branch_type}")
-        
+
+    def get_from_E_or_EB(self, name: str):
+        return self.get_from(name, [self.E, self.EB])
+
+    def get_from_J_or_JB(self, name: str):
+        return self.get_from(name, [self.J, self.JB])
+
+    def get_from(self, name: str, lists: list[list[Room]]):
+
+        for L in lists:
+
+            for x in L:
+                if x.name == name:
+                    L.remove(x)
+                    return x
+
+        raise LookupError(f"Did not find {name} in lists")
 
     def remove_from(self, list: list[Room], room: Room):
         try:

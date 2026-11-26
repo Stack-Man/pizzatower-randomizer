@@ -16,9 +16,6 @@ from colors import ERROR, RESET, CAUTION, WARNING
 
 from json_objects import Room
 
-import logging as log
-
-
 
 def entrance_or_entrance_branch_segments(SD: SourceDestinationHandler, FG: FlowGraphHandler):
     #Pick either E or EB
@@ -30,22 +27,13 @@ def entrance_or_entrance_branch_segments(SD: SourceDestinationHandler, FG: FlowG
             #bridge fails, we can continue with the next SD pair
 
             for BS_or_BA in SD.branch_starts(): 
-                
-                log.debug("Try with bridge with EB %s and %s",E_or_EB, BS_or_BA)  
                 for seg in bridge_twoway_room_room(E_or_EB, BS_or_BA, FG):
-                    
-                    log.debug("Try with seg with EB %s and %s",E_or_EB, BS_or_BA)  
                     yield seg
             
         #if EB, create a Branch Segment with EB and some BE
         else:      
             for BE_or_BA in SD.branch_ends():
-                log.debug("Try with bridge with E %s and %s", E_or_EB, BE_or_BA)  
-
                 for seg in bridge_branch_room_room(E_or_EB, BE_or_BA, FG):
-                    
-                    log.debug("Try with seg with E %s and %s", E_or_EB, BE_or_BA)  
-                    
                     yield seg
                 
 
@@ -105,10 +93,8 @@ def john_segment_with_loop(seg: TwowaySegment, E_or_BE: Room, J: Room, FG: FlowG
         self_loop_room = SelfLoopRoomPath(J, J.self_loop.start, J.self_loop.end)
         seg.loop_room = self_loop_room
 
-        log.debug("success gen loop_path with seg")
         return seg #return the first successful bridge  
     except:
-        log.debug("failed to gen loop_path with seg")
         pass #failed to bridge with loop path
     
     raise RuntimeError(f"Failed to generate any John segment from {E_or_BE} with loop")
@@ -127,20 +113,12 @@ def ej_or_ejb_segment(SD: SourceDestinationHandler, FG: FlowGraphHandler):
     #Pick either E or EB
     try:
         for E_or_EB in SD.entrances():
-
-            log.debug("Try %s immediate to J/JB", E_or_EB)
-            
             try: #inner try catch allows us to try with the next E instead of exiting immediately 
 
                 #if E, create a TwowaySegment with E and some J
                 if (E_or_EB.branch_type == BranchType.NONE):
 
-                    log.debug("Try %s immediate to J with %i Js", E_or_EB, len(SD.J))
-                
                     for J in SD.just_johns(): 
-
-                        log.debug("Try %s immediate to %s", E_or_EB, J)
-
                         #make sure we try all Js before terminating
                         try:
                             if (J.needs_self_loop):
@@ -155,12 +133,7 @@ def ej_or_ejb_segment(SD: SourceDestinationHandler, FG: FlowGraphHandler):
                 
                 #if EB, create a Branch Segment with EB and some JB
                 else:
-
-                    log.debug("Try %s immediate to JB with %i JBs", E_or_EB, len(SD.JB))
-                    
                     for JB in SD.john_branches():
-
-                        log.debug("Try %s immediate to %s", E_or_EB, JB)
 
                         #make sure we try all JBs before terminating
                         try:
@@ -169,8 +142,6 @@ def ej_or_ejb_segment(SD: SourceDestinationHandler, FG: FlowGraphHandler):
                         except:
                             pass
 
-                    log.debug(f"No JB to match EB {E_or_EB}")
-                        
             except:
                 
                 pass
@@ -179,6 +150,19 @@ def ej_or_ejb_segment(SD: SourceDestinationHandler, FG: FlowGraphHandler):
         pass
 
     raise RuntimeError(f"Failed to generate any EJ or EJB segment")
+
+def ej_or_ejb_segment_forced(FG: FlowGraphHandler, SD: SourceDestinationHandler, E_name: str, J_name: str):
+    E = SD.get_from_E_or_EB(E_name)
+    J = SD.get_from_J_or_JB(J_name)
+
+    if (E.branch_type == BranchType.NONE):
+        for seg in bridge_twoway_room_room(E, J, FG):
+            return seg
+    else:
+        for seg in bridge_branch_room_room(E, J, FG):
+            return seg
+
+    raise RuntimeError(f"No valid level between {E_name} and {J_name}")
 
 def oneway_segment(FG: FlowGraphHandler, S: Room, E: Room, traversal_type: TraversalType):
     return bridge_oneway_room_room(S, E, traversal_type, FG)

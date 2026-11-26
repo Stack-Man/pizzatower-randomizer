@@ -7,9 +7,7 @@ from json_objects import Path
 from graph_objects import EdgeTraversal, PathEdge, TransitionEdge, PathList
 from level_objects import RoomSelection, RoomPath
 from enums import TraversalType, PathTime
-from colors import WARNING, RESET, ERROR
 
-import logging as log
 
 #select rooms from path list without removing them from the path list
 #select rooms and track used room names to avoid reusing the same room

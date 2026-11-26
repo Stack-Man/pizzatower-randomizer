@@ -13,6 +13,7 @@ from level_objects import BranchRoomPath, RoomPath
 from colors import ERROR, RESET
 
 import logging as log
+
 #for generators, avoid raising error on generation exhausation
 #as the calling loop needs to continue cleanly
 

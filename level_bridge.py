@@ -15,8 +15,6 @@ from level_clean_replenish import clean_selections, replenish_selections
 
 from colors import RESET, ERROR
 
-import logging as log
-
 
 #Main Bridge functions that take a Source and Destination 
 #with their selected paths and creates a LevelSegment from it
@@ -125,8 +123,6 @@ def bridge_branch_room_room(start_room: Room, end_room: Room, FG: FlowGraphHandl
             except RuntimeError as e:
                 pass
 
-    log.debug("Tried %s pairs from %s to %s", i, start_room, end_room)
-
 #def profile_call(func, *args):
     #profiler.enable()
     #try:
@@ -161,8 +157,6 @@ def bridge_twoway_from_entrance(start_room: Room, end_room: Room, FG: FlowGraphH
                 yield bridge_twoway(start_rp, end_rp, FG)
             except RuntimeError as e:
                 pass
-
-    log.debug("Tried %s pairs from %s to %s", i, start_room, end_room)
 
 #make bridges from start room with already selected paths
 def bridge_twoway_rp_room(start_rp: BaseRoomPath, end_room: Room, FG: FlowGraphHandler):
@@ -201,7 +195,6 @@ def bridge_oneway_room_room(start_room: Room, end_room: Room, traversal_type: Tr
             except RuntimeError as e:
                 pass
             
-    log.debug("No oneway bridge between %s and %s after %i attempts", start_room, end_room, e)
     raise RuntimeError(f"No oneway bridge between {start_room} and {end_room} after {e} attempts")
 
         
