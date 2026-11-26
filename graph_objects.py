@@ -455,12 +455,16 @@ class BipartiteGraph():
 
         INF = float("inf")
 
+        #store to avoid resorted lists more than once per matching
+        E_nodes = sorted(self.edge_nodes, key=lambda x : x._hash)
+        sorted_Rs : dict[PathEdge, list[str]] = {}
+
         def BFS():
             to_visit : list[PathEdge] = []
             distance : dict[PathEdge, float] = {}
 
             #queue unmatched nodes to visit
-            for E in self.edge_nodes:
+            for E in E_nodes:
                 if E not in E_match:
                     distance[E] = 0
                     to_visit.append(E)
@@ -476,7 +480,11 @@ class BipartiteGraph():
                 if distance[E] >= shortest:
                     continue
 
-                for R in self.edge_nodes[E]:
+                #sort by string
+                #indexed to avoid resorts in same matching
+                Rs_of_E = sorted_Rs.setdefault(E, sorted(self.edge_nodes[E], key=lambda x: x))
+
+                for R in Rs_of_E:
                     matched_E = R_match.get(R) #get the E assigned to R (if any)
 
                     #R is unassigned
@@ -495,7 +503,10 @@ class BipartiteGraph():
 
         # DFS: Find augmenting paths using BFS distances
         def DFS(E : PathEdge, distance : dict[PathEdge, float], shortest: float):
-            for R in self.edge_nodes[E]:
+
+            Rs_of_E = sorted_Rs.setdefault(E, sorted(self.edge_nodes[E], key=lambda x: x))
+            
+            for R in Rs_of_E:
                 matched_E = R_match.get(R)
 
                 #assign R to E if R is unassigned
@@ -537,7 +548,7 @@ class BipartiteGraph():
             if shortest == INF:
                 break
 
-            for E in self.edge_nodes:
+            for E in E_nodes:
                 if E not in E_match:
                     DFS(E, distance, shortest)
 

@@ -12,9 +12,6 @@ from level_objects import LevelSegment
 class SourceDestinationHandler():
     def __init__ (self, E: list[Room], EB: list[Room], J: list[Room], JB: list[Room], BA: list[Room], BS: list[Room], BE: list[Room]
                   , WAR_START: Room, WAR_EXIT: Room, CTOP_START: Room, CTOP_EXIT: Room):
-
-        #TODO: use seeded randomization to randomize the order of rooms. This will be part of our randomization.
-
         self.E = E
         self.EB = EB
         self.J = J

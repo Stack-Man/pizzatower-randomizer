@@ -8,6 +8,7 @@ from graph_objects import EdgeTraversal, PathEdge, TransitionEdge, PathList
 from level_objects import RoomSelection, RoomPath
 from enums import TraversalType, PathTime
 
+import logging as log
 
 #select rooms from path list without removing them from the path list
 #select rooms and track used room names to avoid reusing the same room
@@ -21,6 +22,11 @@ def select_rooms_non_empty(traversal: EdgeTraversal, traversal_type: TraversalTy
 
     if (has_DB_matching):
         matching = select_rooms_from_matching(traversal_type, matching_DB)
+
+        log.debug("MATCHING:")
+
+        for K, V in matching.items():
+            log.debug("%s : %s %s", K, V.room, V.path)
 
     room_paths : list[RoomPath] = []
     used_rooms : list[str] = []
