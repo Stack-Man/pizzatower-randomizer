@@ -145,12 +145,10 @@ class PathList():
             yield p
 
     def remove(self, path: Path):
+        was_DB = len(self.DB) == 0
+        
         try:
             self.NDB.remove(path)
-
-            #must update if NDB moves from 1 to 0
-            if (len(self.NDB) == 0):
-                return True #depleted
 
         except Exception as e:
             pass
@@ -158,29 +156,26 @@ class PathList():
         try:
             self.DB.remove(path)
 
-            #must update if NDB is 0 and DB count changed
-            #DB must have changed if remove succeeded
-            return (len(self.NDB) == 0)
-
         except Exception as e:
             pass
 
-        return False
+        #if was DB, then must be updated
+        #if not, then was already updated before or never in BG
+        #either we were DB and just decreased it
+        #or we still are DB and updated NDB
+        return was_DB
 
     def add(self, path: Path):
         if (path.is_double_bookable):
             self.DB.append(path)
-
-            #update if NDB is 0 and DB count changed
-            #DB must have changed if remove succeeded
-            return len(self.NDB) == 0
             
         else:
             self.NDB.append(path)
 
-            #must update if NDB moves from 0 to 1
-            if (len(self.NDB) == 1):
-                return True #replenished
+        #if has DB then must be updated
+        #either NDB was increased and we were already DB
+        #or we just became or added to DB
+        return len(self.DB) > 0
 
     def is_double_bookable(self):
         return len(self.DB) > 0 and len(self.NDB) == 0
@@ -491,7 +486,15 @@ class BipartiteGraph():
         names : set[str] = set()
 
         for PL in path_lists:
-            for P in PL.DB: #only DB rooms are added
+
+            #add from DB or NDB
+            #the matching will take care of 
+            #assignment and all edges are
+            #added to the BG as long as they have
+            #at least 1 DB path
+            for P in PL.DB:
+                names.add(P.room_name)
+            for P in PL.NDB:
                 names.add(P.room_name)
 
         return names

@@ -29,9 +29,6 @@ from graph_create import FlowGraphHandler
 
 from perf_counter import start_perf, end_perf, PerfType
 
-
-CUR_ROUND = 0
-
 #can an additional optimization be made considering steps with START vs EXIT nodes?
 #a START node doesnt need to know how to reach other START nodes
 #an EXIT node will never have its steps list read
@@ -51,8 +48,6 @@ def flow(G: FlowGraphHandler):
     G.changed_last_round = True #store value in shared G so any thread can modify it
 
     while (G.changed_last_round and R < len(G.nodes())):
-        CUR_ROUND = R
-
         G.changed_last_round = False
 
         #pass all valid edge traversal from N to its parents P

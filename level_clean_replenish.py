@@ -14,44 +14,6 @@ import logging as log
 
 from colors import CONTINUE, RESET
 
-#TODO: we are only updating traversals of depleted or removed edges
-#HOWEVER: every edge that has a room added/removed MUST be updated
-#to preserve the state of the bipartite graph
-#since the number of connections between edge node and room nodes changes every time a room is removed/added
-#not just when the entire edge is depleted/replenished
-
-#instead of updating every traversal based on edges,
-#update every traversal that contains any removed edges
-#upadte the bipartites with all edges all at once (just reconstruct?)
-#and then find the traversal type at the end?
-#(traversal type kind of relies on the per-edge traversal type to track NPT/PT stuff so maybe not)
-
-#okay first, only DB rooms are in the bipartite, if any edge has a NDB room then it doesnt need to be part of the bipartite
-#second, the number of DB rooms assigned to each E node DOES matter, since that effects assignment
-
-#therefore, we only need to update traversals based on edges whose number of DB rooms changed, or whose number of NDB path went from 0 to 1 or vice versa
-
-#SECOND: an invalidated traversalw ill stay invalid when updating with replenished edges, it doesn't understand that the invalidity is gone
-#for this, design an algorithm that considers ALL edges at once to determine new type?
-#but depleting and edge and making an impossible traversal does nota ctually mark it as invalid
-#it has a zero edge but its not invalid (zero edges are still checked for)
-
-#i believe that the traversal will remember its overall traversal type when depleted, what we need to know is if 
-#an impossible booking can occur
-#an impossible booking would mark its type as invalid, and it won't be reverted when replenished and no longer impossible...
-#if an edge is depleted, that would by definition cause an impossible booking (connected component where E > R (E is 1 and R is 0))
-#okay so yes we do need something to remember the previous traversal type or reconstruct it when adding
-#since the type can change in multiple ways (like TW to OW only and then later to invalid) we will have to reconsider all edges again when we add
-
-#in summary:
-#1. update traversals with edges where (NDB = 0 & new_DB != old_DB) or (NDB 1 > 0 or NDB 0 > 1)
-#2. modify bipartite update to consider updating an edge instead of adding a new one (must consider all edges to determine new type) (reconstruct?)
-
-#reconstructing will be expensive, about as expensive as all those deepcopies... avoid it if possible
-
-#if wwe modify the edges on each bipartite, regardless of whether they were possible or not, we can see again if they are possible
-# the "use old type" method was simply a time saving method to avoid modifying already "impossible" graphs
-
 def all_traversals(FG: FlowGraphHandler):
     for N in FG.nodes():
         N: DoorNode|CombinedDoorNode

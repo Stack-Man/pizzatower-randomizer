@@ -41,7 +41,7 @@ def add_to_bipartite_graph(bipartite_TW: BipartiteGraph, bipartite_PT: Bipartite
 
     #NPT = AnNY NPT or OW but not PT
     has_match_NPT = (traversal_type == TraversalType.PIZZATIME or 
-                     add_and_check_for_matching(bipartite_NPT, edge, edge.get_path_lists(TraversalType.PIZZATIME)))
+                    add_and_check_for_matching(bipartite_NPT, edge, edge.get_path_lists(TraversalType.PIZZATIME)))
 
     #no need to make an OW bipartite graph as there is never a timeless OW path needed
     #(CTOP is PT and WAR is NPT) 
@@ -78,6 +78,7 @@ def update_in_bipartite_graph_by_type_no_type_check(BG: BipartiteGraph, edge: Pa
     #2. Was DB and no longer is (remove)
     #3. Was DB and still is (update)
     #4. Wasn't DB and still isn't (NDB 0 > 1 or 1 < 0 but DB 0) #this last case, we ignore b/c we check for non zero edges in get traversal
+
     was_DB = edge in BG
 
     is_DB = True
