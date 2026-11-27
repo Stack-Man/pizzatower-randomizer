@@ -58,7 +58,7 @@ def minigolf_8(room: Room):
 
     paths = [path_EE]
 
-    result = Room("minigolf_8", doors, paths, True, False, False, False, True)
+    result = Room("minigolf_8", doors, paths, True, False, False, False, False, False, needs_self_loop=True)
 
     result.room_type = RoomType.JOHN
     result.branch_type = BranchType.NONE

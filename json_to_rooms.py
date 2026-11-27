@@ -17,8 +17,6 @@ def json_to_rooms(json):
     json_rooms = json[JSON_ROOMS]
     rooms = []
 
-    
-
     for json_room in json_rooms:
         room = json_to_room(json_room)
 
@@ -77,19 +75,21 @@ def json_to_room(json_room):
     room_name = json_room[JSON_ROOM_NAME]
     is_forced_branch_any = JSON_FORCED_BRANCH_ANY in json_room
     is_forced_branch_start = JSON_FORCED_BRANCH_START in json_room
+    is_forced_branch_end = JSON_FORCED_BRANCH_END in json_room
+    is_extra_branch = JSON_EXTRA_BRANCH in json_room
     needs_self_loop = JSON_NEEDS_SELF_LOOP in json_room
     
     doors = json_to_doors(json_room)
     
     paths = doors_to_paths(doors, is_john_room)
     
-    room = Room(room_name, doors, paths, is_john_room, is_entrance_room, is_forced_branch_any, is_forced_branch_start, needs_self_loop)
+    room = Room(room_name, doors, paths, is_john_room, is_entrance_room, 
+                is_forced_branch_any, is_forced_branch_start, is_forced_branch_end, is_extra_branch, 
+                needs_self_loop)
     
     room.branch_type = get_branch_type(room)
     
     room.room_type =  get_room_type(room)
-    
-    #TODO: check for CTOP Entrance, CTOP Exit, War EXIT
 
     return room
 
@@ -123,7 +123,7 @@ def json_to_door(json_door):
     door_dir = get_dir(j_door_dir)
     door_type = get_door_type(j_door_type)
 
-    is_branch = DOOR_BRANCH in json_door
+    is_branch = DOOR_BRANCH in json_door or (JSON_USE_EXTRA_BRANCHES and DOOR_EXTRA_BRANCH in json_door)
     is_branch_start = DOOR_BRANCH_START in json_door
     is_branch_end = DOOR_BRANCH_END in json_door
     initially_blocked = DOOR_INITIALLY_BLOCKED in json_door
@@ -240,6 +240,18 @@ def doors_to_path(start_door, exit_door, is_john_room):
 #   Object Helpers
 #-------------------
 def get_branch_type(room):
+    if (room.is_extra_branch and JSON_USE_EXTRA_BRANCHES):
+
+        if (room.is_forced_branch_end):
+            return BranchType.EXTRA_END
+        elif (room.is_forced_branch_start):
+            return BranchType.EXTRA_START
+        else:
+            return BranchType.EXTRA_ANY
+        
+    elif (room.is_extra_branch and not JSON_USE_EXTRA_BRANCHES):
+        return BranchType.NONE
+    
     #branchstart and branchend values mean the door is a branchmid?
     if room.has_john and has_NPT_to_PT_path(room):
         return BranchType.END
@@ -253,6 +265,8 @@ def get_branch_type(room):
     if room.is_forced_branch_start:
         return BranchType.FORCED_START
 
+    if room.is_forced_branch_end:
+        return BranchType.FORCED_END
 
     has_branch_NPT = False
     has_NPT_branch = False
@@ -326,9 +340,11 @@ def PT_branch(path):
 def branch_TIME(path, time):
     #return path.start_door.branch and path.path_time == time
     return path.start_door.branch and path.exit_door.exit_path_time == time
+    #return path.start_door.branch and path.exit_door.exit_path_time in [time, PathTime.BOTH]
 
 def TIME_branch(path, time, wrong_time):
     return path.exit_door.branch and (path.start_door.start_path_time == time or path.oneway) and path.start_door.start_path_time is not wrong_time
+    #return path.exit_door.branch and (path.start_door.start_path_time in [time, PathTime.BOTH] or path.oneway) and path.start_door.start_path_time is not wrong_time
 
 def get_room_type(room):
     if (room.has_john):

@@ -120,23 +120,27 @@
 			},
 			{
 				"title": "dungeon_7",
+				"is_extra_branch": true,
 				"maxscore": 0,
 				"doors": [
 					{
 						"letter": "A",
 						"type": "vertical",
-						"dir": "up"
+						"dir": "up",
+						"extrabranch": true
 					},
 					{
 						"letter": "B",
 						"type": "vertical",
-						"dir": "down"
+						"dir": "down",
+						"extrabranch": true
 					},
 					{
 						"letter": "F",
 						"type": "door",
 						"gerome": true,
-						"loop": true
+						"loop": true,
+						"extrabranch": true
 					}
 				]
 			},

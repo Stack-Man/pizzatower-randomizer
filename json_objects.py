@@ -91,7 +91,7 @@ class Path():
         #apply room when adding paths to room 
         #deepcopy automatically prevents circular deep copying with this ref
         #used during room selection to flush out all paths of a consumed DB room
-        self.room : Room = Room("", [], [], False, False, False, False, False)
+        self.room : Room = Room("", [], [], False, False, False, False, False, False, False)
 
         #apply edge when adding paths to edge
         #used during room selection to quickly flush out all paths of a DB room from their respective edges
@@ -170,7 +170,7 @@ class SelfLoop():
         self.allow_oneway = allow_oneway
 
 class Room():
-    def __init__(self, name, doors, paths : list[Path], john, entrance, is_forced_branch_any, is_forced_branch_start, needs_self_loop):
+    def __init__(self, name, doors, paths : list[Path], john, entrance, is_forced_branch_any, is_forced_branch_start, is_forced_branch_end, is_extra_branch, needs_self_loop):
         self.name = name
 
         #if (name == "graveyard_7"):
@@ -184,6 +184,8 @@ class Room():
         self.has_entrance = entrance
         self.is_forced_branch_any = is_forced_branch_any
         self.is_forced_branch_start = is_forced_branch_start
+        self.is_forced_branch_end = is_forced_branch_end
+        self.is_extra_branch = is_extra_branch
         self.is_double_bookable = False
         self.needs_self_loop = needs_self_loop
 

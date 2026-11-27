@@ -310,6 +310,8 @@ class PathEdge(Edge):
     def __hash__(self):
         return self._hash
 
+import logging as log
+
 class TransitionEdge(Edge):
     def __init__(self, start_node: DoorNode | CombinedDoorNode, end_node:  DoorNode | CombinedDoorNode):
         super().__init__(start_node, end_node)
@@ -360,9 +362,13 @@ class BipartiteGraph():
         #start_perf(PerfType.BGCOPY)
         copy = BipartiteGraph()
 
-        #copy.edge_nodes = self.edge_nodes.copy()
-        #copy.room_nodes = self.room_nodes.copy()
-        #copy.matching = self.matching.copy()
+        copy.edge_nodes = self.edge_nodes.copy()
+        copy.room_nodes = self.room_nodes.copy()
+        copy.matching = self.matching.copy()
+
+        #self.edge_nodes = self.edge_nodes.copy()
+        #self.room_nodes = self.room_nodes.copy()
+        #self.matching = self.matching.copy()
 
         #used to defer copy of matching until we are sure the added 
         #edge is DB in fact we can defer all of these cant we?
@@ -505,9 +511,36 @@ class BipartiteGraph():
     def check_for_valid_matching(self):
         #now that we've confirmed that the added edge is valid, we should
         #finish copying the rest of the params from previous if it exists
+
+        #one problem with deferred copying is that we've already added the edge and room nodes
+        #to this BG without adding the rest, so we need to combine the lists, not replace them
+
         if (self.previous != None):
-            self.edge_nodes = self.previous.edge_nodes.copy()
-            self.room_nodes = self.previous.room_nodes.copy()
+            #self.edge_nodes = self.previous.edge_nodes.copy()
+            #self.room_nodes = self.previous.room_nodes.copy()
+
+            #we don't actually need to copy the E: Rs sets
+            #because the rooms for each E are the same across all BGs
+            #for E, Rs in self.previous.edge_nodes.items():
+                #self.edge_nodes[E] = Rs
+
+            #the edges for each room from a copied BG don't change, they only
+            #might add an edge if taht room is also part of the new edge
+            for R, Es in self.previous.room_nodes.items():
+
+                #for each R, might add the 1 edge currently in the BG, so check if it
+                #exists first
+                if (R in self.room_nodes):
+                    old_Es = self.room_nodes[R]
+                    self.room_nodes[R] = Es.copy()
+
+                    for E in old_Es:
+                        self.room_nodes[R].add(E)
+
+                #otherwise, we can just have the same set
+                self.room_nodes[R] = Es
+
+            #self.matching.update(self.previous.matching)
             self.matching = self.previous.matching.copy()
 
             #set to None so that during updates that DONT involve copying the BG, we don't copy again
@@ -629,7 +662,16 @@ class BipartiteGraph():
             self.matching = {}
             return False
 
+        #if (len(self.edge_nodes) == 0):
+           #log.debug("len is 0 after matching")
+           #raise NotImplementedError(f"len of edge nodes of BG is 0 after matching???")
+
+        #log.debug("E match len: %s, edge nodes len: %s", len(E_match), len(self.edge_nodes))
+
         self.matching = E_match
+
+        
+
         return True
 
 
@@ -704,6 +746,9 @@ class EdgeTraversal():
         msg = ""
 
         for edge in self.edges:
+
+            if (type(edge) == TransitionEdge):
+                continue
 
             msg = msg + str(edge) + " > "
 

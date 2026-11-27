@@ -41,8 +41,39 @@ def test_growth():
 
     grown_levels = grow_levels_track_size(levels, FG, grow)
 
-    #print_levels(grown_levels)
+    test_no_duplicate_rooms(grown_levels)
 
+    print_levels(grown_levels)
+
+
+def test_no_duplicate_rooms(grown_levels: list[Level]):
+
+    #room name and the level that used it
+    used_rooms : dict[str, str] = {}
+    levels_by_name : dict[str, Level] = {}
+
+    for level in grown_levels:
+
+        level_name = level.segments[0].start_room.room.name
+        levels_by_name[level_name] = level
+
+        for seg in level.segments:
+
+            #dont iterate over SD rooms since those are duplicated
+            #between adjacent segments
+            for room in seg.btw_rooms():
+
+                if room.room.name in used_rooms:
+
+                
+                    log.debug(level)
+                    log.debug(levels_by_name[used_rooms[room.room.name]])
+
+                    raise NotImplementedError(f"Duplicate room {room.room.name} between {level_name} and {used_rooms[room.room.name]}")
+                else:
+                    used_rooms[room.room.name] = level_name
+
+            
 
 def test_growth_forced(A: str, B: str):
     SD, FG = get_SD_FG(fn = fn, traversal_mode=traverse)

@@ -45,6 +45,10 @@ def branch_branch_room_path(room: Room, se_type: StartExitType):
     for A, B in pairs(room.paths):
         #branch is source
         #we want branch > NPT and PT > branch
+
+        if (A == B):
+            log.debug("A is B in branch branch room path %s and %s", A, B)
+
         if (se_type == StartExitType.START):
 
             if branch_NPT_and_PT_branch(A, B):

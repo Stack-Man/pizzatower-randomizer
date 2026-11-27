@@ -5,7 +5,7 @@ import cProfile
 import pstats
 
 
-def profile_test(func, logging = False):
+def profile_test(func, logging = True):
     if (not logging):
         log.disable()
     profiler = cProfile.Profile()
@@ -17,8 +17,6 @@ def profile_test(func, logging = False):
     # Sort results by cumulative time spent in each function
     stats = pstats.Stats(profiler).sort_stats("cumtime")
     stats.print_stats(15)  # Print top 10 slowest functions
-
-    #stats.print_stats(r'\((bridge_twoway_room_room|bridge_branch_room_room)\)$')
 
     print_perf()
 

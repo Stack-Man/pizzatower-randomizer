@@ -3,7 +3,7 @@
 #Interface for reading JSON from filenames and returning as Room objects
 
 import json
-from json_to_objects import json_to_rooms
+from json_to_rooms import json_to_rooms
 from settings import *
 from colors import ERROR, RESET, CAUTION, WARNING
 

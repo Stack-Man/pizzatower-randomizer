@@ -167,6 +167,8 @@
 				
 				{
 					"title" : "entrance_7",
+					"is_extra_branch": true,
+					"is_forced_branch_end": true,
 					"maxscore": 0,
 					"loop": true,
                     "doors": [
@@ -189,7 +191,8 @@
                             "dir": "up",
 							"pizzatimestart" : true,
 							"exitonly" : true,
-							"ratblocked" : true
+							"ratblocked" : true,
+							"extrabranch" : true
 						}
                     ]
 				},

@@ -64,25 +64,29 @@
 				{
 					"title" : "ruin_3",
 					"maxscore": 0,
+					"is_extra_branch": true,
 					"loop": true,
 					"doors": [
 						{
 							"letter" : "C",
 							"type": "horizontal",
-							"dir": "left"
+							"dir": "left",
+							"extrabranch" : true
 						},
 
 						{
 							"letter" : "A",
 							"type": "horizontal",
 							"dir": "right",
-							"loop": true
+							"loop": true,
+							"extrabranch" : true
 						},
 
 						{
 							"letter" : "B",
 							"type": "horizontal",
-							"dir": "left"
+							"dir": "left",
+							"extrabranch" : true
 						}
 					]
 				},

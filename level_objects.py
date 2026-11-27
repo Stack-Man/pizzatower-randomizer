@@ -66,6 +66,19 @@ class TwowaySegment(LevelSegment):
         self.loop_path : Any = None
         self.loop_room: Any = None
 
+    def btw_rooms(self):
+    
+        #yield self.start_room
+
+        for r in self.between_rooms.rooms:
+            yield r
+
+        #yield self.end_room
+
+        if (self.has_loop_path):
+            for r in self.loop_path:
+                yield r
+
     def __str__(self):
         msg = "TW Seg = S:" + str(self.start_room)
 
@@ -98,6 +111,18 @@ class BranchSegment(LevelSegment):
         super().__init__(start_room, end_room)
         self.pt_between_rooms = pt_between_rooms
         self.npt_between_rooms = npt_between_rooms
+
+    def btw_rooms(self):
+
+        #yield self.start_room
+
+        for r in self.pt_between_rooms.rooms:
+            yield r
+
+        for r in self.npt_between_rooms.rooms:
+            yield r
+
+        #yield self.end_room
 
     def __str__(self):
         msg = "Branch Seg: \n"

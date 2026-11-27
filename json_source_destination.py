@@ -11,7 +11,8 @@ from level_objects import LevelSegment
 
 class SourceDestinationHandler():
     def __init__ (self, E: list[Room], EB: list[Room], J: list[Room], JB: list[Room], BA: list[Room], BS: list[Room], BE: list[Room]
-                  , WAR_START: Room, WAR_EXIT: Room, CTOP_START: Room, CTOP_EXIT: Room):
+                  , WAR_START: Room, WAR_EXIT: Room, CTOP_START: Room, CTOP_EXIT: Room,
+                  EBA: list[Room], EBS: list[Room], EBE: list[Room]):
         self.E = E
         self.EB = EB
         self.J = J
@@ -23,6 +24,9 @@ class SourceDestinationHandler():
         self.WAR_EXIT = WAR_EXIT
         self.CTOP_START = CTOP_START
         self.CTOP_EXIT = CTOP_EXIT
+        self.EBA = EBA
+        self.EBS = EBS
+        self.EBE = EBE
 
     def remove_SD_in_segment(self, seg: LevelSegment):
         source = seg.start_room.room
@@ -84,11 +88,11 @@ class SourceDestinationHandler():
         return self.iterate_over([self.E, self.EB])
 
     def branch_starts(self):
-        return self.iterate_over([self.BS, self.BA])
+        return self.iterate_over([self.BS, self.BA, self.EBS, self.EBA])
 
     def branch_ends(self):
         #print(f"Branch Ends: iterating over BE {len(self.BE)} BA {len(self.BA)}")
-        return self.iterate_over([self.BE, self.BA])
+        return self.iterate_over([self.BE, self.BA, self.EBE, self.EBA])
 
     def just_johns(self):
         return self.iterate_over([self.J])
@@ -105,7 +109,8 @@ class SourceDestinationHandler():
         #only the lists themselves need to be unique
         #the Rooms within are just for reference
         return SourceDestinationHandler(self.E.copy(), self.EB.copy(), self.J.copy(), self.JB.copy(), self.BA.copy(), self.BS.copy(), self.BE.copy(),
-                                        self.WAR_START, self.WAR_EXIT, self.CTOP_START, self.CTOP_EXIT)
+                                        self.WAR_START, self.WAR_EXIT, self.CTOP_START, self.CTOP_EXIT,
+                                        self.EBA.copy(), self.EBS.copy(), self.EBE.copy())
 
 
 def get_source_destination_rooms(rooms: list[Room]):
@@ -114,10 +119,10 @@ def get_source_destination_rooms(rooms: list[Room]):
     john = []
     branch = []
 
-    WS = Room("INVALID_WS", [], [], False, False, False, False, False)
-    WE = Room("INVALID_WE", [], [], False, False, False, False, False)
-    CS = Room("INVALID_CS", [], [], False, False, False, False, False)
-    CE = Room("INVALID_CE", [], [], False, False, False, False, False)
+    WS = Room("INVALID_WS", [], [], False, False, False, False, False, False, False)
+    WE = Room("INVALID_WE", [], [], False, False, False, False, False, False, False)
+    CS = Room("INVALID_CS", [], [], False, False, False, False, False, False, False)
+    CE = Room("INVALID_CE", [], [], False, False, False, False, False, False, False)
 
     for room in rooms:
 
@@ -140,9 +145,9 @@ def get_source_destination_rooms(rooms: list[Room]):
     E, EB = branch_from_EJ(entrance)
     J, JB = branch_from_EJ(john)
 
-    BA, BS, BE = branch_by_type(branch)
+    BA, BS, BE, EBA, EBS, EBE = branch_by_type(branch)
 
-    return SourceDestinationHandler(E, EB, J, JB, BA, BS, BE, WS, WE, CS, CE)
+    return SourceDestinationHandler(E, EB, J, JB, BA, BS, BE, WS, WE, CS, CE, EBA, EBS, EBE)
 
 def branch_from_EJ(rooms: list[Room]):
 
@@ -162,9 +167,13 @@ def branch_by_type(rooms: list[Room]):
     branch_start = []
     branch_end = []
 
+    extra_any = []
+    extra_start = []
+    extra_end = []
+
     print(f"{WARNING}WARNING: IGNORING BRANCH ROOMS OF TYPE MID{RESET}")
 
-    for room in rooms:
+    for room in rooms: 
 
         match room.branch_type:
             case BranchType.ANY:
@@ -177,11 +186,16 @@ def branch_by_type(rooms: list[Room]):
                 branch_any.append(room)
             case BranchType.FORCED_START:
                 branch_start.append(room)
-
             case BranchType.FORCED_END:
                 branch_end.append(room)
+            case BranchType.EXTRA_ANY:
+                extra_any.append(room)
+            case BranchType.EXTRA_START:
+                extra_start.append(room)
+            case BranchType.EXTRA_END:
+                extra_end.append(room)
 
-    return branch_any, branch_start, branch_end
+    return branch_any, branch_start, branch_end, extra_any, extra_start, extra_end
 
 def has_more_than_one_branch_door(room: Room):
     i = 0

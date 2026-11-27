@@ -10,6 +10,9 @@ class BranchType(Enum):
     FORCED_ANY = 5
     FORCED_START = 6
     FORCED_END = 7
+    EXTRA_ANY = 8
+    EXTRA_START = 9
+    EXTRA_END = 10
  
 class PathTime(Enum):
     BOTH = 0
