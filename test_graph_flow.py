@@ -115,12 +115,6 @@ def print_steps(G: FlowGraphHandler, print_traversals: bool):
                     print(f"    {traversal}")
     
 
+from profiler import profile_test
 
-profiler = cProfile.Profile()
-profiler.enable()
-test_flow()
-profiler.disable()
-
-# Sort results by cumulative time spent in each function
-stats = pstats.Stats(profiler).sort_stats("cumtime")
-stats.print_stats(15)  # Print top 10 slowest functions
+profile_test(test_flow, logging=True)

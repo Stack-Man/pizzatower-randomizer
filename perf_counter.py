@@ -20,6 +20,7 @@ class PerfType(Enum):
     FLOW = 9
     GROWTH = 10
 
+
 start_times: dict[PerfType, float] = {}
 total_times: dict[PerfType, float] = {}
 

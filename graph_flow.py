@@ -30,6 +30,8 @@ from graph_create import FlowGraphHandler
 from perf_counter import start_perf, end_perf, PerfType
 
 
+CUR_ROUND = 0
+
 #can an additional optimization be made considering steps with START vs EXIT nodes?
 #a START node doesnt need to know how to reach other START nodes
 #an EXIT node will never have its steps list read
@@ -49,22 +51,21 @@ def flow(G: FlowGraphHandler):
     G.changed_last_round = True #store value in shared G so any thread can modify it
 
     while (G.changed_last_round and R < len(G.nodes())):
+        CUR_ROUND = R
 
         G.changed_last_round = False
-
 
         #pass all valid edge traversal from N to its parents P
         #overhead of starting threads seems to kill any performance benefits :/
         for N in G.nodes():
-            pass_steps_to_parents(G, N)
+            pass_steps_to_parents(G, N, R)
 
         #At the end of every round, save next to steps, last = next and clear next
         #ensures all nodes complete before modifying N.steps and tracks this round's steps
         
         for N in G.nodes():
             store_steps(N)
-
-
+            
         R = R + 1
 
     #clean up node steps, remove traversals stored in START nodes
@@ -88,28 +89,30 @@ def flow(G: FlowGraphHandler):
     end_perf(PerfType.FLOW)
     return G
 
-def contains_repeat_subset(subset_traversals: dict[DoorNode | CombinedDoorNode, list[EdgeTraversal]], superset_traversal : EdgeTraversal):
+def pass_steps_to_parents(G: FlowGraphHandler, N: DoorNode | CombinedDoorNode, R):
 
-    for _, traversals in subset_traversals.items():
-        for subset in traversals:
-            if superset_traversal.contains_subset(subset):
-                return True
+    debug = N.unique_id == "TNS" and R == 17
 
-    return False
-
-def pass_steps_to_parents(G: FlowGraphHandler, N: DoorNode | CombinedDoorNode):
+    Ds = 0
+    
     for P in G.predecessors(N):
         P : DoorNode | CombinedDoorNode
 
         #pass all valid traversals in N to parent P
+
+        Ts = 0
+        
         for destination, traversals in N.last_steps.items():
 
-            size = len(P.next_steps)
+            Ds += 1
 
             if (destination not in P.next_steps):
                 P.next_steps[destination] = []
 
             for traversal in traversals:
+
+                Ts += 1
+                
                 if (destination == P or traversal.contains(P)): #skip traversals that contain self
                     continue
 
@@ -126,9 +129,16 @@ def pass_steps_to_parents(G: FlowGraphHandler, N: DoorNode | CombinedDoorNode):
                 #Create shallow copies of the bipartite graph for the new edge traversal
                 #to avoid modifying the graphs of the original traversal
                 #(the graphs will be re-used during path selection)
+
+                #if (debug):
+                    #log.debug("%sBegin copy BG from %s to %s%s", CAUTION, N, P, RESET)
+                
                 new_bipartite_TW = traversal.bipartiteTW.copy()
                 new_bipartite_PT = traversal.bipartitePT.copy()
                 new_bipartite_NPT = traversal.bipartiteTW.copy()
+
+                #if (debug):
+                    #log.debug("%sFinish copy BG from %s to %s%s", CAUTION, N, P, RESET)
 
                 #exclusions only need to be performed on PathEdges, not TrasnitionEdges
                 if (type(new_edge) == PathEdge):

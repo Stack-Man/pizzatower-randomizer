@@ -10,9 +10,10 @@ from settings import TraversalMode
 from enums import PathTime, RoomType, StartExitType, TraversalType, DoorType
 from graph_transition_edge import transition_edges_from_nodes
 import networkx as nx
-from copy import deepcopy
 
 from perf_counter import start_perf, end_perf, PerfType
+
+import logging as log
 
 class FlowGraphHandler():
     def __init__(self, G: nx.DiGraph):
@@ -27,6 +28,9 @@ class FlowGraphHandler():
 
         #iterate over all traversals and
         #store list of traversals for each path edge
+
+        log.debug("Creating edge-traversal lookup")
+
         for N in self.nodes():
 
             for D, traversals in N.steps.items():
@@ -38,6 +42,9 @@ class FlowGraphHandler():
                         if (type(edge) == PathEdge):
                             self.edge_to_traversals.setdefault(edge, []).append(T)
 
+        log.debug("Finished edge-traversal lookup")
+        log.debug("Creating node index lookup")
+
         #store the combined or door node containing each door node in the graph
         #for fast look up by DoorNode
         self.node_index : dict[DoorNode, DoorNode | CombinedDoorNode] = {}
@@ -46,20 +53,12 @@ class FlowGraphHandler():
         for N in self.nodes():
             self.node_index[N] = N
 
+        log.debug("Finished node index lookup")
+
     def get_traversals_with_edge(self, edge: PathEdge):
         return self.edge_to_traversals.get(edge, []) #return empty if edge not in traversal
 
     def get_node_containing(self, C: DoorNode):
-
-        #if C not in self.node_index:
-
-            #print(f"Index count: {len(self.node_index.items())}")
-
-            #for K, V in self.node_index.items():
-                #print(f"Index: {K}: {V}")
-            
-            #raise LookupError(f"{C} was not in node index!")
-        
         return self.node_index[C]
 
     def nodes(self):

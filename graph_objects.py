@@ -45,7 +45,7 @@ class DoorNode(Node):
         #consistent, deternimistic iteration between runs
         #don't use ._hash because its non determinsitic between
         #runs without set PYTHONHASHSEED (string is guaranteed consistent)
-        self.unique_id = str(door_type) + str(door_dir) + str(se_type)
+        self.unique_id = str(door_type.value) + str(door_dir.value) + str(se_type.value)
 
     def __eq__(self, other):
         return self._hash == other._hash
@@ -335,7 +335,7 @@ class TransitionEdge(Edge):
 #overhead costs of networkx graphs when we process impossible bookings
 #(typically 3k - 12k updates per selection, so minor overhead costs are significant)
 
-#from graph_objects import PathEdge, PathList
+from perf_counter import start_perf, end_perf, PerfType
 
 class BipartiteGraph():
     def __init__(self):
@@ -349,6 +349,8 @@ class BipartiteGraph():
         self.room_nodes : dict[str, set[PathEdge]] = {}
         self.matching : dict[PathEdge, str] = {}
 
+        self.previous : None | BipartiteGraph = None
+
     def __contains__(self, item):
         return item in self.edge_nodes
 
@@ -357,17 +359,24 @@ class BipartiteGraph():
     #a shallow copy is all that is needed, the insides should
     #reference the same PathEdge objects
     def copy(self):
+        #start_perf(PerfType.BGCOPY)
         copy = BipartiteGraph()
 
-        copy.edge_nodes = self.edge_nodes.copy()
-        copy.room_nodes = self.room_nodes.copy()
-        copy.matching = self.matching.copy()
+        #copy.edge_nodes = self.edge_nodes.copy()
+        #copy.room_nodes = self.room_nodes.copy()
+        #copy.matching = self.matching.copy()
+
+        #used to defer copy of matching until we are sure the added 
+        #edge is DB in fact we can defer all of these cant we?
+        copy.previous = self
+        #end_perf(PerfType.BGCOPY)
 
         return copy
 
 
     #add edge only if DB, for initial construction of EdgeTraverals
     def add_edge_if_DB(self, edge: PathEdge, path_lists: list[PathList]):
+        #start_perf(PerfType.BGCOPY)
 
         has_at_least_one_path = False
                 
@@ -382,12 +391,16 @@ class BipartiteGraph():
             has_at_least_one_path = True
 
             if not PL.is_double_bookable():
+                #end_perf(PerfType.BGCOPY)
                 return False #Failed to ADD, edge must be DB
 
         if (not has_at_least_one_path):
+            #end_perf(PerfType.BGCOPY)
             return False #Failed to ADD, edge must have at least one path
 
         self.add_edge(edge, path_lists)
+
+        #end_perf(PerfType.BGCOPY)
 
         return True
 
@@ -414,6 +427,12 @@ class BipartiteGraph():
 
         if (edge not in self.edge_nodes):
             raise LookupError(f"Tried to REMOVE {edge} NOT in BG")
+
+        #simply remove the edge from the matching
+        try:
+            self.matching.pop(edge)
+        except:
+            pass
 
         Rs = self.edge_nodes[edge]
 
@@ -457,6 +476,14 @@ class BipartiteGraph():
 
             self.room_nodes.setdefault(R, set())
             self.room_nodes[R].add(edge)
+
+        #if the orgiginally matched room is no longer in
+        #edge, remove that matching
+        try:
+            if self.matching[edge] not in Rs:
+                self.matching.pop(edge)
+        except:
+            pass
         
     def get_room_names(self, path_lists: list[PathList]):
 
@@ -470,9 +497,27 @@ class BipartiteGraph():
         return names
 
     def check_for_valid_matching(self):
+        #now that we've confirmed that the added edge is valid, we should
+        #finish copying the rest of the params from previous if it exists
+        if (self.previous != None):
+            self.edge_nodes = self.previous.edge_nodes.copy()
+            self.room_nodes = self.previous.room_nodes.copy()
+            self.matching = self.previous.matching.copy()
+
+            #set to None so that during updates that DONT involve copying the BG, we don't copy again
+            self.previous = None 
+        
         # Matchings in both directions
-        E_match : dict[PathEdge, str] = {}
+        # start with the previous matching before edge was added
+        # algorithm will automatically reassign or assign unassigned edges
+        # using prev matching as a start works well
+        # in edge remove/update we remove/may remove the matching if it is no longer valid
+        E_match : dict[PathEdge, str] = self.matching
         R_match : dict[str, PathEdge] = {}
+
+        #reverse dict for R_match
+        for K, V in E_match.items():
+            R_match[V] = K
 
         INF = float("inf")
 

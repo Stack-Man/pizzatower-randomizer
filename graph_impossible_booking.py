@@ -21,6 +21,8 @@ from enums import TraversalType
 from colors import ERROR, RESET, CAUTION 
 import logging as log
 
+from perf_counter import start_perf, end_perf, PerfType
+
 #These first two functions are used during traversal construction to check traversal type
 #as we create the traversal, allowing us to terminate invalid traversals
 #bipartite_TW/PT/NPT: A bipartite graph constructed from the edge traversal up to this point
@@ -36,6 +38,7 @@ def add_to_bipartite_graph(bipartite_TW: BipartiteGraph, bipartite_PT: Bipartite
     has_match_PT = (traversal_type == TraversalType.NOTPIZZATIME or 
                     add_and_check_for_matching(bipartite_PT, edge, edge.get_path_lists(TraversalType.NOTPIZZATIME)))
 
+
     #NPT = AnNY NPT or OW but not PT
     has_match_NPT = (traversal_type == TraversalType.PIZZATIME or 
                      add_and_check_for_matching(bipartite_NPT, edge, edge.get_path_lists(TraversalType.PIZZATIME)))
@@ -44,7 +47,10 @@ def add_to_bipartite_graph(bipartite_TW: BipartiteGraph, bipartite_PT: Bipartite
     #(CTOP is PT and WAR is NPT) 
     #OW is simply a generic "both PT and NPT can work"
 
+
     new_traversal_type : TraversalType = get_traversal_type_from_possible_matchings(has_match_TW, has_match_PT, has_match_NPT)
+
+
 
     return new_traversal_type
 

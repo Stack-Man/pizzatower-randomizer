@@ -31,20 +31,15 @@ fn = ["johngutter", "ancientcheese", "bloodsauce", "pizzascape",
 
 fn = FILENAMES
 
-def test_generate():
-    levels, FG = generate_base_levels(fn = fn, traversal_mode=traverse)
-    log.debug("Generated %i levels in %s\n\n\n", len(levels), get_perf(PerfType.GEN))
-    print_levels(levels)
-
 def test_growth():
-    levels, FG = generate_base_levels(fn = fn, traversal_mode=traverse)
+    levels, FG = generate_base_levels(fn = fn, traversal_mode=traverse, seed=2)
 
     log.debug("Generated %i levels in %s\n\n\n", len(levels), get_perf(PerfType.GEN))
     log.debug("Generated %i levels in %s\n\n\n", len(levels), get_perf(PerfType.GEN))
 
     #print_levels(levels)
 
-    #grown_levels = grow_levels_track_size(levels, FG, grow)
+    grown_levels = grow_levels_track_size(levels, FG, grow)
 
     #print_levels(grown_levels)
 
