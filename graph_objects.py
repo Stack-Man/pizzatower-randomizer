@@ -41,6 +41,10 @@ class DoorNode(Node):
         #cache hash to avoid rehashing since types are immutable
         self._hash = hash((self.door_type, self.door_dir, self.se_type))
 
+        #used to sort non-deterministic dicts or sets for
+        #consistent, deternimistic iteration between runs
+        #don't use ._hash because its non determinsitic between
+        #runs without set PYTHONHASHSEED (string is guaranteed consistent)
         self.unique_id = str(door_type) + str(door_dir) + str(se_type)
 
     def __eq__(self, other):
@@ -69,6 +73,8 @@ class CombinedDoorNode(Node):
         for n in nodes:
             id += n.unique_id
 
+        #used to sort non-deterministic dicts or sets for
+        #consistent, deternimistic iteration between runs
         self.unique_id = id
             
 
@@ -206,7 +212,9 @@ class PathEdge(Edge):
 
         self._hash = hash((self.start_node, self.end_node))
 
-        
+        #used to sort non-deterministic dicts or sets for
+        #consistent, deternimistic iteration between runs
+        #see DoorNode for more info        
         self.unique_id = start_node.unique_id + "," + end_node.unique_id
 
     def get_path_lists(self, traversal_type: TraversalType):

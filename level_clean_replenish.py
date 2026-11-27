@@ -68,13 +68,17 @@ def store_traversal_updated_edges_batch(FG: FlowGraphHandler, updated_edges: set
     to_update : dict[EdgeTraversal, set[PathEdge]]= {} 
 
     #find all updated edges in a traversal and store them
-    i = 0
-    for traversal, _, _ in all_traversals(FG):
-        i += 1
-        for edge in updated_edges:
-            if edge in traversal:
+    #for traversal, _, _ in all_traversals(FG):
+        #for edge in updated_edges:
+            #if edge in traversal:
                 #add or append edge to traversal list
-                to_update.setdefault(traversal, set()).add(edge)
+                #to_update.setdefault(traversal, set()).add(edge)
+    
+    for edge in updated_edges:
+        traversal_containing_edge = FG.get_traversals_with_edge(edge)
+
+        for traversal in traversal_containing_edge:
+            to_update.setdefault(traversal, set()).add(edge)
 
     #for each traversal and its list of effected edges
     for traversal, edges in to_update.items():
@@ -139,13 +143,19 @@ def clean_selections(FG: FlowGraphHandler, selections: list[RoomSelection]):
     #clean up all selections of the segment
     #and store unique depleted edges
     for selection in selections:
+        #log.debug("About to clean selection")
         new_depleted_edges = clean_selection(selection)
-
+        #log.debug("Cleaned selection")
         for e in new_depleted_edges:
             depleted_edges.add(e)
+        #log.debug("stored depleted edges")
+
+    #log.debug("About to store edges")
 
     #remove depleted edges from bipartite graphs of traversals containing them
     store_traversal_updated_edges_batch(FG, depleted_edges)
+
+    #log.debug("stored edges")
     
 def clean_selection(selection: RoomSelection):
 

@@ -23,10 +23,10 @@ def select_rooms_non_empty(traversal: EdgeTraversal, traversal_type: TraversalTy
     if (has_DB_matching):
         matching = select_rooms_from_matching(traversal_type, matching_DB)
 
-        log.debug("MATCHING:")
+        #log.debug("MATCHING:")
 
-        for K, V in matching.items():
-            log.debug("%s : %s %s", K, V.room, V.path)
+        #for K, V in matching.items():
+            #log.debug("%s : %s %s", K, V.room, V.path)
 
     room_paths : list[RoomPath] = []
     used_rooms : list[str] = []

@@ -15,6 +15,8 @@ from level_clean_replenish import clean_selections, replenish_selections
 
 from colors import RESET, ERROR
 
+import logging as log
+
 
 #Main Bridge functions that take a Source and Destination 
 #with their selected paths and creates a LevelSegment from it
@@ -36,6 +38,7 @@ def bridge_twoway(start_rp: BaseRoomPath, end_rp: BaseRoomPath, FG: FlowGraphHan
 
     
 def bridge_branch(start_rp: BranchRoomPath, end_rp: BranchRoomPath, FG: FlowGraphHandler):
+
     try:
     
         NPT = bridge_oneway(start_rp, end_rp, TraversalType.NOTPIZZATIME, FG)
@@ -60,6 +63,7 @@ def bridge_branch(start_rp: BranchRoomPath, end_rp: BranchRoomPath, FG: FlowGrap
     
 
 def bridge_oneway(start_rp: BranchRoomPath | RoomPath, end_rp: BranchRoomPath | RoomPath, traversal_type: TraversalType, FG: FlowGraphHandler):
+
     traversal = get_traversal(start_rp, end_rp, FG, traversal_type)
     room_selection = select_rooms_non_empty(traversal, traversal_type)
     return room_selection
@@ -108,51 +112,21 @@ def bridge_twoway_room_room(start_room: Room, end_room: Room, FG: FlowGraphHandl
         case _:
             raise NotImplementedError(f"{ERROR}ERROR: bridge_twoway_room_room() not implemented for start_room of type {start_room.room_type}{RESET}")
 
-#from profiler import profiler
-
 def bridge_branch_room_room(start_room: Room, end_room: Room, FG: FlowGraphHandler):
-    i = 0
 
     #branch to branch, connecting BS/BA to BE/BA 
+
     for start_rp in branch_room_path(start_room, StartExitType.START): #branch is source
         for end_rp in branch_room_path(end_room, StartExitType.EXIT): #branch is destination
-            i += 1
-
             try:
                 yield bridge_branch(start_rp, end_rp, FG)
             except RuntimeError as e:
                 pass
 
-#def profile_call(func, *args):
-    #profiler.enable()
-    #try:
-        #return func(*args)
-    #finally:
-        #profiler.disable()
-
-#def bridge_branch_room_room_profile(start_room: Room, end_room: Room, FG: FlowGraphHandler):
-    #i = 0
-
-    #branch to branch, connecting BS/BA to BE/BA 
-    #for start_rp in profile_call(branch_room_path, start_room, StartExitType.START): #branch is source
-        #for end_rp in profile_call(branch_room_path, end_room, StartExitType.EXIT): #branch is destination
-            #i += 1
-
-            #try:
-                #result = profile_call(bridge_branch, start_rp, end_rp, FG)
-                #yield result
-            #except RuntimeError as e:
-                #pass
-
-    #log.debug("Tried %s pairs from %s to %s", i, start_room, end_room)
 
 def bridge_twoway_from_entrance(start_room: Room, end_room: Room, FG: FlowGraphHandler):
-
-    i = 0
-
     for start_rp in entrance_room_path(start_room):
         for end_rp in room_path_cap_TW(end_room):
-            i += 1
             try:
                 yield bridge_twoway(start_rp, end_rp, FG)
             except RuntimeError as e:
@@ -160,13 +134,8 @@ def bridge_twoway_from_entrance(start_room: Room, end_room: Room, FG: FlowGraphH
 
 #make bridges from start room with already selected paths
 def bridge_twoway_rp_room(start_rp: BaseRoomPath, end_room: Room, FG: FlowGraphHandler):
-    i = 0
-    s = 0
-
     for end_rp in room_path_cap_TW(end_room):
-        i+=1
         try:
-            s += 1
             yield bridge_twoway(start_rp, end_rp, FG)
         except RuntimeError as e:
             pass
@@ -181,28 +150,18 @@ def bridge_branch_rp_room(start_rp: BranchRoomPath, end_room: Room, FG: FlowGrap
             pass
 
 def bridge_oneway_room_room(start_room: Room, end_room: Room, traversal_type: TraversalType, FG: FlowGraphHandler):
-    e = 0
-
-    for start_rp in oneway_entrance_room_path(start_room, traversal_type):
-        
+    for start_rp in oneway_entrance_room_path(start_room, traversal_type):     
         for end_rp in oneway_exit_room_path(end_room, traversal_type):
-
-            e += 1
-
             try:
                 selection = bridge_oneway(start_rp, end_rp, traversal_type, FG)
                 return TwowaySegment(start_rp, end_rp, selection)
             except RuntimeError as e:
                 pass
             
-    raise RuntimeError(f"No oneway bridge between {start_room} and {end_room} after {e} attempts")
+    raise RuntimeError(f"No oneway bridge between {start_room} and {end_room} after attempts")
 
         
 def bridge_rp_rp(A: BaseRoomPath, B: BaseRoomPath, FG: FlowGraphHandler, traversal_type: TraversalType):
-
-
     traversal = get_traversal(A, B, FG, traversal_type, force_extension = True)
-
-
     room_selection = select_rooms_non_empty(traversal, traversal_type)
     return room_selection

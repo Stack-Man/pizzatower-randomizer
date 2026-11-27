@@ -22,7 +22,21 @@ class FlowGraphHandler():
         self.changed_last_round = True 
         self.selected_rooms: list[str] = []
 
+        #store PathEdge to traversal lookup for fast access during clean/replenish
         self.edge_to_traversals: dict[PathEdge, list[EdgeTraversal]] = {}
+
+        #iterate over all traversals and
+        #store list of traversals for each path edge
+        for N in self.nodes():
+
+            for D, traversals in N.steps.items():
+
+                for T in traversals:
+
+                    for edge in T:
+
+                        if (type(edge) == PathEdge):
+                            self.edge_to_traversals.setdefault(edge, []).append(T)
 
         #store the combined or door node containing each door node in the graph
         #for fast look up by DoorNode
@@ -32,16 +46,19 @@ class FlowGraphHandler():
         for N in self.nodes():
             self.node_index[N] = N
 
+    def get_traversals_with_edge(self, edge: PathEdge):
+        return self.edge_to_traversals.get(edge, []) #return empty if edge not in traversal
+
     def get_node_containing(self, C: DoorNode):
 
-        if C not in self.node_index:
+        #if C not in self.node_index:
 
-            print(f"Index count: {len(self.node_index.items())}")
+            #print(f"Index count: {len(self.node_index.items())}")
 
-            for K, V in self.node_index.items():
-                print(f"Index: {K}: {V}")
+            #for K, V in self.node_index.items():
+                #print(f"Index: {K}: {V}")
             
-            raise LookupError(f"{C} was not in node index!")
+            #raise LookupError(f"{C} was not in node index!")
         
         return self.node_index[C]
 

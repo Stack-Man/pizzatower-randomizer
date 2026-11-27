@@ -49,12 +49,19 @@ def generate_levels_recursive_all(SD: SourceDestinationHandler, FG: FlowGraphHan
     current_SD = SD
     current_FG = FG
 
+    #stored failed E to BS or EB to BE room pairs
+    #so that we never try them again
+    #because they're the first segment of a level,
+    #step backs will NEVER resupply with traversals that will
+    #make them possible again
+    failed_pairs :  set[tuple[Room, Room]] = set()
+
     try:
 
         while i < level_count:
             start_perf(PerfType.GEN)
 
-            segments, new_SD = generate_level_recursive_start(current_SD, current_FG)
+            segments, new_SD = generate_level_recursive_start(current_SD, current_FG, failed_pairs)
             current_SD = new_SD
 
             level = Level(segments=segments)
@@ -63,7 +70,7 @@ def generate_levels_recursive_all(SD: SourceDestinationHandler, FG: FlowGraphHan
 
             time = end_perf(PerfType.GEN)
             print_perf_type(PerfType.GEN)
-            log.debug("%i in (%s): %s", i, time, level)
+            log.debug(" %i in (%s)\n", i, time)#, level)
 
     except RuntimeError as e:
             pass
@@ -84,6 +91,7 @@ def generate_levels_recursive_all(SD: SourceDestinationHandler, FG: FlowGraphHan
 
         log.debug("%i: %s", i, war_level)
     except:
+        log.warning("Failed to generate WAR")
         pass
 
     try:
@@ -100,13 +108,14 @@ def generate_levels_recursive_all(SD: SourceDestinationHandler, FG: FlowGraphHan
 
         log.debug("%i: %s", i, ctop_level)
     except:
+        log.warning("Failed to generate CTOP")
         pass
 
     log.debug("Generated %i levels of %i", i, level_count + 2)
 
     return levels, current_SD, current_FG
 
-def generate_level_recursive_start(SD: SourceDestinationHandler, FG: FlowGraphHandler):
+def generate_level_recursive_start(SD: SourceDestinationHandler, FG: FlowGraphHandler, failed_pairs: set[tuple[Room, Room]]):
     log.debug("START")
 
     if (len(SD.J) <= 0 and len(SD.JB) <= 0):
@@ -118,15 +127,13 @@ def generate_level_recursive_start(SD: SourceDestinationHandler, FG: FlowGraphHa
         log.debug("%sBSs left: %i, BEs left: %i, BAs left:%i%s", CAUTION, len(SD.BS), len(SD.BE), len(SD.BA), RESET)
     
     try:
-        for entrance_segment in entrance_or_entrance_branch_segments(SD, FG):
+        for entrance_segment in entrance_or_entrance_branch_segments(SD, FG, failed_pairs):
 
             log.debug("%sTRY entrance_segment: %s to %s%s", CONTINUE, entrance_segment.start_room, entrance_segment.end_room, RESET)
 
-            try:
-                clean_segment(FG, entrance_segment)
-            except Exception as e:
-                log.debug("%s====================Fatal error from clean: %s%s", ERROR, e, RESET)
-                raise(e)
+            clean_segment(FG, entrance_segment)
+
+            log.debug("Finish Clean of E")
             
             if (type(entrance_segment) == TwowaySegment):
                 log.debug("Continue seg as E")
@@ -165,11 +172,15 @@ def generate_level_recursive_start(SD: SourceDestinationHandler, FG: FlowGraphHa
 
             log.debug("%sDUMP entrance_segment: %s to %s%s", FAIL, entrance_segment.start_room, entrance_segment.end_room, RESET)
             replenish_segment(FG, entrance_segment)
+            log.debug("Finish DUMP of E")
             
         #total failure, try connecting any E or EB to any J or JB directly
         #this is the only combination not tried
     
     except RuntimeError as e:
+
+        log.debug("Failed E Seg beacuse %s", e)
+        
         pass
 
     try:

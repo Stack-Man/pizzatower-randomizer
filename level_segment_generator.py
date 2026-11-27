@@ -16,26 +16,34 @@ from colors import ERROR, RESET, CAUTION, WARNING
 
 from json_objects import Room
 
+import logging as log
 
-def entrance_or_entrance_branch_segments(SD: SourceDestinationHandler, FG: FlowGraphHandler):
+
+def entrance_or_entrance_branch_segments(SD: SourceDestinationHandler, FG: FlowGraphHandler, failed_pairs: set[tuple[Room, Room]]):
     #Pick either E or EB
     for E_or_EB in SD.entrances():
-        #E_or_EB.print_stats()
+
+        #if EB, create a Branch Segment with EB and some BE
+        D_generator = SD.branch_ends
+        bridge_generator = bridge_branch_room_room
+
         #if E, create a TwowaySegment with E and some BS
         if (E_or_EB.branch_type == BranchType.NONE):
-            #surround each bridge generator with try catch in case
-            #bridge fails, we can continue with the next SD pair
+            D_generator = SD.branch_starts
+            bridge_generator = bridge_twoway_room_room
 
-            for BS_or_BA in SD.branch_starts(): 
-                for seg in bridge_twoway_room_room(E_or_EB, BS_or_BA, FG):
-                    yield seg
+        for B in D_generator():
+
+            #skip pairs that already failed completely
+            if ((E_or_EB, B) in failed_pairs):
+                continue
             
-        #if EB, create a Branch Segment with EB and some BE
-        else:      
-            for BE_or_BA in SD.branch_ends():
-                for seg in bridge_branch_room_room(E_or_EB, BE_or_BA, FG):
-                    yield seg
-                
+            for seg in bridge_generator(E_or_EB, B, FG):
+                yield seg
+
+            #if all segs were yielded, then this pair failed but is not consumed
+            #we should add it to failed_pairs
+            failed_pairs.add((E_or_EB, B))
 
     raise RuntimeError(f"{WARNING}Failed to generate any E or EB segment after entrances{RESET}")
 

@@ -29,7 +29,7 @@ fn = ["johngutter", "ancientcheese", "bloodsauce", "pizzascape",
 
 #fn = ["johngutter", "ancientcheese"]
 
-#fn = FILENAMES
+fn = FILENAMES
 
 def test_generate():
     levels, FG = generate_base_levels(fn = fn, traversal_mode=traverse)
@@ -44,7 +44,7 @@ def test_growth():
 
     #print_levels(levels)
 
-    grown_levels = grow_levels_track_size(levels, FG, grow)
+    #grown_levels = grow_levels_track_size(levels, FG, grow)
 
     #print_levels(grown_levels)
 

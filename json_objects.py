@@ -195,7 +195,15 @@ class Room():
 
             if (path.inconsistent_path_time() and not john and not entrance):
                 print(f"{ERROR} ERROR: Path of {name} from {path.start_door} to {path.exit_door} does not have consistent path times {path.start_door.start_path_time} to {path.exit_door.exit_path_time}{RESET}")
-        
+
+        self._hash = hash(name)
+
+    def __eq__(self, other):
+        return self._hash == other._hash
+
+    def __hash__(self):
+        return self._hash
+    
     def __str__(self):
         return f"{self.name}"
         
