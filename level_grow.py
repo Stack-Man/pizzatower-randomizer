@@ -90,14 +90,14 @@ def grow_levels_template(levels: list[Level], FG: FlowGraphHandler, level_iterat
                 if (grew):
                     break
                 else:
-                    log.debug("Failed to grow between %s to %s", A.room.name, B.room.name)
+                    #log.debug("Failed to grow between %s to %s", A.room.name, B.room.name)
                     failed.add((A, B))
 
             #move to next L if grew
             if (grew):
                 break
             else:
-                log.debug("Failed to grow segment %s to %s", S.start_room.room.name, S.end_room.room.name)
+                #log.debug("Failed to grow segment %s to %s", S.start_room.room.name, S.end_room.room.name)
                 filled.add(S)
 
         #if not grew, then all S have failed to grow

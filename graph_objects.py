@@ -178,7 +178,10 @@ class PathList():
         return len(self.DB) > 0
 
     def is_double_bookable(self):
-        return len(self.DB) > 0 and len(self.NDB) == 0
+        return len(self.DB) > 0 
+        #we now allow edges containing NDB to be added to BG
+        #just to ensure we avoid impossible bookings during matching and assignment
+        #return len(self.DB) > 0 and len(self.NDB) == 0
 
     def __len__(self):
         return len(self.NDB) + len(self.DB)
