@@ -215,6 +215,21 @@ class PathEdge(Edge):
         #see DoorNode for more info        
         self.unique_id = start_node.unique_id + "," + end_node.unique_id
 
+    def stats(self, traversal_type: TraversalType):
+
+        msg = "\n"
+
+        PLs = self.get_path_lists(traversal_type)
+
+        msg += f"{str(traversal_type)}:\n"
+
+        for PL in PLs:
+
+            msg += f"NDB: {len(PL.NDB)}\n"
+            msg += f"DB: {len(PL.DB)}\n"
+
+        return msg
+
     def get_path_lists(self, traversal_type: TraversalType):
         match traversal_type:
             case TraversalType.ANY:
@@ -384,6 +399,7 @@ class BipartiteGraph():
         #start_perf(PerfType.BGCOPY)
 
         has_at_least_one_path = False
+        has_at_least_one_DB_PL = False
                 
         for PL in path_lists:
 
@@ -395,13 +411,22 @@ class BipartiteGraph():
             #if all lists are empty, invalid
             has_at_least_one_path = True
 
-            if not PL.is_double_bookable():
+            if PL.is_double_bookable():
+                has_at_least_one_DB_PL = True
+
+            #one PL in edge not having DB does not prohibit it from possibly
+            #double booking another edge in the BG
+            #with antoher PL
+            #if not PL.is_double_bookable():
                 #end_perf(PerfType.BGCOPY)
-                return False #Failed to ADD, edge must be DB
+                #return False #Failed to ADD, edge must be DB
 
         if (not has_at_least_one_path):
             #end_perf(PerfType.BGCOPY)
             return False #Failed to ADD, edge must have at least one path
+
+        if (not has_at_least_one_DB_PL):
+            return False #Failed to ADD, edge cannot possibly DB another edge (0 total DB paths)
 
         self.add_edge(edge, path_lists)
 

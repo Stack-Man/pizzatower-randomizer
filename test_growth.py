@@ -37,7 +37,9 @@ def test_growth():
     log.debug("Generated %i levels in %s\n\n\n", len(levels), get_perf(PerfType.GEN))
     log.debug("Generated %i levels in %s\n\n\n", len(levels), get_perf(PerfType.GEN))
 
-    #print_levels(levels)
+    print_levels(levels)
+
+    test_no_duplicate_rooms(levels)
 
     grown_levels = grow_levels_track_size(levels, FG, grow)
 

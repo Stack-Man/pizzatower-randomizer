@@ -37,7 +37,14 @@ def select_rooms_non_empty(traversal: EdgeTraversal, traversal_type: TraversalTy
             #skip DB edges that are already in the matchign
             if (has_DB_matching):
                 if edge in matching:
+                    used_rooms.append(matching[edge].room.name)
                     continue
+
+                #edges not in matching when matching exists must have 0 total DB paths
+                #and cannot possibly DB antoher edge when selected
+
+                    #log.debug("Edge stats: %s", edge.stats(traversal_type))
+                    #raise LookupError(f"Edge {edge} was not in matching despite having a DB matching!")
 
             found = False
 
