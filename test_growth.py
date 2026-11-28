@@ -23,16 +23,11 @@ from profiler import profile_test
 
 grow = GrowthMode.EQUAL_LENGTH
 traverse = TraversalMode.MATCHING_PERFECT
-
-fn = ["johngutter", "ancientcheese", "bloodsauce", "pizzascape",
-        "fastfoodsaloon", "wasteyard", "funfarm", "oreganodesert"]
-
-#fn = ["johngutter", "ancientcheese"]
-
 fn = FILENAMES
+seed = 2
 
 def test_growth():
-    levels, FG = generate_base_levels(fn = fn, traversal_mode=traverse, seed=2)
+    levels, FG = generate_base_levels(fn = fn, traversal_mode=traverse, seed=seed)
 
     log.debug("Generated %i levels in %s\n\n\n", len(levels), get_perf(PerfType.GEN))
     log.debug("Generated %i levels in %s\n\n\n", len(levels), get_perf(PerfType.GEN))

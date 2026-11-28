@@ -49,6 +49,25 @@ def generate_levels_recursive_all(SD: SourceDestinationHandler, FG: FlowGraphHan
     current_SD = SD
     current_FG = FG
 
+    #priotizie CTOP since its essential for completing the game
+
+    try:
+        if (SD.CTOP_EXIT.name != "tower_entrancehall" or SD.CTOP_START.name != "tower_finalhallway"):
+            log.warning("CTOP not parsed for generation")
+            raise RuntimeError("CTOP not parsed for generation")
+        
+        ctop_segments = generate_level_oneway(current_FG, SD.CTOP_START, SD.CTOP_EXIT, TraversalType.PIZZATIME)
+
+        ctop_level = Level(segments=ctop_segments)
+        levels.append(ctop_level)
+
+        i += 1
+
+        log.debug("%i: %s", i, ctop_level)
+    except RuntimeError:
+        log.warning("Failed to generate CTOP")
+        pass
+
     #stored failed E to BS or EB to BE room pairs
     #so that we never try them again
     #because they're the first segment of a level,
@@ -75,7 +94,6 @@ def generate_levels_recursive_all(SD: SourceDestinationHandler, FG: FlowGraphHan
     except RuntimeError as e:
             pass
 
-
     try:
         if (SD.WAR_EXIT.name != "war_13" or SD.WAR_START.name != "war_1"):
             log.warning("WAR not parsed for generation")
@@ -90,26 +108,11 @@ def generate_levels_recursive_all(SD: SourceDestinationHandler, FG: FlowGraphHan
         i += 1
 
         log.debug("%i: %s", i, war_level)
-    except:
+    except RuntimeError:
         log.warning("Failed to generate WAR")
         pass
 
-    try:
-        if (SD.CTOP_EXIT.name != "tower_entrancehall" or SD.CTOP_START.name != "tower_finalhallway"):
-            log.warning("CTOP not parsed for generation")
-            raise RuntimeError("CTOP not parsed for generation")
-        
-        ctop_segments = generate_level_oneway(current_FG, SD.CTOP_START, SD.CTOP_EXIT, TraversalType.PIZZATIME)
-
-        ctop_level = Level(segments=ctop_segments)
-        levels.append(ctop_level)
-
-        i += 1
-
-        log.debug("%i: %s", i, ctop_level)
-    except:
-        log.warning("Failed to generate CTOP")
-        pass
+    
 
     log.debug("Generated %i levels of %i", i, level_count + 2)
 
@@ -125,6 +128,7 @@ def generate_level_recursive_start(SD: SourceDestinationHandler, FG: FlowGraphHa
         log.debug("%sJs left: %i, JBs left: %i%s", CAUTION, len(SD.J), len(SD.JB), RESET)
         log.debug("%sEs left: %i, EBs left: %i%s", CAUTION, len(SD.E), len(SD.EB), RESET)
         log.debug("%sBSs left: %i, BEs left: %i, BAs left:%i%s", CAUTION, len(SD.BS), len(SD.BE), len(SD.BA), RESET)
+        log.debug("%sEBSs left: %i, EBEs left: %i, EBAs left:%i%s", CAUTION, len(SD.EBS), len(SD.EBE), len(SD.EBA), RESET)
     
     try:
         for entrance_segment in entrance_or_entrance_branch_segments(SD, FG, failed_pairs):

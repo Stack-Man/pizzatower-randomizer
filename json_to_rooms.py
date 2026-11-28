@@ -58,6 +58,14 @@ def json_to_rooms(json):
         if (not JSON_ROOMS_ALLOW_BRANCH_ROOMS and (room.room_type == RoomType.BRANCH or room.branch_type is not BranchType.NONE)):
             continue
 
+        #disallow branches that are not extra
+        #this keeps entrance and john branches
+        if (JSON_DISALLOW_NON_EXTRA_BRANCHES 
+            and room.room_type == RoomType.BRANCH
+            and not room.branch_type in [BranchType.EXTRA_ANY, BranchType.EXTRA_END, BranchType.EXTRA_START]):
+           
+            continue
+
         if (room.room_type == RoomType.NORMAL):
             mark_if_double_bookable(room)
         

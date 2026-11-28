@@ -19,7 +19,12 @@ JSON_ROOMS_ALLOW_NO_TRANSITION_ROOMS = False
 JSON_ROOMS_ALLOW_BRANCH_ROOMS = True
 
 #rooms that are not normally branch rooms can be used as such
-JSON_USE_EXTRA_BRANCHES = False
+JSON_USE_EXTRA_BRANCHES = True
+
+#Disallow non extra branches while allowing extra ones for testing
+JSON_DISALLOW_NON_EXTRA_BRANCHES = False
+
+
 
 #How transitions between rooms can connect
 class TraversalMode(Enum):

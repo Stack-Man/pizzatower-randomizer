@@ -14,6 +14,8 @@ from level_bridge import bridge_twoway_room_room, bridge_branch_room_room, bridg
 
 from colors import ERROR, RESET, CAUTION, WARNING
 
+from level_clean_replenish import clean_segment, replenish_segment
+
 from json_objects import Room
 
 import logging as log
@@ -78,7 +80,7 @@ def john_segment_with_loop_rp(FG: FlowGraphHandler, BE_or_E: BaseRoomPath, J: Ro
     for seg in bridge_twoway_rp_room(BE_or_E, J, FG):
         try:
             return john_segment_with_loop(seg, BE_or_E.room, J, FG)
-        except:
+        except RuntimeError:
             pass
 
     raise RuntimeError(f"Failed to generate John segment from {BE_or_E.room} with loop")
@@ -87,13 +89,17 @@ def john_segment_with_loop_room(FG: FlowGraphHandler, E: Room, J: Room):
     for seg in bridge_twoway_room_room(E, J, FG):
         try:
             return john_segment_with_loop(seg, E, J, FG)
-        except:
+        except RuntimeError:
             pass
 
     raise RuntimeError(f"Failed to generate John segment from {E} with loop")
 
 def john_segment_with_loop(seg: TwowaySegment, E_or_BE: Room, J: Room, FG: FlowGraphHandler):
     try:
+        #must clean seg before getting self loop
+        #so we can avoid duplicating rooms
+        clean_segment(FG, seg)
+        
         loop_path = bridge_self_loop(J, FG)
         seg.has_loop_path = True
         seg.loop_path = loop_path
@@ -102,7 +108,10 @@ def john_segment_with_loop(seg: TwowaySegment, E_or_BE: Room, J: Room, FG: FlowG
         seg.loop_room = self_loop_room
 
         return seg #return the first successful bridge  
-    except:
+    except RuntimeError as e:
+        #relpenish seg on failed since we cleaned it earlier
+        replenish_segment(FG, seg)
+        
         pass #failed to bridge with loop path
     
     raise RuntimeError(f"Failed to generate any John segment from {E_or_BE} with loop")
@@ -134,7 +143,7 @@ def ej_or_ejb_segment(SD: SourceDestinationHandler, FG: FlowGraphHandler):
                             else:
                                 for seg in bridge_twoway_room_room(E_or_EB, J, FG):     
                                     return seg #return first valid seg
-                        except:
+                        except RuntimeError:
                             pass
 
                     raise RuntimeError(f"No J to match E {E_or_EB}")
@@ -147,10 +156,10 @@ def ej_or_ejb_segment(SD: SourceDestinationHandler, FG: FlowGraphHandler):
                         try:
                             for seg in bridge_branch_room_room(E_or_EB, JB, FG):
                                 return seg
-                        except:
+                        except RuntimeError:
                             pass
 
-            except:
+            except RuntimeError:
                 
                 pass
             

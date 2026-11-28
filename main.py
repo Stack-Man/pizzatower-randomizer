@@ -6,5 +6,5 @@
 
 #TODO: Self key loop for ruins_1, crust cove, pizzascape, fast food saloon
 
-#TODO: sorting of rooms/edges by name/id in matching might bias some edges to some rooms
-#perhaps we should shuffle the sorted elements? That would still be determinsitic per seed
+#TODO: collect data on most commonly failed path connections during generation
+#to get an idea of what type of edges are most valuable and we should avoid using
