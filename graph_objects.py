@@ -336,6 +336,7 @@ class TransitionEdge(Edge):
 #(typically 3k - 12k updates per selection, so minor overhead costs are significant)
 
 from perf_counter import start_perf, end_perf, PerfType
+import random
 
 class BipartiteGraph():
     def __init__(self):
@@ -562,6 +563,8 @@ class BipartiteGraph():
 
         #store to avoid resorted lists more than once per matching
         E_nodes = sorted(self.edge_nodes, key=lambda x : x.unique_id)
+        random.shuffle(E_nodes) #shuffle based on random seed to remove bias
+
         sorted_Rs : dict[PathEdge, list[str]] = {}
 
         def BFS():
@@ -587,7 +590,15 @@ class BipartiteGraph():
 
                 #sort by string
                 #indexed to avoid resorts in same matching
-                Rs_of_E = sorted_Rs.setdefault(E, sorted(self.edge_nodes[E], key=lambda x: x))
+                #Rs_of_E = sorted_Rs.setdefault(E, sorted(self.edge_nodes[E], key=lambda x: x))
+                #seeded shuffle to eliminate sorted bias for matching
+                #DONT use setdefault because that will always sort the element
+                if E not in sorted_Rs:
+                    sorted_Rs_of_E = sorted(self.edge_nodes[E])
+                    random.shuffle(sorted_Rs_of_E)
+                    sorted_Rs[E] = sorted_Rs_of_E
+                
+                Rs_of_E = sorted_Rs[E]
 
                 for R in Rs_of_E:
                     matched_E = R_match.get(R) #get the E assigned to R (if any)
@@ -609,8 +620,16 @@ class BipartiteGraph():
         # DFS: Find augmenting paths using BFS distances
         def DFS(E : PathEdge, distance : dict[PathEdge, float], shortest: float):
 
-            Rs_of_E = sorted_Rs.setdefault(E, sorted(self.edge_nodes[E], key=lambda x: x))
+            #Rs_of_E = sorted_Rs.setdefault(E, sorted(self.edge_nodes[E], key=lambda x: x))
+
+            #same as BFS, shuffle and avoid sorting if it already exists
+            if E not in sorted_Rs:
+                sorted_Rs_of_E = sorted(self.edge_nodes[E])
+                random.shuffle(sorted_Rs_of_E)
+                sorted_Rs[E] = sorted_Rs_of_E
             
+            Rs_of_E = sorted_Rs[E]
+
             for R in Rs_of_E:
                 matched_E = R_match.get(R)
 

@@ -76,7 +76,7 @@ class TwowaySegment(LevelSegment):
         #yield self.end_room
 
         if (self.has_loop_path):
-            for r in self.loop_path:
+            for r in self.loop_path.rooms:
                 yield r
 
     def __str__(self):
